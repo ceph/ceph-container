@@ -4,7 +4,7 @@
 #
 # VERSION 0.0.2
 
-FROM ulexus/ceph-base
+FROM ceph/ceph-base
 MAINTAINER Seán C McCord "ulexus@gmail.com"
 
 # Execute monitor as the entrypoint

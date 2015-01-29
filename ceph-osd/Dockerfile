@@ -7,7 +7,7 @@
 #
 # VERSION 0.0.2
 
-FROM ulexus/ceph-base
+FROM ceph/ceph-base
 MAINTAINER Seán C McCord "ulexus@gmail.com"
 
 # Expose the ceph OSD port (6800+, by default)

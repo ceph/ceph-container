@@ -16,7 +16,7 @@ ENV RBD_IMAGE volume
 ENV FSTYPE xfs
 ENV RBDOPTS rw
 
-FROM ulexus/ceph-base
+FROM ceph/ceph-base
 MAINTAINER Seán C McCord "ulexus@gmail.com"
 
 # Add volume for ceph config

@@ -4,7 +4,7 @@
 # rbd-unlock - release an RBD lock
 #
 
-FROM ulexus/rbd
+FROM ceph/rbd
 MAINTAINER Seán C McCord "ulexus@gmail.com"
 
 ADD etcdctl /usr/bin/etcdctl

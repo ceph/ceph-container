@@ -4,7 +4,7 @@
 # rbd-lock - acquire the given lock and (optionally) store its locker value in etcd
 #
 
-FROM ulexus/rbd
+FROM ceph/rbd
 MAINTAINER Seán C McCord "ulexus@gmail.com"
 
 ADD etcdctl /usr/bin/etcdctl
