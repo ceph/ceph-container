@@ -1,4 +1,4 @@
-# ceph-docker
+docker-ceph
+===========
 
-Docker files and images to run Ceph in containers.
-Docker Hub organisation: Ceph.
+Ceph-related dockerfiles
