@@ -6,7 +6,7 @@
 FROM ubuntu:14.04
 MAINTAINER Sébastien Han "seb@redhat.com"
 
-ENV CEPH_VERSION=firefly
+ENV CEPH_VERSION firefly
 
 # Install Ceph
 CMD wget -q -O- 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc' | apt-key add -
