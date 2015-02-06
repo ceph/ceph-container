@@ -2,7 +2,7 @@
 # 
 # VERSION 0.0.2
 
-FROM ceph/ceph-base
+FROM ceph/base
 MAINTAINER Seán C McCord "ulexus@gmail.com"
 
 # Fuse's mknod doesn't work with docker build
