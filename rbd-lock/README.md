@@ -16,5 +16,5 @@ Note:  A lock is acquired if and only if the return value is 0.  If the lock id 
 
 Example:
 
-`docker run --rm -v /etc/ceph:/etc/ceph ulexus/rbd-lock myPool/myImage myLockName`
+`docker run --rm -v /etc/ceph:/etc/ceph ceph/rbd-lock myPool/myImage myLockName`
 

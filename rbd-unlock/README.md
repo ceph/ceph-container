@@ -14,5 +14,5 @@ It uses the following environment variables, if present:
 
 Example:
 
-`docker run --rm -v /etc/ceph:/etc/ceph ulexus/rbd-unlock myPool/myImage myLockName lockId`
+`docker run --rm -v /etc/ceph:/etc/ceph ceph/rbd-unlock myPool/myImage myLockName lockId`
 
