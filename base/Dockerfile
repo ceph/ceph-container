@@ -12,7 +12,11 @@ RUN apt-get update
 RUN apt-get install -y wget
 
 # Install Ceph
-CMD wget -q -O- 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc' | apt-key add -
+RUN wget -q -O- 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc' | apt-key add -
 RUN echo deb http://ceph.com/debian-$CEPH_VERSION/ trusty main | tee /etc/apt/sources.list.d/ceph-$CEPH_VERSION.list
 RUN apt-get update
 RUN apt-get install -y --force-yes ceph
+
+ADD entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
