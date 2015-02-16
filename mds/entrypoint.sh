@@ -4,7 +4,7 @@ set -e
 # Expected environment variables:
 #   MDS_NAME - (name of metadata server)
 # Usage:
-#   docker run -e MDS_NAME=mymds ulexus/ceph-mds
+#   docker run -e MDS_NAME=mymds ceph/mds
 
 if [ ! -n "$MDS_NAME" ]; then
    echo "ERROR- MDS_NAME must be defined as the name of the metadata server"

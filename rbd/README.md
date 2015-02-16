@@ -7,4 +7,4 @@ Make sure to pass your /etc/ceph path as a volume/bind-mount.
 
 Example:
 
-`docker run -v /etc/ceph:/etc/ceph ulexus/rbd -p vms ls`
+`docker run -v /etc/ceph:/etc/ceph ceph/rbd -p vms ls`

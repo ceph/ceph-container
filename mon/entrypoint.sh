@@ -5,7 +5,7 @@ set -e
 #   MON_IP - (IP address of monitor)
 #   MON_NAME - (name of monitor)
 # Usage:
-#   docker run -e MON_IP=192.168.101.50 -e MON_NAME=mymon ulexus/ceph-mon
+#   docker run -e MON_IP=192.168.101.50 -e MON_NAME=mymon ceph/mon
 
 if [ ! -n "$MON_NAME" ]; then
    echo "ERROR- MON_NAME must be defined as the name of the monitor"

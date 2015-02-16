@@ -13,7 +13,7 @@ The environment variables `MON_NAME` and `MON_IP` are required:
 *  `MON_IP` is the IP address of the monitor (public)
 
 For example:
-`docker run -e MON_IP=192.168.101.50 -e MON_NAME=mymon ulexus/ceph-mon`
+`docker run -e MON_IP=192.168.101.50 -e MON_NAME=mymon ceph/mon`
 
 If you have an existing Ceph cluster and are only looking to add a monitor, you will need at least four files in `/etc/ceph`:
 *  `ceph.conf` - The main ceph configuration file, which may be obtained from an existing ceph monitor
@@ -24,5 +24,5 @@ If you have an existing Ceph cluster and are only looking to add a monitor, you 
 Otherwise, if you are bootstrapping a new cluster, these will be generated for you.
 
 Commonly, you will want to bind-mount your host's `/etc/ceph` into the container.  For example:
-`docker run -e MON_IP=192.168.101.50 -e MON_NAME=mymon -v /etc/ceph:/etc/ceph ulexus/ceph-mon`
+`docker run -e MON_IP=192.168.101.50 -e MON_NAME=mymon -v /etc/ceph:/etc/ceph ceph/mon`
 

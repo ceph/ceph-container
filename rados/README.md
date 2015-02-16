@@ -7,4 +7,4 @@ Make sure to pass your /etc/ceph path as a volume/bind-mount.
 
 Example:
 
-`docker run -v /etc/ceph:/etc/ceph ulexus/rados lspools`
+`docker run -v /etc/ceph:/etc/ceph ceph/rados lspools`
