@@ -1,39 +1,71 @@
 #!/bin/bash
 set -e
 
-: ${CLUSTER:=ceph}
-: ${WEIGHT:=1.0}
-: ${JOURNAL:=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/journal}
+# Expected environment variables:
+#   RGW_NAME - (name of rados gateway server)
+# Usage:
+#   docker run -e RGW_NAME=myrgw ceph/radosgw
 
-# Make sure the osd id is set
-if [ ! -n "$OSD_ID" ]; then
-   echo "OSD_ID must be set; call 'ceph osd create' to allocate the next available osd id"
-   exit 1
+if [ ! -n "$RGW_NAME" ]; then
+  echo "ERROR- RGW_NAME must be defined as the name of the rados gateway server"
+  exit 1
 fi
 
-
-# Check to see if our OSD has been initialized
-if [ ! -e /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring ]; then
-   # Create OSD key and file structure
-   ceph-osd -i $OSD_ID --mkfs --mkjournal --osd-journal ${JOURNAL}
-
-   # Add OSD key to the authentication database
-   if [ ! -e /etc/ceph/${CLUSTER}.client.admin.keyring ]; then
-      echo "Cannot authenticate to Ceph monitor without /etc/ceph/${CLUSTER}.client.admin.keyring.  Retrieve this from /etc/ceph on a monitor node."
-      exit 1
-   fi
-   ceph auth get-or-create osd.${OSD_ID} osd 'allow *' mon 'allow profile osd' -o /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
-
-   # Add the OSD to the CRUSH map
-   if [ ! -n "${HOSTNAME}" ]; then
-      echo "HOSTNAME not set; cannot add OSD to CRUSH map"
-      exit 1
-   fi
-   ceph osd crush add ${OSD_ID} ${WEIGHT} root=default host=${HOSTNAME}
+if [ ! -e /etc/ceph/ceph.conf ]; then
+  echo "ERROR- /etc/ceph/ceph.conf must exist; get it from another ceph node"
+   exit 2
 fi
 
-if [ $1 == 'ceph-osd' ]; then
-   exec ceph-osd -d -i ${OSD_ID} -k /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
-else
-   exec $@
+# Configure rados gateway necessary components
+a2enmod rewrite > /dev/null 2>&1
+a2dissite *default > /dev/null 2>&1
+
+tee /var/www/s3gw.fcgi > /dev/null <<EOF
+#!/bin/sh
+exec /usr/bin/radosgw -c /etc/ceph/ceph.conf -n client.radosgw.gateway
+EOF
+chmod +x /var/www/s3gw.fcgi
+
+# Make sure the directory exists
+mkdir -p /var/lib/ceph/radosgw/${RGW_NAME}
+
+# Check to see if our RGW has been initialized
+if [ ! -e /var/lib/ceph/radosgw/${RGW_NAME}/keyring ]; then
+  # Add RGW key to the authentication database
+  if [ ! -e /etc/ceph/ceph.client.admin.keyring ]; then
+    echo "Cannot authenticate to Ceph monitor without /etc/ceph/ceph.client.admin.keyring.  Retrieve this from /etc/ceph on a monitor node."
+    exit 1
+  fi
+  ceph auth get-or-create client.radosgw.gateway osd 'allow rwx' mon 'allow rw' -o /var/lib/ceph/radosgw/${RGW_NAME}/keyring
+
+  # Configure Apache
+  echo "ServerName $(hostname)" > /etc/apache2/httpd.conf
+
+  # Configure rados gateway vhost
+  tee /etc/apache2/sites-available/rgw.conf > /dev/null <<EOF
+FastCgiExternalServer /var/www/s3gw.fcgi -socket /tmp/radosgw.sock
+<VirtualHost *:80>
+        ServerName $(hostname)
+        DocumentRoot /var/www
+
+        <IfModule mod_fastcgi.c>
+                <Directory /var/www>
+                        Options +ExecCGI
+                        AllowOverride All
+                        SetHandler fastcgi-script
+                        Order allow,deny
+                        Allow from all
+                        AuthBasicAuthoritative Off
+                </Directory>
+        </IfModule>
+
+        RewriteEngine On
+        RewriteRule ^/([a-zA-Z0-9-_.]*)([/]?.*) /s3gw.fcgi?page=$1&params=$2&%{QUERY_STRING} [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]
+
+</VirtualHost>
+EOF
+  a2ensite rgw.conf > /dev/null 2>&1
+  source /etc/apache2/envvars && /usr/sbin/apache2 -DBACKGROUND > /dev/null 2>&1
 fi
+
+/usr/bin/radosgw -d -c /etc/ceph/ceph.conf -n client.radosgw.gateway -k /var/lib/ceph/radosgw/${RGW_NAME}/keyring
