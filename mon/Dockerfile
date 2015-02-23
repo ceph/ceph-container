@@ -27,7 +27,7 @@ FROM ceph/base
 MAINTAINER Seán C McCord "ulexus@gmail.com"
 
 # Add bootstrap script
-ADD entrypoint.sh /usr/local/bin/entrypoint.sh
+ADD entrypoint.sh /entrypoint.sh
 
 # Add volumes for ceph config and monitor data
 VOLUME ["/etc/ceph","/var/lib/ceph"]
@@ -36,4 +36,4 @@ VOLUME ["/etc/ceph","/var/lib/ceph"]
 EXPOSE 6789
 
 # Execute monitor as the entrypoint
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]

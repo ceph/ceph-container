@@ -14,9 +14,9 @@ RUN apt-add-repository -y multiverse
 RUN apt-get update
 RUN apt-get install -y --force-yes apache2 libapache2-mod-fastcgi radosgw
 
-ADD entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+ADD entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
 
 # Expose Apache port
 EXPOSE 80

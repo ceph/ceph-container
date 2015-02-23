@@ -25,11 +25,11 @@ RUN ["echo", "fuse hold", "|" ,"dpkg", "--set-selections"]
 RUN apt-get install -y ceph-mds
 
 # Add bootstrap script
-ADD entrypoint.sh /usr/local/bin/entrypoint.sh
+ADD entrypoint.sh /entrypoint.sh
 
 # Expose the ceph mds port (6800, by default)
 EXPOSE 6800
 
 # Execute monitor as the entrypoint
 #WORKDIR /
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]

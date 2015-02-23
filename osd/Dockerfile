@@ -13,7 +13,7 @@ MAINTAINER Seán C McCord "ulexus@gmail.com"
 # Expose the ceph OSD port (6800+, by default)
 EXPOSE 6800
 
-ADD entrypoint.sh /usr/local/bin/entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+ADD entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
 
 CMD ["ceph-osd"]
