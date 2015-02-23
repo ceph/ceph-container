@@ -11,15 +11,13 @@ import (
 )
 
 var (
-	Image  string
-	Pool   string
+	RBDDev   string
 	FSType string
 	Target string
 )
 
 func init() {
-	flag.StringVar(&Image, "image", "image0", "RBD Image to mount")
-	flag.StringVar(&Pool, "pool", "rbd", "RBD Pool in which Image resides")
+	flag.StringVar(&RBDDev, "rbddev", "rbd", "RBD dev to mount")
 	flag.StringVar(&FSType, "fstype", "xfs", "Filesystem type")
 	flag.StringVar(&Target, "target", "/mnt/rbd", "Mountpoint / target")
 }
@@ -28,7 +26,7 @@ func main() {
 	flag.Parse()
 
 	// Mount the RBD
-	err := syscall.Mount("/dev/rbd/"+Pool+"/"+Image, Target, FSType, 0, "")
+	err := syscall.Mount(RBDDev, Target, FSType, 0, "")
 	if err != nil {
 		log.Fatalf("Failed to mount: %s\n", err.Error())
 	}
