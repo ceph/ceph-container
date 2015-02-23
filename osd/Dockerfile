@@ -13,7 +13,14 @@ MAINTAINER Seán C McCord "ulexus@gmail.com"
 # Expose the ceph OSD port (6800+, by default)
 EXPOSE 6800
 
-ADD entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+RUN apt-get update && apt-get -y install runit && \
+apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-CMD ["ceph-osd"]
+ADD 2.sh /etc/runit/2
+RUN chmod +x /etc/runit/2
+
+RUN mkdir /etc/service/bootstrap
+ADD entrypoint.sh /etc/service/bootstrap/run
+RUN chmod +x /etc/service/bootstrap/run
+
+ENTRYPOINT ["/sbin/runit-init"]
