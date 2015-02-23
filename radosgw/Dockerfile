@@ -14,6 +14,10 @@ RUN apt-add-repository -y multiverse
 RUN apt-get update
 RUN apt-get install -y --force-yes apache2 libapache2-mod-fastcgi radosgw
 
+# Add the startup wrapper
+ADD startRadosgw/startRadosgw /startRadosgw
+
+# Add the entrypoint script
 ADD entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
