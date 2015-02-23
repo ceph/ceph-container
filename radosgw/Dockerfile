@@ -1,18 +1,22 @@
 # DOCKER-VERSION 1.0.0
-# 
+#
 # Ceph rados gateway
 #
 # VERSION 0.0.1
 
 FROM ceph/base
-MAINTAINER Seán C McCord "ulexus@gmail.com"
+MAINTAINER Sébastien Han "seb@redhat.com"
 
-# Expose the ceph OSD port (6800+, by default)
-EXPOSE 80
-EXPOSE 443
+# Apache prerequisite
+RUN echo "deb http://ceph.com/packages/ceph-extras/debian precise main" | tee /etc/apt/sources.list.d/ceph-extra-firefly.list
+RUN apt-get install -y python-software-properties software-properties-common
+RUN apt-add-repository -y multiverse
+RUN apt-get update
+RUN apt-get install -y --force-yes apache2 libapache2-mod-fastcgi radosgw
 
 ADD entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
-CMD ["radosgw"]
+# Expose Apache port
+EXPOSE 80
