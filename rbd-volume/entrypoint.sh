@@ -14,7 +14,7 @@ mkdir -p ${RBD_TARGET}
 /sbin/modprobe rbd
 
 # Map the rbd volume
-/usr/bin/rbd map ${RBD_IMAGE} --pool ${RBD_POOL} -o ${RBDOPTS}
+/usr/bin/rbd map ${RBD_IMAGE} --pool ${RBD_POOL} -o ${RBD_OPTS}
 
 # Mount and wait for exit signal (after which, unmount and exit)
 /mountWait -image ${RBD_IMAGE} -pool ${RBD_POOL} -fstype ${RBD_FS} -target ${RBD_TARGET}
