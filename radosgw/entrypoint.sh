@@ -37,12 +37,13 @@ if [ ! -e /var/lib/ceph/radosgw/${RGW_NAME}/keyring ]; then
     exit 1
   fi
   ceph auth get-or-create client.radosgw.gateway osd 'allow rwx' mon 'allow rw' -o /var/lib/ceph/radosgw/${RGW_NAME}/keyring
+fi
 
-  # Configure Apache
-  echo "ServerName $(hostname)" > /etc/apache2/httpd.conf
+# Configure Apache
+echo "ServerName $(hostname)" > /etc/apache2/httpd.conf
 
-  # Configure rados gateway vhost
-  tee /etc/apache2/sites-available/rgw.conf > /dev/null <<EOF
+# Configure rados gateway vhost
+tee /etc/apache2/sites-available/rgw.conf > /dev/null <<EOF
 FastCgiExternalServer /var/www/s3gw.fcgi -socket /tmp/radosgw.sock
 <VirtualHost *:80>
         ServerName $(hostname)
@@ -64,8 +65,10 @@ FastCgiExternalServer /var/www/s3gw.fcgi -socket /tmp/radosgw.sock
 
 </VirtualHost>
 EOF
-  a2ensite rgw.conf > /dev/null 2>&1
-  source /etc/apache2/envvars && /usr/sbin/apache2 -DBACKGROUND > /dev/null 2>&1
-fi
 
-/usr/bin/radosgw -d -c /etc/ceph/ceph.conf -n client.radosgw.gateway -k /var/lib/ceph/radosgw/${RGW_NAME}/keyring
+# Enable the gateway configuration
+a2ensite rgw.conf > /dev/null 2>&1
+
+# Start apache and radosgw
+source /etc/apache2/envvars
+/startRadosgw
