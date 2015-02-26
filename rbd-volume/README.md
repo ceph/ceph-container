@@ -1,4 +1,4 @@
-# `rbd-volume`
+# `rbd-volume` - *NON-FUNCTIONAL*
 
 This Docker container will mount the requested `RBD` image to a volume.  You can then
 use link to that volume from other containers with the `--volumes-from` Docker `run` option.
