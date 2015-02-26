@@ -11,7 +11,6 @@ Components:
 * [`ceph/osd`](osd/): Ceph OSD (object storage daemon)
 * [`ceph/rados`](rados/): Convenience wrapper to execute the `rados` CLI tool
 * [`ceph/radosgw`](radosgw/): Ceph Rados gateway service; S3/swift API server
-* [`ceph/rbd-volume`](rbd-volume/): Ceph RBD mount container, for use as a storage volume ambassador
 * [`ceph/rbd`](rbd/): Convenience wrapper to execute the `rbd` CLI tool
 
 
