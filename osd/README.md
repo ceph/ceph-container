@@ -10,7 +10,6 @@ There are a number of environment variables which are used to configure
 the execution of the OSD:
 
  -  `CLUSTER` is the name of the ceph cluster (defaults to `ceph`)
- -  `OSD_ID` is the (numeric) id of this OSD; if you don't have one, you can execute `ceph osd create` from another working node (such as a monitor).  There is no default, and this variable is REQUIRED.
 
 If the OSD is not already created (key, configuration, OSD data), the
 following environment variables will control its creation:
@@ -18,6 +17,19 @@ following environment variables will control its creation:
  -  `WEIGHT` is the of the OSD when it is added to the CRUSH map (default is `1.0`)
  -  `JOURNAL` is the location of the journal (default is the `journal` file inside the OSD data directory)
  -  `HOSTNAME` is the name of the host; it is used as a flag when adding the OSD to the CRUSH map
+
+The old option `OSD_ID` is now unused.  Instead, the script will scan for each directory in `/var/lib/ceph/osd` of the form `<cluster>-<osd-id>`.
+
+## Multiple OSDs
+
+There is a problem when attempting run run multiple OSD containers on a single docker host.  See issue #19.
+
+There are two workarounds, at present:
+* Run each OSD with a separate IP address (e.g., use the new Docker 1.5 IPv6 support)
+* Run multiple OSDs within the same container
+
+To run multiple OSDs within the same container, simply bind-mount each OSD datastore directory:
+* `docker run -v /osds/1:/var/lib/ceph/osd/ceph-1 -v /osds/2:/var/lib/ceph/osd/ceph-2`
 
 
 ## BTRFS and journal
