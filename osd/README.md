@@ -19,6 +19,11 @@ following environment variables will control its creation:
  -  `JOURNAL` is the location of the journal (default is the `journal` file inside the OSD data directory)
  -  `HOSTNAME` is the name of the host; it is used as a flag when adding the OSD to the CRUSH map
 
+
+## BTRFS and journal
+
+If your OSD is BTRFS and you want to use PARALLEL journal mode, you will need to run this container with `--privileged` set to true.  Otherwise, `ceph-osd` will have insufficient permissions and it will revert to the slower WRITEAHEAD mode.
+
 Note
 ----
 
