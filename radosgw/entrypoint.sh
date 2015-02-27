@@ -72,3 +72,4 @@ a2ensite rgw.conf > /dev/null 2>&1
 # Start apache and radosgw
 source /etc/apache2/envvars
 /startRadosgw
+

@@ -24,3 +24,4 @@ ENTRYPOINT ["/entrypoint.sh"]
 
 # Expose Apache port
 EXPOSE 80
+
