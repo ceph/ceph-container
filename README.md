@@ -12,5 +12,6 @@ Components:
 * [`ceph/rados`](rados/): Convenience wrapper to execute the `rados` CLI tool
 * [`ceph/radosgw`](radosgw/): Ceph Rados gateway service; S3/swift API server
 * [`ceph/rbd`](rbd/): Convenience wrapper to execute the `rbd` CLI tool
+* [`ceph/config`](config/): Initializes and distributes cluster configuration
 
 
