@@ -7,15 +7,16 @@ to setup ceph on CoreOS.
 
 The following strategy is applied:
 
+  * An `/etc/ceph/ceph.conf` is found, do nothing.
   * If a cluster configuration is available, it will be written to `/etc/ceph`
-  * If no cluster configuration is available, it will be created. A lock mechanism 
+  * If no cluster configuration is available, it will be bootstrapped. A lock mechanism 
     is used to allow concurrent deployment of multiple hosts.
 
 ## Usage 
 
 To bootstrap a new cluster run:
 
-`docker run -e MON_IP=192.168.101.50 -e MON_NAME=mymon -e CLUSTER=testing -v /etc/ceph:/etc/ceph ceph/config`
+`docker run -e ETCDCTL_PEERS=http://102.168.101.50:4001 -e MON_IP=192.168.101.50 -e MON_NAME=mymon -e CLUSTER=testing -v /etc/ceph:/etc/ceph ceph/config`
 
 This will generate:
 
@@ -31,9 +32,6 @@ from etcd and written to `/etc/ceph`.
 
 Multiple concurrent invocations will block until the first host finished to generate 
 the configuration.
-
-When run without `MON_IP` and `MON_NAME` it will not generate a config but block and 
-wait until it becomes available. 
 
 ## Configuration
 
