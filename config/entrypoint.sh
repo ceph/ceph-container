@@ -24,7 +24,7 @@ if [ -e /etc/ceph/ceph.conf ]; then
   exit 0
 fi
  
-# Aquire lock to not run into race conditions with parallel bootstraps
+# Acquire lock to not run into race conditions with parallel bootstraps
 until etcdctl mk ${CLUSTER_PATH}/lock $MON_NAME --ttl 60 > /dev/null 2>&1 ; do
   echo "Configuration is locked by another host. Waiting."
   sleep 1
