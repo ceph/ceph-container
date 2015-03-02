@@ -14,10 +14,6 @@
 FROM ceph/base
 MAINTAINER Sébastien Han "seb@redhat.com"
 
-RUN wget https://github.com/coreos/etcd/releases/download/v0.4.6/etcd-v0.4.6-linux-amd64.tar.gz
-RUN tar xzvf etcd-v0.4.6-linux-amd64.tar.gz
-RUN cp etcd-v0.4.6-linux-amd64/etcdctl /usr/local/bin
-
 # Add bootstrap script
 ADD entrypoint.sh /entrypoint.sh
 
