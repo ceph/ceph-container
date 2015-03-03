@@ -16,7 +16,7 @@ The following strategy is applied:
 
 To bootstrap a new cluster run:
 
-`docker run -e ETCDCTL_PEERS=http://102.168.101.50:4001 -e MON_IP=192.168.101.50 -e MON_NAME=mymon -e CLUSTER=testing -v /etc/ceph:/etc/ceph ceph/config`
+`docker run -e ETCDCTL_PEERS=http://192.168.101.50:4001 -e MON_IP=192.168.101.50 -e MON_NAME=mymon -e CLUSTER=testing -v /etc/ceph:/etc/ceph ceph/config`
 
 This will generate:
 
