@@ -13,5 +13,5 @@ Components:
 * [`ceph/radosgw`](radosgw/): Ceph Rados gateway service; S3/swift API server
 * [`ceph/rbd`](rbd/): Convenience wrapper to execute the `rbd` CLI tool
 * [`ceph/config`](config/): Initializes and distributes cluster configuration
-
+* [`ceph/docker-registry`](docker-registry/): Rados backed docker-registry images repository
 
