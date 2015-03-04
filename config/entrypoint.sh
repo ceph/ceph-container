@@ -30,7 +30,8 @@ until etcdctl mk ${CLUSTER_PATH}/lock $MON_NAME --ttl 60 > /dev/null 2>&1 ; do
   sleep 1
 done
 
-if etcdctl get --consistent ${CLUSTER_PATH}/done > /dev/null 2>%1 ; then
+etcdctl get --consistent ${CLUSTER_PATH}/done 2>/dev/null >/dev/null
+if [ $? -ne 0 ]; then
   echo "Configuration found for cluster ${CLUSTER}. Writing to disk."
 
   etcdctl get ${CLUSTER_PATH}/ceph.conf > /etc/ceph/ceph.conf
