@@ -1,0 +1,13 @@
+FROM registry
+
+ENV SETTINGS_FLAVOR s3
+ENV STORAGE_PATH /registry
+ENV SEARCH_BACKEND sqlalchemy
+ENV AWS_ENCRYPT false
+ENV AWS_DEBUG true 
+ENV AWS_SECURE false
+ENV AWS_ENCRYPT false
+
+EXPOSE 5000
+
+CMD ["docker-registry"]
