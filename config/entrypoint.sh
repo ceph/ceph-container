@@ -35,10 +35,11 @@ fi
 
 # Change to the old CLUSTER_PATH, if it already exists
 set +e
-etcdctl get /ceph-config/${CLUSTER}/done
+etcdctl get /ceph-config/${CLUSTER}/done 2>/dev/null
 RET=$?
 set -e
 if [ $RET -eq 0 ]; then
+   echo "Old configuration key (/ceph-config/) found; using it instead"
    CLUSTER_PATH=/ceph-config/${CLUSTER}
 fi
  
@@ -60,6 +61,7 @@ if [ $RET -eq 0 ]; then
   etcdctl get ${CLUSTER_PATH}/ceph.mon.keyring > /etc/ceph/ceph.mon.keyring
   etcdctl get ${CLUSTER_PATH}/ceph.client.admin.keyring > /etc/ceph/ceph.client.admin.keyring
 
+  echo "Attempting to pull monitor map from existing cluster."
   ceph mon getmap -o /etc/ceph/monmap
 else 
   echo "No configuration found for cluster ${CLUSTER}. Generating."
@@ -86,5 +88,6 @@ ENDHERE
   etcdctl set ${CLUSTER_PATH}/done true > /dev/null 2>&1
 fi
 
+echo "unlocking configuration"
 etcdctl rm ${CLUSTER_PATH}/lock > /dev/null 2>&1
 
