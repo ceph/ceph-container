@@ -37,7 +37,9 @@ the configuration.
 
 The following environment variables can be used to configure the bootstrapping:
 
+  * `CONFIG_ROOT` is the location in etcd for the ceph configuration (defaults to: "/ceph") 
   * `CLUSTER` is the name of the ceph cluster (defaults to: "ceph") 
+  * `CLUSTER_PATH` is the location in etcd for the ceph configuration (defaults to: "`${CONFIG_ROOT}/${CLUSTER}/config`") 
 
 Mandatory Configuration:
   * `MON_NAME` is the name of the monitor. Usually the short hostname
