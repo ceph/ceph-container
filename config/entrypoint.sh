@@ -35,7 +35,7 @@ fi
 
 # Change to the old CLUSTER_PATH, if it already exists
 set +e
-etcdctl get /ceph-config/${CLUSTER}
+etcdctl get /ceph-config/${CLUSTER}/done
 set -e
 if [ $? -eq 0 ]; then
    CLUSTER_PATH=/ceph-config/${CLUSTER}
