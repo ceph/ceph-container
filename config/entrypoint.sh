@@ -36,8 +36,9 @@ fi
 # Change to the old CLUSTER_PATH, if it already exists
 set +e
 etcdctl get /ceph-config/${CLUSTER}/done
+RET=$?
 set -e
-if [ $? -eq 0 ]; then
+if [ $RET -eq 0 ]; then
    CLUSTER_PATH=/ceph-config/${CLUSTER}
 fi
  
@@ -50,8 +51,9 @@ done
 # Don't cancel this script when the `done` key doesn't exist
 set +e
 etcdctl get ${CLUSTER_PATH}/done 2>/dev/null >/dev/null
+RET=$?
 set -e
-if [ $? -eq 0 ]; then
+if [ $RET -eq 0 ]; then
   echo "Configuration found for cluster ${CLUSTER}. Writing to disk."
 
   etcdctl get ${CLUSTER_PATH}/ceph.conf > /etc/ceph/ceph.conf
