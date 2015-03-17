@@ -20,7 +20,12 @@ following environment variables will control its creation:
 
 The old option `OSD_ID` is now unused.  Instead, the script will scan for each directory in `/var/lib/ceph/osd` of the form `<cluster>-<osd-id>`.
 
-## Multiple OSDs
+To create your OSDs simply run the following command:
+
+`docker exec <mon-container-id> ceph osd create`.
+
+Multiple OSDs
+-------------
 
 There is a problem when attempting run run multiple OSD containers on a single docker host.  See issue #19.
 
@@ -31,8 +36,8 @@ There are two workarounds, at present:
 To run multiple OSDs within the same container, simply bind-mount each OSD datastore directory:
 * `docker run -v /osds/1:/var/lib/ceph/osd/ceph-1 -v /osds/2:/var/lib/ceph/osd/ceph-2`
 
-
-## BTRFS and journal
+BTRFS and journal
+-----------------
 
 If your OSD is BTRFS and you want to use PARALLEL journal mode, you will need to run this container with `--privileged` set to true.  Otherwise, `ceph-osd` will have insufficient permissions and it will revert to the slower WRITEAHEAD mode.
 
@@ -47,5 +52,3 @@ On CoreOS (and probably other systemd-based systems), you can do this by creatin
 
       [Service]
       LimitNOFILE=4096
-
-
