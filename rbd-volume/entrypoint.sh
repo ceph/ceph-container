@@ -10,9 +10,6 @@ set -e
 # Make sure the mountpoint exists
 mkdir -p ${RBD_TARGET}
 
-# Make sure the rbd module is loaded
-/sbin/modprobe rbd
-
 # Map the rbd volume
 /usr/bin/rbd map ${RBD_IMAGE} --pool ${RBD_POOL} -o ${RBD_OPTS}
 
