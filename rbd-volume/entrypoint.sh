@@ -9,7 +9,7 @@ set -e
 
 MOUNT_OPTIONS=''
 
-if ["$RBD_OPTS" == "ro"]; then
+if [ "$RBD_OPTS" == "ro" ]; then
 	MOUNT_OPTIONS="-r ${MOUNT_OPTIONS}"
 fi
 
