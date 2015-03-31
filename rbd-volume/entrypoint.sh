@@ -17,5 +17,5 @@ mkdir -p ${RBD_TARGET}
 MOUNT_DEV=$( /usr/bin/rbd showmapped | grep -m 1 -E "^[0-9]{1,3}\s+${RBD_POOL}\s+${RBD_IMAGE}" | awk '{print $5}' )
 
 # Mount and wait for exit signal (after which, unmount and exit)
-/mountWait -rbddev ${MOUNT_DEV} -fstype ${RBD_FS} -target ${RBD_TARGET}
+/mountWait -rbddev ${MOUNT_DEV} -fstype ${RBD_FS} -target ${RBD_TARGET} -o ${RBD_OPTS}
 
