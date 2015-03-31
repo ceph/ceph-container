@@ -1,0 +1,19 @@
+[Unit]
+Description=Mount rbd volume to host
+After=docker.service
+
+[Service]
+Environment=RBD_POOL=rbd
+Environment=VOL_FS=xfs
+ExecStartPre=-/usr/bin/docker pull ceph/rbd-volume
+ExecStartPre=/bin/sh -c "docker run --rm -v /opt/bin:/host --entrypoint '/bin/bash' ceph/rbd-volume -c 'cp -f /mountWait /host'"
+ExecStartPre=/usr/bin/mkdir -p /mnt/%i
+ExecStart=/bin/sh -c "/opt/bin/mountWait -rbddev $(/usr/bin/docker run --rm -v /etc/ceph:/etc/ceph:ro --privileged --net host -v /dev:/dev --entrypoint '/usr/bin/rbd' ceph/rbd-volume map ${RBD_POOL}/%i) -fstype ${VOL_FS} -target /mnt/%i"
+ExecStartPost=/usr/bin/sleep 3
+ExecStopPost=-/bin/sh -c "/usr/bin/umount /mnt/%i"
+ExecStopPost=/bin/sh -c "/usr/bin/docker run --rm -v /etc/ceph:/etc/ceph:ro --privileged --net host -v /dev:/dev --entrypoint /cleanup.sh -e RBD_IMAGE=%i ceph/rbd-volume"
+SuccessExitStatus=1 2 8 137
+TimeoutStartSec=0
+TimeoutStopSec=0
+
+[X-Fleet]

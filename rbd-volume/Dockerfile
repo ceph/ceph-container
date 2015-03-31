@@ -23,4 +23,8 @@ RUN chmod +x /mountWait
 ADD entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+# Add cleanup script
+ADD cleanup.sh /cleanup.sh
+RUN chmod +x /cleanup.sh
+
 ENTRYPOINT ["/entrypoint.sh"]
