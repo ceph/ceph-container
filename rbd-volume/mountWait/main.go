@@ -2,7 +2,18 @@
 // then unmounts the image and exits.
 package main
 
+/*
+#include <sched.h>
+#include <stdio.h>
+#include <fcntl.h>
+
+__attribute__((constructor)) void enter_namespace(void) {
+   setns(open("/host/proc/1/ns/mnt", O_RDONLY, 0644), 0);
+}
+*/
+
 import (
+	"C"
 	"flag"
 	"log"
 	"os"
