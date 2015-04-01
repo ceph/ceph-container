@@ -11,9 +11,9 @@ __attribute__((constructor)) void enter_namespace(void) {
    setns(open("/host/proc/1/ns/mnt", O_RDONLY, 0644), 0);
 }
 */
+import "C"
 
 import (
-	"C"
 	"flag"
 	"log"
 	"os"
