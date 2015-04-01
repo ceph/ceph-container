@@ -4,14 +4,15 @@ After=docker.service
 
 [Service]
 Environment=RBD_POOL=rbd
-Environment=VOL_FS=xfs
+Environment=RBD_FS=xfs
+Environment=RBD_TARGET=/mnt/%i
+Environment=RBD_IMAGE=%i
 ExecStartPre=-/usr/bin/docker pull ceph/rbd-volume
-ExecStartPre=/bin/sh -c "docker run --rm -v /opt/bin:/host --entrypoint '/bin/bash' ceph/rbd-volume -c 'cp -f /mountWait /host'"
-ExecStartPre=/usr/bin/mkdir -p /mnt/%i
-ExecStart=/bin/sh -c "/opt/bin/mountWait -rbddev $(/usr/bin/docker run --rm -v /etc/ceph:/etc/ceph:ro --privileged --net host -v /dev:/dev --entrypoint '/usr/bin/rbd' ceph/rbd-volume map ${RBD_POOL}/%i) -fstype ${VOL_FS} -target /mnt/%i"
+ExecStartPre=/bin/sh -c "mkdir -p ${RBD_TARGET}"
+ExecStart=/bin/sh -c "docker run --rm -v /proc:/host/proc -v /data/ceph/conf:/etc/ceph:ro --privileged --net host -v /dev:/dev ceph/rbd-volume"
 ExecStartPost=/usr/bin/sleep 3
-ExecStopPost=-/bin/sh -c "/usr/bin/umount /mnt/%i"
-ExecStopPost=/bin/sh -c "/usr/bin/docker run --rm -v /etc/ceph:/etc/ceph:ro --privileged --net host -v /dev:/dev --entrypoint /cleanup.sh -e RBD_IMAGE=%i ceph/rbd-volume"
+ExecStopPost=-/bin/sh -c "/usr/bin/umount ${RBD_TARGET}"
+ExecStopPost=/bin/sh -c "/usr/bin/docker run --rm -v /etc/ceph:/etc/ceph:ro --privileged --net host -v /dev:/dev ceph/rbd-volume cleanup"
 SuccessExitStatus=1 2 8 137
 TimeoutStartSec=0
 TimeoutStopSec=0
