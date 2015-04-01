@@ -2,6 +2,17 @@
 // then unmounts the image and exits.
 package main
 
+/*
+#include <sched.h>
+#include <stdio.h>
+#include <fcntl.h>
+
+__attribute__((constructor)) void enter_namespace(void) {
+   setns(open("/host/proc/1/ns/mnt", O_RDONLY, 0644), 0);
+}
+*/
+import "C"
+
 import (
 	"flag"
 	"log"
@@ -19,10 +30,67 @@ var (
 )
 
 func init() {
-	flag.StringVar(&RBDDev, "rbddev", "rbd", "RBD dev to mount")
-	flag.StringVar(&FSType, "fstype", "xfs", "Filesystem type")
-	flag.StringVar(&Target, "target", "/mnt/rbd", "Mountpoint / target")
+	flag.StringVar(&RBDDev, "rbddev", "", "RBD dev to mount")
+	flag.StringVar(&FSType, "fstype", "", "Filesystem type")
+	flag.StringVar(&Target, "target", "", "Mountpoint / target")
 	flag.StringVar(&MountOpts, "o", "", "options to use when mounting an image")
+}
+
+func calcFlags(opts string) uintptr {
+	var flags uintptr = 0
+
+	for _, o := range strings.Split(opts, ",") {
+		switch o {
+			default:
+				log.Fatalf("Failed to mount: %s: option not supported\n", o)
+			case "atime":
+				flags |= 0
+			case "async":
+				flags |= 0
+			case "dev":
+				flags |= 0					
+			case "diratime":
+				flags |= 0
+			case "dirsync":
+				flags |= syscall.MS_DIRSYNC
+			case "exec":
+				flags |= 0
+			case "mand":
+				flags |= syscall.MS_MANDLOCK						
+			case "noatime":
+				flags |= syscall.MS_NOATIME	
+			case "nodev":
+				flags |= syscall.MS_NODEV
+			case "nodiratime":
+				flags |= syscall.MS_NODIRATIME													
+			case "noexec":
+				flags |= syscall.MS_NOEXEC
+			case "nomand":
+				flags |= 0
+			case "norelatime":
+				flags |= 0
+			case "nostrictatime":
+				flags |= 0					
+			case "nosuid":
+				flags |= syscall.MS_NOSUID					
+			case "relatime":
+				flags |= syscall.MS_RELATIME
+			case "remount":
+				flags |= syscall.MS_REMOUNT
+			case "ro":
+				flags |= syscall.MS_RDONLY
+			case "rw":
+				flags |= 0					
+			case "strictatime":
+				flags |= syscall.MS_STRICTATIME
+			case "suid":
+				flags |= syscall.MS_NODEV
+			case "sync":
+				flags |= syscall.MS_SYNCHRONOUS						
+		}
+	}
+
+	return flags
 }
 
 func main() {
@@ -31,56 +99,21 @@ func main() {
 	var syscall_flags uintptr = 0
 
 	if len(MountOpts) > 0 {
-		for _, o := range strings.Split(MountOpts, ",") {
-			switch o {
-				default:
-					log.Fatalf("Failed to mount: -o %s: option not supported\n", o)
-				case "atime":
-					syscall_flags |= 0
-				case "async":
-					syscall_flags |= 0
-				case "dev":
-					syscall_flags |= 0					
-				case "diratime":
-					syscall_flags |= 0
-				case "dirsync":
-					syscall_flags |= syscall.MS_DIRSYNC
-				case "exec":
-					syscall_flags |= 0
-				case "mand":
-					syscall_flags |= syscall.MS_MANDLOCK						
-				case "noatime":
-					syscall_flags |= syscall.MS_NOATIME	
-				case "nodev":
-					syscall_flags |= syscall.MS_NODEV
-				case "nodiratime":
-					syscall_flags |= syscall.MS_NODIRATIME													
-				case "noexec":
-					syscall_flags |= syscall.MS_NOEXEC
-				case "nomand":
-					syscall_flags |= 0
-				case "norelatime":
-					syscall_flags |= 0
-				case "nostrictatime":
-					syscall_flags |= 0					
-				case "nosuid":
-					syscall_flags |= syscall.MS_NOSUID					
-				case "relatime":
-					syscall_flags |= syscall.MS_RELATIME
-				case "remount":
-					syscall_flags |= syscall.MS_REMOUNT
-				case "ro":
-					syscall_flags |= syscall.MS_RDONLY
-				case "rw":
-					syscall_flags |= 0					
-				case "strictatime":
-					syscall_flags |= syscall.MS_STRICTATIME
-				case "suid":
-					syscall_flags |= syscall.MS_NODEV
-				case "sync":
-					syscall_flags |= syscall.MS_SYNCHRONOUS						
-			}
-		}
+		syscall_flags = calcFlags(MountOpts) 
+	} else if os.Getenv("RBD_OPTS") != "" {
+		syscall_flags = calcFlags(os.Getenv("RBD_OPTS"))
+	}
+
+	if RBDDev == "" {
+		RBDDev = os.Getenv("RBD_DEV")
+	}
+
+	if Target == "" {
+		Target = os.Getenv("RBD_TARGET")
+	}
+
+	if FSType == "" {
+		FSType = os.Getenv("RBD_FS")
 	}
 
 	// Mount the RBD

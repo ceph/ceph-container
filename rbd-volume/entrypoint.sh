@@ -7,15 +7,34 @@ set -e
 : ${RBD_FS:=xfs}
 : ${RBD_TARGET:=/mnt/rbd}
 
-# Make sure the mountpoint exists
-mkdir -p ${RBD_TARGET}
-
 # Map the rbd volume
-/usr/bin/rbd map ${RBD_IMAGE} --pool ${RBD_POOL} -o ${RBD_OPTS}
-
-# Get rbd device
-MOUNT_DEV=$( /usr/bin/rbd showmapped | grep -m 1 -E "^[0-9]{1,3}\s+${RBD_POOL}\s+${RBD_IMAGE}" | awk '{print $5}' )
+function map {
+	/usr/bin/rbd map ${RBD_IMAGE} --pool ${RBD_POOL} -o ${RBD_OPTS}
+}
 
 # Mount and wait for exit signal (after which, unmount and exit)
-/mountWait -rbddev ${MOUNT_DEV} -fstype ${RBD_FS} -target ${RBD_TARGET} -o ${RBD_OPTS}
+function mount {
+	RBD_DEV=$1
+
+	if [ -z $1 ]; then
+		read RBD_DEV
+	fi
+
+	/mountWait -rbddev ${RBD_DEV} -fstype ${RBD_FS} -target ${RBD_TARGET} -o ${RBD_OPTS}
+}
+
+# Unmap rbd device
+function unmap {
+	/usr/bin/rbd unmap $( /usr/bin/rbd showmapped | grep -m 1 -E "^[0-9]{1,3}\s+${RBD_POOL}\s+${RBD_IMAGE}" | awk '{print $5}' )
+}
+
+case "$@" in
+	"map" ) map;;
+	"mount" ) mount;;
+	"unmap" ) unmap;;
+	* ) 
+	RBD_DEV=$(map)
+	mount $RBD_DEV
+	;;
+esac
 

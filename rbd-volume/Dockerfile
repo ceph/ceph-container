@@ -12,9 +12,6 @@
 FROM ceph/base
 MAINTAINER Seán C McCord "ulexus@gmail.com"
 
-# Make /mnt/rbd a volume
-VOLUME /mnt/rbd
-
 # Add mountWait
 ADD mountWait/mountWait /mountWait
 RUN chmod +x /mountWait

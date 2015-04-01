@@ -1,0 +1,21 @@
+[Unit]
+Description=Mount rbd volume to host
+After=docker.service
+
+[Service]
+Environment=RBD_POOL=rbd
+Environment=RBD_FS=xfs
+Environment=RBD_TARGET=/mnt/%i
+Environment=RBD_IMAGE=%i
+ExecStartPre=-/usr/bin/docker pull ceph/rbd-volume
+ExecStartPre=/bin/sh -c "mkdir -p ${RBD_TARGET}"
+ExecStart=/bin/sh -c "docker run --rm --name %p-%i -v /proc:/host/proc -v /etc/ceph:/etc/ceph:ro --privileged --net host -v /dev:/dev -e RBD_POOL=${RBD_POOL} -e RBD_FS=${RBD_FS} -e RBD_TARGET=${RBD_TARGET} -e RBD_IMAGE=${RBD_IMAGE} ceph/rbd-volume"
+ExecStartPost=/usr/bin/sleep 3
+ExecStop=/bin/sh -c "docker stop %p-%i"
+ExecStopPost=-/bin/sh -c "/usr/bin/umount ${RBD_TARGET}"
+ExecStopPost=/bin/sh -c "/usr/bin/docker run --rm -v /etc/ceph:/etc/ceph:ro --privileged --net host -v /dev:/dev -e RBD_IMAGE=${RBD_IMAGE} -e RBD_POOL=${RBD_POOL} ceph/rbd-volume unmap"
+SuccessExitStatus=1 2 8 137
+TimeoutStartSec=0
+TimeoutStopSec=30
+
+[X-Fleet]
