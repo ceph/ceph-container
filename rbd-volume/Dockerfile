@@ -12,9 +12,6 @@
 FROM ceph/base
 MAINTAINER Seán C McCord "ulexus@gmail.com"
 
-# Make /mnt/rbd a volume
-VOLUME /mnt/rbd
-
 # Add mountWait
 ADD mountWait/mountWait /mountWait
 RUN chmod +x /mountWait
@@ -22,9 +19,5 @@ RUN chmod +x /mountWait
 # Add entrypoint script
 ADD entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-
-# Add cleanup script
-ADD cleanup.sh /cleanup.sh
-RUN chmod +x /cleanup.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
