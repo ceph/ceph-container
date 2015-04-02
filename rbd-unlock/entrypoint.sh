@@ -5,6 +5,9 @@ IMAGENAME=${1:-${IMAGENAME}}
 LOCKNAME=${2:-${HOSTNAME}}
 LOCKID=${3:-${LOCKID}}
 
+# ETCDCTL_PEERS - a comma-delimited list of machine addresses in the cluster (default: "127.0.0.1:4001")
+: ${ETCDCTL_PEERS:=127.0.0.1:4001}
+
 function usage() {
    echo "$0 <pool/image> [lockName [lockId]]"
    exit 255
@@ -23,8 +26,8 @@ fi
 # If we were given an ETCD_LOCKID_KEY, use that to find
 # the lock id
 if [ -n "$ETCD_LOCKID_KEY" ]; then
-   LOCKID=$(etcdctl get $ETCD_LOCKID_KEY)
-   etcdctl rm $ETCD_LOCKID_KEY
+   LOCKID=$(etcdctl -C ${ETCDCTL_PEERS} --no-sync get $ETCD_LOCKID_KEY)
+   etcdctl -C ${ETCDCTL_PEERS} --no-sync rm $ETCD_LOCKID_KEY
 fi
 
 # If we do not have a LOCKID, die
