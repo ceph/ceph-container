@@ -8,7 +8,7 @@ FROM ceph/rbd
 MAINTAINER Seán C McCord "ulexus@gmail.com"
 
 ADD entrypoint.sh /entrypoint.sh
-RUN chmod +x /usr/bin/etcdctl /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 # Execute the lock script
 ENTRYPOINT ["/entrypoint.sh"]
