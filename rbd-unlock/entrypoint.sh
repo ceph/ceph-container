@@ -3,7 +3,6 @@ set -e
 
 IMAGENAME=${1:-${IMAGENAME}}
 LOCKNAME=${2:-${HOSTNAME}}
-LOCKID=${3:-${LOCKID}}
 
 # ETCDCTL_PEERS - a comma-delimited list of machine addresses in the cluster (default: "127.0.0.1:4001")
 : ${ETCDCTL_PEERS:=127.0.0.1:4001}
@@ -29,6 +28,8 @@ if [ -n "$ETCD_LOCKID_KEY" ]; then
    LOCKID=$(etcdctl -C ${ETCDCTL_PEERS} --no-sync get $ETCD_LOCKID_KEY)
    etcdctl -C ${ETCDCTL_PEERS} --no-sync rm $ETCD_LOCKID_KEY
 fi
+
+LOCKID=${3:-${LOCKID}}
 
 # If we do not have a LOCKID, die
 if [ ! -n "$LOCKID" ]; then
