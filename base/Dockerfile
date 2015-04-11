@@ -1,13 +1,13 @@
 # CEPH BASE IMAGE
-# CEPH VERSION: Firefly
-# CEPH VERSION DETAIL: 0.80.8
+# CEPH VERSION: Hammer
+# CEPH VERSION DETAIL: 0.94.x
 
 FROM ubuntu:14.04
 MAINTAINER Sébastien Han "seb@redhat.com"
 
-ENV ETCDCTL_VERSION v2.0.4
+ENV ETCDCTL_VERSION v2.0.9
 ENV ETCDCTL_ARCH linux-amd64
-ENV CEPH_VERSION giant
+ENV CEPH_VERSION hammer
 
 # Install prerequisites
 RUN apt-get update &&  apt-get install -y wget
