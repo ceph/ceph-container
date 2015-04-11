@@ -4,7 +4,7 @@
 # rbd-lock - acquire the given lock and (optionally) store its locker value in etcd
 #
 
-FROM ceph/rbd
+FROM ceph/rbd:hammer
 MAINTAINER Seán C McCord "ulexus@gmail.com"
 
 ADD entrypoint.sh /entrypoint.sh

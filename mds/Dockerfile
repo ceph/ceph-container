@@ -2,7 +2,7 @@
 # 
 # VERSION 0.0.2
 
-FROM ceph/base
+FROM ceph/base:hammer
 MAINTAINER Seán C McCord "ulexus@gmail.com"
 
 # Add bootstrap script

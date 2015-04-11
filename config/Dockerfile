@@ -11,7 +11,7 @@
 #
 # VERSION 0.0.1
 
-FROM ceph/base
+FROM ceph/base:hammer
 MAINTAINER Sébastien Han "seb@redhat.com"
 
 # Add bootstrap script
