@@ -17,6 +17,17 @@ if [ ! -n "$MON_IP" ]; then
    exit 1
 fi
 
+# When using contanier network stack we use the first available ip
+if [ "$MON_IP" == "container" ]; then
+   MON_IP=$(hostname --ip-address)
+fi
+
+
+if [ "$MON_IP" ]; then
+   echo "ERROR- MON_IP must be defined as the IP address of the monitor"
+   exit 1
+fi
+
 if [ ! -e /etc/ceph/ceph.conf ]; then
    ### Bootstrap the ceph cluster
 
