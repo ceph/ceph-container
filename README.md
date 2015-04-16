@@ -21,3 +21,6 @@ Ceph-related dockerfiles
 * [`ceph/rbd-unlock`](rbd-unlock/): Convenience wrapper to release an rbd lock
 * [`ceph/rbd-volume`](rbd-volume/): Convenience wrapper to mount an rbd volume
 
+## Demo
+
+* [`ceph/demo`](demo/): Demonstration cluster for testing and learning.  This container runs all the major ceph components, bootstrapped for you to play with.  (not intended for use in building a production cluster)
