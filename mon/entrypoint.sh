@@ -12,10 +12,9 @@ if [ ! -n "$MON_NAME" ]; then
    exit 1
 fi
 
-if [ ! -n "$MON_IP" ]; then
-   echo "ERROR- MON_IP must be defined as the IP address of the monitor"
-   exit 1
-fi
+# MON_IP is the private container ip
+MON_IP=`ifconfig |grep "inet addr"|cut -d":" -f2|cut -d" " -f1|grep -v "127.0.0.1"`
+
 
 if [ ! -e /etc/ceph/ceph.conf ]; then
    ### Bootstrap the ceph cluster
