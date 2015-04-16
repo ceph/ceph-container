@@ -23,4 +23,4 @@ Ceph-related dockerfiles
 
 ## Demo
 
-* [`ceph/demo`](demo/): Demonstration cluster for testing and learning.  This container runs all the major ceph components, bootstrapped for you to play with.  (not intended for use in building a production cluster)
+* [`ceph/demo`](demo/): Demonstration cluster for testing and learning.  This container runs all the major ceph components installed, bootstrapped, and executed for you to play with.  (not intended for use in building a production cluster)
