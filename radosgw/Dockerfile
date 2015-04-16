@@ -7,10 +7,6 @@
 FROM ceph/base
 MAINTAINER Sébastien Han "seb@redhat.com"
 
-# Install Rados gateway
-RUN apt-get update && apt-get install -y --force-yes radosgw && \
-apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 # Add the entrypoint script
 ADD entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
