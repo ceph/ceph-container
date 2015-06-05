@@ -18,6 +18,7 @@ do
 
    # Check to see if our OSD has been initialized
    if [ ! -e /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring ]; then
+      ceph osd create
       # Create OSD key and file structure
       ceph-osd -i $OSD_ID --mkfs --mkjournal --osd-journal ${OSD_J}
 
