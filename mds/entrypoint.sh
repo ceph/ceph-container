@@ -18,6 +18,9 @@ fi
 
 # Check to see if we are a new MDS
 if [ ! -e /var/lib/ceph/mds/ceph-$MDS_NAME/keyring ]; then
+   ceph osd pool create cephfs_data 8
+   ceph osd pool create cephfs_metadata 8
+   ceph fs new cephfs cephfs_metadata cephfs_data
 
    mkdir -p /var/lib/ceph/mds/ceph-${MDS_NAME}
 
