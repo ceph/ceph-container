@@ -4,7 +4,7 @@ After=docker.service
 
 [Service]
 TimeoutSec=0
-EnvironmentFile=/etc/environment
+EnvironmentFile=-/etc/environment
 ExecStartPre=/bin/mkdir -p /etc/ceph
 ExecStartPre=/usr/bin/docker pull ceph/mds
 ExecStartPre=-/usr/bin/docker rm ceph-mds-%i
