@@ -4,7 +4,7 @@ After=docker.service
 RequiresMountsFor=/var/lib/ceph/osd/ceph-%i
 
 [Service]
-EnvironmentFile=/etc/environment
+EnvironmentFile=-/etc/environment
 Environment=OSD_ID=%i
 Environment=HOSTNAME=%H
 ExecStartPre=/usr/bin/docker run --rm -v /opt/bin:/opt/bin ibuildthecloud/systemd-docker

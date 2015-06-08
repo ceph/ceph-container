@@ -4,7 +4,7 @@
 # rbd
 #
 
-FROM ceph/base
+FROM ceph/centos-base
 MAINTAINER Seán C McCord "ulexus@gmail.com"
 
 # Execute monitor as the entrypoint

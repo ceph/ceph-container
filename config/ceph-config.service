@@ -6,7 +6,7 @@ Before=ceph-osd.service
 Before=ceph-mds@.service
 
 [Service]
-EnvironmentFile=/etc/environment
+EnvironmentFile=-/etc/environment
 Type=oneshot
 RemainAfterExit=yes
 ExecStartPre=/bin/mkdir -p /etc/ceph
