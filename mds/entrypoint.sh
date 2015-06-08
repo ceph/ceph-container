@@ -51,7 +51,7 @@ if [ ! -e /var/lib/ceph/mds/ceph-$MDS_NAME/keyring ]; then
 fi
 
 # Create the Ceph filesystem, if necessary
-if [ $CEPHFS_CREATE -gt 0 ]; then
+if [ $CEPHFS_CREATE -eq 1 ]; then
    FS_EXISTS=$(ceph fs ls | grep -c name:.${CEPHFS_NAME},)
    if [ $FS_EXISTS -eq 0 ]; then
       # Make sure the specified data pool exists
