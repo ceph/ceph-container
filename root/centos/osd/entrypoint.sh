@@ -1,1 +1,0 @@
-../../ubuntu/osd/entrypoint.sh

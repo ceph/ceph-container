@@ -1,1 +1,0 @@
-../../ubuntu/mds/entrypoint.sh

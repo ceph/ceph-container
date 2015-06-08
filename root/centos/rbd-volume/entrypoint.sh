@@ -1,1 +1,0 @@
-../../ubuntu/rbd-volume/entrypoint.sh

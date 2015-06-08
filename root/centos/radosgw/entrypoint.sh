@@ -1,1 +1,0 @@
-../../ubuntu/radosgw/entrypoint.sh

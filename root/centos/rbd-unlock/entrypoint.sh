@@ -1,1 +1,0 @@
-../../ubuntu/rbd-unlock/entrypoint.sh
