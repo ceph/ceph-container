@@ -1,0 +1,1 @@
+../../ubuntu/mon/entrypoint.sh
