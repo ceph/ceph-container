@@ -1,10 +1,10 @@
 # DOCKER-VERSION 1.2.0
 # VERSION 0.1.0
-# 
+#
 # rbd-unlock - release an RBD lock
 #
 
-FROM ceph/ubuntu-rbd
+FROM ceph/rbd
 MAINTAINER Seán C McCord "ulexus@gmail.com"
 
 ADD entrypoint.sh /entrypoint.sh

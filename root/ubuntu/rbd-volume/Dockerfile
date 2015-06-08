@@ -1,5 +1,5 @@
 # DOCKER-VERSION 1.4.1
-# 
+#
 # Ceph RBD volume ambassador
 #
 #  USAGE NOTES:
@@ -9,7 +9,7 @@
 #
 # VERSION 0.0.2
 
-FROM ceph/ubuntu-base
+FROM ceph/base
 MAINTAINER Seán C McCord "ulexus@gmail.com"
 
 # Add mountWait

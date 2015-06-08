@@ -4,7 +4,7 @@
 #
 # VERSION 0.0.1
 
-FROM ceph/ubuntu-base
+FROM ceph/base
 MAINTAINER Sébastien Han "seb@redhat.com"
 
 # Add the entrypoint script
