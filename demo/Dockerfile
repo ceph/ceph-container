@@ -4,7 +4,7 @@
 #
 # VERSION 0.0.1
 
-FROM ceph/base
+FROM ceph/centos-base
 MAINTAINER Sébastien Han "seb@redhat.com"
 
 # Add bootstrap script

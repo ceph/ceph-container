@@ -73,4 +73,3 @@ if [ ! -e /var/lib/ceph/mon/ceph-${MON_NAME}/keyring ]; then
 fi
 
 exec /usr/bin/ceph-mon -d -i ${MON_NAME} --public-addr ${MON_IP}:6789
-

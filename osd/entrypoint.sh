@@ -8,7 +8,7 @@ for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }')
 do
    if [ -n "${JOURNAL_DIR}" ]; then
       OSD_J="${JOURNAL_DIR}/journal.${OSD_ID}"
-   else      
+   else
       if [ -n "${JOURNAL}" ]; then
          OSD_J=${JOURNAL}
       else
