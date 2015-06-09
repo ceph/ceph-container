@@ -1,5 +1,5 @@
 # DOCKER-VERSION 1.0.0
-# 
+#
 # Ceph OSD
 #
 #  USAGE NOTES:
@@ -7,7 +7,7 @@
 #
 # VERSION 0.0.2
 
-FROM ceph/centos-base
+FROM ceph/base:centos-latest
 MAINTAINER Seán C McCord "ulexus@gmail.com"
 
 # Expose the ceph OSD port (6800+, by default)

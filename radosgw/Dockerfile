@@ -4,7 +4,7 @@
 #
 # VERSION 0.0.1
 
-FROM ceph/centos-base
+FROM ceph/base:centos-latest
 MAINTAINER Sébastien Han "seb@redhat.com"
 
 # Add the entrypoint script
