@@ -1,5 +1,5 @@
-cli
-===
+ceph-cli
+========
 
 These are wrapper files for ceph cli tools to make working with ceph a little
 easier and directly from the host OS.
