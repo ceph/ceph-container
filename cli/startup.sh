@@ -9,3 +9,8 @@ if [ ! -e /opt/bin/ceph ] || [ "$(checksum /opt/bin/ceph)" != "$(checksum /ceph)
 	echo "Installing ceph to /opt/bin"
 	cp -pf /ceph /opt/bin
 fi
+
+if [ ! -e /opt/bin/ceph-disk ] || [ "$(checksum /opt/bin/ceph-disk)" != "$(checksum /ceph-disk)" ]; then
+	echo "Installing ceph-disk to /opt/bin"
+	cp -pf /ceph-disk /opt/bin
+fi
