@@ -16,4 +16,5 @@ Another way to install these is with docker.  This is especially handy under Cor
 Then use them you normally would.
 
 `ceph status`
-`ceph-disk`
+`ceph-disk prepare`
+`rados lspools`

@@ -14,3 +14,8 @@ if [ ! -e /opt/bin/ceph-disk ] || [ "$(checksum /opt/bin/ceph-disk)" != "$(check
 	echo "Installing ceph-disk to /opt/bin"
 	cp -pf /ceph-disk /opt/bin
 fi
+
+if [ ! -e /opt/bin/rados ] || [ "$(checksum /opt/bin/rados)" != "$(checksum /rados)" ]; then
+	echo "Installing rados to /opt/bin"
+	cp -pf /rados /opt/bin
+fi
