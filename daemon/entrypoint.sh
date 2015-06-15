@@ -20,19 +20,46 @@ set -e
 : ${RGW_REMOTE_CGI_PORT:=9000}
 : ${RGW_REMOTE_CGI_HOST:=0.0.0.0}
 
-
-if [ ! -n "$CEPH_DAEMON" ]; then
-   echo "ERROR- CEPH_DAEMON must be defined as the name of the daemon you want to deploy"
-   echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW"
-   exit 1
-fi
-
 function ceph_config_check {
 if [[ ! -e /etc/ceph/${CLUSTER}.conf ]]; then
   echo "ERROR- /etc/ceph/ceph.conf must exist; get it from your existing mon"
   exit 1
 fi
 }
+
+###############
+# CEPH_DAEMON #
+###############
+
+# If we are given a valid first argument, set the
+# CEPH_DAEMON variable from it
+case "$1" in
+   mds)
+      CEPH_DAEMON=MDS
+      ;;
+   mon)
+      CEPH_DAEMON=MON
+      ;;
+   osd)
+      CEPH_DAEMON=OSD
+      ;;
+   osd_directory)
+      CEPH_DAEMON=OSD_DIRECTORY
+      ;;
+   osd_ceph_disk)
+      CEPH_DAEMON=OSD_CEPH_DISK
+      ;;
+   rgw)
+      CEPH_DAEMON=RGW
+      ;;
+esac
+if [ ! -n "$CEPH_DAEMON" ]; then
+   echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
+   echo "of the daemon you want to deploy."
+   echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW"
+   echo "Valid values for the daemon parameter are mon, osd, osd_directory, osd_ceph_disk, mds, rgw"
+   exit 1
+fi
 
 
 #######
