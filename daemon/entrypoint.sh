@@ -56,7 +56,7 @@ esac
 if [ ! -n "$CEPH_DAEMON" ]; then
    echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
    echo "of the daemon you want to deploy."
-   echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW"
+   echo "Valid values for CEPH_DAEMON are MON, OSD, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW"
    echo "Valid values for the daemon parameter are mon, osd, osd_directory, osd_ceph_disk, mds, rgw"
    exit 1
 fi
@@ -150,6 +150,19 @@ ENDHERE
   exec /usr/bin/ceph-mon -d -i ${MON_NAME} --public-addr ${MON_IP}:6789
 fi
 
+################
+# OSD (common) #
+################
+
+if [[ "$CEPH_DAEMON" = "OSD_DIRECTORY" ]]; then
+  if [ -n "$(find /var/lib/ceph/osd -prune -empty)" ]; then
+    echo "No bootstrapped OSDs found; trying ceph-disk"
+    CEPH_DAEMON="OSD_CEPH_DISK"
+  else
+    echo "Bootstrapped OSD(s) found; using OSD directory"
+    CEPH_DAEMON="OSD_DIRECTORY"
+  fi
+fi
 
 #################
 # OSD_DIRECTORY #
