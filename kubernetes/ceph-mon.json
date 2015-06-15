@@ -1,0 +1,24 @@
+{
+  "id": "ceph-mon",
+  "kind": "ReplicationController",
+  "apiVersion": "v1beta1",
+  "desiredState": {
+    "replicas": 1,
+    "replicaSelector": {"name": "frontend"},
+    "podTemplate": {
+      "desiredState": {
+        "manifest": {
+          "version": "v1beta1",
+          "id": "cephmonController",
+          "containers": [{
+            "name": "ceph-mon",
+            "image": "ceph-daemon",
+            "env": [{"name": "CEPH_DAEMON", "value": "MON"},{"name": "MON_IP", "value": "172.17.0.13"},{"name": "CEPH_PUBLIC_NETWORK", "value": "172.17.0.0/24"}],
+            "args": "-v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/"
+          }]
+        }
+      },
+      "labels": {"name": "frontend"}
+    }},
+  "labels": {"name": "serving"}
+}
