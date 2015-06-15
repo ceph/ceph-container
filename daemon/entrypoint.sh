@@ -5,7 +5,7 @@ set -e
 : ${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}
 : ${MON_NAME:=$(hostname -s)}
 : ${MDS_NAME:=$(hostname -s)}
-: ${OSD_FORCE_ZAP:=1}
+: ${OSD_FORCE_ZAP:=0}
 : ${OSD_JOURNAL_SIZE:=100}
 : ${CEPHFS_CREATE:=0}
 : ${CEPHFS_NAME:=cephfs}
@@ -238,7 +238,7 @@ elif [[ "$CEPH_DAEMON" = "OSD_CEPH_DISK" ]]; then
   # -  add device format check (make sure only one device is passed
 
   if [[ "$(sudo parted --script ${OSD_DEVICE} print | egrep '^ 1.*ceph data')" ]]; then
-    echo "ERROR- It looks like this device is an OSD, use OSD_FORCE_ZAP to use this device"
+    echo "ERROR- It looks like this device is an OSD, set OSD_FORCE_ZAP=1 to use this device anyway and zap its content"
     exit 1
   elif [[ "$(sudo parted --script ${OSD_DEVICE} print | egrep '^ 1.*ceph data')" && ${OSD_FORCE_ZAP} -eq "1" ]]; then
     ceph-disk -v zap ${OSD_DEVICE}
