@@ -76,7 +76,7 @@ if [[ "$CEPH_DAEMON" = "MON" ]]; then
 
   if [ ${MON_IP_AUTO_DETECT} -eq 1 ]; then
     MON_IP=$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)
-    if [ -z $MON_IP ]; then
+    if [ -z "$MON_IP" ]; then
       MON_IP=$(ip -4 -o a | awk '/eth/ { sub ("/..", "", $4); print $4 }')
     fi
   elif [ ${MON_IP_AUTO_DETECT} -eq 4 ]; then
