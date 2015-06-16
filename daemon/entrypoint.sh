@@ -4,6 +4,7 @@ set -e
 : ${CLUSTER:=ceph}
 : ${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}
 : ${MON_NAME:=$(hostname -s)}
+: ${MON_IP_AUTO_DETECT:=0}
 : ${MDS_NAME:=$(hostname -s)}
 : ${OSD_FORCE_ZAP:=0}
 : ${OSD_JOURNAL_SIZE:=100}
@@ -71,6 +72,10 @@ if [[ "$CEPH_DAEMON" = "MON" ]]; then
   if [ ! -n "$CEPH_PUBLIC_NETWORK" ]; then
     echo "ERROR- CEPH_PUBLIC_NETWORK must be defined as the name of the network for the OSDs"
     exit 1
+  fi
+
+  if [ ${MON_IP_AUTO_DETECT} -eq 1 ]; then
+    MON_IP=$(ip -4 -o a | awk '/eth/ { sub ("/..", "", $4); print $4 }')
   fi
 
   if [ ! -n "$MON_IP" ]; then

@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+: ${MON_IP_AUTO_DETECT:=0}
+
 # Expected environment variables:
 #   MON_IP - (IP address of monitor)
 #   MON_NAME - (name of monitor)
@@ -10,6 +12,10 @@ set -e
 if [ ! -n "$MON_NAME" ]; then
    echo "ERROR- MON_NAME must be defined as the name of the monitor"
    exit 1
+fi
+
+if [ ${MON_IP_AUTO_DETECT} -eq 1 ]; then
+  MON_IP=$(ip -4 -o a | awk '/eth/ { sub ("/..", "", $4); print $4 }')
 fi
 
 if [ ! -n "$MON_IP" ]; then
