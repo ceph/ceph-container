@@ -1,16 +1,13 @@
 #!/bin/bash
 set -e
 
+: ${MON_NAME:=$(hostname -s)}
+
 # Expected environment variables:
 #   MON_IP - (IP address of monitor)
 #   MON_NAME - (name of monitor)
 # Usage:
 #   docker run -e MON_IP=192.168.101.50 -e MON_NAME=mymon ceph/mon
-
-if [ ! -n "$MON_NAME" ]; then
-   echo "ERROR- MON_NAME must be defined as the name of the monitor"
-   exit 1
-fi
 
 if [ ! -n "$MON_IP" ]; then
    echo "ERROR- MON_IP must be defined as the IP address of the monitor"
