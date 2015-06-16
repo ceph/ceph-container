@@ -75,7 +75,14 @@ if [[ "$CEPH_DAEMON" = "MON" ]]; then
   fi
 
   if [ ${MON_IP_AUTO_DETECT} -eq 1 ]; then
+    MON_IP=$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)
+    if [ -z $MON_IP ]; then
+      MON_IP=$(ip -4 -o a | awk '/eth/ { sub ("/..", "", $4); print $4 }')
+    fi
+  elif [ ${MON_IP_AUTO_DETECT} -eq 4 ]; then
     MON_IP=$(ip -4 -o a | awk '/eth/ { sub ("/..", "", $4); print $4 }')
+  elif [ ${MON_IP_AUTO_DETECT} -eq 6 ]; then
+    MON_IP=$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)
   fi
 
   if [ ! -n "$MON_IP" ]; then
@@ -98,6 +105,12 @@ public network = ${CEPH_PUBLIC_NETWORK}
 cluster network = ${CEPH_CLUSTER_NETWORK}
 osd journal size = ${OSD_JOURNAL_SIZE}
 ENDHERE
+
+    if [[ ! -z "$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }')" | head -n1 ]]; then
+      echo "ms_bind_ipv6 = true" >> /etc/ceph/${CLUSTER}.conf
+      sed -i '/mon host/d' /etc/ceph/${CLUSTER}.conf
+      echo "mon host = ${MON_IP}" >> /etc/ceph/${CLUSTER}.conf
+    fi
 
     # Generate administrator key
     ceph-authtool /etc/ceph/ceph.client.admin.keyring --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
