@@ -218,7 +218,7 @@ if [[ "$CEPH_DAEMON" = "OSD_DIRECTORY" ]]; then
         exit 1
       fi
 
-      timeout 10 --cluster ${CLUSTER} ceph --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring health || exit 1
+      timeout 10 ceph --cluster ${CLUSTER} --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring health || exit 1
 
       # Generate the OSD key
       ceph --cluster ${CLUSTER} --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring auth get-or-create osd.${OSD_ID} osd 'allow *' mon 'allow profile osd' -o /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
