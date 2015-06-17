@@ -261,17 +261,17 @@ elif [[ "$CEPH_DAEMON" = "OSD_CEPH_DISK" ]]; then
     exit 1
   fi
 
-  timeout 10 --cluster ${CLUSTER} ceph --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring health || exit 1
+  timeout 10 ceph --cluster ${CLUSTER} --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring health || exit 1
 
   mkdir -p /var/lib/ceph/osd
 
   # TODO:
   # -  add device format check (make sure only one device is passed
 
-  if [[ "$(sudo parted --script ${OSD_DEVICE} print | egrep '^ 1.*ceph data')" ]]; then
+  if [[ "$(parted --script ${OSD_DEVICE} print | egrep '^ 1.*ceph data')" && ${OSD_FORCE_ZAP} -ne "1" ]]; then
     echo "ERROR- It looks like this device is an OSD, set OSD_FORCE_ZAP=1 to use this device anyway and zap its content"
     exit 1
-  elif [[ "$(sudo parted --script ${OSD_DEVICE} print | egrep '^ 1.*ceph data')" && ${OSD_FORCE_ZAP} -eq "1" ]]; then
+  elif [[ "$(parted --script ${OSD_DEVICE} print | egrep '^ 1.*ceph data')" && ${OSD_FORCE_ZAP} -eq "1" ]]; then
     ceph-disk -v zap ${OSD_DEVICE}
   fi
 
@@ -307,7 +307,7 @@ elif [[ "$CEPH_DAEMON" = "MDS" ]]; then
       exit 1
     fi
 
-    timeout 10 --cluster ${CLUSTER} ceph --name client.bootstrap-mds --keyring /var/lib/ceph/bootstrap-mds/ceph.keyring health || exit 1
+    timeout 10 ceph --cluster ${CLUSTER} --name client.bootstrap-mds --keyring /var/lib/ceph/bootstrap-mds/ceph.keyring health || exit 1
 
     # Generate the MDS key
     ceph --cluster ${CLUSTER} --name client.bootstrap-mds --keyring /var/lib/ceph/bootstrap-mds/ceph.keyring auth get-or-create mds.$MDS_NAME osd 'allow rwx' mds 'allow' mon 'allow profile mds' > /var/lib/ceph/mds/ceph-${MDS_NAME}/keyring
@@ -362,7 +362,7 @@ elif [[ "$CEPH_DAEMON" = "RGW" ]]; then
       exit 1
     fi
 
-    timeout 10 --cluster ${CLUSTER} ceph --name client.bootstrap-rgw --keyring /var/lib/ceph/bootstrap-rgw/ceph.keyring health || exit 1
+    timeout 10 ceph --cluster ${CLUSTER} --name client.bootstrap-rgw --keyring /var/lib/ceph/bootstrap-rgw/ceph.keyring health || exit 1
 
     # Generate the RGW key
     ceph --cluster ${CLUSTER} --name client.bootstrap-rgw --keyring /var/lib/ceph/bootstrap-rgw/ceph.keyring auth get-or-create client.rgw.${RGW_NAME} osd 'allow rwx' mon 'allow rw' -o /var/lib/ceph/radosgw/${RGW_NAME}/keyring
