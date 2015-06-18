@@ -13,8 +13,8 @@
           "volumes":[{"name":"cephconfig", "source":{"hostDir":{"path":"/etc/ceph/"}}}, {"name":"cephdata", "source":{"hostDir":{"path":"/var/lib/ceph/"}}}],
           "containers": [{
             "name": "ceph-mon",
-            "image": "ceph/mon",
-            "env": [{"name": "CEPH_DAEMON", "value": "MON"},{"name": "MON_IP", {"name": "CEPH_NETWORK", "value": "172.17.0.0/24"},{"name": "MON_IP_AUTO_DETECT", "value": "1"}],
+            "image": "ceph/daemon",
+            "env": [{"name": "CEPH_DAEMON", "value": "MON"},{"name": "CEPH_PUBLIC_NETWORK", "value": "172.17.0.0/24"},{"name": "MON_IP_AUTO_DETECT", "value": "1"}],
             "volumeMounts": [{"name": "cephconfig", "mountPath": "/etc/ceph/"}, {"name": "cephdata", "mountPath": "/var/lib/ceph/"}]
           }]
         }
