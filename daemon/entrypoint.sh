@@ -240,7 +240,7 @@ EOF
     chmod +x /etc/service/ceph-${OSD_ID}/run
   done
 
-read
+exec /sbin/my_init
 
 
 #################
