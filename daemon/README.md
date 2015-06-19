@@ -150,7 +150,11 @@ ceph/daemon
 
 List of available options:
 
-* `MDS_NAME` is the name the MDS server (DEFAULT: $(hostname))
+* `MDS_NAME` is the name the MDS server (DEFAULT: mds-$(hostname)).
+One thing to note is that metadata servers are not machine-restricted.
+They are not bound by their data directories and can move around the cluster.
+As a result, you can run more than one MDS on a single machine.
+If you plan to do so, you better set this variable and do something like: `mds-$(hostname)-a`, `mds-$(hostname)-b`etc...
 
 
 Deploy a Rados Gateway

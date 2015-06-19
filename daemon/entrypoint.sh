@@ -5,7 +5,7 @@ set -e
 : ${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}
 : ${MON_NAME:=$(hostname -s)}
 : ${MON_IP_AUTO_DETECT:=0}
-: ${MDS_NAME:=$(hostname -s)}
+: ${MDS_NAME:=mds-$(hostname -s)}
 : ${OSD_FORCE_ZAP:=0}
 : ${OSD_JOURNAL_SIZE:=100}
 : ${CEPHFS_CREATE:=0}
