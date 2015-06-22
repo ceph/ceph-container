@@ -2,6 +2,14 @@ Daemon container
 ================
 
 This Dockerfile may be used to bootstrap a Ceph cluster with all the Ceph daemons running.
+To run a certain type of daemon, simply use the name of the daemon as `$1`.
+Valid values are:
+
+* `mon` deploys a Ceph monitor
+* `osd_directory` deploys an OSD using a prepared directory (used in scenario where the operator doesn't want to use `--privileged=true`)
+* `osd_ceph_disk` deploys an OSD using ceph-disk, so you have to provide a whole device (ie: /dev/sdb)
+* `mds` deploys a MDS
+* `rgw` deploys a Rados Gateway
 
 
 Usage
@@ -9,7 +17,6 @@ Usage
 
 You can use this container to bootstrap any Ceph daemon.
 
-* `CEPH_DAEMON` is the name the daemon you want to deploy (DEFAULT: none). Available values: `MON`, `OSD_DIRECTORY`, `OSD_CEPH_DISK`, `MDS`, `RGW`.
 * `CLUSTER` is the name of the cluster (DEFAULT: ceph)
 * `HOSTNAME` is the hostname of the machine  (DEFAULT: $(hostname))
 
@@ -23,10 +30,9 @@ Run:
 $ sudo docker run -d --net=host \
 -v /etc/ceph:/etc/ceph \
 -v /var/lib/ceph/:/var/lib/ceph/ \
--e CEPH_DAEMON=MON \
 -e MON_IP=192.168.0.20 \
 -e CEPH_PUBLIC_NETWORK=192.168.0.0/24 \
-ceph/daemon
+ceph/daemon mon
 ```
 
 List of available options:
@@ -35,7 +41,7 @@ List of available options:
 * `CEPH_PUBLIC_NETWORK`: CIDR of the host running Docker, it should be in the same network as the `MON_IP`
 * `CEPH_CLUSTER_NETWORK`: CIDR of a secondary interface of the host running Docker. Used for the OSD replication traffic
 * `MON_IP`: IP address of the host running Docker
-* `MON_IP_AUTO_DETECT`: Whether and how to attempt IP autodetection.  
+* `MON_IP_AUTO_DETECT`: Whether and how to attempt IP autodetection.
     *  0 = Do not detect (default)
     *  1 = Detect IPv6, fallback to IPv4 (if no globally-routable IPv6 address detected)
     *  4 = Detect IPv4 only
@@ -59,16 +65,15 @@ $ sudo docker run -d --net=host \
 -v /etc/ceph:/etc/ceph \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
--e CEPH_DAEMON=OSD \
 -e OSD_DEVICE=/dev/vdd \
-ceph/daemon
+ceph/daemon osd_ceph_disk
 ```
 
 List of available options:
 
-* `OSD_DEVICE`:
-* `OSD_JOURNAL`:
-* `HOSTNAME`:
+* `OSD_DEVICE` is the OSD device
+* `OSD_JOURNAL` is the journal for a given OSD
+* `HOSTNAME` is the used to place the OSD in the CRUSH map
 
 If you do not want to use `--privileged=true`, please fall back on the second example.
 
@@ -78,14 +83,14 @@ If you do not want to use `--privileged=true`, please fall back on the second ex
 There are a number of environment variables which are used to configure
 the execution of the OSD:
 
- -  `CLUSTER` is the name of the ceph cluster (defaults to `ceph`)
+*  `CLUSTER` is the name of the ceph cluster (defaults to `ceph`)
 
 If the OSD is not already created (key, configuration, OSD data), the
 following environment variables will control its creation:
 
- -  `WEIGHT` is the of the OSD when it is added to the CRUSH map (default is `1.0`)
- -  `JOURNAL` is the location of the journal (default is the `journal` file inside the OSD data directory)
- -  `HOSTNAME` is the name of the host; it is used as a flag when adding the OSD to the CRUSH map
+* `WEIGHT` is the of the OSD when it is added to the CRUSH map (default is `1.0`)
+* `JOURNAL` is the location of the journal (default is the `journal` file inside the OSD data directory)
+* `HOSTNAME` is the name of the host; it is used as a flag when adding the OSD to the CRUSH map
 
 The old option `OSD_ID` is now unused.  Instead, the script will scan for each directory in `/var/lib/ceph/osd` of the form `<cluster>-<osd-id>`.
 
@@ -143,9 +148,8 @@ Run:
 $ sudo docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /etc/ceph:/etc/ceph \
--e CEPH_DAEMON=MDS \
 -e CEPHFS_CREATE=1 \
-ceph/daemon
+ceph/daemon mds
 ```
 
 List of available options:
@@ -167,8 +171,7 @@ However it is possible to use different CGI frontends by simply giving remote ad
 $ sudo docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /etc/ceph:/etc/ceph \
--e CEPH_DAEMON=RGW \
-ceph/daemon
+ceph/daemon rgw
 ```
 
 List of available options:

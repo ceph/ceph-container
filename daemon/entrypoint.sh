@@ -41,9 +41,6 @@ case "$1" in
    mon)
       CEPH_DAEMON=MON
       ;;
-   osd)
-      CEPH_DAEMON=OSD
-      ;;
    osd_directory)
       CEPH_DAEMON=OSD_DIRECTORY
       ;;
@@ -57,8 +54,8 @@ esac
 if [ ! -n "$CEPH_DAEMON" ]; then
    echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
    echo "of the daemon you want to deploy."
-   echo "Valid values for CEPH_DAEMON are MON, OSD, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW"
-   echo "Valid values for the daemon parameter are mon, osd, osd_directory, osd_ceph_disk, mds, rgw"
+   echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW"
+   echo "Valid values for the daemon parameter are mon, osd_directory, osd_ceph_disk, mds, rgw"
    exit 1
 fi
 
@@ -106,7 +103,7 @@ cluster network = ${CEPH_CLUSTER_NETWORK}
 osd journal size = ${OSD_JOURNAL_SIZE}
 ENDHERE
 
-if [[ ! -z "$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)" ]]; then
+    if [[ ! -z "$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)" ]]; then
       echo "ms_bind_ipv6 = true" >> /etc/ceph/${CLUSTER}.conf
       sed -i '/mon host/d' /etc/ceph/${CLUSTER}.conf
       echo "mon host = ${MON_IP}" >> /etc/ceph/${CLUSTER}.conf
@@ -168,6 +165,7 @@ if [[ ! -z "$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4);
   exec /usr/bin/ceph-mon -d -i ${MON_NAME} --public-addr ${MON_IP}:6789
 fi
 
+
 ################
 # OSD (common) #
 ################
@@ -181,6 +179,7 @@ if [[ "$CEPH_DAEMON" = "OSD_DIRECTORY" ]]; then
     CEPH_DAEMON="OSD_DIRECTORY"
   fi
 fi
+
 
 #################
 # OSD_DIRECTORY #
@@ -381,7 +380,9 @@ elif [[ "$CEPH_DAEMON" = "RGW" ]]; then
 
 else
 
-  echo "ERROR- Unrecognized daemon type."
+  echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
+  echo "of the daemon you want to deploy."
   echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW"
+  echo "Valid values for the daemon parameter are mon, osd_directory, osd_ceph_disk, mds, rgw"
   exit 1
 fi
