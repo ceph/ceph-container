@@ -41,9 +41,6 @@ case "$1" in
    mon)
       CEPH_DAEMON=MON
       ;;
-   osd)
-      CEPH_DAEMON=OSD
-      ;;
    osd_directory)
       CEPH_DAEMON=OSD_DIRECTORY
       ;;
@@ -57,8 +54,8 @@ esac
 if [ ! -n "$CEPH_DAEMON" ]; then
    echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
    echo "of the daemon you want to deploy."
-   echo "Valid values for CEPH_DAEMON are MON, OSD, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW"
-   echo "Valid values for the daemon parameter are mon, osd, osd_directory, osd_ceph_disk, mds, rgw"
+   echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW"
+   echo "Valid values for the daemon parameter are mon, osd_directory, osd_ceph_disk, mds, rgw"
    exit 1
 fi
 
@@ -383,7 +380,9 @@ elif [[ "$CEPH_DAEMON" = "RGW" ]]; then
 
 else
 
-  echo "ERROR- Unrecognized daemon type."
+  echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
+  echo "of the daemon you want to deploy."
   echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW"
+  echo "Valid values for the daemon parameter are mon, osd_directory, osd_ceph_disk, mds, rgw"
   exit 1
 fi
