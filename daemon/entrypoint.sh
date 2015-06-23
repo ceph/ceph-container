@@ -20,12 +20,93 @@ set -e
 : ${RGW_REMOTE_CGI:=0}
 : ${RGW_REMOTE_CGI_PORT:=9000}
 : ${RGW_REMOTE_CGI_HOST:=0.0.0.0}
+: ${KV_TYPE:=none} # valid options: consul, etcd or none
+: ${KV_IP:=127.0.0.1}
+: ${KV_PORT:=4001} # PORT 8500 for Consul
+
 
 function ceph_config_check {
 if [[ ! -e /etc/ceph/${CLUSTER}.conf ]]; then
   echo "ERROR- /etc/ceph/ceph.conf must exist; get it from your existing mon"
   exit 1
 fi
+}
+
+function create_mon_ceph_config_from_kv {
+
+  CLUSTER_PATH=ceph-config/${CLUSTER}
+
+  echo "Adding Mon Host - ${MON_NAME}"
+  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} cas mon_host/${MON_NAME} ${MON_IP} > /dev/null 2>&1
+
+  # Acquire lock to not run into race conditions with parallel bootstraps
+  until kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} cas ${CLUSTER_PATH}/lock $MON_NAME > /dev/null 2>&1 ; do
+    echo "Configuration is locked by another host. Waiting."
+    sleep 1
+  done
+
+  # Update config after initial mon creation
+  if kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/monSetupComplete > /dev/null 2>&1 ; then
+    echo "Configuration found for cluster ${CLUSTER}. Writing to disk."
+
+
+    until ./confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" -confdir="./conf.d" ; do
+      echo "Waiting for confd to update templates..."
+      sleep 1
+    done
+
+    echo "Adding Keyrings"
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/monKeyring > /etc/ceph/ceph.mon.keyring
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/ceph.client.admin.keyring
+
+    if [ ! -f /tmp/monmap ]; then
+      echo "Monmap is missing. Adding initial monmap..."
+      kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/monmap > /etc/ceph/monmap
+      ceph mon getmap -o /etc/ceph/monmap
+    fi
+
+  else # Create initial Mon, keyring 
+    echo "No configuration found for cluster ${CLUSTER}. Generating."
+
+    FSID=$(uuidgen)
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put common/fsid "$FSID"
+
+    until ./confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" -confdir="./conf.d" ; do
+      echo "Waiting for confd to write initial templates..."
+      sleep 1
+    done
+
+    echo "Creating Keyrings"
+    ceph-authtool /etc/ceph/ceph.client.admin.keyring --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
+    ceph-authtool /etc/ceph/ceph.mon.keyring --create-keyring --gen-key -n mon. --cap mon 'allow *'
+
+    echo "Creating Monmap"
+    monmaptool --create --add ${MON_NAME} ${MON_IP} --fsid ${FSID} /etc/ceph/monmap
+
+    echo "Importing Keyrings and Monmap to KV"
+    MONKEYRING=$(cat /etc/ceph/ceph.mon.keyring)
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monKeyring "$MONKEYRING"
+
+    ADKEYRING=$(cat /etc/ceph/ceph.client.admin.keyring)
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/adminKeyring "$ADKEYRING"
+
+    MOMNAP=$(cat /etc/ceph/monmap)
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monmap "$MOMNAP"
+
+    echo "Completed initialization for ${MON_NAME}"
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monSetupComplete true > /dev/null 2>&1
+  fi
+
+  # Remove lock for other clients to install
+  echo "Removing lock for ${MON_NAME}"
+  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} del ${CLUSTER_PATH}/lock > /dev/null 2>&1
+
+}
+
+function create_osd_ceph_config_from_kv {
+
+
+
 }
 
 ###############
@@ -89,6 +170,8 @@ if [[ "$CEPH_DAEMON" = "MON" ]]; then
     echo "ERROR- MON_IP must be defined as the IP address of the monitor"
     exit 1
   fi
+
+if [["$KV_TYPE" = "none"]]; then
 
   # bootstrap MON
   if [ ! -e /etc/ceph/${CLUSTER}.conf ]; then
@@ -163,6 +246,10 @@ if [[ ! -z "$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4);
     # Clean up the temporary key
     rm /tmp/ceph.mon.keyring
   fi
+
+else
+  create_mon_ceph_config_from_kv()
+fi
 
   # start MON
   exec /usr/bin/ceph-mon -d -i ${MON_NAME} --public-addr ${MON_IP}:6789

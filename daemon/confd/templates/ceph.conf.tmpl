@@ -1,0 +1,67 @@
+# Created and Maintained by Confd
+
+[global]
+{{ if exists "/common/cephx"}}
+  auth cluster required = cephx
+  auth service required = cephx
+  auth client required = cephx
+  cephx require signatures = {{getv "/common/cephx_require_signatures"}} # Kernel RBD does NOT support signatures!
+  cephx cluster require signatures = {{getv "/common/cephx_cluster_require_signatures"}}
+  cephx service require signatures = {{getv "/common/cephx_service_require_signatures"}}
+{{else}}
+  auth cluster required = none
+  auth service required = none
+  auth client required = none
+  auth supported = none
+{{end}}
+  fsid = {{getenv "fsid" }}
+  max open files = {{getv "/common/max_open_files" }}
+  osd pool default pg num = {{getv "/osd/pool_default_pg_num"}}
+  osd pool default pgp num = {{getv "/osd/pool_default_pgp_num"}}
+  osd pool default size = {{getv "/osd/pool_default_size"}}
+  osd pool default min size = {{getv "/osd/pool_default_min_size"}}
+  osd pool default crush rule = {{getv "/crush/pool_default_crush_rule"}}
+
+  mon osd full ratio = {{getv "/mon/mon_osd_full_ratio"}}
+  mon osd nearfull ratio = {{getv "/mon/mon_osd_nearfull_ratio"}}
+
+[mon]
+  mon osd down out interval = {{getv "/mon/mon_osd_down_out_interval"}}
+  mon osd min down reporters = {{getv "/mon/mon_osd_min_down_reporters"}}
+{{range getvs "/mon_host/*"}}
+{{$data := split (.Key) "/"}}
+    [mon.{{index $data 2}}]
+      host = {{index $data 2}}
+      mon addr = {{.Value}}
+{{end}}
+[osd]
+  osd mkfs type = {{getv "/osd/osd_mkfs_type"}}
+  osd mkfs options xfs = {{getv "/osd/osd_mkfs_options_xfs"}}
+  osd mount options xfs = {{getv "/osd/osd_mount_options_xfs"}}
+  osd journal size = {{getv "/osd/journal_size"}}
+  filestore journal writeahead = true
+  cluster_network = {{getv "/osd/cluster_network"}}
+  public_network = {{getv "/osd/public_network"}}
+  osd mon heartbeat interval = {{getv "/osd/osd_mon_heartbeat_interval"}}
+  # Performance tuning
+  filestore merge threshold = {{getv "/perf/filestore_merge_threshold"}}
+  filestore split multiple = {{getv "/perf/filestore_split_multiple"}}
+  osd op threads = {{getv "/perf/osd_op_threads"}}
+  # Recovery tuning
+  osd recovery max active = {{getv "/rec/osd_recovery_max_active"}}
+  osd max backfills = {{getv "/rec/osd_max_backfills"}}
+  osd recovery op priority = {{getv "/rec/osd_recovery_op_priority"}}
+  osd recovery max chunk = {{getv "/rec/osd_recovery_max_chunk"}}
+  osd recovery threads = {{getv "/rec/osd_recovery_threads"}}
+  osd objectstore = {{getv "backend/osd_objectstore"}}
+  osd crush update on start = {{getv "/crush/osd_crush_update_on_start"}}
+  # ports
+  ms bind port min = {{getv "/ports/ms_bind_port_min"}}
+  ms bind port max = {{getv "/ports/ms_bind_port_max"}}
+  osd client op priority = {{getv "/osd/osd_client_op_priority}}
+
+
+[client]
+  rbd_cache = {{getv "/rbd/rbd_cache_enabled"}}
+  rbd cache writethrough until flush = {{getv "/rbd/rbd_cache_writethrough_until_flush"}}
+  admin socket = /var/run/ceph/$cluster-$type.$id.$pid.$cctid.asok
