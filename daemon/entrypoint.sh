@@ -59,7 +59,7 @@ function create_mon_ceph_config_from_kv {
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/monKeyring > /etc/ceph/ceph.mon.keyring
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/ceph.client.admin.keyring
 
-    if [ ! -f /tmp/monmap ]; then
+    if [ ! -f /etc/ceph/monmap ]; then
       echo "Monmap is missing. Adding initial monmap..."
       kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/monmap > /etc/ceph/monmap
       ceph mon getmap -o /etc/ceph/monmap
