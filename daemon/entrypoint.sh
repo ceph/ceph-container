@@ -65,7 +65,8 @@ function create_mon_ceph_config_from_kv {
       ceph mon getmap -o /etc/ceph/monmap
     fi
 
-  else # Create initial Mon, keyring 
+  else
+    # Create initial Mon, keyring
     echo "No configuration found for cluster ${CLUSTER}. Generating."
 
     FSID=$(uuidgen)
@@ -105,7 +106,12 @@ function create_mon_ceph_config_from_kv {
 
 function create_osd_ceph_config_from_kv {
 
+  CLUSTER_PATH=ceph-config/${CLUSTER}
 
+  until kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/monSetupComplete > /dev/null 2>&1 ; do
+    echo "OSD: Waiting for monitor setup to complete..."
+    sleep 5
+  done
 
 }
 
@@ -171,7 +177,7 @@ if [[ "$CEPH_DAEMON" = "MON" ]]; then
     exit 1
   fi
 
-if [["$KV_TYPE" = "none"]]; then
+if [[ "$KV_TYPE" = "none" ]]; then
 
   # bootstrap MON
   if [ ! -e /etc/ceph/${CLUSTER}.conf ]; then
@@ -189,7 +195,7 @@ cluster network = ${CEPH_CLUSTER_NETWORK}
 osd journal size = ${OSD_JOURNAL_SIZE}
 ENDHERE
 
-if [[ ! -z "$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)" ]]; then
+    if [[ ! -z "$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)" ]]; then
       echo "ms_bind_ipv6 = true" >> /etc/ceph/${CLUSTER}.conf
       sed -i '/mon host/d' /etc/ceph/${CLUSTER}.conf
       echo "mon host = ${MON_IP}" >> /etc/ceph/${CLUSTER}.conf
@@ -248,7 +254,7 @@ if [[ ! -z "$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4);
   fi
 
 else
-  create_mon_ceph_config_from_kv()
+  create_mon_ceph_config_from_kv
 fi
 
   # start MON
