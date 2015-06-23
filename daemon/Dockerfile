@@ -10,6 +10,10 @@ MAINTAINER Sébastien Han "seb@redhat.com"
 # Add bootstrap script
 ADD entrypoint.sh /entrypoint.sh
 
+# Add templates for confd
+ADD ./confd/templates/* /etc/confd/templates/
+ADD ./confd/conf.d/* /etc/confd/conf.d/
+
 # Add volumes for Ceph config and data
 VOLUME ["/etc/ceph","/var/lib/ceph"]
 
