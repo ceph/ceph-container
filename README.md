@@ -24,3 +24,9 @@ Ceph-related dockerfiles
 ## Demo
 
 * [`ceph/demo`](demo/): Demonstration cluster for testing and learning.  This container runs all the major ceph components installed, bootstrapped, and executed for you to play with.  (not intended for use in building a production cluster)
+
+## Video demonstration
+
+A recorded video on how to deploy your Ceph cluster entirely in Docker containers is available here:
+
+[![Demo Running Ceph in Docker containers](http://img.youtube.com/vi/FUSTjTBA8f8/0.jpg)](http://youtu.be/FUSTjTBA8f8 "Demo Running Ceph in Docker containers")
