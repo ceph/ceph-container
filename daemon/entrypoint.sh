@@ -250,6 +250,12 @@ ENDHERE
 
 else
   create_mon_ceph_config_from_kv
+  if [ ! -d /var/lib/ceph/mon/ceph-${MON_NAME} ]; then
+  # Make the monitor directory
+  mkdir -p /var/lib/ceph/mon/ceph-${MON_NAME}
+  fi
+  # Prepare the monitor daemon's directory with the map and keyring
+  ceph-mon --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap --keyring /etc/ceph/ceph.mon.keyring
 fi
 
   # start MON
