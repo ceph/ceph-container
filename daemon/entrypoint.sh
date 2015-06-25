@@ -239,12 +239,12 @@ fi
   if [ ! -e /var/lib/ceph/mon/ceph-${MON_NAME}/keyring ]; then
 
     if [ ! -e /etc/ceph/ceph.mon.keyring ]; then
-      echo "ERROR- /etc/ceph/ceph.mon.keyring must exist.  You can extract it from your current monitor by running 'ceph auth get mon. -o /etc/ceph/ceph.mon.keyring'"
+      echo "ERROR- /etc/ceph/ceph.mon.keyring must exist.  You can extract it from your current monitor by running 'ceph auth get mon. -o /etc/ceph/ceph.mon.keyring' or use a KV Store"
       exit 1
     fi
 
     if [ ! -e /etc/ceph/monmap ]; then
-      echo "ERROR- /etc/ceph/monmap must exist.  You can extract it from your current monitor by running 'ceph mon getmap -o /etc/ceph/monmap'"
+      echo "ERROR- /etc/ceph/monmap must exist.  You can extract it from your current monitor by running 'ceph mon getmap -o /etc/ceph/monmap' or use a KV Store"
       exit 1
     fi
 
