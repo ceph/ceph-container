@@ -14,8 +14,8 @@
   auth client required = none
   auth supported = none
 {{end}}
-  fsid = {{getenv "fsid" }}
-  max open files = {{getv "/common/max_open_files" }}
+  fsid = {{getv "/common/fsid"}}
+  max open files = {{getv "/common/max_open_files"}}
   osd pool default pg num = {{getv "/osd/pool_default_pg_num"}}
   osd pool default pgp num = {{getv "/osd/pool_default_pgp_num"}}
   osd pool default size = {{getv "/osd/pool_default_size"}}
@@ -28,10 +28,9 @@
 [mon]
   mon osd down out interval = {{getv "/mon/mon_osd_down_out_interval"}}
   mon osd min down reporters = {{getv "/mon/mon_osd_min_down_reporters"}}
-{{range getvs "/mon_host/*"}}
-{{$data := split (.Key) "/"}}
-    [mon.{{index $data 2}}]
-      host = {{index $data 2}}
+{{range gets "/mon_host/*"}}
+    [mon.{{base .Key}}]
+      host = {{base .Key}}
       mon addr = {{.Value}}
 {{end}}
 [osd]
@@ -53,12 +52,13 @@
   osd recovery op priority = {{getv "/rec/osd_recovery_op_priority"}}
   osd recovery max chunk = {{getv "/rec/osd_recovery_max_chunk"}}
   osd recovery threads = {{getv "/rec/osd_recovery_threads"}}
-  osd objectstore = {{getv "backend/osd_objectstore"}}
+  osd objectstore = {{getv "/backend/osd_objectstore"}}
   osd crush update on start = {{getv "/crush/osd_crush_update_on_start"}}
+  osd client op priority = {{getv "/rec/osd_client_op_priority"}}
   # ports
   ms bind port min = {{getv "/ports/ms_bind_port_min"}}
   ms bind port max = {{getv "/ports/ms_bind_port_max"}}
-  osd client op priority = {{getv "/osd/osd_client_op_priority"}}
+  
 
 
 [client]
