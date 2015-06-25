@@ -82,7 +82,7 @@ function create_mon_ceph_config_from_kv {
     ceph-authtool /etc/ceph/ceph.mon.keyring --create-keyring --gen-key -n mon. --cap mon 'allow *'
 
     echo "Creating Monmap"
-    monmaptool --create --add ${MON_NAME} ${MON_IP} --fsid ${FSID} /etc/ceph/monmap
+    monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${FSID} /etc/ceph/monmap
 
     echo "Importing Keyrings and Monmap to KV"
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monKeyring - < /etc/ceph/ceph.mon.keyring
