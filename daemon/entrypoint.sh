@@ -259,7 +259,7 @@ else
 fi
 
   # start MON
-  exec /usr/bin/ceph-mon -d -i ${MON_NAME} --public-addr ${MON_IP}:6789
+  exec /usr/bin/ceph-mon -d -i ${MON_NAME} --public-addr "${MON_IP}:6789"
 fi
 
 ################
