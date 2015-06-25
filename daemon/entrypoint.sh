@@ -231,6 +231,10 @@ ENDHERE
     monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} /etc/ceph/monmap
   fi
 
+else
+  create_mon_ceph_config_from_kv
+fi
+
   # If we don't have a monitor keyring, this is a new monitor
   if [ ! -e /var/lib/ceph/mon/ceph-${MON_NAME}/keyring ]; then
 
@@ -261,15 +265,6 @@ ENDHERE
     rm /tmp/ceph.mon.keyring
   fi
 
-else
-  create_mon_ceph_config_from_kv
-  if [ ! -d /var/lib/ceph/mon/ceph-${MON_NAME} ]; then
-  # Make the monitor directory
-  mkdir -p /var/lib/ceph/mon/ceph-${MON_NAME}
-  fi
-  # Prepare the monitor daemon's directory with the map and keyring
-  ceph-mon --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap --keyring /etc/ceph/ceph.mon.keyring
-fi
 
   # start MON
   exec /usr/bin/ceph-mon -d -i ${MON_NAME} --public-addr "${MON_IP}:6789"
