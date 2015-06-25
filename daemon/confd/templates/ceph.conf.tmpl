@@ -64,4 +64,4 @@
 [client]
   rbd_cache = {{getv "/rbd/rbd_cache_enabled"}}
   rbd cache writethrough until flush = {{getv "/rbd/rbd_cache_writethrough_until_flush"}}
-  admin socket = /var/run/ceph/$cluster-$type.$id.$pid.$cctid.asok
+  admin socket = /var/run/ceph/rbd-clients/$cluster-$type.$id.$pid.$cctid.asok
