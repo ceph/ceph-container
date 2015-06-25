@@ -50,7 +50,7 @@ function create_mon_ceph_config_from_kv {
     echo "Configuration found for cluster ${CLUSTER}. Writing to disk."
 
 
-    until ./confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
+    until confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
       echo "Waiting for confd to update templates..."
       sleep 1
     done
@@ -72,7 +72,7 @@ function create_mon_ceph_config_from_kv {
     FSID=$(uuidgen)
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/common/fsid "$FSID"
 
-    until ./confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
+    until confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
       echo "Waiting for confd to write initial templates..."
       sleep 1
     done
