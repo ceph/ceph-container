@@ -85,14 +85,9 @@ function create_mon_ceph_config_from_kv {
     monmaptool --create --add ${MON_NAME} ${MON_IP} --fsid ${FSID} /etc/ceph/monmap
 
     echo "Importing Keyrings and Monmap to KV"
-    MONKEYRING=$(cat /etc/ceph/ceph.mon.keyring)
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monKeyring "$MONKEYRING"
-
-    ADKEYRING=$(cat /etc/ceph/ceph.client.admin.keyring)
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/adminKeyring "$ADKEYRING"
-
-    MOMNAP=$(cat /etc/ceph/monmap)
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monmap "$MOMNAP"
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monKeyring - < /etc/ceph/ceph.mon.keyring
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/adminKeyring - < /etc/ceph/ceph.client.admin.keyring
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monmap - < /etc/ceph/monmap
 
     echo "Completed initialization for ${MON_NAME}"
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monSetupComplete true > /dev/null 2>&1
