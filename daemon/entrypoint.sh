@@ -70,7 +70,7 @@ function create_mon_ceph_config_from_kv {
     echo "No configuration found for cluster ${CLUSTER}. Generating."
 
     FSID=$(uuidgen)
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/common/fsid "$FSID"
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/common/fsid ${FSID}
 
     until confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
       echo "Waiting for confd to write initial templates..."
