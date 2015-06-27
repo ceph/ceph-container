@@ -11,6 +11,5 @@ keys = [
  "/perf/",
  "/rec/",
  "/ports/",
- "/rbd/",
- "/other/"
+ "/rbd/"
 ] 
