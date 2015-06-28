@@ -135,6 +135,14 @@ ceph auth get-or-create client.radosgw.gateway osd 'allow rwx' mon 'allow rw' -o
 radosgw -c /etc/ceph/ceph.conf -n client.radosgw.gateway -k /var/lib/ceph/radosgw/${RGW_NAME}/keyring --rgw-socket-path="" --rgw-frontends="civetweb port=${RGW_CIVETWEB_PORT}"
 
 
+#######
+# API #
+#######
+
+# start ceph-rest-api
+ceph-rest-api -n client.admin &
+
+
 #########
 # WATCH #
 #########
