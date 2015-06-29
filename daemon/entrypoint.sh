@@ -55,6 +55,9 @@ function create_mon_ceph_config_from_kv {
       sleep 1
     done
 
+    # Check/Create bootstrap key directories
+    mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
+
     echo "Adding Keyrings"
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/monKeyring > /etc/ceph/ceph.mon.keyring
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/ceph.client.admin.keyring
