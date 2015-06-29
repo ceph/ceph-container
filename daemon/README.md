@@ -186,3 +186,23 @@ To enable an external CGI interface instead of civetweb set:
 * `RGW_REMOTE_CGI_PORT=9000`
 
 And run the container like this `docker run -d -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph -e CEPH_DAEMON=RGW -e RGW_NAME=myrgw -p 9000:9000 -e RGW_REMOTE_CGI=1 -e RGW_REMOTE_CGI_HOST=192.168.0.1 -e RGW_REMOTE_CGI_PORT=9000 ceph/daemon`
+
+
+Deploy a REST API
+-----------------
+
+This is pretty straighforward. The `--net=host` is not mandatory, if you don't use it do not forget to expose the `RESTAPI_PORT`.
+
+```
+$ sudo docker run -d --net=host \
+-v /etc/ceph:/etc/ceph \
+ceph/daemon restapi
+```
+
+List of available options:
+
+* `RESTAPI_IP` is the IP address to listen on (DEFAULT: 0.0.0.0)
+* `RESTAPI_PORT` is the listening port of the REST API (DEFAULT: 5000)
+* `RESTAPI_BASE_URL` is the base URL of the API (DEFAULT: /api/v0.1)
+* `RESTAPI_LOG_LEVEL` is the log level of the API (DEFAULT: warning)
+* `RESTAPI_LOG_FILE` is the location of the log file (DEFAULT: /var/log/ceph/ceph-restapi.log)

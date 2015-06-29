@@ -20,11 +20,23 @@ set -e
 : ${RGW_REMOTE_CGI:=0}
 : ${RGW_REMOTE_CGI_PORT:=9000}
 : ${RGW_REMOTE_CGI_HOST:=0.0.0.0}
+: ${RESTAPI_IP:=0.0.0.0}
+: ${RESTAPI_PORT:=5000}
+: ${RESTAPI_BASE_URL:=/api/v0.1}
+: ${RESTAPI_LOG_LEVEL:=warning}
+: ${RESTAPI_LOG_FILE:=/var/log/ceph/ceph-restapi.log}
 
 function ceph_config_check {
 if [[ ! -e /etc/ceph/${CLUSTER}.conf ]]; then
   echo "ERROR- /etc/ceph/ceph.conf must exist; get it from your existing mon"
   exit 1
+fi
+}
+
+function ceph_admin_key_check {
+if [[ ! -e /etc/ceph/${CLUSTER}.client.admin.keyring ]]; then
+    echo "ERROR- /etc/ceph/${CLUSTER}.client.admin.keyring must exist; get it from your existing mon"
+    exit 1
 fi
 }
 
@@ -50,12 +62,15 @@ case "$1" in
    rgw)
       CEPH_DAEMON=RGW
       ;;
+   restapi)
+      CEPH_DAEMON=RESTAPI
+      ;;
 esac
 if [ ! -n "$CEPH_DAEMON" ]; then
    echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
    echo "of the daemon you want to deploy."
-   echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW"
-   echo "Valid values for the daemon parameter are mon, osd_directory, osd_ceph_disk, mds, rgw"
+   echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW, RESTAPI"
+   echo "Valid values for the daemon parameter are mon, osd_directory, osd_ceph_disk, mds, rgw, restapi"
    exit 1
 fi
 
@@ -320,10 +335,9 @@ elif [[ "$CEPH_DAEMON" = "MDS" ]]; then
 
   # Create the Ceph filesystem, if necessary
   if [ $CEPHFS_CREATE -eq 1 ]; then
-    if [[ ! -e /etc/ceph/ceph.client.admin.keyring ]]; then
-      echo "ERROR- /etc/ceph/ceph.client.admin.keyring must exist; get it from your existing mon"
-      exit 1
-    fi
+
+    ceph_admin_key_check
+
     if [[ "$(ceph fs ls | grep -c name:.${CEPHFS_NAME},)" -eq "0" ]]; then
        # Make sure the specified data pool exists
        if ! ceph osd pool stats ${CEPHFS_DATA_POOL} > /dev/null 2>&1; then
@@ -375,6 +389,30 @@ elif [[ "$CEPH_DAEMON" = "RGW" ]]; then
 
 
 ###########
+# RESTAPI #
+###########
+
+elif [[ "$CEPH_DAEMON" = "RESTAPI" ]]; then
+
+  ceph_config_check
+  ceph_admin_key_check
+
+  # to avoid having a lot of [client.restapi] we check if one exists
+  if [[ ! "$(egrep "\[client.restapi\]" /etc/ceph/${CLUSTER}.conf)" ]]; then
+    cat <<ENDHERE >>/etc/ceph/${CLUSTER}.conf
+
+[client.restapi]
+  public addr = ${RESTAPI_IP}:${RESTAPI_PORT}
+  restapi base url = ${RESTAPI_BASE_URL}
+  restapi log level = ${RESTAPI_LOG_LEVEL}
+  log file = ${RESTAPI_LOG_FILE}
+ENDHERE
+  fi
+
+  # start ceph-rest-api
+  exec /usr/bin/ceph-rest-api -n client.admin
+
+###########
 # UNKNOWN #
 ###########
 
@@ -382,7 +420,7 @@ else
 
   echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
   echo "of the daemon you want to deploy."
-  echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW"
-  echo "Valid values for the daemon parameter are mon, osd_directory, osd_ceph_disk, mds, rgw"
+  echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW, RESTAPI"
+  echo "Valid values for the daemon parameter are mon, osd_directory, osd_ceph_disk, mds, rgw, restapi"
   exit 1
 fi
