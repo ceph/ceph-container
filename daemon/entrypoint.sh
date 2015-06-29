@@ -5,7 +5,7 @@ set -e
 : ${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}
 : ${MON_NAME:=$(hostname -s)}
 : ${MON_IP_AUTO_DETECT:=0}
-: ${MDS_NAME:=$(hostname -s)}
+: ${MDS_NAME:=mds-$(hostname -s)}
 : ${OSD_FORCE_ZAP:=0}
 : ${OSD_JOURNAL_SIZE:=100}
 : ${CEPHFS_CREATE:=0}
@@ -144,9 +144,6 @@ case "$1" in
    mon)
       CEPH_DAEMON=MON
       ;;
-   osd)
-      CEPH_DAEMON=OSD
-      ;;
    osd_directory)
       CEPH_DAEMON=OSD_DIRECTORY
       ;;
@@ -160,8 +157,8 @@ esac
 if [ ! -n "$CEPH_DAEMON" ]; then
    echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
    echo "of the daemon you want to deploy."
-   echo "Valid values for CEPH_DAEMON are MON, OSD, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW"
-   echo "Valid values for the daemon parameter are mon, osd, osd_directory, osd_ceph_disk, mds, rgw"
+   echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW"
+   echo "Valid values for the daemon parameter are mon, osd_directory, osd_ceph_disk, mds, rgw"
    exit 1
 fi
 
@@ -278,6 +275,7 @@ fi
   exec /usr/bin/ceph-mon -d -i ${MON_NAME} --public-addr "${MON_IP}:6789"
 fi
 
+
 ################
 # OSD (common) #
 ################
@@ -291,6 +289,7 @@ if [[ "$CEPH_DAEMON" = "OSD_DIRECTORY" ]]; then
     CEPH_DAEMON="OSD_DIRECTORY"
   fi
 fi
+
 
 #################
 # OSD_DIRECTORY #
@@ -350,7 +349,7 @@ EOF
     chmod +x /etc/service/ceph-${OSD_ID}/run
   done
 
-read
+exec /sbin/my_init
 
 
 #################
@@ -491,7 +490,9 @@ elif [[ "$CEPH_DAEMON" = "RGW" ]]; then
 
 else
 
-  echo "ERROR- Unrecognized daemon type."
+  echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
+  echo "of the daemon you want to deploy."
   echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW"
+  echo "Valid values for the daemon parameter are mon, osd_directory, osd_ceph_disk, mds, rgw"
   exit 1
 fi
