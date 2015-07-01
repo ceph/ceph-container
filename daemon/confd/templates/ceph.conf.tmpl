@@ -3,12 +3,24 @@
 [global]
   fsid = {{getv "/auth/fsid"}}
 {{ if exists "/auth/cephx"}}
-  auth cluster required = cephx
-  auth service required = cephx
-  auth client required = cephx
-  cephx require signatures = {{getv "/auth/cephx_require_signatures"}} # Kernel RBD does NOT support signatures!
-  cephx cluster require signatures = {{getv "/auth/cephx_cluster_require_signatures"}}
-  cephx service require signatures = {{getv "/auth/cephx_service_require_signatures"}}
+  auth_cluster_required = cephx
+  auth_service_required = cephx
+  auth_client_required = cephx
+  {{if exists "/auth/cephx_require_signatures"}}
+  cephx_require_signatures = {{getv "/auth/cephx_require_signatures"}} # Kernel RBD does NOT support signatures!
+  {{else}}
+  cephx_require_signatures = false
+  {{end}}
+  {{if exists "/auth/cephx_cluster_require_signatures"}}
+  cephx_cluster_require_signatures = {{getv "/auth/cephx_cluster_require_signatures"}}
+  {{else}}
+  cephx_cluster_require_signatures = true
+  {{end}}
+  {{if exists "/auth/cephx_service_require_signatures"}}
+  cephx_service_require_signatures = {{getv "/auth/cephx_service_require_signatures"}}
+  {{else}}
+  cephx_service_require_signatures = false
+  {{end}}
 {{else}}
   auth cluster required = none
   auth service required = none
