@@ -2,14 +2,10 @@
 src = "ceph.conf.tmpl"
 dest = "/etc/ceph/ceph.conf"
 keys = [
- "/mon_host/",
- "/common/",
+ "/auth/",
+ "/global/",
  "/mon/",
+ "/mon_host/",
  "/osd/",
- "/crush/",
- "/backend/",
- "/perf/",
- "/rec/",
- "/ports/",
- "/rbd/"
+ "/client/"
 ] 
