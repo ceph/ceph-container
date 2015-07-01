@@ -30,6 +30,10 @@
 {{range gets "/osd/*"}}
   {{base .Key}} = {{.Value}}{{end}}
 
+[mds]
+{{range gets "/mds/*"}}
+  {{base .Key}} = {{.Value}}{{end}}
+
 [client]
 {{range gets "/client/*"}}
   {{base .Key}} = {{.Value}}{{end}}
