@@ -20,6 +20,10 @@ RUN mkdir -p /etc/container_environment
 ADD 2.sh /etc/runit/2
 RUN chmod +x /etc/runit/2
 
+# Add templates for confd
+ADD ./confd/templates/* /etc/confd/templates/
+ADD ./confd/conf.d/* /etc/confd/conf.d/
+
 # Add volumes for Ceph config and data
 VOLUME ["/etc/ceph","/var/lib/ceph"]
 

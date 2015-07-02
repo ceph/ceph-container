@@ -25,6 +25,9 @@ set -e
 : ${RESTAPI_BASE_URL:=/api/v0.1}
 : ${RESTAPI_LOG_LEVEL:=warning}
 : ${RESTAPI_LOG_FILE:=/var/log/ceph/ceph-restapi.log}
+: ${KV_TYPE:=none} # valid options: consul, etcd or none
+: ${KV_IP:=127.0.0.1}
+: ${KV_PORT:=4001} # PORT 8500 for Consul
 
 function ceph_config_check {
 if [[ ! -e /etc/ceph/${CLUSTER}.conf ]]; then
@@ -38,6 +41,108 @@ if [[ ! -e /etc/ceph/${CLUSTER}.client.admin.keyring ]]; then
     echo "ERROR- /etc/ceph/${CLUSTER}.client.admin.keyring must exist; get it from your existing mon"
     exit 1
 fi
+}
+
+function create_mon_ceph_config_from_kv {
+
+  CLUSTER_PATH=ceph-config/${CLUSTER}
+
+  echo "Adding Mon Host - ${MON_NAME}"
+  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} cas ${CLUSTER_PATH}/mon_host/${MON_NAME} ${MON_IP} > /dev/null 2>&1
+
+  # Acquire lock to not run into race conditions with parallel bootstraps
+  until kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} cas ${CLUSTER_PATH}/lock $MON_NAME > /dev/null 2>&1 ; do
+    echo "Configuration is locked by another host. Waiting."
+    sleep 1
+  done
+
+  # Update config after initial mon creation
+  if kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/monSetupComplete > /dev/null 2>&1 ; then
+    echo "Configuration found for cluster ${CLUSTER}. Writing to disk."
+
+
+    until confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
+      echo "Waiting for confd to update templates..."
+      sleep 1
+    done
+
+    # Check/Create bootstrap key directories
+    mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
+
+    echo "Adding Keyrings"
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/monKeyring > /etc/ceph/ceph.mon.keyring
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/ceph.client.admin.keyring
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/bootstrapOsdKeyring > /var/lib/ceph/bootstrap-osd/ceph.keyring
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/bootstrapMdsKeyring > /var/lib/ceph/bootstrap-mds/ceph.keyring
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/bootstrapRgwKeyring > /var/lib/ceph/bootstrap-rgw/ceph.keyring
+
+
+    if [ ! -f /etc/ceph/monmap ]; then
+      echo "Monmap is missing. Adding initial monmap..."
+      kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/monmap > /etc/ceph/monmap
+      ceph mon getmap -o /etc/ceph/monmap
+    fi
+
+  else
+    # Create initial Mon, keyring
+    echo "No configuration found for cluster ${CLUSTER}. Generating."
+
+    FSID=$(uuidgen)
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/common/fsid ${FSID}
+
+    until confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
+      echo "Waiting for confd to write initial templates..."
+      sleep 1
+    done
+
+    echo "Creating Keyrings"
+    ceph-authtool /etc/ceph/ceph.client.admin.keyring --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
+    ceph-authtool /etc/ceph/ceph.mon.keyring --create-keyring --gen-key -n mon. --cap mon 'allow *'
+
+    # Create bootstrap key directories
+    mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
+
+    # Generate the OSD bootstrap key
+    ceph-authtool /var/lib/ceph/bootstrap-osd/ceph.keyring --create-keyring --gen-key -n client.bootstrap-osd --cap mon 'allow profile bootstrap-osd'
+
+    # Generate the MDS bootstrap key
+    ceph-authtool /var/lib/ceph/bootstrap-mds/ceph.keyring --create-keyring --gen-key -n client.bootstrap-mds --cap mon 'allow profile bootstrap-mds'
+
+    # Generate the RGW bootstrap key
+    ceph-authtool /var/lib/ceph/bootstrap-rgw/ceph.keyring --create-keyring --gen-key -n client.bootstrap-rgw --cap mon 'allow profile bootstrap-rgw'
+
+
+    echo "Creating Monmap"
+    monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${FSID} /etc/ceph/monmap
+
+    echo "Importing Keyrings and Monmap to KV"
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monKeyring - < /etc/ceph/ceph.mon.keyring
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/adminKeyring - < /etc/ceph/ceph.client.admin.keyring
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/bootstrapOsdKeyring - < /var/lib/ceph/bootstrap-osd/ceph.keyring
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/bootstrapMdsKeyring - < /var/lib/ceph/bootstrap-mds/ceph.keyring
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/bootstrapRgwKeyring - < /var/lib/ceph/bootstrap-rgw/ceph.keyring
+    
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monmap - < /etc/ceph/monmap
+
+    echo "Completed initialization for ${MON_NAME}"
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monSetupComplete true > /dev/null 2>&1
+  fi
+
+  # Remove lock for other clients to install
+  echo "Removing lock for ${MON_NAME}"
+  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} del ${CLUSTER_PATH}/lock > /dev/null 2>&1
+
+}
+
+function create_osd_ceph_config_from_kv {
+
+  CLUSTER_PATH=ceph-config/${CLUSTER}
+
+  until kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/monSetupComplete > /dev/null 2>&1 ; do
+    echo "OSD: Waiting for monitor setup to complete..."
+    sleep 5
+  done
+
 }
 
 ###############
@@ -102,6 +207,8 @@ if [[ "$CEPH_DAEMON" = "MON" ]]; then
     exit 1
   fi
 
+if [[ "$KV_TYPE" = "none" ]]; then
+
   # bootstrap MON
   if [ ! -e /etc/ceph/${CLUSTER}.conf ]; then
     fsid=$(uuidgen)
@@ -143,19 +250,23 @@ ENDHERE
     ceph-authtool /var/lib/ceph/bootstrap-rgw/ceph.keyring --create-keyring --gen-key -n client.bootstrap-rgw --cap mon 'allow profile bootstrap-rgw'
 
     # Generate initial monitor map
-    monmaptool --create --add ${MON_NAME} ${MON_IP} --fsid ${fsid} /etc/ceph/monmap
+    monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} /etc/ceph/monmap
   fi
+
+else
+  create_mon_ceph_config_from_kv
+fi
 
   # If we don't have a monitor keyring, this is a new monitor
   if [ ! -e /var/lib/ceph/mon/ceph-${MON_NAME}/keyring ]; then
 
     if [ ! -e /etc/ceph/ceph.mon.keyring ]; then
-      echo "ERROR- /etc/ceph/ceph.mon.keyring must exist.  You can extract it from your current monitor by running 'ceph auth get mon. -o /etc/ceph/ceph.mon.keyring'"
+      echo "ERROR- /etc/ceph/ceph.mon.keyring must exist.  You can extract it from your current monitor by running 'ceph auth get mon. -o /etc/ceph/ceph.mon.keyring' or use a KV Store"
       exit 1
     fi
 
     if [ ! -e /etc/ceph/monmap ]; then
-      echo "ERROR- /etc/ceph/monmap must exist.  You can extract it from your current monitor by running 'ceph mon getmap -o /etc/ceph/monmap'"
+      echo "ERROR- /etc/ceph/monmap must exist.  You can extract it from your current monitor by running 'ceph mon getmap -o /etc/ceph/monmap' or use a KV Store"
       exit 1
     fi
 
@@ -176,8 +287,9 @@ ENDHERE
     rm /tmp/ceph.mon.keyring
   fi
 
+
   # start MON
-  exec /usr/bin/ceph-mon -d -i ${MON_NAME} --public-addr ${MON_IP}:6789
+  exec /usr/bin/ceph-mon -d -i ${MON_NAME} --public-addr "${MON_IP}:6789"
 fi
 
 
