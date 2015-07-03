@@ -36,6 +36,13 @@ There are two workarounds, at present:
 To run multiple OSDs within the same container, simply bind-mount each OSD datastore directory:
 * `docker run -v /osds/1:/var/lib/ceph/osd/ceph-1 -v /osds/2:/var/lib/ceph/osd/ceph-2`
 
+Shared and/or separate journal
+------------------------------
+
+The default journal location for each OSD in this container (if and only if the `/var/lib/ceph/osd/journal/` directory exists) is `/var/lib/ceph/osd/journal/journal.<OSD_ID>/`.  This means that if you would like to have your journals (optionally shared) in a separate disk, all you have to do it mount that separate disk to the container's `/var/lib/ceph/osd/journal/` directory.
+
+An easy way to have this all handled properly is to mount your journal and each OSD to their respective locations in your host's `/var/lib/ceph/osd` tree and make that entire tree available to this container by passing `-v /var/lib/ceph/osd:/var/lib/ceph/osd` to the `docker run` execution.
+
 BTRFS and journal
 -----------------
 

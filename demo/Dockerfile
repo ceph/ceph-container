@@ -14,7 +14,7 @@ ADD entrypoint.sh /entrypoint.sh
 VOLUME ["/etc/ceph","/var/lib/ceph"]
 
 # Expose the Ceph ports
-EXPOSE 6789 6800 6801 6802 6803 6804 6805 80
+EXPOSE 6789 6800 6801 6802 6803 6804 6805 80 5000
 
 # Execute the entrypoint
 ENTRYPOINT ["/entrypoint.sh"]

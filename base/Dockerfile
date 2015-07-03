@@ -14,10 +14,20 @@ RUN rpm --import 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.a
 RUN rpm -Uvh http://ceph.com/rpm-${CEPH_VERSION}/rhel7/noarch/ceph-release-1-1.el7.noarch.rpm
 RUN yum install -y epel-release && yum clean all
 RUN yum install -y ceph ceph-radosgw && yum clean all
+ENV KVIATOR_VERSION 0.0.5
+ENV CONFD_VERSION 0.10.0
 
 # Install etcdctl
 RUN curl -L --remote-name https://github.com/coreos/etcd/releases/download/${ETCDCTL_VERSION}/etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}.tar.gz && tar xfz etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}.tar.gz -C /tmp/ etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}/etcdctl
 RUN mv /tmp/etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}/etcdctl /usr/local/bin/etcdctl
+
+#install kviator
+ADD https://github.com/AcalephStorage/kviator/releases/download/v${KVIATOR_VERSION}/kviator-${KVIATOR_VERSION}-linux-amd64.zip /tmp/kviator.zip
+RUN cd /usr/local/bin && unzip /tmp/kviator.zip && chmod +x /usr/local/bin/kviator && rm /tmp/kviator.zip
+
+# Install confd
+ADD https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-linux-amd64 /usr/local/bin/confd
+RUN chmod +x /usr/local/bin/confd && mkdir -p /etc/confd/conf.d && mkdir -p /etc/confd/templates
 
 ADD entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]

@@ -1,0 +1,51 @@
+# Created and Maintained by Confd
+
+[global]
+  fsid = {{getv "/auth/fsid"}}
+{{ if exists "/auth/cephx"}}
+  auth_cluster_required = cephx
+  auth_service_required = cephx
+  auth_client_required = cephx
+  {{if exists "/auth/cephx_require_signatures"}}
+  cephx_require_signatures = {{getv "/auth/cephx_require_signatures"}} # Kernel RBD does NOT support signatures!
+  {{else}}
+  cephx_require_signatures = false
+  {{end}}
+  {{if exists "/auth/cephx_cluster_require_signatures"}}
+  cephx_cluster_require_signatures = {{getv "/auth/cephx_cluster_require_signatures"}}
+  {{else}}
+  cephx_cluster_require_signatures = true
+  {{end}}
+  {{if exists "/auth/cephx_service_require_signatures"}}
+  cephx_service_require_signatures = {{getv "/auth/cephx_service_require_signatures"}}
+  {{else}}
+  cephx_service_require_signatures = false
+  {{end}}
+{{else}}
+  auth cluster required = none
+  auth service required = none
+  auth client required = none
+  auth supported = none
+{{end}}
+{{range gets "/global/*"}}
+  {{base .Key}} = {{.Value}}{{end}}
+
+[mon]
+{{range gets "/mon/*"}}
+  {{base .Key}} = {{.Value}}{{end}}
+{{range gets "/mon_host/*"}}
+    [mon.{{base .Key}}]
+      host = {{base .Key}}
+      mon_addr = {{.Value}}{{end}}
+
+[osd]
+{{range gets "/osd/*"}}
+  {{base .Key}} = {{.Value}}{{end}}
+
+[mds]
+{{range gets "/mds/*"}}
+  {{base .Key}} = {{.Value}}{{end}}
+
+[client]
+{{range gets "/client/*"}}
+  {{base .Key}} = {{.Value}}{{end}}
