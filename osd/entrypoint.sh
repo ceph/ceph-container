@@ -2,6 +2,7 @@
 set -e
 
 : ${CLUSTER:=ceph}
+: ${HOSTNAME:=$(hostname -s)}
 : ${WEIGHT:=1.0}
 
 for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }')
