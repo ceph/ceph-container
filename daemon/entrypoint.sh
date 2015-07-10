@@ -3,7 +3,8 @@ set -e
 
 : ${CLUSTER:=ceph}
 : ${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}
-: ${MON_NAME:=$(hostname -s)}
+: ${HOSTNAME:=$(hostname -s)}
+: ${MON_NAME:=${HOSTNAME}}
 : ${MON_IP_AUTO_DETECT:=0}
 : ${MDS_NAME:=mds-$(hostname -s)}
 : ${OSD_FORCE_ZAP:=0}
