@@ -88,7 +88,7 @@ function create_mon_ceph_config_from_kv {
     echo "No configuration found for cluster ${CLUSTER}. Generating."
 
     FSID=$(uuidgen)
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/common/fsid ${FSID}
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/auth/fsid ${FSID}
 
     until confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
       echo "Waiting for confd to write initial templates..."
@@ -121,7 +121,7 @@ function create_mon_ceph_config_from_kv {
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/bootstrapOsdKeyring - < /var/lib/ceph/bootstrap-osd/ceph.keyring
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/bootstrapMdsKeyring - < /var/lib/ceph/bootstrap-mds/ceph.keyring
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/bootstrapRgwKeyring - < /var/lib/ceph/bootstrap-rgw/ceph.keyring
-    
+
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monmap - < /etc/ceph/monmap
 
     echo "Completed initialization for ${MON_NAME}"
@@ -134,7 +134,7 @@ function create_mon_ceph_config_from_kv {
 
 }
 
-function create_osd_ceph_config_from_kv {
+function create_ceph_config_from_kv {
 
   CLUSTER_PATH=ceph-config/${CLUSTER}
 
@@ -142,6 +142,19 @@ function create_osd_ceph_config_from_kv {
     echo "OSD: Waiting for monitor setup to complete..."
     sleep 5
   done
+
+  until confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
+    echo "Waiting for confd to update templates..."
+    sleep 1
+  done
+
+  # Check/Create bootstrap key directories
+  mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
+
+  echo "Adding bootstrap keyrings"
+  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/bootstrapOsdKeyring > /var/lib/ceph/bootstrap-osd/ceph.keyring
+  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/bootstrapMdsKeyring > /var/lib/ceph/bootstrap-mds/ceph.keyring
+  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/bootstrapRgwKeyring > /var/lib/ceph/bootstrap-rgw/ceph.keyring
 
 }
 
@@ -314,6 +327,10 @@ fi
 
 if [[ "$CEPH_DAEMON" = "OSD_DIRECTORY" ]]; then
 
+  if [[ "$KV_TYPE" != "none" ]]; then
+    create_ceph_config_from_kv
+  fi
+
   ceph_config_check
 
   if [ -n "$(find /var/lib/ceph/osd -prune -empty)" ]; then
@@ -375,6 +392,10 @@ exec /sbin/my_init
 
 elif [[ "$CEPH_DAEMON" = "OSD_CEPH_DISK" ]]; then
 
+  if [[ "$KV_TYPE" != "none" ]]; then
+    create_ceph_config_from_kv
+  fi
+
   ceph_config_check
 
   if [[ -z "${OSD_DEVICE}" ]];then
@@ -421,6 +442,10 @@ elif [[ "$CEPH_DAEMON" = "OSD_CEPH_DISK" ]]; then
 
 elif [[ "$CEPH_DAEMON" = "MDS" ]]; then
 
+  if [[ "$KV_TYPE" != "none" ]]; then
+    create_ceph_config_from_kv
+  fi
+
   ceph_config_check
 
   # Check to see if we are a new MDS
@@ -448,6 +473,7 @@ elif [[ "$CEPH_DAEMON" = "MDS" ]]; then
   # Create the Ceph filesystem, if necessary
   if [ $CEPHFS_CREATE -eq 1 ]; then
 
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/ceph.client.admin.keyring
     ceph_admin_key_check
 
     if [[ "$(ceph fs ls | grep -c name:.${CEPHFS_NAME},)" -eq "0" ]]; then
@@ -474,6 +500,10 @@ elif [[ "$CEPH_DAEMON" = "MDS" ]]; then
 #######
 
 elif [[ "$CEPH_DAEMON" = "RGW" ]]; then
+
+  if [[ "$KV_TYPE" != "none" ]]; then
+    create_ceph_config_from_kv
+  fi
 
   ceph_config_check
 
@@ -506,7 +536,12 @@ elif [[ "$CEPH_DAEMON" = "RGW" ]]; then
 
 elif [[ "$CEPH_DAEMON" = "RESTAPI" ]]; then
 
+  if [[ "$KV_TYPE" != "none" ]]; then
+    create_ceph_config_from_kv
+  fi
+
   ceph_config_check
+  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/ceph.client.admin.keyring
   ceph_admin_key_check
 
   # to avoid having a lot of [client.restapi] we check if one exists
