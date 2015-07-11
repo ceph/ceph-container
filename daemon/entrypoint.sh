@@ -122,7 +122,7 @@ function create_mon_ceph_config_from_kv {
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/bootstrapOsdKeyring - < /var/lib/ceph/bootstrap-osd/ceph.keyring
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/bootstrapMdsKeyring - < /var/lib/ceph/bootstrap-mds/ceph.keyring
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/bootstrapRgwKeyring - < /var/lib/ceph/bootstrap-rgw/ceph.keyring
-    
+
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monmap - < /etc/ceph/monmap
 
     echo "Completed initialization for ${MON_NAME}"
@@ -165,6 +165,9 @@ case "$1" in
    osd_ceph_disk)
       CEPH_DAEMON=OSD_CEPH_DISK
       ;;
+   osd_ceph_disk_activate)
+      CEPH_DAEMON=OSD_CEPH_DISK_ACTIVATE
+      ;;
    rgw)
       CEPH_DAEMON=RGW
       ;;
@@ -173,11 +176,11 @@ case "$1" in
       ;;
 esac
 if [ ! -n "$CEPH_DAEMON" ]; then
-   echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
-   echo "of the daemon you want to deploy."
-   echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW, RESTAPI"
-   echo "Valid values for the daemon parameter are mon, osd_directory, osd_ceph_disk, mds, rgw, restapi"
-   exit 1
+    echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
+    echo "of the daemon you want to deploy."
+    echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, OSD_CEPH_DISK_ACTIVATE, MDS, RGW, RESTAPI"
+    echo "Valid values for the daemon parameter are mon, osd_directory, osd_ceph_disk, osd_ceph_disk_activate, mds, rgw, restapi"
+    exit 1
 fi
 
 
@@ -416,6 +419,28 @@ elif [[ "$CEPH_DAEMON" = "OSD_CEPH_DISK" ]]; then
   exec /usr/bin/ceph-osd -f -d -i ${OSD_ID}
 
 
+##########################
+# OSD_CEPH_DISK_ACTIVATE #
+##########################
+
+elif [[ "$CEPH_DAEMON" = "OSD_CEPH_DISK_ACTIVATE" ]]; then
+
+  ceph_config_check
+
+  if [[ -z "${OSD_DEVICE}" ]];then
+    echo "ERROR- You must provide a device to build your OSD ie: /dev/sdb"
+    exit 1
+  fi
+
+  mkdir -p /var/lib/ceph/osd
+  ceph-disk -v activate ${OSD_DEVICE}1
+  OSD_ID=$(cat /var/lib/ceph/osd/$(ls -ltr /var/lib/ceph/osd/ | tail -n1 | awk -v pattern="$CLUSTER" '$0 ~ pattern {print $9}')/whoami)
+  OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
+  ceph --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} root=default host=$(hostname)
+
+  exec /usr/bin/ceph-osd -f -d -i ${OSD_ID}
+
+
 #######
 # MDS #
 #######
@@ -533,7 +558,7 @@ else
 
   echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
   echo "of the daemon you want to deploy."
-  echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, MDS, RGW, RESTAPI"
-  echo "Valid values for the daemon parameter are mon, osd_directory, osd_ceph_disk, mds, rgw, restapi"
+  echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, OSD_CEPH_DISK_ACTIVATE, MDS, RGW, RESTAPI"
+  echo "Valid values for the daemon parameter are mon, osd_directory, osd_ceph_disk, osd_ceph_disk_activate, mds, rgw, restapi"
   exit 1
 fi

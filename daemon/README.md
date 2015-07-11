@@ -78,6 +78,24 @@ List of available options:
 If you do not want to use `--privileged=true`, please fall back on the second example.
 
 
+### Ceph disk activate ###
+
+This fonction is balance between ceph-disk and osd directory where the operator can use ceph-disk outside of the container (directly on the host) to prepare the devices.
+Devices will be prepared with `ceph-disk prepare`, then they will get activated inside the container.
+A priviledged container is still required as ceph-disk needs to access /dev/.
+So this has minimum value compare to the ceph-disk but might fit some use cases where the operators want to prepare their devices outside of a container.
+
+```
+$ sudo docker run -d --net=host \
+--privileged=true \
+-v /etc/ceph:/etc/ceph \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-v /dev/:/dev/ \
+-e OSD_DEVICE=/dev/vdd \
+ceph/daemon osd_ceph_disk_activate
+```
+
+
 ### Ceph OSD directory ###
 
 There are a number of environment variables which are used to configure
