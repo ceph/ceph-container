@@ -21,10 +21,28 @@ You can use this container to bootstrap any Ceph daemon.
 * `HOSTNAME` is the hostname of the machine  (DEFAULT: $(hostname))
 
 
+KV backends
+-----------
+
+We currently support 2 KV backends to store our configuration flags, keys and maps:
+
+* etcd
+* consul
+
+Prior to deploy your monitors, you have to populate your kv store with the help of the script `populate.sh` in examples/confd.
+As soon as this done, you can bootstrap your first monitor.
+
+Important variables in `populate.sh` to change when you bootstrap an OSD:
+
+* `/osd/journal_size`
+* `/osd/cluster_network`
+* `/osd/public_network`
+
+
 Deploy a monitor
 ----------------
 
-Run:
+Without KV store, run:
 
 ```
 $ sudo docker run -d --net=host \
@@ -32,6 +50,18 @@ $ sudo docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -e MON_IP=192.168.0.20 \
 -e CEPH_PUBLIC_NETWORK=192.168.0.0/24 \
+ceph/daemon mon
+```
+
+With KV store, run:
+
+```
+$ sudo docker run -d --net=host \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-e MON_IP=192.168.0.20 \
+-e CEPH_PUBLIC_NETWORK=192.168.0.0/24 \
+-e KV_TYPE=etcd \
+-e KV_IP=192.168.0.20 \
 ceph/daemon mon
 ```
 
@@ -59,6 +89,8 @@ There are two available options:
 
 ### Ceph disk ###
 
+Without KV backend:
+
 ```
 $ sudo docker run -d --net=host \
 --privileged=true \
@@ -66,6 +98,19 @@ $ sudo docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
 -e OSD_DEVICE=/dev/vdd \
+ceph/daemon osd_ceph_disk
+```
+
+With KV backend:
+
+```
+$ sudo docker run -d --net=host \
+--privileged=true \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-v /dev/:/dev/ \
+-e OSD_DEVICE=/dev/vdd \
+-e KV_TYPE=etcd \
+-e KV_IP=192.168.0.20 \
 ceph/daemon osd_ceph_disk
 ```
 
@@ -160,13 +205,24 @@ For most people, the defaults for the following optional environment variables a
   * `CEPHFS_METADATA_POOL`:  The name of the metadata pool for the ceph filesystem.  If it does not exist, it will be created.  Defaults to `${CEPHFS_NAME}_metadata`
   * `CEPHFS_METADATA_POOL_PG`:  The number of placement groups for the metadata pool.  Defaults to `8`
 
-Run:
+Without KV backend, run:
 
 ```
 $ sudo docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /etc/ceph:/etc/ceph \
 -e CEPHFS_CREATE=1 \
+ceph/daemon mds
+```
+
+Without KV backend, run:
+
+```
+$ sudo docker run -d --net=host \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-e CEPHFS_CREATE=1 \
+-e KV_TYPE=etcd \
+-e KV_IP=192.168.0.20 \
 ceph/daemon mds
 ```
 
@@ -185,10 +241,22 @@ Deploy a Rados Gateway
 For the Rados Gateway, we deploy it with `civetweb` enabled by default.
 However it is possible to use different CGI frontends by simply giving remote address and port.
 
+Without kv backend, run:
+
 ```
 $ sudo docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /etc/ceph:/etc/ceph \
+ceph/daemon rgw
+```
+
+With kv backend, run:
+
+```
+$ sudo docker run -d --net=host \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-e KV_TYPE=etcd \
+-e KV_IP=192.168.0.20 \
 ceph/daemon rgw
 ```
 
@@ -213,7 +281,8 @@ This is pretty straighforward. The `--net=host` is not mandatory, if you don't u
 
 ```
 $ sudo docker run -d --net=host \
--v /etc/ceph:/etc/ceph \
+-e KV_TYPE=etcd \
+-e KV_IP=192.168.0.20 \
 ceph/daemon restapi
 ```
 
