@@ -569,7 +569,9 @@ elif [[ "$CEPH_DAEMON" = "RESTAPI" ]]; then
   fi
 
   ceph_config_check
-  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/ceph.client.admin.keyring
+  if [[ "$KV_TYPE" != "none" ]]; then
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/ceph.client.admin.keyring
+  fi
   ceph_admin_key_check
 
   # to avoid having a lot of [client.restapi] we check if one exists
