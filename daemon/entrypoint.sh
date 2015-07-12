@@ -499,7 +499,9 @@ elif [[ "$CEPH_DAEMON" = "MDS" ]]; then
   # Create the Ceph filesystem, if necessary
   if [ $CEPHFS_CREATE -eq 1 ]; then
 
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/ceph.client.admin.keyring
+    if [[ "$KV_TYPE" != "none" ]]; then
+      kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/ceph.client.admin.keyring
+    fi
     ceph_admin_key_check
 
     if [[ "$(ceph fs ls | grep -c name:.${CEPHFS_NAME},)" -eq "0" ]]; then
