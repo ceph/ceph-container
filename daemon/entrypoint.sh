@@ -383,7 +383,7 @@ function start_restapi {
   get_admin_key
   check_admin_key
 
-  # Check to see if we need to add a [client.restapi] section
+  # Check to see if we need to add a [client.restapi] section; add, if necessary
   if [[ ! "$(egrep "\[client.restapi\]" /etc/ceph/${CLUSTER}.conf)" ]]; then
     cat <<ENDHERE >>/etc/ceph/${CLUSTER}.conf
 
