@@ -147,7 +147,7 @@ function start_osd {
          osd_activate
          ;;
       *)
-         if [ -n "$(find /var/lib/ceph/osd -prine -empty)" ]; then
+         if [ -n "$(find /var/lib/ceph/osd -prune -empty)" ]; then
             echo "No bootstrapped OSDs found; trying ceph-disk"
             osd_disk
          else
