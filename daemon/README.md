@@ -84,10 +84,15 @@ Deploy an OSD
 
 There are three available `OSD_TYPE` values:
 
-* `activate` - the daemon expects to be passed a block device of a `ceph-disk`-prepared disk; no bootstrapping will be performed
+* `activate` - the daemon expects to be passed a block device of a `ceph-disk`-prepared disk (via the `OSD_DEVICE` environment variable); no bootstrapping will be performed
 * `directory` - the daemon expects to find the OSD filesystem(s) already mounted in `/var/lib/ceph/osd/`
-* `disk` - the daemon expects to be passed a block device
+* `disk` - the daemon expects to be passed a block device via the `OSD_DEVICE` environment variable
 
+Options for OSDs (TODO: consolidate these options between the types):
+* `JOURNAL_DIR` - if provided, new OSDs will be bootstrapped to use the specified directory as a common journal area.  This is usually used to store the journals for more than one OSD on a common, separate disk.  This currently only applies to the `directory` OSD type.
+* `JOURNAL` - if provided, the new OSD will be bootstrapped to use the specified journal file (if you do not wish to use the default).  This is currently only supported by the `directory` OSD type
+* `OSD_DEVICE` - mandatory for `activate` and `disk` OSD types; this specifies which block device to use as the OSD
+* `OSD_JOURNAL` - optional override of the OSD journal file. this only applies to the `activate` and `disk` OSD types
 
 ### Ceph disk ###
 
