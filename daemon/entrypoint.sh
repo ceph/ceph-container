@@ -441,8 +441,8 @@ case "$CEPH_DAEMON" in
       if [ ! -n "$CEPH_DAEMON" ]; then
           echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
           echo "of the daemon you want to deploy."
-          echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, OSD_CEPH_DISK_ACTIVATE, MDS, RGW, RESTAPI"
-          echo "Valid values for the daemon parameter are mon, osd_directory, osd_ceph_disk, osd_ceph_disk_activate, mds, rgw, restapi"
+          echo "Valid values for CEPH_DAEMON are MON, OSD, OSD_DIRECTORY, OSD_CEPH_DISK, OSD_CEPH_DISK_ACTIVATE, MDS, RGW, RESTAPI"
+          echo "Valid values for the daemon parameter are mon, osd, osd_directory, osd_ceph_disk, osd_ceph_disk_activate, mds, rgw, restapi"
           exit 1
       fi
       ;;
