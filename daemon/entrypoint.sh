@@ -3,6 +3,7 @@ set -e
 
 : ${CLUSTER:=ceph}
 : ${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}
+: ${CEPH_DAEMON:=${1}} # default daemon to first argument
 : ${HOSTNAME:=$(hostname -s)}
 : ${MON_NAME:=${HOSTNAME}}
 : ${MON_IP_AUTO_DETECT:=0}
@@ -30,181 +31,43 @@ set -e
 : ${KV_IP:=127.0.0.1}
 : ${KV_PORT:=4001} # PORT 8500 for Consul
 
-function ceph_config_check {
+# ceph config file exists or die
+function check_config {
 if [[ ! -e /etc/ceph/${CLUSTER}.conf ]]; then
   echo "ERROR- /etc/ceph/${CLUSTER}.conf must exist; get it from your existing mon"
   exit 1
 fi
 }
 
-function ceph_admin_key_check {
+# ceph admin key exists or die
+function check_admin_key {
 if [[ ! -e /etc/ceph/${CLUSTER}.client.admin.keyring ]]; then
     echo "ERROR- /etc/ceph/${CLUSTER}.client.admin.keyring must exist; get it from your existing mon"
     exit 1
 fi
 }
 
-function create_mon_ceph_config_from_kv {
+###########################
+# Configuration generator #
+###########################
 
-  CLUSTER_PATH=ceph-config/${CLUSTER}
-
-  echo "Adding Mon Host - ${MON_NAME}"
-  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/mon_host/${MON_NAME} ${MON_IP} > /dev/null 2>&1
-
-  # Acquire lock to not run into race conditions with parallel bootstraps
-  until kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} cas ${CLUSTER_PATH}/lock $MON_NAME > /dev/null 2>&1 ; do
-    echo "Configuration is locked by another host. Waiting."
-    sleep 1
-  done
-
-  # Update config after initial mon creation
-  if kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/monSetupComplete > /dev/null 2>&1 ; then
-    echo "Configuration found for cluster ${CLUSTER}. Writing to disk."
-
-
-    until confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
-      echo "Waiting for confd to update templates..."
-      sleep 1
-    done
-
-    # Check/Create bootstrap key directories
-    mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
-
-    echo "Adding Keyrings"
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/monKeyring > /etc/ceph/ceph.mon.keyring
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/ceph.client.admin.keyring
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/bootstrapOsdKeyring > /var/lib/ceph/bootstrap-osd/ceph.keyring
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/bootstrapMdsKeyring > /var/lib/ceph/bootstrap-mds/ceph.keyring
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/bootstrapRgwKeyring > /var/lib/ceph/bootstrap-rgw/ceph.keyring
-
-
-    if [ ! -f /etc/ceph/monmap ]; then
-      echo "Monmap is missing. Adding initial monmap..."
-      kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/monmap > /etc/ceph/monmap
-      ceph mon getmap -o /etc/ceph/monmap
-    fi
-
-  else
-    # Create initial Mon, keyring
-    echo "No configuration found for cluster ${CLUSTER}. Generating."
-
-    FSID=$(uuidgen)
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/auth/fsid ${FSID}
-
-    until confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
-      echo "Waiting for confd to write initial templates..."
-      sleep 1
-    done
-
-    echo "Creating Keyrings"
-    ceph-authtool /etc/ceph/ceph.client.admin.keyring --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
-    ceph-authtool /etc/ceph/ceph.mon.keyring --create-keyring --gen-key -n mon. --cap mon 'allow *'
-
-    # Create bootstrap key directories
-    mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
-
-    # Generate the OSD bootstrap key
-    ceph-authtool /var/lib/ceph/bootstrap-osd/ceph.keyring --create-keyring --gen-key -n client.bootstrap-osd --cap mon 'allow profile bootstrap-osd'
-
-    # Generate the MDS bootstrap key
-    ceph-authtool /var/lib/ceph/bootstrap-mds/ceph.keyring --create-keyring --gen-key -n client.bootstrap-mds --cap mon 'allow profile bootstrap-mds'
-
-    # Generate the RGW bootstrap key
-    ceph-authtool /var/lib/ceph/bootstrap-rgw/ceph.keyring --create-keyring --gen-key -n client.bootstrap-rgw --cap mon 'allow profile bootstrap-rgw'
-
-
-    echo "Creating Monmap"
-    monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${FSID} /etc/ceph/monmap
-
-    echo "Importing Keyrings and Monmap to KV"
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monKeyring - < /etc/ceph/ceph.mon.keyring
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/adminKeyring - < /etc/ceph/ceph.client.admin.keyring
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/bootstrapOsdKeyring - < /var/lib/ceph/bootstrap-osd/ceph.keyring
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/bootstrapMdsKeyring - < /var/lib/ceph/bootstrap-mds/ceph.keyring
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/bootstrapRgwKeyring - < /var/lib/ceph/bootstrap-rgw/ceph.keyring
-
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monmap - < /etc/ceph/monmap
-
-    echo "Completed initialization for ${MON_NAME}"
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monSetupComplete true > /dev/null 2>&1
-  fi
-
-  # Remove lock for other clients to install
-  echo "Removing lock for ${MON_NAME}"
-  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} del ${CLUSTER_PATH}/lock > /dev/null 2>&1
-
-}
-
-function create_ceph_config_from_kv {
-
-  CLUSTER_PATH=ceph-config/${CLUSTER}
-
-  until kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/monSetupComplete > /dev/null 2>&1 ; do
-    echo "OSD: Waiting for monitor setup to complete..."
-    sleep 5
-  done
-
-  until confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
-    echo "Waiting for confd to update templates..."
-    sleep 1
-  done
-
-  [ "${CLUSTER}" != "ceph" ] && mv /etc/ceph/ceph.conf /etc/ceph/${CLUSTER}.conf
-
-  # Check/Create bootstrap key directories
-  mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
-
-  echo "Adding bootstrap keyrings"
-  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/bootstrapOsdKeyring > /var/lib/ceph/bootstrap-osd/ceph.keyring
-  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/bootstrapMdsKeyring > /var/lib/ceph/bootstrap-mds/ceph.keyring
-  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/bootstrapRgwKeyring > /var/lib/ceph/bootstrap-rgw/ceph.keyring
-
-}
-
-###############
-# CEPH_DAEMON #
-###############
-
-# If we are given a valid first argument, set the
-# CEPH_DAEMON variable from it
-case "$1" in
-   mds)
-      CEPH_DAEMON=MDS
+# Load in the bootstrapping routines
+# based on the data store
+case "$KV_TYPE" in
+   etcd|consul)
+      source config.kv.sh
       ;;
-   mon)
-      CEPH_DAEMON=MON
-      ;;
-   osd_directory)
-      CEPH_DAEMON=OSD_DIRECTORY
-      ;;
-   osd_ceph_disk)
-      CEPH_DAEMON=OSD_CEPH_DISK
-      ;;
-   osd_ceph_disk_activate)
-      CEPH_DAEMON=OSD_CEPH_DISK_ACTIVATE
-      ;;
-   rgw)
-      CEPH_DAEMON=RGW
-      ;;
-   restapi)
-      CEPH_DAEMON=RESTAPI
+   *)
+      source config.static.sh
       ;;
 esac
-if [ ! -n "$CEPH_DAEMON" ]; then
-    echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
-    echo "of the daemon you want to deploy."
-    echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, OSD_CEPH_DISK_ACTIVATE, MDS, RGW, RESTAPI"
-    echo "Valid values for the daemon parameter are mon, osd_directory, osd_ceph_disk, osd_ceph_disk_activate, mds, rgw, restapi"
-    exit 1
-fi
 
 
 #######
 # MON #
 #######
 
-if [[ "$CEPH_DAEMON" = "MON" ]]; then
-
+function start_mon {
   if [ ! -n "$CEPH_PUBLIC_NETWORK" ]; then
     echo "ERROR- CEPH_PUBLIC_NETWORK must be defined as the name of the network for the OSDs"
     exit 1
@@ -226,55 +89,9 @@ if [[ "$CEPH_DAEMON" = "MON" ]]; then
     exit 1
   fi
 
-if [[ "$KV_TYPE" = "none" ]]; then
-
-  # bootstrap MON
-  if [ ! -e /etc/ceph/${CLUSTER}.conf ]; then
-    fsid=$(uuidgen)
-    cat <<ENDHERE >/etc/ceph/${CLUSTER}.conf
-[global]
-fsid = $fsid
-mon initial members = ${MON_NAME}
-mon host = ${MON_IP}
-auth cluster required = cephx
-auth service required = cephx
-auth client required = cephx
-public network = ${CEPH_PUBLIC_NETWORK}
-cluster network = ${CEPH_CLUSTER_NETWORK}
-osd journal size = ${OSD_JOURNAL_SIZE}
-ENDHERE
-
-    if [[ ! -z "$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)" ]]; then
-      echo "ms_bind_ipv6 = true" >> /etc/ceph/${CLUSTER}.conf
-      sed -i '/mon host/d' /etc/ceph/${CLUSTER}.conf
-      echo "mon host = ${MON_IP}" >> /etc/ceph/${CLUSTER}.conf
-    fi
-
-    # Generate administrator key
-    ceph-authtool /etc/ceph/ceph.client.admin.keyring --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
-
-    # Generate the mon. key
-    ceph-authtool /etc/ceph/ceph.mon.keyring --create-keyring --gen-key -n mon. --cap mon 'allow *'
-
-    # Create bootstrap key directories
-    mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
-
-    # Generate the OSD bootstrap key
-    ceph-authtool /var/lib/ceph/bootstrap-osd/ceph.keyring --create-keyring --gen-key -n client.bootstrap-osd --cap mon 'allow profile bootstrap-osd'
-
-    # Generate the MDS bootstrap key
-    ceph-authtool /var/lib/ceph/bootstrap-mds/ceph.keyring --create-keyring --gen-key -n client.bootstrap-mds --cap mon 'allow profile bootstrap-mds'
-
-    # Generate the RGW bootstrap key
-    ceph-authtool /var/lib/ceph/bootstrap-rgw/ceph.keyring --create-keyring --gen-key -n client.bootstrap-rgw --cap mon 'allow profile bootstrap-rgw'
-
-    # Generate initial monitor map
-    monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} /etc/ceph/monmap
-  fi
-
-else
-  create_mon_ceph_config_from_kv
-fi
+  # get_mon_config is also responsible for bootstrapping the
+  # cluster, if necessary
+  get_mon_config
 
   # If we don't have a monitor keyring, this is a new monitor
   if [ ! -e /var/lib/ceph/mon/ceph-${MON_NAME}/keyring ]; then
@@ -306,47 +123,54 @@ fi
     rm /tmp/ceph.mon.keyring
   fi
 
-
   # start MON
   exec /usr/bin/ceph-mon -d -i ${MON_NAME} --public-addr "${MON_IP}:6789"
-fi
+}
 
 
 ################
 # OSD (common) #
 ################
 
-if [[ "$CEPH_DAEMON" = "OSD_DIRECTORY" ]]; then
-  if [ -n "$(find /var/lib/ceph/osd -prune -empty)" ]; then
-    echo "No bootstrapped OSDs found; trying ceph-disk"
-    CEPH_DAEMON="OSD_CEPH_DISK"
-  else
-    echo "Bootstrapped OSD(s) found; using OSD directory"
-    CEPH_DAEMON="OSD_DIRECTORY"
-  fi
-fi
+function start_osd {
+   get_config
+   check_config
+
+   case "$OSD_TYPE" in
+      directory)
+         osd_directory
+         ;;
+      disk)
+         osd_disk
+         ;;
+      activate)
+         osd_activate
+         ;;
+      *)
+         if [ -n "$(find /var/lib/ceph/osd -prune -empty)" ]; then
+            echo "No bootstrapped OSDs found; trying ceph-disk"
+            osd_disk
+         else
+            echo "Bootstrapped OSD(s) found; using OSD directory"
+            osd_directory
+         fi
+         ;;
+   esac
+}
 
 
 #################
 # OSD_DIRECTORY #
 #################
 
-if [[ "$CEPH_DAEMON" = "OSD_DIRECTORY" ]]; then
-
-  if [[ "$KV_TYPE" != "none" ]]; then
-    create_ceph_config_from_kv
-  fi
-
-  ceph_config_check
-
+function osd_directory {
   if [ -n "$(find /var/lib/ceph/osd -prune -empty)" ]; then
     echo "ERROR- could not find any OSD, did you bind mount the OSD data directory?"
     echo "ERROR- use -v <host_osd_data_dir>:<container_osd_data_dir>"
     exit 1
   fi
 
-  for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }')
-  do
+  for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }'); do
     if [ -n "${JOURNAL_DIR}" ]; then
        OSD_J="${JOURNAL_DIR}/journal.${OSD_ID}"
     else
@@ -390,20 +214,13 @@ EOF
   done
 
 exec /sbin/my_init
-
+}
 
 #################
 # OSD_CEPH_DISK #
 #################
 
-elif [[ "$CEPH_DAEMON" = "OSD_CEPH_DISK" ]]; then
-
-  if [[ "$KV_TYPE" != "none" ]]; then
-    create_ceph_config_from_kv
-  fi
-
-  ceph_config_check
-
+function osd_disk {
   if [[ -z "${OSD_DEVICE}" ]];then
     echo "ERROR- You must provide a device to build your OSD ie: /dev/sdb"
     exit 1
@@ -440,16 +257,14 @@ elif [[ "$CEPH_DAEMON" = "OSD_CEPH_DISK" ]]; then
   ceph --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} root=default host=$(hostname)
 
   exec /usr/bin/ceph-osd -f -d -i ${OSD_ID}
+}
 
 
 ##########################
 # OSD_CEPH_DISK_ACTIVATE #
 ##########################
 
-elif [[ "$CEPH_DAEMON" = "OSD_CEPH_DISK_ACTIVATE" ]]; then
-
-  ceph_config_check
-
+function osd_activate {
   if [[ -z "${OSD_DEVICE}" ]];then
     echo "ERROR- You must provide a device to build your OSD ie: /dev/sdb"
     exit 1
@@ -462,34 +277,34 @@ elif [[ "$CEPH_DAEMON" = "OSD_CEPH_DISK_ACTIVATE" ]]; then
   ceph --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} root=default host=$(hostname)
 
   exec /usr/bin/ceph-osd -f -d -i ${OSD_ID}
-
+}
 
 #######
 # MDS #
 #######
 
-elif [[ "$CEPH_DAEMON" = "MDS" ]]; then
-
-  if [[ "$KV_TYPE" != "none" ]]; then
-    create_ceph_config_from_kv
-  fi
-
-  ceph_config_check
+function start_mds {
+  get_config
+  check_config
 
   # Check to see if we are a new MDS
   if [ ! -e /var/lib/ceph/mds/ceph-${MDS_NAME}/keyring ]; then
 
      mkdir -p /var/lib/ceph/mds/ceph-${MDS_NAME}
 
-    if [ ! -e /var/lib/ceph/bootstrap-mds/ceph.keyring ]; then
-      echo "ERROR- /var/lib/ceph/bootstrap-mds/ceph.keyring must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-mds -o /var/lib/ceph/bootstrap-mds/ceph.keyring'"
+    if [ -e /etc/ceph/${CLUSTER}.client.admin.keyring ]; then
+       KEYRING_OPT="--keyring /etc/ceph/${CLUSTER}.client.admin.keyring"
+    elif [ -e /var/lib/ceph/bootstrap-mds/ceph.keyring ]; then
+       KEYRING_OPT="--keyring /var/lib/ceph/bootstrap-mds/ceph.keyring"
+    else
+      echo "ERROR- Failed to bootstrap MDS: could not find admin or bootstrap-mds keyring.  You can extract it from your current monitor by running 'ceph auth get client.bootstrap-mds -o /var/lib/ceph/bootstrap-mds/ceph.keyring'"
       exit 1
     fi
 
-    timeout 10 ceph --cluster ${CLUSTER} --name client.bootstrap-mds --keyring /var/lib/ceph/bootstrap-mds/ceph.keyring health || exit 1
+    timeout 10 ceph --cluster ${CLUSTER} --name client.bootstrap-mds $KEYRING_OPT health || exit 1
 
     # Generate the MDS key
-    ceph --cluster ${CLUSTER} --name client.bootstrap-mds --keyring /var/lib/ceph/bootstrap-mds/ceph.keyring auth get-or-create mds.$MDS_NAME osd 'allow rwx' mds 'allow' mon 'allow profile mds' > /var/lib/ceph/mds/ceph-${MDS_NAME}/keyring
+    ceph --cluster ${CLUSTER} --name client.bootstrap-mds $KEYRING_OPT auth get-or-create mds.$MDS_NAME osd 'allow rwx' mds 'allow' mon 'allow profile mds' > /var/lib/ceph/mds/ceph-${MDS_NAME}/keyring
 
   fi
 
@@ -501,10 +316,8 @@ elif [[ "$CEPH_DAEMON" = "MDS" ]]; then
   # Create the Ceph filesystem, if necessary
   if [ $CEPHFS_CREATE -eq 1 ]; then
 
-    if [[ "$KV_TYPE" != "none" ]]; then
-      kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/ceph.client.admin.keyring
-    fi
-    ceph_admin_key_check
+    get_admin_key
+    check_admin_key
 
     if [[ "$(ceph fs ls | grep -c name:.${CEPHFS_NAME},)" -eq "0" ]]; then
        # Make sure the specified data pool exists
@@ -523,19 +336,16 @@ elif [[ "$CEPH_DAEMON" = "MDS" ]]; then
 
   # NOTE: prefixing this with exec causes it to die (commit suicide)
   /usr/bin/ceph-mds -d -i ${MDS_NAME}
+}
 
 
 #######
 # RGW #
 #######
 
-elif [[ "$CEPH_DAEMON" = "RGW" ]]; then
-
-  if [[ "$KV_TYPE" != "none" ]]; then
-    create_ceph_config_from_kv
-  fi
-
-  ceph_config_check
+function start_rgw {
+  get_config
+  check_config
 
   # Check to see if our RGW has been initialized
   if [ ! -e /var/lib/ceph/radosgw/${RGW_NAME}/keyring ]; then
@@ -558,25 +368,22 @@ elif [[ "$CEPH_DAEMON" = "RGW" ]]; then
   else
     /usr/bin/radosgw -d -c /etc/ceph/ceph.conf -n client.rgw.${RGW_NAME} -k /var/lib/ceph/radosgw/$RGW_NAME/keyring --rgw-socket-path="" --rgw-frontends="civetweb port=$RGW_CIVETWEB_PORT"
   fi
+}
 
 
 ###########
 # RESTAPI #
 ###########
 
-elif [[ "$CEPH_DAEMON" = "RESTAPI" ]]; then
+function start_restapi {
+  get_config
+  check_config
 
-  if [[ "$KV_TYPE" != "none" ]]; then
-    create_ceph_config_from_kv
-  fi
+  # Ensure we have the admin key
+  get_admin_key
+  check_admin_key
 
-  ceph_config_check
-  if [[ "$KV_TYPE" != "none" ]]; then
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/ceph.client.admin.keyring
-  fi
-  ceph_admin_key_check
-
-  # to avoid having a lot of [client.restapi] we check if one exists
+  # Check to see if we need to add a [client.restapi] section; add, if necessary
   if [[ ! "$(egrep "\[client.restapi\]" /etc/ceph/${CLUSTER}.conf)" ]]; then
     cat <<ENDHERE >>/etc/ceph/${CLUSTER}.conf
 
@@ -591,15 +398,54 @@ ENDHERE
   # start ceph-rest-api
   exec /usr/bin/ceph-rest-api -n client.admin
 
-###########
-# UNKNOWN #
-###########
+}
 
-else
+###############
+# CEPH_DAEMON #
+###############
 
-  echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
-  echo "of the daemon you want to deploy."
-  echo "Valid values for CEPH_DAEMON are MON, OSD_DIRECTORY, OSD_CEPH_DISK, OSD_CEPH_DISK_ACTIVATE, MDS, RGW, RESTAPI"
-  echo "Valid values for the daemon parameter are mon, osd_directory, osd_ceph_disk, osd_ceph_disk_activate, mds, rgw, restapi"
-  exit 1
-fi
+# Normalize DAEMON to lowercase
+CEPH_DAEMON=$(echo ${CEPH_DAEMON} |tr '[:upper:]' '[:lower:]')
+
+# If we are given a valid first argument, set the
+# CEPH_DAEMON variable from it
+case "$CEPH_DAEMON" in
+   mds)
+      start_mds
+      ;;
+   mon)
+      start_mon
+      ;;
+   osd)
+      start_osd
+      ;;
+   osd_directory)
+      OSD_TYPE="directory"
+      start_osd
+      ;;
+   osd_ceph_disk)
+      OSD_TYPE="disk"
+      start_osd
+      ;;
+   osd_ceph_disk_activate)
+      OSD_TYPE="activate"
+      start_osd
+      ;;
+   rgw)
+      start_rgw
+      ;;
+   restapi)
+      start_restapi
+      ;;
+   *)
+      if [ ! -n "$CEPH_DAEMON" ]; then
+          echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
+          echo "of the daemon you want to deploy."
+          echo "Valid values for CEPH_DAEMON are MON, OSD, OSD_DIRECTORY, OSD_CEPH_DISK, OSD_CEPH_DISK_ACTIVATE, MDS, RGW, RESTAPI"
+          echo "Valid values for the daemon parameter are mon, osd, osd_directory, osd_ceph_disk, osd_ceph_disk_activate, mds, rgw, restapi"
+          exit 1
+      fi
+      ;;
+esac
+
+exit 0

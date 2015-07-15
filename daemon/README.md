@@ -6,6 +6,7 @@ To run a certain type of daemon, simply use the name of the daemon as `$1`.
 Valid values are:
 
 * `mon` deploys a Ceph monitor
+* `osd` deploys an OSD using the method specified by `OSD_TYPE`
 * `osd_directory` deploys an OSD using a prepared directory (used in scenario where the operator doesn't want to use `--privileged=true`)
 * `osd_ceph_disk` deploys an OSD using ceph-disk, so you have to provide a whole device (ie: /dev/sdb)
 * `mds` deploys a MDS
@@ -81,11 +82,17 @@ List of available options:
 Deploy an OSD
 -------------
 
-There are two available options:
+There are three available `OSD_TYPE` values:
 
-* use `OSD_CEPH_DISK` where you only specify a block device
-* use `OSD_DIRECTORY` where you specify an OSD mount point to your container
+* `activate` - the daemon expects to be passed a block device of a `ceph-disk`-prepared disk (via the `OSD_DEVICE` environment variable); no bootstrapping will be performed
+* `directory` - the daemon expects to find the OSD filesystem(s) already mounted in `/var/lib/ceph/osd/`
+* `disk` - the daemon expects to be passed a block device via the `OSD_DEVICE` environment variable
 
+Options for OSDs (TODO: consolidate these options between the types):
+* `JOURNAL_DIR` - if provided, new OSDs will be bootstrapped to use the specified directory as a common journal area.  This is usually used to store the journals for more than one OSD on a common, separate disk.  This currently only applies to the `directory` OSD type.
+* `JOURNAL` - if provided, the new OSD will be bootstrapped to use the specified journal file (if you do not wish to use the default).  This is currently only supported by the `directory` OSD type
+* `OSD_DEVICE` - mandatory for `activate` and `disk` OSD types; this specifies which block device to use as the OSD
+* `OSD_JOURNAL` - optional override of the OSD journal file. this only applies to the `activate` and `disk` OSD types
 
 ### Ceph disk ###
 
@@ -125,7 +132,7 @@ If you do not want to use `--privileged=true`, please fall back on the second ex
 
 ### Ceph disk activate ###
 
-This fonction is balance between ceph-disk and osd directory where the operator can use ceph-disk outside of the container (directly on the host) to prepare the devices.
+This function is balance between ceph-disk and osd directory where the operator can use ceph-disk outside of the container (directly on the host) to prepare the devices.
 Devices will be prepared with `ceph-disk prepare`, then they will get activated inside the container.
 A priviledged container is still required as ceph-disk needs to access /dev/.
 So this has minimum value compare to the ceph-disk but might fit some use cases where the operators want to prepare their devices outside of a container.
