@@ -32,7 +32,7 @@ set -e
 
 function ceph_config_check {
 if [[ ! -e /etc/ceph/${CLUSTER}.conf ]]; then
-  echo "ERROR- /etc/ceph/ceph.conf must exist; get it from your existing mon"
+  echo "ERROR- /etc/ceph/${CLUSTER}.conf must exist; get it from your existing mon"
   exit 1
 fi
 }
@@ -148,6 +148,8 @@ function create_ceph_config_from_kv {
     echo "Waiting for confd to update templates..."
     sleep 1
   done
+
+  [ "${CLUSTER}" != "ceph" ] && mv /etc/ceph/ceph.conf /etc/ceph/${CLUSTER}.conf
 
   # Check/Create bootstrap key directories
   mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
@@ -427,9 +429,9 @@ elif [[ "$CEPH_DAEMON" = "OSD_CEPH_DISK" ]]; then
   fi
 
   if [[ ! -z "${OSD_JOURNAL}" ]]; then
-    ceph-disk -v prepare ${OSD_DEVICE}:${OSD_JOURNAL}
+    ceph-disk -v prepare --cluster ${CLUSTER} ${OSD_DEVICE}:${OSD_JOURNAL}
   else
-    ceph-disk -v prepare ${OSD_DEVICE}
+    ceph-disk -v prepare --cluster ${CLUSTER} ${OSD_DEVICE}
   fi
 
   ceph-disk -v activate ${OSD_DEVICE}1
