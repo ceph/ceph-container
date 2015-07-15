@@ -305,7 +305,7 @@ function start_mds {
     timeout 10 ceph --cluster ${CLUSTER} --name client.bootstrap-mds $KEYRING_OPT health || exit 1
 
     # Generate the MDS key
-    ceph --cluster ${CLUSTER} --name client.bootstrap-mds $KEYRING_OPT auth get-or-create mds.$MDS_NAME osd 'allow rwx' mds 'allow' mon 'allow profile mds' > /var/lib/ceph/mds/ceph-${MDS_NAME}/keyring
+    ceph --cluster ${CLUSTER} --name client.bootstrap-mds $KEYRING_OPT auth get-or-create mds.$MDS_NAME osd 'allow rwx' mds 'allow' mon 'allow profile mds' -o /var/lib/ceph/mds/ceph-${MDS_NAME}/keyring
 
   fi
 
