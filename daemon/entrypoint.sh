@@ -49,7 +49,7 @@ function create_mon_ceph_config_from_kv {
   CLUSTER_PATH=ceph-config/${CLUSTER}
 
   echo "Adding Mon Host - ${MON_NAME}"
-  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} cas ${CLUSTER_PATH}/mon_host/${MON_NAME} ${MON_IP} > /dev/null 2>&1
+  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/mon_host/${MON_NAME} ${MON_IP} > /dev/null 2>&1
 
   # Acquire lock to not run into race conditions with parallel bootstraps
   until kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} cas ${CLUSTER_PATH}/lock $MON_NAME > /dev/null 2>&1 ; do
