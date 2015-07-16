@@ -296,18 +296,18 @@ function start_mds {
      mkdir -p /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}
 
     if [ -e /etc/ceph/${CLUSTER}.client.admin.keyring ]; then
-       KEYRING_OPT="--keyring /etc/ceph/${CLUSTER}.client.admin.keyring"
+       KEYRING_OPT="--name client.admin --keyring /etc/ceph/${CLUSTER}.client.admin.keyring"
     elif [ -e /var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring ]; then
-       KEYRING_OPT="--keyring /var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring"
+       KEYRING_OPT="--name client.bootstrap-mds --keyring /var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring"
     else
       echo "ERROR- Failed to bootstrap MDS: could not find admin or bootstrap-mds keyring.  You can extract it from your current monitor by running 'ceph auth get client.bootstrap-mds -o /var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring'"
       exit 1
     fi
 
-    timeout 10 ceph ${CEPH_OPTS} --name client.bootstrap-mds $KEYRING_OPT health || exit 1
+    timeout 10 ceph ${CEPH_OPTS} $KEYRING_OPT health || exit 1
 
     # Generate the MDS key
-    ceph ${CEPH_OPTS} --name client.bootstrap-mds $KEYRING_OPT auth get-or-create mds.$MDS_NAME osd 'allow rwx' mds 'allow' mon 'allow profile mds' -o /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring
+    ceph ${CEPH_OPTS} $KEYRING_OPT auth get-or-create mds.$MDS_NAME osd 'allow rwx' mds 'allow' mon 'allow profile mds' -o /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring
 
   fi
 
