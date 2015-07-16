@@ -292,9 +292,7 @@ function start_mds {
 
      mkdir -p /var/lib/ceph/mds/ceph-${MDS_NAME}
 
-    if [ -e /etc/ceph/${CLUSTER}.client.admin.keyring ]; then
-       KEYRING_OPT="--keyring /etc/ceph/${CLUSTER}.client.admin.keyring"
-    elif [ -e /var/lib/ceph/bootstrap-mds/ceph.keyring ]; then
+    if [ -e /var/lib/ceph/bootstrap-mds/ceph.keyring ]; then
        KEYRING_OPT="--keyring /var/lib/ceph/bootstrap-mds/ceph.keyring"
     else
       echo "ERROR- Failed to bootstrap MDS: could not find admin or bootstrap-mds keyring.  You can extract it from your current monitor by running 'ceph auth get client.bootstrap-mds -o /var/lib/ceph/bootstrap-mds/ceph.keyring'"
