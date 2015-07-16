@@ -10,6 +10,7 @@ set -e
 : ${MDS_NAME:=mds-$(hostname -s)}
 : ${OSD_FORCE_ZAP:=0}
 : ${OSD_JOURNAL_SIZE:=100}
+: ${CRUSH_LOCATION:=root=default host=$(hostname)}
 : ${CEPHFS_CREATE:=0}
 : ${CEPHFS_NAME:=cephfs}
 : ${CEPHFS_DATA_POOL:=${CEPHFS_NAME}_data}
@@ -30,6 +31,8 @@ set -e
 : ${KV_TYPE:=none} # valid options: consul, etcd or none
 : ${KV_IP:=127.0.0.1}
 : ${KV_PORT:=4001} # PORT 8500 for Consul
+
+CEPH_OPTS="--cluster ${CLUSTER}"
 
 # ceph config file exists or die
 function check_config {
@@ -94,10 +97,10 @@ function start_mon {
   get_mon_config
 
   # If we don't have a monitor keyring, this is a new monitor
-  if [ ! -e /var/lib/ceph/mon/ceph-${MON_NAME}/keyring ]; then
+  if [ ! -e /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}/keyring ]; then
 
-    if [ ! -e /etc/ceph/ceph.mon.keyring ]; then
-      echo "ERROR- /etc/ceph/ceph.mon.keyring must exist.  You can extract it from your current monitor by running 'ceph auth get mon. -o /etc/ceph/ceph.mon.keyring' or use a KV Store"
+    if [ ! -e /etc/ceph/${CLUSTER}.mon.keyring ]; then
+      echo "ERROR- /etc/ceph/${CLUSTER}.mon.keyring must exist.  You can extract it from your current monitor by running 'ceph auth get mon. -o /etc/ceph/${CLUSTER}.mon.keyring' or use a KV Store"
       exit 1
     fi
 
@@ -107,24 +110,24 @@ function start_mon {
     fi
 
     # Testing if it's not the first monitor, if one key doesn't exist we assume none of them exist
-    ceph-authtool /tmp/ceph.mon.keyring --create-keyring --import-keyring /etc/ceph/ceph.client.admin.keyring
-    ceph-authtool /tmp/ceph.mon.keyring --import-keyring /var/lib/ceph/bootstrap-osd/ceph.keyring
-    ceph-authtool /tmp/ceph.mon.keyring --import-keyring /var/lib/ceph/bootstrap-mds/ceph.keyring
-    ceph-authtool /tmp/ceph.mon.keyring --import-keyring /var/lib/ceph/bootstrap-rgw/ceph.keyring
-    ceph-authtool /tmp/ceph.mon.keyring --import-keyring /etc/ceph/ceph.mon.keyring
+    ceph-authtool /tmp/${CLUSTER}.mon.keyring --create-keyring --import-keyring /etc/ceph/${CLUSTER}.client.admin.keyring
+    ceph-authtool /tmp/${CLUSTER}.mon.keyring --import-keyring /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring
+    ceph-authtool /tmp/${CLUSTER}.mon.keyring --import-keyring /var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring
+    ceph-authtool /tmp/${CLUSTER}.mon.keyring --import-keyring /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
+    ceph-authtool /tmp/${CLUSTER}.mon.keyring --import-keyring /etc/ceph/${CLUSTER}.mon.keyring
 
     # Make the monitor directory
-    mkdir -p /var/lib/ceph/mon/ceph-${MON_NAME}
+    mkdir -p /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
 
     # Prepare the monitor daemon's directory with the map and keyring
-    ceph-mon --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap --keyring /tmp/ceph.mon.keyring
+    ceph-mon --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap --keyring /tmp/${CLUSTER}.mon.keyring
 
     # Clean up the temporary key
-    rm /tmp/ceph.mon.keyring
+    rm /tmp/${CLUSTER}.mon.keyring
   fi
 
   # start MON
-  exec /usr/bin/ceph-mon -d -i ${MON_NAME} --public-addr "${MON_IP}:6789"
+  exec /usr/bin/ceph-mon ${CEPH_OPTS} -d -i ${MON_NAME} --public-addr "${MON_IP}:6789"
 }
 
 
@@ -184,33 +187,33 @@ function osd_directory {
     # Check to see if our OSD has been initialized
     if [ ! -e /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring ]; then
       # Create OSD key and file structure
-      ceph-osd -i $OSD_ID --mkfs --mkjournal --osd-journal ${OSD_J}
+      ceph-osd ${CEPH_OPTS} -i $OSD_ID --mkfs --mkjournal --osd-journal ${OSD_J}
 
-      if [ ! -e /var/lib/ceph/bootstrap-osd/ceph.keyring ]; then
-        echo "ERROR- /var/lib/ceph/bootstrap-osd/ceph.keyring must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-osd -o /var/lib/ceph/bootstrap-osd/ceph.keyring'"
+      if [ ! -e /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring ]; then
+        echo "ERROR- /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-osd -o /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring'"
         exit 1
       fi
 
-      timeout 10 ceph --cluster ${CLUSTER} --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring health || exit 1
+      timeout 10 ceph ${CEPH_OPTS} --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring health || exit 1
 
       # Generate the OSD key
-      ceph --cluster ${CLUSTER} --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring auth get-or-create osd.${OSD_ID} osd 'allow *' mon 'allow profile osd' -o /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
+      ceph ${CEPH_OPTS} --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring auth get-or-create osd.${OSD_ID} osd 'allow *' mon 'allow profile osd' -o /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
 
       # Add the OSD to the CRUSH map
       if [ ! -n "${HOSTNAME}" ]; then
         echo "HOSTNAME not set; cannot add OSD to CRUSH map"
         exit 1
       fi
-      ceph --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} root=default host=${HOSTNAME}
+      ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
     fi
 
-    mkdir -p /etc/service/ceph-${OSD_ID}
-    cat >/etc/service/ceph-${OSD_ID}/run <<EOF
+    mkdir -p /etc/service/${CLUSTER}-${OSD_ID}
+    cat >/etc/service/${CLUSTER}-${OSD_ID}/run <<EOF
 #!/bin/bash
 echo "store-daemon: starting daemon on ${HOSTNAME}..."
-exec ceph-osd -f -d -i ${OSD_ID} --osd-journal ${OSD_J} -k /var/lib/ceph/osd/ceph-${OSD_ID}/keyring
+exec ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --osd-journal ${OSD_J} -k /var/lib/ceph/osd/ceph-${OSD_ID}/keyring
 EOF
-    chmod +x /etc/service/ceph-${OSD_ID}/run
+    chmod +x /etc/service/${CLUSTER}-${OSD_ID}/run
   done
 
 exec /sbin/my_init
@@ -226,12 +229,12 @@ function osd_disk {
     exit 1
   fi
 
-  if [ ! -e /var/lib/ceph/bootstrap-osd/ceph.keyring ]; then
-    echo "ERROR- /var/lib/ceph/bootstrap-ods/ceph.keyring must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-ods -o /var/lib/ceph/bootstrap-ods/ceph.keyring'"
+  if [ ! -e /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring ]; then
+    echo "ERROR- /var/lib/ceph/bootstrap-ods/${CLUSTER}.keyring must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-ods -o /var/lib/ceph/bootstrap-ods/${CLUSTER}.keyring'"
     exit 1
   fi
 
-  timeout 10 ceph --cluster ${CLUSTER} --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/ceph.keyring health || exit 1
+  timeout 10 ceph ${CEPH_OPTS} --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring health || exit 1
 
   mkdir -p /var/lib/ceph/osd
 
@@ -246,17 +249,17 @@ function osd_disk {
   fi
 
   if [[ ! -z "${OSD_JOURNAL}" ]]; then
-    ceph-disk -v prepare --cluster ${CLUSTER} ${OSD_DEVICE}:${OSD_JOURNAL}
+    ceph-disk -v prepare ${OSD_DEVICE}:${OSD_JOURNAL}
   else
-    ceph-disk -v prepare --cluster ${CLUSTER} ${OSD_DEVICE}
+    ceph-disk -v prepare ${OSD_DEVICE}
   fi
 
   ceph-disk -v activate ${OSD_DEVICE}1
   OSD_ID=$(cat /var/lib/ceph/osd/$(ls -ltr /var/lib/ceph/osd/ | tail -n1 | awk -v pattern="$CLUSTER" '$0 ~ pattern {print $9}')/whoami)
   OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
-  ceph --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} root=default host=$(hostname)
+  ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
 
-  exec /usr/bin/ceph-osd -f -d -i ${OSD_ID}
+  exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID}
 }
 
 
@@ -274,9 +277,9 @@ function osd_activate {
   ceph-disk -v activate ${OSD_DEVICE}1
   OSD_ID=$(cat /var/lib/ceph/osd/$(ls -ltr /var/lib/ceph/osd/ | tail -n1 | awk -v pattern="$CLUSTER" '$0 ~ pattern {print $9}')/whoami)
   OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
-  ceph --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} root=default host=$(hostname)
+  ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
 
-  exec /usr/bin/ceph-osd -f -d -i ${OSD_ID}
+  exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID}
 }
 
 #######
@@ -288,23 +291,23 @@ function start_mds {
   check_config
 
   # Check to see if we are a new MDS
-  if [ ! -e /var/lib/ceph/mds/ceph-${MDS_NAME}/keyring ]; then
+  if [ ! -e /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring ]; then
 
-     mkdir -p /var/lib/ceph/mds/ceph-${MDS_NAME}
+     mkdir -p /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}
 
     if [ -e /etc/ceph/${CLUSTER}.client.admin.keyring ]; then
        KEYRING_OPT="--keyring /etc/ceph/${CLUSTER}.client.admin.keyring"
-    elif [ -e /var/lib/ceph/bootstrap-mds/ceph.keyring ]; then
-       KEYRING_OPT="--keyring /var/lib/ceph/bootstrap-mds/ceph.keyring"
+    elif [ -e /var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring ]; then
+       KEYRING_OPT="--keyring /var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring"
     else
-      echo "ERROR- Failed to bootstrap MDS: could not find admin or bootstrap-mds keyring.  You can extract it from your current monitor by running 'ceph auth get client.bootstrap-mds -o /var/lib/ceph/bootstrap-mds/ceph.keyring'"
+      echo "ERROR- Failed to bootstrap MDS: could not find admin or bootstrap-mds keyring.  You can extract it from your current monitor by running 'ceph auth get client.bootstrap-mds -o /var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring'"
       exit 1
     fi
 
-    timeout 10 ceph --cluster ${CLUSTER} --name client.bootstrap-mds $KEYRING_OPT health || exit 1
+    timeout 10 ceph ${CEPH_OPTS} --name client.bootstrap-mds $KEYRING_OPT health || exit 1
 
     # Generate the MDS key
-    ceph --cluster ${CLUSTER} --name client.bootstrap-mds $KEYRING_OPT auth get-or-create mds.$MDS_NAME osd 'allow rwx' mds 'allow' mon 'allow profile mds' > /var/lib/ceph/mds/ceph-${MDS_NAME}/keyring
+    ceph ${CEPH_OPTS} --name client.bootstrap-mds $KEYRING_OPT auth get-or-create mds.$MDS_NAME osd 'allow rwx' mds 'allow' mon 'allow profile mds' -o /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring
 
   fi
 
@@ -321,21 +324,21 @@ function start_mds {
 
     if [[ "$(ceph fs ls | grep -c name:.${CEPHFS_NAME},)" -eq "0" ]]; then
        # Make sure the specified data pool exists
-       if ! ceph osd pool stats ${CEPHFS_DATA_POOL} > /dev/null 2>&1; then
-          ceph osd pool create ${CEPHFS_DATA_POOL} ${CEPHFS_DATA_POOL_PG}
+       if ! ceph ${CEPH_OPTS} osd pool stats ${CEPHFS_DATA_POOL} > /dev/null 2>&1; then
+          ceph ${CEPH_OPTS} osd pool create ${CEPHFS_DATA_POOL} ${CEPHFS_DATA_POOL_PG}
        fi
 
        # Make sure the specified metadata pool exists
-       if ! ceph osd pool stats ${CEPHFS_METADATA_POOL} > /dev/null 2>&1; then
-          ceph osd pool create ${CEPHFS_METADATA_POOL} ${CEPHFS_METADATA_POOL_PG}
+       if ! ceph ${CEPH_OPTS} osd pool stats ${CEPHFS_METADATA_POOL} > /dev/null 2>&1; then
+          ceph ${CEPH_OPTS} osd pool create ${CEPHFS_METADATA_POOL} ${CEPHFS_METADATA_POOL_PG}
        fi
 
-       ceph fs new ${CEPHFS_NAME} ${CEPHFS_METADATA_POOL} ${CEPHFS_DATA_POOL}
+       ceph ${CEPH_OPTS} fs new ${CEPHFS_NAME} ${CEPHFS_METADATA_POOL} ${CEPHFS_DATA_POOL}
     fi
   fi
 
   # NOTE: prefixing this with exec causes it to die (commit suicide)
-  /usr/bin/ceph-mds -d -i ${MDS_NAME}
+  /usr/bin/ceph-mds ${CEPH_OPTS} -d -i ${MDS_NAME}
 }
 
 
@@ -352,21 +355,21 @@ function start_rgw {
 
     mkdir -p /var/lib/ceph/radosgw/${RGW_NAME}
 
-    if [ ! -e /var/lib/ceph/bootstrap-rgw/ceph.keyring ]; then
-      echo "ERROR- /var/lib/ceph/bootstrap-rgw/ceph.keyring must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-rgw -o /var/lib/ceph/bootstrap-rgw/ceph.keyring'"
+    if [ ! -e /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring ]; then
+      echo "ERROR- /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-rgw -o /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring'"
       exit 1
     fi
 
-    timeout 10 ceph --cluster ${CLUSTER} --name client.bootstrap-rgw --keyring /var/lib/ceph/bootstrap-rgw/ceph.keyring health || exit 1
+    timeout 10 ceph ${CEPH_OPTS} --name client.bootstrap-rgw --keyring /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring health || exit 1
 
     # Generate the RGW key
-    ceph --cluster ${CLUSTER} --name client.bootstrap-rgw --keyring /var/lib/ceph/bootstrap-rgw/ceph.keyring auth get-or-create client.rgw.${RGW_NAME} osd 'allow rwx' mon 'allow rw' -o /var/lib/ceph/radosgw/${RGW_NAME}/keyring
+    ceph ${CEPH_OPTS} --name client.bootstrap-rgw --keyring /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring auth get-or-create client.rgw.${RGW_NAME} osd 'allow rwx' mon 'allow rw' -o /var/lib/ceph/radosgw/${RGW_NAME}/keyring
   fi
 
   if [ "$RGW_REMOTE_CGI" -eq 1 ]; then
-    /usr/bin/radosgw -d -c /etc/ceph/ceph.conf -n client.rgw.${RGW_NAME} -k /var/lib/ceph/radosgw/$RGW_NAME/keyring --rgw-socket-path="" --rgw-frontends="fastcgi socket_port=$RGW_REMOTE_CGI_PORT socket_host=$RGW_REMOTE_CGI_HOST"
+    /usr/bin/radosgw -d ${CEPH_OPTS} -n client.rgw.${RGW_NAME} -k /var/lib/ceph/radosgw/$RGW_NAME/keyring --rgw-socket-path="" --rgw-frontends="fastcgi socket_port=$RGW_REMOTE_CGI_PORT socket_host=$RGW_REMOTE_CGI_HOST"
   else
-    /usr/bin/radosgw -d -c /etc/ceph/ceph.conf -n client.rgw.${RGW_NAME} -k /var/lib/ceph/radosgw/$RGW_NAME/keyring --rgw-socket-path="" --rgw-frontends="civetweb port=$RGW_CIVETWEB_PORT"
+    /usr/bin/radosgw -d ${CEPH_OPTS} -n client.rgw.${RGW_NAME} -k /var/lib/ceph/radosgw/$RGW_NAME/keyring --rgw-socket-path="" --rgw-frontends="civetweb port=$RGW_CIVETWEB_PORT"
   fi
 }
 
@@ -396,7 +399,7 @@ ENDHERE
   fi
 
   # start ceph-rest-api
-  exec /usr/bin/ceph-rest-api -n client.admin
+  exec /usr/bin/ceph-rest-api ${CEPH_OPTS} -n client.admin
 
 }
 
