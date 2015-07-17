@@ -249,7 +249,7 @@ function osd_disk {
   fi
 
   if [[ ! -z "${OSD_JOURNAL}" ]]; then
-    ceph-disk -v prepare ${OSD_DEVICE}:${OSD_JOURNAL}
+    ceph-disk -v prepare ${OSD_DEVICE} ${OSD_JOURNAL}
   else
     ceph-disk -v prepare ${OSD_DEVICE}
   fi
