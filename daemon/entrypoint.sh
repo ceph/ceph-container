@@ -7,18 +7,17 @@ set -e
 : ${HOSTNAME:=$(hostname -s)}
 : ${MON_NAME:=${HOSTNAME}}
 : ${MON_IP_AUTO_DETECT:=0}
-: ${MDS_NAME:=mds-$(hostname -s)}
+: ${MDS_NAME:=mds-${HOSTNAME}}
 : ${OSD_FORCE_ZAP:=0}
 : ${OSD_JOURNAL_SIZE:=100}
-: ${CRUSH_LOCATION:=root=default host=$(hostname)}
+: ${CRUSH_LOCATION:=root=default host=${HOSTNAME}}
 : ${CEPHFS_CREATE:=0}
 : ${CEPHFS_NAME:=cephfs}
 : ${CEPHFS_DATA_POOL:=${CEPHFS_NAME}_data}
 : ${CEPHFS_DATA_POOL_PG:=8}
 : ${CEPHFS_METADATA_POOL:=${CEPHFS_NAME}_metadata}
 : ${CEPHFS_METADATA_POOL_PG:=8}
-: ${RGW_NAME:=$(hostname -s)}
-: ${RGW_CIVETWEB_PORT:=80}
+: ${RGW_NAME:=${HOSTNAME}}
 : ${RGW_CIVETWEB_PORT:=80}
 : ${RGW_REMOTE_CGI:=0}
 : ${RGW_REMOTE_CGI_PORT:=9000}
