@@ -45,7 +45,7 @@ function get_mon_config {
     fi
 
     echo "Trying to get the most recent monmap..."
-    if timeout 5 ceph mon getmap -o /etc/ceph/monmap; then
+    if timeout 5 ceph ${CEPH_OPTS} mon getmap -o /etc/ceph/monmap; then
       echo "Monmap successfully retrieved."
     else
       echo "Peers not found, using initial monmap."
