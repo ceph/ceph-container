@@ -42,7 +42,13 @@ function get_mon_config {
     if [ ! -f /etc/ceph/monmap ]; then
       echo "Monmap is missing. Adding initial monmap..."
       kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/monmap > /etc/ceph/monmap
-      ceph mon getmap -o /etc/ceph/monmap
+    fi
+
+    echo "Trying to get the most recent monmap..."
+    if timeout 5 ceph ${CEPH_OPTS} mon getmap -o /etc/ceph/monmap; then
+      echo "Monmap successfully retrieved."
+    else
+      echo "Peers not found, using initial monmap."
     fi
 
   else
