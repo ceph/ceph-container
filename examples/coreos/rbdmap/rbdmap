@@ -1,0 +1,110 @@
+#!/bin/bash
+#
+# rbdmap Ceph RBD Mapping
+# This version supports the keyring file rather than just the ID.
+
+# Based on work by Laurent Barbe
+# http://cephnotes.ksperis.com/blog/2014/01/09/map-rbd-kernel-without-install-ceph-common
+# http://cephnotes.ksperis.com/downloads/rbdmap
+
+RBDMAPFILE="/etc/ceph/rbdmap"
+DESC="RBD Mapping"
+
+modprobe rbd || exit 1
+
+do_map() {
+  if [ ! -f "$RBDMAPFILE" ]; then
+    echo "*** $DESC : No $RBDMAPFILE found."
+    exit 0
+  fi
+
+  echo "Starting $DESC"
+  # Read /etc/ceph/rbdmap to create non-existant mapping
+  newrbd=
+  RET=0
+  while read -r DEV PARAMS; do
+    case "$DEV" in
+      ""|\#*)
+        continue ;;
+      */*) ;;
+      *)
+        DEV=rbd/$DEV ;;
+    esac
+
+    if [ ! -b /dev/rbd/$DEV ]; then
+      echo "Map: $DEV"
+      mons=`egrep 'mon[ _]host' /etc/ceph/ceph.conf | cut -f2 -d'=' | sed 's/ //g'`
+      rbddev=`echo $DEV | tr '/' ' '`
+
+      IFS=, read -r -a params <<< "$PARAMS"
+      for opt in "${params[@]}"; do
+        IFS="=" read -r key val <<< "$opt"
+        case $key in
+              id) name=$val ;;
+              secret) secret=$val ;;
+              keyring) secret=`sed -rn 's/^[[:space:]]*key[[:space:]]=[[:space:]]*//p' $val` ;;
+        esac
+      done
+      if [ -n "$secret" ] && [ -n "$name" ]; then
+        echo "echo "$mons name=$name,secret=$secret $rbddev" > /sys/bus/rbd/add"
+        echo "$mons name=$name,secret=$secret $rbddev" > /sys/bus/rbd/add
+        [ $? -ne "0" ] && RET=1
+        newrbd="yes"
+      fi
+    fi
+  done < "$RBDMAPFILE"
+  [[ $RET -eq 0 ]] && { echo "Success"; } || { echo "Failed"; }
+
+  # Mount new rbd
+  if [ "$newrbd" ]; then
+    echo "Mounting all filesystems"
+    mount -a
+    [[ $? -eq 0 ]] && { echo "Success"; } || { echo "Failed"; }
+  fi
+}
+
+do_unmap() {
+  echo "* Stopping $DESC"
+  RET=0
+  # Recursive umount that depends /dev/rbd*
+  MNTDEP=$(findmnt --mtab | awk '$2 ~ /^\/dev\/rbd[0-9]*$/ {print $1}' | sort -r)
+  for MNT in $MNTDEP; do
+    umount $MNT
+  done
+  # Unmap all rbd device
+  cd /sys/bus/rbd/devices/
+  if ls * >/dev/null 2>&1; then
+    for DEV in *; do
+      echo "Unmap: $DEV"
+      echo $DEV > /sys/bus/rbd/remove
+      [ $? -ne "0" ] && RET=1
+    done
+  fi
+  [[ $RET -eq 1 ]] && { echo "Success"; } || { echo "Failed"; }
+}
+
+
+case "$1" in
+  start)
+  do_map
+  ;;
+
+  stop)
+  do_unmap
+  ;;
+
+  reload)
+  do_map
+  ;;
+
+  status)
+  ls /sys/bus/rbd/devices/
+  ;;
+
+  *)
+  echo "Usage: rbdmap {start|stop|reload|status}"
+  exit 1
+  ;;
+esac
+
+exit 0
