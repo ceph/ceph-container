@@ -1,0 +1,12 @@
+[Unit]
+Description=RBD Mapping Service
+After=network.target
+Requires=network.target
+
+[Service]
+TimeoutStartSec=0
+ExecStart=/opt/sbin/rbdmap start
+ExecStop=/opt/sbin/rbdmap stop
+
+[Install]
+WantedBy=multi-user.target
