@@ -20,6 +20,7 @@ auth client required = cephx
 public network = ${CEPH_PUBLIC_NETWORK}
 cluster network = ${CEPH_CLUSTER_NETWORK}
 osd journal size = ${OSD_JOURNAL_SIZE}
+mon pg warn max per osd = 0
 ENDHERE
 
     if [[ ! -z "$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)" ]]; then
