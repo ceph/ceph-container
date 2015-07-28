@@ -46,7 +46,6 @@ do_map() {
         esac
       done
       if [ -n "$secret" ] && [ -n "$name" ]; then
-        echo "echo "$mons name=$name,secret=$secret $rbddev" > /sys/bus/rbd/add"
         echo "$mons name=$name,secret=$secret $rbddev" > /sys/bus/rbd/add
         [ $? -ne "0" ] && RET=1
         newrbd="yes"
