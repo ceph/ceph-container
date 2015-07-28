@@ -143,13 +143,7 @@ function start_osd {
          osd_directory
          ;;
       disk)
-         if [ -n "$(find /var/lib/ceph/osd -prune -empty)" ]; then
-           echo "No bootstrapped OSDs found; trying ceph-disk on ${OSD_DEVICE}"
-           osd_disk
-         else
-           echo "Bootstrapped OSD(s) found; ${OSD_DEVICE} won't be bootstrapped this time"
-           osd_activate
-         fi
+         osd_disk
          ;;
       activate)
          osd_activate
@@ -159,8 +153,13 @@ function start_osd {
             echo "No bootstrapped OSDs found; trying ceph-disk"
             osd_disk
          else
-            echo "Bootstrapped OSD(s) found; using OSD directory"
-            osd_directory
+            if [ -z "${OSD_DEVICE}" ]; then
+                echo "Bootstrapped OSD(s) found; using OSD directory"
+                osd_directory
+            else
+                echo "Bootstrapped OSD(s) found; using ${OSD_DEVICE}"
+                osd_activate
+            fi
          fi
          ;;
    esac
