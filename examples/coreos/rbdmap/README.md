@@ -31,5 +31,7 @@ Note: ensure the _netdev option is specified in the mount options.
 
 ```
 _netdev
-    The filesystem resides on a device that requires network access (used to prevent the system from attempting to mount these filesystems until the network has been enabled on the system).
+    The filesystem resides on a device that requires network access (used to prevent
+    the system from attempting to mount these filesystems until the network has been
+    enabled on the system).
 ```
