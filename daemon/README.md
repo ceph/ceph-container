@@ -82,8 +82,9 @@ List of available options:
 Deploy an OSD
 -------------
 
-There are three available `OSD_TYPE` values:
+There are four available `OSD_TYPE` values:
 
+* `<none>` - if no `OSD_TYPE` is set; one of `disk`, `activate` or `directory` will be used based on autodetection of the current OSD bootstrap state
 * `activate` - the daemon expects to be passed a block device of a `ceph-disk`-prepared disk (via the `OSD_DEVICE` environment variable); no bootstrapping will be performed
 * `directory` - the daemon expects to find the OSD filesystem(s) already mounted in `/var/lib/ceph/osd/`
 * `disk` - the daemon expects to be passed a block device via the `OSD_DEVICE` environment variable
@@ -93,6 +94,38 @@ Options for OSDs (TODO: consolidate these options between the types):
 * `JOURNAL` - if provided, the new OSD will be bootstrapped to use the specified journal file (if you do not wish to use the default).  This is currently only supported by the `directory` OSD type
 * `OSD_DEVICE` - mandatory for `activate` and `disk` OSD types; this specifies which block device to use as the OSD
 * `OSD_JOURNAL` - optional override of the OSD journal file. this only applies to the `activate` and `disk` OSD types
+
+### Without OSD_TYPE ###
+
+If the operator does not specify an `OSD_TYPE` autodetection happens:
+- `disk` is used if no bootstrapped OSD is found. `OSD_FORCE_ZAP=1` must be set at this point.
+- `activate` is used if a bootstrapped OSD is found and `OSD_DEVICE` is also provided.
+- `directory` is used if a bootstrapped OSD is found and no `OSD_DEVICE` is provided.
+
+Without KV backend:
+```
+$ sudo docker run -d --net=host \
+--privileged=true \
+-v /etc/ceph:/etc/ceph \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-v /dev/:/dev/ \
+-e OSD_DEVICE=/dev/vdd \
+-e OSD_FORCE_ZAP=1 \
+ceph/daemon osd
+```
+
+With KV backend:
+```
+$ sudo docker run -d --net=host \
+--privileged=true \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-v /dev/:/dev/ \
+-e OSD_DEVICE=/dev/vdd \
+-e OSD_FORCE_ZAP=1 \
+-e KV_TYPE=etcd \
+-e KV_IP=192.168.0.20 \
+ceph/daemon osd
+```
 
 ### Ceph disk ###
 
@@ -105,7 +138,8 @@ $ sudo docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
 -e OSD_DEVICE=/dev/vdd \
-ceph/daemon osd_ceph_disk
+-e OSD_TYPE=disk \
+ceph/daemon osd
 ```
 
 With KV backend:
@@ -116,16 +150,17 @@ $ sudo docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
 -e OSD_DEVICE=/dev/vdd \
+-e OSD_TYPE=disk \
 -e KV_TYPE=etcd \
 -e KV_IP=192.168.0.20 \
-ceph/daemon osd_ceph_disk
+ceph/daemon osd
 ```
 
 List of available options:
 
 * `OSD_DEVICE` is the OSD device
 * `OSD_JOURNAL` is the journal for a given OSD
-* `HOSTNAME` is the used to place the OSD in the CRUSH map
+* `HOSTNAME` is used to place the OSD in the CRUSH map
 
 If you do not want to use `--privileged=true`, please fall back on the second example.
 
@@ -144,7 +179,8 @@ $ sudo docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
 -e OSD_DEVICE=/dev/vdd \
-ceph/daemon osd_ceph_disk_activate
+-e OSD_TYPE=activate \
+ceph/daemon osd
 ```
 
 
