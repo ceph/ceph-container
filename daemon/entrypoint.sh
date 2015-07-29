@@ -149,7 +149,7 @@ function start_osd {
          osd_activate
          ;;
       *)
-         if [ -n "$(find /var/lib/ceph/osd -prune -empty)" ]; then
+         if [[ ! -d /var/lib/ceph/osd || -n "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
             echo "No bootstrapped OSDs found; trying ceph-disk"
             osd_disk
          else
@@ -166,7 +166,7 @@ function start_osd {
 #################
 
 function osd_directory {
-  if [ -n "$(find /var/lib/ceph/osd -prune -empty)" ]; then
+  if [[ ! -d /var/lib/ceph/osd || -n "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
     echo "ERROR- could not find any OSD, did you bind mount the OSD data directory?"
     echo "ERROR- use -v <host_osd_data_dir>:<container_osd_data_dir>"
     exit 1
