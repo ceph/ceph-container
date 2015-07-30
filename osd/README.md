@@ -30,8 +30,8 @@ Multiple OSDs
 There is a problem when attempting run run multiple OSD containers on a single docker host.  See issue #19.
 
 There are two workarounds, at present:
-* Run each OSD with a separate IP address (e.g., use the new Docker 1.5 IPv6 support)
-* Run multiple OSDs within the same container
+* Run each OSD with the `--pid=host` option
+* Run multiple OSDs within the same container (this is the default, if the OSD directories are present)
 
 To run multiple OSDs within the same container, simply bind-mount each OSD datastore directory:
 * `docker run -v /osds/1:/var/lib/ceph/osd/ceph-1 -v /osds/2:/var/lib/ceph/osd/ceph-2`
