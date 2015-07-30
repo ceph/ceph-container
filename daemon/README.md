@@ -210,7 +210,7 @@ To create your OSDs simply run the following command:
 There is a problem when attempting run run multiple OSD containers on a single docker host.  See issue #19.
 
 There are two workarounds, at present:
-* Run each OSD with a separate IP address (e.g., use the new Docker 1.5 IPv6 support)
+* Run each OSD with the `--pid=host` option
 * Run multiple OSDs within the same container
 
 To run multiple OSDs within the same container, simply bind-mount each OSD datastore directory:
