@@ -27,6 +27,12 @@ Ceph-related dockerfiles
 
 ## Video demonstration
 
+### Manually
+
 A recorded video on how to deploy your Ceph cluster entirely in Docker containers is available here:
 
 [![Demo Running Ceph in Docker containers](http://img.youtube.com/vi/FUSTjTBA8f8/0.jpg)](http://youtu.be/FUSTjTBA8f8 "Demo Running Ceph in Docker containers")
+
+### With Ansible
+
+[![Demo Running Ceph in Docker containers with Ansible](http://img.youtube.com/vi/DQYZU1VsqXc/0.jpg)](http://youtu.be/DQYZU1VsqXc "Demo Running Ceph in Docker containers with Ansible")
