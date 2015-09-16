@@ -10,6 +10,7 @@ ENV ETCDCTL_ARCH linux-amd64
 ENV CEPH_VERSION infernalis
 ENV KVIATOR_VERSION 0.0.7
 ENV CONFD_VERSION 0.10.0
+ENV KUBECTL_VERSION v1.0.6
 
 # Install prerequisites
 RUN apt-get update && apt-get install -y wget unzip uuid-runtime runit
@@ -31,6 +32,13 @@ RUN cd /usr/local/bin && unzip /tmp/kviator.zip && chmod +x /usr/local/bin/kviat
 # Install confd
 ADD https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-linux-amd64 /usr/local/bin/confd
 RUN chmod +x /usr/local/bin/confd && mkdir -p /etc/confd/conf.d && mkdir -p /etc/confd/templates
+
+# Install kubectl
+ADD https://storage.googleapis.com/kubernetes-release/release/#{KUBECTL_VERSION}/bin/linux/amd64/kubectl /usr/local/bin/kubectl
+RUN chmod +x /usr/local/bin/kubectl
+
+ADD https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 /usr/local/bin/jq
+RUN chmod +x /usr/local/bin/jq
 
 ADD entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
