@@ -6,6 +6,7 @@ set -e
 : ${MON_NAME:=$(hostname -s)}
 : ${RGW_CIVETWEB_PORT:=80}
 
+CEPH_OPTS="--cluster ${CLUSTER}"
 
 #######
 # MON #
@@ -22,7 +23,7 @@ if [ ! -n "$MON_IP" ]; then
 fi
 
 # bootstrap MON
-if [ ! -e /etc/ceph/ceph.conf ]; then
+if [ ! -e /etc/ceph/${CLUSTER}.conf ]; then
    fsid=$(uuidgen)
    cat <<ENDHERE >/etc/ceph/${CLUSTER}.conf
 [global]
@@ -48,7 +49,7 @@ ENDHERE
    ceph-authtool /etc/ceph/${CLUSTER}.mon.keyring --create-keyring --gen-key -n mon. --cap mon 'allow *'
 
    # Generate initial monitor map
-   monmaptool --create --add ${MON_NAME} ${MON_IP} --fsid ${fsid} /etc/ceph/monmap
+   monmaptool --create --add ${MON_NAME} ${MON_IP} --fsid ${fsid} /etc/ceph/${CLUSTER}.monmap
 fi
 
 # If we don't have a monitor keyring, this is a new monitor
@@ -60,12 +61,12 @@ if [ ! -e /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}/keyring ]; then
    fi
 
    if [ ! -e /etc/ceph/${CLUSTER}.mon.keyring ]; then
-      echo "ERROR- /etc/ceph/${CLUSTER}.mon.keyring must exist.  You can extract it from your current monitor by running 'ceph auth get mon. -o /tmp/${CLUSTER}.mon.keyring'"
+      echo "ERROR- /etc/ceph/${CLUSTER}.mon.keyring must exist.  You can extract it from your current monitor by running 'ceph ${CEPH_OPTS} auth get mon. -o /tmp/${CLUSTER}.mon.keyring'"
       exit 3
    fi
 
-   if [ ! -e /etc/ceph/monmap ]; then
-      echo "ERROR- /etc/ceph/monmap must exist.  You can extract it from your current monitor by running 'ceph mon getmap -o /tmp/monmap'"
+   if [ ! -e /etc/ceph/${CLUSTER}.monmap ]; then
+      echo "ERROR- /etc/ceph/${CLUSTER}.monmap must exist.  You can extract it from your current monitor by running 'ceph ${CEPH_OPTS} mon getmap -o /tmp/monmap'"
       exit 4
    fi
 
@@ -77,17 +78,17 @@ if [ ! -e /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}/keyring ]; then
    mkdir -p /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
 
    # Prepare the monitor daemon's directory with the map and keyring
-   ceph-mon --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap --keyring /tmp/${CLUSTER}.mon.keyring
+   ceph-mon ${CEPH_OPTS} --mkfs -i ${MON_NAME} --monmap /etc/ceph/${CLUSTER}.monmap --keyring /tmp/${CLUSTER}.mon.keyring
 
    # Clean up the temporary key
    rm /tmp/${CLUSTER}.mon.keyring
 fi
 
 # start MON
-ceph-mon -i ${MON_NAME} --public-addr ${MON_IP}:6789
+ceph-mon ${CEPH_OPTS} -i ${MON_NAME} --public-addr ${MON_IP}
 
 # change replica size
-ceph osd pool set rbd size 1
+ceph ${CEPH_OPTS} osd pool set rbd size 1
 
 
 #######
@@ -97,15 +98,15 @@ ceph osd pool set rbd size 1
 if [ ! -e /var/lib/ceph/osd/${CLUSTER}-0/keyring ]; then
   # bootstrap OSD
   mkdir -p /var/lib/ceph/osd/${CLUSTER}-0
-  ceph osd create
-  ceph-osd -i 0 --mkfs
-  ceph auth get-or-create osd.0 osd 'allow *' mon 'allow profile osd' -o /var/lib/ceph/osd/${CLUSTER}-0/keyring
-  ceph osd crush add 0 1 root=default host=$(hostname -s)
-  ceph-osd -i 0 -k /var/lib/ceph/osd/${CLUSTER}-0/keyring
+  ceph ${CEPH_OPTS} osd create
+  ceph-osd ${CEPH_OPTS} -i 0 --mkfs
+  ceph ${CEPH_OPTS} auth get-or-create osd.0 osd 'allow *' mon 'allow profile osd' -o /var/lib/ceph/osd/${CLUSTER}-0/keyring
+  ceph ${CEPH_OPTS} osd crush add 0 1 root=default host=$(hostname -s)
+  ceph-osd ${CEPH_OPTS} -i 0 -k /var/lib/ceph/osd/${CLUSTER}-0/keyring
 fi
 
 # start OSD
-ceph-osd --cluster=${CLUSTER} -i 0
+ceph-osd ${CEPH_OPTS} -i 0
 
 
 #######
@@ -114,17 +115,17 @@ ceph-osd --cluster=${CLUSTER} -i 0
 
 if [ ! -e /var/lib/ceph/mds/${CLUSTER}-0/keyring ]; then
   # create ceph filesystem
-  ceph osd pool create cephfs_data 8
-  ceph osd pool create cephfs_metadata 8
-  ceph fs new cephfs cephfs_metadata cephfs_data
+  ceph ${CEPH_OPTS} osd pool create cephfs_data 8
+  ceph ${CEPH_OPTS} osd pool create cephfs_metadata 8
+  ceph ${CEPH_OPTS} fs new cephfs cephfs_metadata cephfs_data
 
   # bootstrap MDS
   mkdir -p /var/lib/ceph/mds/${CLUSTER}-0
-  ceph auth get-or-create mds.0 mds 'allow' osd 'allow *' mon 'allow profile mds' > /var/lib/ceph/mds/${CLUSTER}-0/keyring
+  ceph ${CEPH_OPTS} auth get-or-create mds.0 mds 'allow' osd 'allow *' mon 'allow profile mds' > /var/lib/ceph/mds/${CLUSTER}-0/keyring
 fi
 
 # start MDS
-ceph-mds --cluster=${CLUSTER} -i 0
+ceph-mds ${CEPH_OPTS} -i 0
 
 
 #######
@@ -134,11 +135,11 @@ ceph-mds --cluster=${CLUSTER} -i 0
 if [ ! -e /var/lib/ceph/radosgw/${RGW_NAME}/keyring ]; then
   # bootstrap RGW
   mkdir -p /var/lib/ceph/radosgw/${RGW_NAME}
-  ceph auth get-or-create client.radosgw.gateway osd 'allow rwx' mon 'allow rw' -o /var/lib/ceph/radosgw/${RGW_NAME}/keyring
+  ceph ${CEPH_OPTS} auth get-or-create client.radosgw.gateway osd 'allow rwx' mon 'allow rw' -o /var/lib/ceph/radosgw/${RGW_NAME}/keyring
 fi
 
 # start RGW
-radosgw -c /etc/ceph/ceph.conf -n client.radosgw.gateway -k /var/lib/ceph/radosgw/${RGW_NAME}/keyring --rgw-socket-path="" --rgw-frontends="civetweb port=${RGW_CIVETWEB_PORT}"
+radosgw -c /etc/ceph/${CLUSTER}.conf -n client.radosgw.gateway -k /var/lib/ceph/radosgw/${RGW_NAME}/keyring --rgw-socket-path="" --rgw-frontends="civetweb port=${RGW_CIVETWEB_PORT}"
 
 
 #######
@@ -146,11 +147,11 @@ radosgw -c /etc/ceph/ceph.conf -n client.radosgw.gateway -k /var/lib/ceph/radosg
 #######
 
 # start ceph-rest-api
-ceph-rest-api -n client.admin &
+ceph-rest-api ${CEPH_OPTS} -n client.admin &
 
 
 #########
 # WATCH #
 #########
 
-exec ceph -w
+exec ceph ${CEPH_OPTS} -w
