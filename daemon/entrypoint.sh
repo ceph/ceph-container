@@ -10,6 +10,7 @@ set -e
 : ${MDS_NAME:=mds-${HOSTNAME}}
 : ${OSD_FORCE_ZAP:=0}
 : ${OSD_JOURNAL_SIZE:=100}
+: ${OSD_GET_ADMIN_KEY:=0}
 : ${CRUSH_LOCATION:=root=default host=${HOSTNAME}}
 : ${CEPHFS_CREATE:=0}
 : ${CEPHFS_NAME:=cephfs}
@@ -137,6 +138,7 @@ function start_mon {
 function start_osd {
    get_config
    check_config
+   [ ${OSD_GET_ADMIN_KEY} -eq "1" ] && get_admin_key
 
    case "$OSD_TYPE" in
       directory)
