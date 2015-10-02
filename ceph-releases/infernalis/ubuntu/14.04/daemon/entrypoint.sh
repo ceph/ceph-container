@@ -82,10 +82,6 @@ esac
 #######
 
 function start_mon {
-  if [ ! -n "$CEPH_PUBLIC_NETWORK" ]; then
-    echo "ERROR- CEPH_PUBLIC_NETWORK must be defined as the name of the network for the OSDs"
-    exit 1
-  fi
 
   if [ ${MON_IP_AUTO_DETECT} -eq 1 ]; then
     MON_IP=$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)
