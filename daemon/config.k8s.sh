@@ -14,7 +14,7 @@ function get_mon_config {
   monmaptool --create ${MONMAP_ADD} --fsid ${FSID} /etc/ceph/monmap
 
   # Update hostname in ceph.conf
-  sed -i "s/HOSTNAME/${MON_HOST}/g" /etc/ceph/ceph.conf
+  sed -i "s/HOSTNAME/${MON_NAME}/g" /etc/ceph/ceph.conf
   # sed -i "s/\[\[CEPH_PUBLIC_NETWORK\]\]/${CEPH_PUBLIC_NETWORK}/g" /etc/ceph/ceph.conf
   # sed -i "s/[[CEPH_CLUSTER_NETWORK]]/${CEPH_CLUSTER_NETWORK}/g" /etc/ceph/ceph.conf
 
