@@ -71,6 +71,9 @@ case "$KV_TYPE" in
    etcd|consul)
       source /config.kv.sh
       ;;
+   k8s|kubernetes)
+      source config.k8s.sh
+      ;;
    *)
       source /config.static.sh
       ;;
