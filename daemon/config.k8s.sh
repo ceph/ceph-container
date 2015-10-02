@@ -7,7 +7,9 @@ function get_admin_key {
 }
 
 function get_mon_config {
-  
+  FSID=$(ceph-conf --lookup fsid -c /etc/ceph/ceph.conf)
+
+
   MONMAP_ADD=$(kubectl get pods --namespace=${CLUSTER} -l daemon=mon -o template --template="{{range .items}}--add {{.metadata.name}} {{.status.podIP}} {{end}}")
   # MONMAP_ADD="${HOSTS%?}"
 
