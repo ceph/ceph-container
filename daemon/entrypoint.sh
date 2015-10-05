@@ -4,6 +4,7 @@ set -e
 : ${CLUSTER:=ceph}
 : ${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}
 : ${CEPH_DAEMON:=${1}} # default daemon to first argument
+: ${CEPH_GET_ADMIN_KEY:=0}
 : ${HOSTNAME:=$(hostname -s)}
 : ${MON_NAME:=${HOSTNAME}}
 : ${MON_IP_AUTO_DETECT:=0}
@@ -137,6 +138,11 @@ function start_mon {
 function start_osd {
    get_config
    check_config
+
+   if [ ${CEPH_GET_ADMIN_KEY} -eq "1" ]; then
+     get_admin_key
+     check_admin_key
+   fi
 
    case "$OSD_TYPE" in
       directory)
@@ -354,6 +360,11 @@ function start_mds {
 function start_rgw {
   get_config
   check_config
+
+  if [ ${CEPH_GET_ADMIN_KEY} -eq "1" ]; then
+    get_admin_key
+    check_admin_key
+  fi
 
   # Check to see if our RGW has been initialized
   if [ ! -e /var/lib/ceph/radosgw/${RGW_NAME}/keyring ]; then
