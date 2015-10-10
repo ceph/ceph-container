@@ -7,23 +7,19 @@ function get_admin_key {
 }
 
 function get_mon_config {
+  # Get FSID from ceph.conf
   FSID=$(ceph-conf --lookup fsid -c /etc/ceph/ceph.conf)
 
-
+  # Get the ceph mon pods (name and IP) from the Kubernetes API. Formatted as a set of monmap params
   MONMAP_ADD=$(kubectl get pods --namespace=${CLUSTER} -l daemon=mon -o template --template="{{range .items}}--add {{.metadata.name}} {{.status.podIP}} {{end}}")
-  # MONMAP_ADD="${HOSTS%?}"
 
+  # Create a monmap with the Pod Names and IP
   monmaptool --create ${MONMAP_ADD} --fsid ${FSID} /etc/ceph/monmap
-
-  # Update hostname in ceph.conf
-  sed -i "s/HOSTNAME/${MON_NAME}/g" /etc/ceph/ceph.conf
-  # sed -i "s/\[\[CEPH_PUBLIC_NETWORK\]\]/${CEPH_PUBLIC_NETWORK}/g" /etc/ceph/ceph.conf
-  # sed -i "s/[[CEPH_CLUSTER_NETWORK]]/${CEPH_CLUSTER_NETWORK}/g" /etc/ceph/ceph.conf
 
 }
 
 function get_config {
    # No-op for static
-   echo "k8s: does not generate config. Use secrets instead."
+   echo "k8s: config is stored as k8s secrets."
 }
 
