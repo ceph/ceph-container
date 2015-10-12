@@ -9,6 +9,7 @@ MAINTAINER Sébastien Han "seb@redhat.com"
 
 # Add bootstrap script
 ADD entrypoint.sh /entrypoint.sh
+ADD remove-mon.sh /remove-mon.sh
 ADD config.*.sh /
 
 ADD my_init/my_init /sbin/my_init
