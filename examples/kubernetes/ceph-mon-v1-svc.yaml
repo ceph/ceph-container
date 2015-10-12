@@ -15,3 +15,4 @@ spec:
   selector:
     app: ceph
     daemon: mon
+  clusterIP: None
