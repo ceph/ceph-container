@@ -8,7 +8,7 @@ metadata:
   name: ceph-mon
   namespace: ceph
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     app: ceph
     daemon: mon
@@ -21,9 +21,6 @@ spec:
         daemon: mon
     spec:
       volumes:
-        - name: ceph-dir
-          hostPath:
-            path: /opt/ceph
         - name: ceph-conf
           secret:
             secretName: ceph-conf-combined
@@ -39,9 +36,14 @@ spec:
       containers:
         - name: ceph-mon
           image: quay.io/acaleph/ceph-daemon:kubernetes
-          # imagePullPolicy: Always
-          # command: ["sleep","10000"]
+          imagePullPolicy: Always
           serviceAccount: default
+          lifecycle:
+            preStop:
+                exec:
+                  # remove the mon on Pod stop.
+                  command:
+                    - "/remove-mon.sh"
           ports:
             - containerPort: 6789
           env:
@@ -56,9 +58,6 @@ spec:
             - name: MON_IP_AUTO_DETECT
               value: "1"
           volumeMounts:
-            - name: ceph-dir
-              mountPath: /opt/ceph
-              
             - name: ceph-conf
               mountPath: /etc/ceph
             - name: ceph-bootstrap-osd-keyring
