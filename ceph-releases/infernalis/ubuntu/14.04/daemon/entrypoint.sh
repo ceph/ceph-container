@@ -280,10 +280,8 @@ function osd_disk {
 
   if [[ ! -z "${OSD_JOURNAL}" ]]; then
     ceph-disk -v prepare ${OSD_DEVICE} ${OSD_JOURNAL}
-    chown ceph. ${OSD_JOURNAL}
   else
     ceph-disk -v prepare ${OSD_DEVICE}
-    chown ceph. ${OSD_DEVICE}2
   fi
 
   ceph-disk -v activate ${OSD_DEVICE}1
@@ -291,7 +289,7 @@ function osd_disk {
   OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
   ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
 
-  echo "OSD prepared; OSD may now used with osd directory"
+  echo "OSD may now used with osd directory."
 }
 
 
