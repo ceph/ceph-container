@@ -33,8 +33,24 @@ Take a look at `ceph/ceph.conf.tmpl` for the default values
 
 Contains ceph.conf, admin keyring and mon keyring. Useful for generating the `/etc/ceph` directory
 
-`./generate_secrets.sh mon-keyring`
+`./generate_secrets.sh combined-conf`
 
 ## Generate encoded boostrap keyring secret
 
 `./generate_secrets.sh bootstrap-keyring <osd|mds|rgw>`
+
+Kubernetes workflow
+===================
+
+```
+./generate_secrets.sh combined-conf `./generate_secrets.sh fsid` > combined.yaml
+./generate_secrets.sh bootstrap-keyring osd > bootstrap-osd.yaml
+./generate_secrets.sh bootstrap-keyring mds > bootstrap-mds.yaml
+./generate_secrets.sh bootstrap-keyring rgw > bootstrap-rgw.yaml
+
+kubectl create -f combined.yaml --namespace=ceph
+kubectl create -f bootstrap-osd.yaml --namespace=ceph
+kubectl create -f bootstrap-mds.yaml --namespace=ceph
+kubectl create -f bootstrap-rgw.yaml --namespace=ceph
+
+```
