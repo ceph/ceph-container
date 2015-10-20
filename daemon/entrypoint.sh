@@ -58,10 +58,10 @@ fi
 # based on the data store
 case "$KV_TYPE" in
    etcd|consul)
-      source config.kv.sh
+      source /config.kv.sh
       ;;
    *)
-      source config.static.sh
+      source /config.static.sh
       ;;
 esac
 
