@@ -4,22 +4,16 @@
 #
 # VERSION 0.0.1
 
-FROM ceph/base
+FROM ceph/base:centos
 MAINTAINER Sébastien Han "seb@redhat.com"
 
-RUN apt-get update && apt-get -y install runit && \
-apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# Install Runit
+RUN curl -s https://packagecloud.io/install/repositories/imeyer/runit/script.rpm.sh | bash
+RUN yum install -y runit-2.1.1-7.el7.centos.x86_64
 
 # Add bootstrap script
 ADD entrypoint.sh /entrypoint.sh
 ADD config.*.sh /
-
-ADD my_init/my_init /sbin/my_init
-RUN chmod +x /sbin/my_init
-RUN mkdir -p /etc/container_environment
-
-ADD 2.sh /etc/runit/2
-RUN chmod +x /etc/runit/2
 
 # Add templates for confd
 ADD ./confd/templates/* /etc/confd/templates/
