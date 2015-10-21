@@ -10,7 +10,7 @@ ENV ETCDCTL_ARCH linux-amd64
 ENV CEPH_VERSION hammer
 
 # Install prerequisites
-RUN yum install -y wget unzip
+RUN yum install -y unzip
 
 # Install Ceph
 RUN rpm --import 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc'
