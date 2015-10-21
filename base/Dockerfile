@@ -2,27 +2,23 @@
 # CEPH VERSION: Hammer
 # CEPH VERSION DETAIL: 0.94.x
 
-FROM ubuntu:14.04
+FROM centos
 MAINTAINER Sébastien Han "seb@redhat.com"
 
 ENV ETCDCTL_VERSION v2.2.0
 ENV ETCDCTL_ARCH linux-amd64
 ENV CEPH_VERSION hammer
 
+# Install Ceph
+RUN rpm --import 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc'
+RUN rpm -Uvh http://ceph.com/rpm-${CEPH_VERSION}/rhel7/noarch/ceph-release-1-1.el7.noarch.rpm
+RUN yum install -y epel-release && yum clean all
+RUN yum install -y ceph ceph-radosgw && yum clean all
 ENV KVIATOR_VERSION 0.0.5
 ENV CONFD_VERSION 0.10.0
 
-# Install prerequisites
-RUN apt-get update &&  apt-get install -y wget unzip
-
-# Install Ceph
-RUN wget -q -O- 'https://download.ceph.com/keys/release.asc' | apt-key add -
-RUN echo deb http://ceph.com/debian-${CEPH_VERSION}/ trusty main | tee /etc/apt/sources.list.d/ceph-${CEPH_VERSION}.list
-RUN apt-get update && apt-get install -y --force-yes ceph radosgw && \
-apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 # Install etcdctl
-RUN wget -q -O- "https://github.com/coreos/etcd/releases/download/${ETCDCTL_VERSION}/etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}.tar.gz" |tar xfz - -C/tmp/ etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}/etcdctl
+RUN curl -L --remote-name https://github.com/coreos/etcd/releases/download/${ETCDCTL_VERSION}/etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}.tar.gz && tar xfz etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}.tar.gz -C /tmp/ etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}/etcdctl
 RUN mv /tmp/etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}/etcdctl /usr/local/bin/etcdctl
 
 #install kviator

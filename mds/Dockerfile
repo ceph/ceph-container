@@ -1,8 +1,8 @@
 # DOCKER-VERSION 1.0.0
-# 
+#
 # VERSION 0.0.2
 
-FROM ceph/base
+FROM ceph/base:centos-latest
 MAINTAINER Seán C McCord "ulexus@gmail.com"
 
 # Add bootstrap script

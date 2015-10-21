@@ -1,6 +1,6 @@
 # DOCKER-VERSION 1.0.0
-# 
-# Ceph Config 
+#
+# Ceph Config
 #
 #  USAGE NOTES:
 #    - Define at least the two following environment variables:
@@ -11,7 +11,7 @@
 #
 # VERSION 0.0.1
 
-FROM ceph/base
+FROM ceph/base:centos-latest
 MAINTAINER Sébastien Han "seb@redhat.com"
 
 # Add bootstrap script
