@@ -6,6 +6,7 @@ To run a certain type of daemon, simply use the name of the daemon as `$1`.
 Valid values are:
 
 * `mon` deploys a Ceph monitor
+* `osd` deploys an OSD using the method specified by `OSD_TYPE`
 * `osd_directory` deploys an OSD using a prepared directory (used in scenario where the operator doesn't want to use `--privileged=true`)
 * `osd_ceph_disk` deploys an OSD using ceph-disk, so you have to provide a whole device (ie: /dev/sdb)
 * `mds` deploys a MDS
@@ -21,10 +22,28 @@ You can use this container to bootstrap any Ceph daemon.
 * `HOSTNAME` is the hostname of the machine  (DEFAULT: $(hostname))
 
 
+KV backends
+-----------
+
+We currently support 2 KV backends to store our configuration flags, keys and maps:
+
+* etcd
+* consul
+
+Prior to deploy your monitors, you have to populate your kv store with the help of the script `populate.sh` in examples/confd.
+As soon as this done, you can bootstrap your first monitor.
+
+Important variables in `populate.sh` to change when you bootstrap an OSD:
+
+* `/osd/journal_size`
+* `/osd/cluster_network`
+* `/osd/public_network`
+
+
 Deploy a monitor
 ----------------
 
-Run:
+Without KV store, run:
 
 ```
 $ sudo docker run -d --net=host \
@@ -32,6 +51,18 @@ $ sudo docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -e MON_IP=192.168.0.20 \
 -e CEPH_PUBLIC_NETWORK=192.168.0.0/24 \
+ceph/daemon mon
+```
+
+With KV store, run:
+
+```
+$ sudo docker run -d --net=host \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-e MON_IP=192.168.0.20 \
+-e CEPH_PUBLIC_NETWORK=192.168.0.0/24 \
+-e KV_TYPE=etcd \
+-e KV_IP=192.168.0.20 \
 ceph/daemon mon
 ```
 
@@ -51,13 +82,54 @@ List of available options:
 Deploy an OSD
 -------------
 
-There are two available options:
+There are four available `OSD_TYPE` values:
 
-* use `OSD_CEPH_DISK` where you only specify a block device
-* use `OSD_DIRECTORY` where you specify an OSD mount point to your container
+* `<none>` - if no `OSD_TYPE` is set; one of `disk`, `activate` or `directory` will be used based on autodetection of the current OSD bootstrap state
+* `activate` - the daemon expects to be passed a block device of a `ceph-disk`-prepared disk (via the `OSD_DEVICE` environment variable); no bootstrapping will be performed
+* `directory` - the daemon expects to find the OSD filesystem(s) already mounted in `/var/lib/ceph/osd/`
+* `disk` - the daemon expects to be passed a block device via the `OSD_DEVICE` environment variable
 
+Options for OSDs (TODO: consolidate these options between the types):
+* `JOURNAL_DIR` - if provided, new OSDs will be bootstrapped to use the specified directory as a common journal area.  This is usually used to store the journals for more than one OSD on a common, separate disk.  This currently only applies to the `directory` OSD type.
+* `JOURNAL` - if provided, the new OSD will be bootstrapped to use the specified journal file (if you do not wish to use the default).  This is currently only supported by the `directory` OSD type
+* `OSD_DEVICE` - mandatory for `activate` and `disk` OSD types; this specifies which block device to use as the OSD
+* `OSD_JOURNAL` - optional override of the OSD journal file. this only applies to the `activate` and `disk` OSD types
+
+### Without OSD_TYPE ###
+
+If the operator does not specify an `OSD_TYPE` autodetection happens:
+- `disk` is used if no bootstrapped OSD is found. `OSD_FORCE_ZAP=1` must be set at this point.
+- `activate` is used if a bootstrapped OSD is found and `OSD_DEVICE` is also provided.
+- `directory` is used if a bootstrapped OSD is found and no `OSD_DEVICE` is provided.
+
+Without KV backend:
+```
+$ sudo docker run -d --net=host \
+--privileged=true \
+-v /etc/ceph:/etc/ceph \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-v /dev/:/dev/ \
+-e OSD_DEVICE=/dev/vdd \
+-e OSD_FORCE_ZAP=1 \
+ceph/daemon osd
+```
+
+With KV backend:
+```
+$ sudo docker run -d --net=host \
+--privileged=true \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-v /dev/:/dev/ \
+-e OSD_DEVICE=/dev/vdd \
+-e OSD_FORCE_ZAP=1 \
+-e KV_TYPE=etcd \
+-e KV_IP=192.168.0.20 \
+ceph/daemon osd
+```
 
 ### Ceph disk ###
+
+Without KV backend:
 
 ```
 $ sudo docker run -d --net=host \
@@ -66,16 +138,50 @@ $ sudo docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
 -e OSD_DEVICE=/dev/vdd \
-ceph/daemon osd_ceph_disk
+-e OSD_TYPE=disk \
+ceph/daemon osd
+```
+
+With KV backend:
+
+```
+$ sudo docker run -d --net=host \
+--privileged=true \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-v /dev/:/dev/ \
+-e OSD_DEVICE=/dev/vdd \
+-e OSD_TYPE=disk \
+-e KV_TYPE=etcd \
+-e KV_IP=192.168.0.20 \
+ceph/daemon osd
 ```
 
 List of available options:
 
 * `OSD_DEVICE` is the OSD device
 * `OSD_JOURNAL` is the journal for a given OSD
-* `HOSTNAME` is the used to place the OSD in the CRUSH map
+* `HOSTNAME` is used to place the OSD in the CRUSH map
 
 If you do not want to use `--privileged=true`, please fall back on the second example.
+
+
+### Ceph disk activate ###
+
+This function is balance between ceph-disk and osd directory where the operator can use ceph-disk outside of the container (directly on the host) to prepare the devices.
+Devices will be prepared with `ceph-disk prepare`, then they will get activated inside the container.
+A priviledged container is still required as ceph-disk needs to access /dev/.
+So this has minimum value compare to the ceph-disk but might fit some use cases where the operators want to prepare their devices outside of a container.
+
+```
+$ sudo docker run -d --net=host \
+--privileged=true \
+-v /etc/ceph:/etc/ceph \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-v /dev/:/dev/ \
+-e OSD_DEVICE=/dev/vdd \
+-e OSD_TYPE=activate \
+ceph/daemon osd
+```
 
 
 ### Ceph OSD directory ###
@@ -104,7 +210,7 @@ To create your OSDs simply run the following command:
 There is a problem when attempting run run multiple OSD containers on a single docker host.  See issue #19.
 
 There are two workarounds, at present:
-* Run each OSD with a separate IP address (e.g., use the new Docker 1.5 IPv6 support)
+* Run each OSD with the `--pid=host` option
 * Run multiple OSDs within the same container
 
 To run multiple OSDs within the same container, simply bind-mount each OSD datastore directory:
@@ -142,13 +248,24 @@ For most people, the defaults for the following optional environment variables a
   * `CEPHFS_METADATA_POOL`:  The name of the metadata pool for the ceph filesystem.  If it does not exist, it will be created.  Defaults to `${CEPHFS_NAME}_metadata`
   * `CEPHFS_METADATA_POOL_PG`:  The number of placement groups for the metadata pool.  Defaults to `8`
 
-Run:
+Without KV backend, run:
 
 ```
 $ sudo docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /etc/ceph:/etc/ceph \
 -e CEPHFS_CREATE=1 \
+ceph/daemon mds
+```
+
+Without KV backend, run:
+
+```
+$ sudo docker run -d --net=host \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-e CEPHFS_CREATE=1 \
+-e KV_TYPE=etcd \
+-e KV_IP=192.168.0.20 \
 ceph/daemon mds
 ```
 
@@ -167,10 +284,22 @@ Deploy a Rados Gateway
 For the Rados Gateway, we deploy it with `civetweb` enabled by default.
 However it is possible to use different CGI frontends by simply giving remote address and port.
 
+Without kv backend, run:
+
 ```
 $ sudo docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /etc/ceph:/etc/ceph \
+ceph/daemon rgw
+```
+
+With kv backend, run:
+
+```
+$ sudo docker run -d --net=host \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-e KV_TYPE=etcd \
+-e KV_IP=192.168.0.20 \
 ceph/daemon rgw
 ```
 
@@ -195,7 +324,8 @@ This is pretty straighforward. The `--net=host` is not mandatory, if you don't u
 
 ```
 $ sudo docker run -d --net=host \
--v /etc/ceph:/etc/ceph \
+-e KV_TYPE=etcd \
+-e KV_IP=192.168.0.20 \
 ceph/daemon restapi
 ```
 

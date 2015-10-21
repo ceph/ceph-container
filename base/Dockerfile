@@ -5,7 +5,7 @@
 FROM centos
 MAINTAINER Sébastien Han "seb@redhat.com"
 
-ENV ETCDCTL_VERSION v2.0.10
+ENV ETCDCTL_VERSION v2.2.0
 ENV ETCDCTL_ARCH linux-amd64
 ENV CEPH_VERSION hammer
 

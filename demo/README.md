@@ -25,3 +25,12 @@ Commonly, you will want to bind-mount your host's `/etc/ceph` into the container
 For example:
 
 `docker run -d --net=host -v /etc/ceph:/etc/ceph -e MON_IP=192.168.0.20 -e CEPH_NETWORK=192.168.0.0/24 ceph/demo`
+
+
+Tip
+---
+
+If you get user_xattr error, try to remount your docker partition:
+```
+$ sudo mount -o remount,user_xattr,rw $(df -P /var/lib/docker |tail -1 |tr -s ' ' |cut -d' ' -f6)
+```
