@@ -9,6 +9,9 @@ ENV ETCDCTL_VERSION v2.2.0
 ENV ETCDCTL_ARCH linux-amd64
 ENV CEPH_VERSION hammer
 
+# Install prerequisites
+RUN yum install -y wget unzip
+
 # Install Ceph
 RUN rpm --import 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc'
 RUN rpm -Uvh http://ceph.com/rpm-${CEPH_VERSION}/rhel7/noarch/ceph-release-1-1.el7.noarch.rpm
