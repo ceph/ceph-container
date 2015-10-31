@@ -16,7 +16,7 @@ ExecStart=/usr/bin/docker run --rm --name %p --net=host -privileged \
    -v /etc/ceph:/etc/ceph \
    -v /dev:/dev \
    -v /var/lib/ceph/osd/ceph-%i:/var/lib/ceph/osd/ceph-%i \
-   ceph/mon
+   ceph/osd
 ExecStopPost=-/usr/bin/docker stop %p
 ExecStopPost=-/usr/bin/docker rm %p
 Restart=always
