@@ -36,6 +36,7 @@ ENDHERE
 
     # Create bootstrap key directories
     mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
+    chown ceph. /var/lib/ceph/bootstrap-{osd,mds,rgw}
 
     # Generate the OSD bootstrap key
     ceph-authtool /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring --create-keyring --gen-key -n client.bootstrap-osd --cap mon 'allow profile bootstrap-osd'
@@ -46,8 +47,12 @@ ENDHERE
     # Generate the RGW bootstrap key
     ceph-authtool /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring --create-keyring --gen-key -n client.bootstrap-rgw --cap mon 'allow profile bootstrap-rgw'
 
+    # Apply proper permissions to the keys
+    chown ceph. /etc/ceph/${CLUSTER}.mon.keyring /etc/ceph/${CLUSTER}.mon.keyring /var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
+
     # Generate initial monitor map
     monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} /etc/ceph/monmap
+    chown ceph. /etc/ceph/monmap
   fi
 }
 
