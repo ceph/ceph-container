@@ -7,13 +7,13 @@ MAINTAINER Sébastien Han "seb@redhat.com"
 
 ENV ETCDCTL_VERSION v2.2.0
 ENV ETCDCTL_ARCH linux-amd64
-ENV CEPH_VERSION hammer
+ENV CEPH_VERSION infernalis
 
 ENV KVIATOR_VERSION 0.0.5
 ENV CONFD_VERSION 0.10.0
 
 # Install prerequisites
-RUN apt-get update &&  apt-get install -y wget unzip
+RUN apt-get update &&  apt-get install -y wget unzip uuid-runtime
 
 # Install Ceph
 RUN wget -q -O- 'https://download.ceph.com/keys/release.asc' | apt-key add -
