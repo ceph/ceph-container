@@ -1,6 +1,8 @@
 ceph-rgw
 ========
 
+_Note_:  This container is DEPRECATED.  Please use `ceph/daemon` instead.  It is better maintained and more featureful.  This container may be removed in a future version.
+
 This Dockerfile creates a Ceph RADOS gateway server (RGW) image
 Both external CGI interface and civetweb are supported.
 However civetweb is preferred so it's enabled by default.
