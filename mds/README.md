@@ -1,6 +1,8 @@
 ceph-mds
 ========
 
+_Note_:  This container is DEPRECATED.  Please use `ceph/daemon` instead.  It is better maintained and more featureful.  This container may be removed in a future version.
+
 This Dockerfile creates a Ceph metadata server (MDS) image
 
 

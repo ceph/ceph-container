@@ -1,6 +1,8 @@
 ceph-osd
 ========
 
+_Note_:  This container is DEPRECATED.  Please use `ceph/daemon` instead.  It is better maintained and more featureful.  This container may be removed in a future version.
+
 Run Ceph OSDs in docker
 
 Usage
