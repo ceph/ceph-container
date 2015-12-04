@@ -22,6 +22,16 @@ You can use this container to bootstrap any Ceph daemon.
 * `HOSTNAME` is the hostname of the machine  (DEFAULT: $(hostname))
 
 
+SELinux
+-------
+
+If SELinux is enabled, run the following commands:
+
+```
+$ sudo chcon -Rt svirt_sandbox_file_t /etc/ceph
+$ sudo chcon -Rt svirt_sandbox_file_t /var/lib/ceph
+```
+
 KV backends
 -----------
 
@@ -105,6 +115,7 @@ If the operator does not specify an `OSD_TYPE` autodetection happens:
 Without KV backend:
 ```
 $ sudo docker run -d --net=host \
+--pid=host \
 --privileged=true \
 -v /etc/ceph:/etc/ceph \
 -v /var/lib/ceph/:/var/lib/ceph/ \
@@ -118,6 +129,7 @@ With KV backend:
 ```
 $ sudo docker run -d --net=host \
 --privileged=true \
+--pid=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
 -e OSD_DEVICE=/dev/vdd \
@@ -134,6 +146,7 @@ Without KV backend:
 ```
 $ sudo docker run -d --net=host \
 --privileged=true \
+--pid=host \
 -v /etc/ceph:/etc/ceph \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
@@ -147,6 +160,7 @@ With KV backend:
 ```
 $ sudo docker run -d --net=host \
 --privileged=true \
+--pid=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
 -e OSD_DEVICE=/dev/vdd \
@@ -175,6 +189,7 @@ So this has minimum value compare to the ceph-disk but might fit some use cases 
 ```
 $ sudo docker run -d --net=host \
 --privileged=true \
+--pid=host \
 -v /etc/ceph:/etc/ceph \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
