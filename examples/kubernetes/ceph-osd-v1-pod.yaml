@@ -1,6 +1,6 @@
 ---
-kind: Pod
-apiVersion: v1
+kind: DaemonSet
+apiVersion: extensions/v1beta1
 metadata:
   name: ceph-osd
   namespace: ceph
@@ -8,49 +8,53 @@ metadata:
     app: ceph
     daemon: osd
 spec:
-  volumes:
-    - name: devices
-      hostPath:
-        path: /dev
-    - name: ceph
-      hostPath:
-        path: /opt/ceph
-    - name: ceph-conf
-      secret:
-        secretName: ceph-conf-combined
-    - name: ceph-bootstrap-osd-keyring
-      secret:
-        secretName: ceph-bootstrap-osd-keyring
-    - name: ceph-bootstrap-mds-keyring
-      secret:
-        secretName: ceph-bootstrap-mds-keyring
-    - name: ceph-bootstrap-rgw-keyring
-      secret:
-        secretName: ceph-bootstrap-rgw-keyring
-  containers:
-    - name: osd-pod
-      image: quay.io/acaleph/ceph-daemon:kubernetes
-      imagePullPolicy: Always
-      serviceAccount: default
-      volumeMounts:
+  template:
+    metadata:
+      labels:
+        node-type: storage
+    spec:
+      volumes:
         - name: devices
-          mountPath: /dev
+          hostPath:
+            path: /dev
         - name: ceph
-          mountPath: /var/lib/ceph
+          hostPath:
+            path: /opt/ceph
         - name: ceph-conf
-          mountPath: /etc/ceph
+          secret:
+            secretName: ceph-conf-combined
         - name: ceph-bootstrap-osd-keyring
-          mountPath: /var/lib/ceph/bootstrap-osd
+          secret:
+            secretName: ceph-bootstrap-osd-keyring
         - name: ceph-bootstrap-mds-keyring
-          mountPath: /var/lib/ceph/bootstrap-mds
+          secret:
+            secretName: ceph-bootstrap-mds-keyring
         - name: ceph-bootstrap-rgw-keyring
-          mountPath: /var/lib/ceph/bootstrap-rgw
-      securityContext:
-        privileged: true
-      env:
-        - name: CEPH_DAEMON
-          value: OSD
-        - name: KV_TYPE
-          value: k8s
-        - name: OSD_DEVICES
-          value: "/dev/xvdc /dev/xvdd"
+          secret:
+            secretName: ceph-bootstrap-rgw-keyring
+      containers:
+        - name: osd-pod
+          image: quay.io/acaleph/ceph-daemon:kubernetes
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: devices
+              mountPath: /dev
+            - name: ceph
+              mountPath: /var/lib/ceph
+            - name: ceph-conf
+              mountPath: /etc/ceph
+            - name: ceph-bootstrap-osd-keyring
+              mountPath: /var/lib/ceph/bootstrap-osd
+            - name: ceph-bootstrap-mds-keyring
+              mountPath: /var/lib/ceph/bootstrap-mds
+            - name: ceph-bootstrap-rgw-keyring
+              mountPath: /var/lib/ceph/bootstrap-rgw
+          securityContext:
+            privileged: true
+          env:
+            - name: CEPH_DAEMON
+              value: OSD
+            - name: KV_TYPE
+              value: k8s
+            - name: OSD_DEVICES
+              value: "/dev/xvdc /dev/xvdd"
