@@ -17,8 +17,6 @@ mon_osd_nearfull_ratio = ${global_mon_osd_nearfull_ratio:-".85"}
 
 mon_host = ${global_mon_host:-'ceph-mon'}
 
-setuser match path = /var/lib/ceph/$type/$cluster-$id
-
 [mon]
 mon_osd_down_out_interval = ${mon_mon_osd_down_out_interval:-"600"}
 mon_osd_min_down_reporters = ${mon_mon_osd_min_down_reporters:-"4"}
