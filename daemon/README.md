@@ -63,6 +63,9 @@ $ sudo docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -e MON_IP=192.168.0.20 \
 -e CEPH_PUBLIC_NETWORK=192.168.0.0/24 \
+-e KV_TYPE=etcd \
+-e KV_IP=127.0.0.1 \
+-e KV_PORT=4001 \
 ceph/daemon populate_kvstore
 ```
 
