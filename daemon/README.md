@@ -40,15 +40,19 @@ We currently support 2 KV backends to store our configuration flags, keys and ma
 * etcd
 * consul
 
-Prior to deploy your monitors, you have to populate your kv store with the help of the script `populate.sh` in examples/confd.
-As soon as this done, you can bootstrap your first monitor.
+There is a `populate.sh` script in the image that is used for defaults to bootstrap daemons. 
+It will add the key if it is not already present.
+You can either prepulate the KV store with your own settings, or provide a populate.sh script
+To supply your own script, make sure to mount the /etc/ceph/ volume and place your populate.sh script there.
 
-Important variables in `populate.sh` to change when you bootstrap an OSD:
+Important variables in `populate.sh` to add/change when you bootstrap an OSD:
 
 * `/osd/journal_size`
 * `/osd/cluster_network`
 * `/osd/public_network`
 
+Note: `cluster_network` and `public_network` are currently not populated in the defaults, but can be passed as environment 
+variables with `-e CEPH_PUBLIC_NETWORK=...` for more flexibility
 
 Deploy a monitor
 ----------------
