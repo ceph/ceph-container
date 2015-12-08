@@ -65,13 +65,6 @@ chown ceph. /var/run/ceph
 # based on the data store
 case "$KV_TYPE" in
    etcd|consul)
-      # if populate.sh script found in /etc/ceph/ use that
-      if [[ -e "/etc/ceph/populate.sh" ]]; then
-        source /etc/ceph/populate.sh
-      else
-      # else use defaults
-        source /populate.sh
-      fi
       source /config.kv.sh
       ;;
    *)
@@ -79,6 +72,38 @@ case "$KV_TYPE" in
       ;;
 esac
 
+##########
+# CONFIG #
+##########
+function kv {
+	# Note the 'cas' command puts a value in the KV store if it is empty
+	KEY="$1"
+	shift
+	VALUE="$*"
+	echo "adding key ${KEY} with value ${VALUE} to KV store"
+	kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} cas ${CLUSTER_PATH}"${KEY}" "${VALUE}" || echo "value is already set"
+}
+
+function populate_kv {
+    CLUSTER_PATH=ceph-config/${CLUSTER}
+    case "$KV_TYPE" in
+       etcd|consul)
+          # if ceph.defaults found in /etc/ceph/ use that
+          if [[ -e "/etc/ceph/ceph.defaults" ]]; then
+            DEFAULTS_PATH="/etc/ceph/ceph.defaults"
+          else
+          # else use defaults
+            DEFAULTS_PATH="/ceph.defaults"
+          fi
+          # read defaults file, grab line with key<space>value without comment #
+          cat "$DEFAULTS_PATH" | grep '^.* .*' | grep -v '#' | while read line; do
+            kv `echo $line`
+          done
+          ;;
+       *)
+          ;;
+    esac
+}
 
 #######
 # MON #
@@ -465,6 +490,9 @@ CEPH_DAEMON=$(echo ${CEPH_DAEMON} |tr '[:upper:]' '[:lower:]')
 # If we are given a valid first argument, set the
 # CEPH_DAEMON variable from it
 case "$CEPH_DAEMON" in
+   populate_kvstore)
+      populate_kv
+      ;;
    mds)
       start_mds
       ;;
