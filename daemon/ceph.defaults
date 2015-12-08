@@ -1,3 +1,7 @@
+# ceph.defaults
+# the format is key_path value
+# the key path will be prefixed by /ceph-config/$CLUSTER
+
 # auth
 /auth/cephx true
 /auth/cephx_require_signatures false
