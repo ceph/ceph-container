@@ -40,12 +40,12 @@ We currently support 2 KV backends to store our configuration flags, keys and ma
 * etcd
 * consul
 
-There is a `populate.sh` script in the image that is used for defaults to bootstrap daemons. 
-It will add the key if it is not already present.
-You can either prepulate the KV store with your own settings, or provide a populate.sh script
-To supply your own script, make sure to mount the /etc/ceph/ volume and place your populate.sh script there.
+There is a `ceph.defaults` config file in the image that is used for defaults to bootstrap daemons. 
+It will add the keys if they are not already present.
+You can either pre-populate the KV store with your own settings, or provide a ceph.defaults config file 
+To supply your own defaults, make sure to mount the /etc/ceph/ volume and place your ceph.defaults file there.
 
-Important variables in `populate.sh` to add/change when you bootstrap an OSD:
+Important variables in `ceph.defaults` to add/change when you bootstrap an OSD:
 
 * `/osd/journal_size`
 * `/osd/cluster_network`
@@ -53,6 +53,18 @@ Important variables in `populate.sh` to add/change when you bootstrap an OSD:
 
 Note: `cluster_network` and `public_network` are currently not populated in the defaults, but can be passed as environment 
 variables with `-e CEPH_PUBLIC_NETWORK=...` for more flexibility
+
+Populate Key Value store
+------------------------
+
+```
+$ sudo docker run -d --net=host \
+-v /etc/ceph:/etc/ceph \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-e MON_IP=192.168.0.20 \
+-e CEPH_PUBLIC_NETWORK=192.168.0.0/24 \
+ceph/daemon populate_kvstore
+```
 
 Deploy a monitor
 ----------------
