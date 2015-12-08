@@ -241,7 +241,7 @@ function osd_directory {
     cat >/etc/service/${CLUSTER}-${OSD_ID}/run <<EOF
 #!/bin/bash
 echo "store-daemon: starting daemon on ${HOSTNAME}..."
-exec ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --osd-journal ${OSD_J} -k /var/lib/ceph/osd/ceph-${OSD_ID}/keyring
+exec ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --osd-journal ${OSD_J} -k /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
 EOF
     chmod +x /etc/service/${CLUSTER}-${OSD_ID}/run
   done
