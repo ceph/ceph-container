@@ -236,7 +236,7 @@ function osd_directory {
     cat >/etc/service/${CLUSTER}-${OSD_ID}/run <<EOF
 #!/bin/bash
 echo "store-daemon: starting daemon on ${HOSTNAME}..."
-exec ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --osd-journal ${OSD_J} -k /var/lib/ceph/osd/ceph-${OSD_ID}/keyring
+exec ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --osd-journal ${OSD_J} -k /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
 EOF
     chmod +x /etc/service/${CLUSTER}-${OSD_ID}/run
   done
@@ -342,7 +342,7 @@ function start_mds {
 
     # Generate the MDS key
     ceph ${CEPH_OPTS} $KEYRING_OPT auth get-or-create mds.$MDS_NAME osd 'allow rwx' mds 'allow' mon 'allow profile mds' -o /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring
-    chown ceph. /var/lib/ceph/mds/${MDS_NAME}/keyring
+    chown ceph. /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring
     chmod 600 /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring
 
   fi
