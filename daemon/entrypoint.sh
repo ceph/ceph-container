@@ -188,10 +188,24 @@ function start_osd {
 #################
 
 function osd_directory {
-  if [[ ! -d /var/lib/ceph/osd || -n "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
-    echo "ERROR- could not find any OSD, did you bind mount the OSD data directory?"
-    echo "ERROR- use -v <host_osd_data_dir>:<container_osd_data_dir>"
+  if [[ ! -d /var/lib/ceph/osd ]]; then
+    echo "ERROR- could not find the osd directory, did you bind mount the OSD data directory?"
+    echo "ERROR- use -v <host_osd_data_dir>:/var/lib/ceph/osd"
     exit 1
+  fi
+
+  # make sure ceph owns the directory
+  chown ceph. /var/lib/ceph/osd
+
+  # check if anything is there, if not create an osd with directory
+  if [[ -n "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
+    echo "Creating osd with ceph osd create"
+    OSD_ID=$(ceph osd create)
+    echo "OSD created with ID: ${OSD_ID}"
+    # create the folder and own it
+    mkdir -p /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}
+    chown ceph. /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}
+    echo "created folder /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}"
   fi
 
   for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }'); do
@@ -218,7 +232,8 @@ function osd_directory {
       timeout 10 ceph ${CEPH_OPTS} --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring health || exit 1
 
       # Add the OSD key
-      ceph ${CEPH_OPTS} --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring auth add osd.${OSD_ID} -i /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd 'allow *' mon 'allow profile osd'
+      ceph ${CEPH_OPTS} --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring auth add osd.${OSD_ID} -i /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd 'allow *' mon 'allow profile osd'  || echo $1
+      echo "done adding key"
       chown ceph. /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
       chmod 0600 /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
       create_socket_dir
@@ -236,7 +251,7 @@ function osd_directory {
     cat >/etc/service/${CLUSTER}-${OSD_ID}/run <<EOF
 #!/bin/bash
 echo "store-daemon: starting daemon on ${HOSTNAME}..."
-exec ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --osd-journal ${OSD_J} -k /var/lib/ceph/osd/ceph-${OSD_ID}/keyring
+exec ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --osd-journal ${OSD_J} -k /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
 EOF
     chmod +x /etc/service/${CLUSTER}-${OSD_ID}/run
   done
