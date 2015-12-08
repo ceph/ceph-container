@@ -21,6 +21,9 @@ RUN mkdir -p /etc/container_environment
 ADD 2.sh /etc/runit/2
 RUN chmod +x /etc/runit/2
 
+ADD populate.sh /populate.sh
+RUN chmod +x /populate.sh
+
 # Add templates for confd
 ADD ./confd/templates/* /etc/confd/templates/
 ADD ./confd/conf.d/* /etc/confd/conf.d/
