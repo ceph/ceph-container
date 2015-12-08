@@ -11,8 +11,11 @@ spec:
   template:
     metadata:
       labels:
-        node-type: storage
+        app: ceph
+        daemon: osd
     spec:
+      nodeSelector:
+        node-type: storage
       volumes:
         - name: devices
           hostPath:
