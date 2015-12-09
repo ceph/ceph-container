@@ -131,7 +131,7 @@ function start_mon {
     create_socket_dir
 
     # Prepare the monitor daemon's directory with the map and keyring
-    ceph-mon --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap --keyring /tmp/${CLUSTER}.mon.keyring
+    ceph-mon --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap --keyring /tmp/${CLUSTER}.mon.keyring --mon-data /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
 
     # Clean up the temporary key
     rm /tmp/${CLUSTER}.mon.keyring
@@ -188,10 +188,30 @@ function start_osd {
 #################
 
 function osd_directory {
-  if [[ ! -d /var/lib/ceph/osd || -n "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
-    echo "ERROR- could not find any OSD, did you bind mount the OSD data directory?"
-    echo "ERROR- use -v <host_osd_data_dir>:<container_osd_data_dir>"
+  if [[ ! -d /var/lib/ceph/osd ]]; then
+    echo "ERROR- could not find the osd directory, did you bind mount the OSD data directory?"
+    echo "ERROR- use -v <host_osd_data_dir>:/var/lib/ceph/osd"
     exit 1
+  fi
+
+  # make sure ceph owns the directory
+  chown ceph. /var/lib/ceph/osd
+
+  # check if anything is there, if not create an osd with directory
+  if [[ -n "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
+    echo "Creating osd with ceph osd create"
+    OSD_ID=$(ceph osd create)
+    if [ "$OSD_ID" -eq "$OSD_ID" ] 2>/dev/null; then
+        echo "OSD created with ID: ${OSD_ID}"
+    else
+      echo "OSD creation failed: ${OSD_ID}"
+      exit 1
+    fi
+
+    # create the folder and own it
+    mkdir -p /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}
+    chown ceph. /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}
+    echo "created folder /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}"
   fi
 
   for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }'); do
