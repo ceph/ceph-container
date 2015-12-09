@@ -201,7 +201,13 @@ function osd_directory {
   if [[ -n "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
     echo "Creating osd with ceph osd create"
     OSD_ID=$(ceph osd create)
-    echo "OSD created with ID: ${OSD_ID}"
+    if [ "$OSD_ID" -eq "$OSD_ID" ] 2>/dev/null; then
+        echo "OSD created with ID: ${OSD_ID}"
+    else
+      echo "OSD creation failed: ${OSD_ID}"
+      exit 1
+    fi
+
     # create the folder and own it
     mkdir -p /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}
     chown ceph. /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}
