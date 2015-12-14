@@ -21,6 +21,9 @@ RUN mkdir -p /etc/container_environment
 ADD 2.sh /etc/runit/2
 RUN chmod +x /etc/runit/2
 
+# ceph defaults key/values for KV store
+ADD ceph.defaults /
+
 # Add templates for confd
 ADD ./confd/templates/* /etc/confd/templates/
 ADD ./confd/conf.d/* /etc/confd/conf.d/
