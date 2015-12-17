@@ -1,0 +1,32 @@
+---
+# Defines deployment design and assigns role to server groups
+
+- hosts: mons
+  connection: local
+  sudo: True
+  roles:
+  - ceph-mon
+
+- hosts: osds
+  connection: local
+  sudo: True
+  roles:
+  - ceph-osd
+
+- hosts: mdss
+  connection: local
+  sudo: True
+  roles:
+  - ceph-mds
+
+- hosts: rgws
+  connection: local
+  sudo: True
+  roles:
+  - ceph-rgw
+
+- hosts: restapis
+  connection: local
+  sudo: True
+  roles:
+  - ceph-restapi
