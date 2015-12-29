@@ -250,9 +250,11 @@ function osd_directory {
   for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }'); do
     if [ -n "${JOURNAL_DIR}" ]; then
        OSD_J="${JOURNAL_DIR}/journal.${OSD_ID}"
+       chown -R ceph. ${JOURNAL_DIR}
     else
        if [ -n "${JOURNAL}" ]; then
           OSD_J=${JOURNAL}
+          chown -R ceph. $(dirname ${JOURNAL_DIR})
        else
           OSD_J=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/journal
        fi
@@ -260,6 +262,7 @@ function osd_directory {
 
     # Check to see if our OSD has been initialized
     if [ ! -e /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring ]; then
+      chown ceph. /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}
       # Create OSD key and file structure
       ceph-osd ${CEPH_OPTS} -i $OSD_ID --mkfs --mkkey --mkjournal --osd-journal ${OSD_J} --setuser ceph --setgroup ceph
 
