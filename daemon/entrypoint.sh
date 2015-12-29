@@ -181,6 +181,7 @@ function start_mon {
 function start_osd {
    get_config
    check_config
+   create_socket_dir
 
    if [ ${CEPH_GET_ADMIN_KEY} -eq "1" ]; then
      get_admin_key
@@ -274,7 +275,6 @@ function osd_directory {
       echo "done adding key"
       chown ceph. /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
       chmod 0600 /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
-      create_socket_dir
 
       # Add the OSD to the CRUSH map
       if [ ! -n "${HOSTNAME}" ]; then
@@ -316,7 +316,6 @@ function osd_disk {
 
   mkdir -p /var/lib/ceph/osd
   chown ceph. /var/lib/ceph/osd
-  create_socket_dir
 
   # TODO:
   # -  add device format check (make sure only one device is passed
@@ -357,7 +356,6 @@ function osd_activate {
 
   mkdir -p /var/lib/ceph/osd
   chown ceph. /var/lib/ceph/osd
-  create_socket_dir
   chown ceph. ${OSD_DEVICE}2
   ceph-disk -v activate ${OSD_DEVICE}1
   OSD_ID=$(cat /var/lib/ceph/osd/$(ls -ltr /var/lib/ceph/osd/ | tail -n1 | awk -v pattern="$CLUSTER" '$0 ~ pattern {print $9}')/whoami)
