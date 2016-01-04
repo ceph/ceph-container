@@ -238,6 +238,10 @@ To create your OSDs simply run the following command:
 
 `docker exec <mon-container-id> ceph osd create`.
 
+Note that we now default to dropping root privileges, so it is important to set the proper ownership for your OSD directories.  The Ceph OSD runs as UID:64045, GID:64045, so:
+
+`chown -R 64045:64045 /var/lib/ceph/osd/*`
+
 
 #### Multiple OSDs ####
 
