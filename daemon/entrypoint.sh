@@ -232,8 +232,8 @@ function osd_directory {
 
   # check if anything is there, if not create an osd with directory
   if [[ -n "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
-    echo "Creating osd with ceph osd create"
-    OSD_ID=$(ceph osd create)
+    echo "Creating osd with ceph --cluster ${CLUSTER} osd create"
+    OSD_ID=$(ceph --cluster ${CLUSTER} osd create)
     if [ "$OSD_ID" -eq "$OSD_ID" ] 2>/dev/null; then
         echo "OSD created with ID: ${OSD_ID}"
     else
