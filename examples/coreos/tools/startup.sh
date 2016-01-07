@@ -19,3 +19,8 @@ if [ ! -e /opt/bin/rados ] || [ "$(checksum /opt/bin/rados)" != "$(checksum /rad
 	echo "Installing rados to /opt/bin"
 	cp -pf /rados /opt/bin
 fi
+
+if [ ! -e /opt/bin/rados ] || [ "$(checksum /opt/bin/rbd)" != "$(checksum /rbd)" ]; then
+	echo "Installing rbd to /opt/bin"
+	cp -pf /rbd /opt/bin
+fi
