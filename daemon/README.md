@@ -346,6 +346,10 @@ List of available options:
 * `RGW_CIVETWEB_PORT` is the port to which civetweb is listening on (DEFAULT: 80)
 * `RGW_NAME`: default to hostname
 
+Administration via [radosgw-admin](http://docs.ceph.com/docs/infernalis/man/8/radosgw-admin/) from the Docker host:
+
+`docker exec <containerId> radosgw-admin -n client.rgw.$(hostname) -k /var/lib/ceph/radosgw/$(hostname)/keyring <commands>`
+
 To enable an external CGI interface instead of civetweb set:
 
 * `RGW_REMOTE_CGI=1`
@@ -353,7 +357,6 @@ To enable an external CGI interface instead of civetweb set:
 * `RGW_REMOTE_CGI_PORT=9000`
 
 And run the container like this `docker run -d -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph -e CEPH_DAEMON=RGW -e RGW_NAME=myrgw -p 9000:9000 -e RGW_REMOTE_CGI=1 -e RGW_REMOTE_CGI_HOST=192.168.0.1 -e RGW_REMOTE_CGI_PORT=9000 ceph/daemon`
-
 
 Deploy a REST API
 -----------------
