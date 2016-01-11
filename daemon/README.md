@@ -346,9 +346,11 @@ List of available options:
 * `RGW_CIVETWEB_PORT` is the port to which civetweb is listening on (DEFAULT: 80)
 * `RGW_NAME`: default to hostname
 
-Administration via [radosgw-admin](http://docs.ceph.com/docs/infernalis/man/8/radosgw-admin/) from the Docker host:
+Administration via [radosgw-admin](http://docs.ceph.com/docs/infernalis/man/8/radosgw-admin/) from the Docker host if the `RGW_NAME` variable hasn't been supplied:
 
 `docker exec <containerId> radosgw-admin -n client.rgw.$(hostname) -k /var/lib/ceph/radosgw/$(hostname)/keyring <commands>`
+
+If otherwise, `$(hostname)`  has to be replaced by the value of `RGW_NAME`.
 
 To enable an external CGI interface instead of civetweb set:
 
