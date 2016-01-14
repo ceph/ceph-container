@@ -115,18 +115,23 @@ function start_mon {
     exit 1
   fi
 
-  if [ ${MON_IP_AUTO_DETECT} -eq 1 ]; then
-    MON_IP=$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)
-    if [ -z "$MON_IP" ]; then
+  if [ command -v ip ]; then
+    if [ ${MON_IP_AUTO_DETECT} -eq 1 ]; then
+      MON_IP=$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)
+      if [ -z "$MON_IP" ]; then
+        MON_IP=$(ip -4 -o a | awk '/eth/ { sub ("/..", "", $4); print $4 }')
+      fi
+    elif [ ${MON_IP_AUTO_DETECT} -eq 4 ]; then
       MON_IP=$(ip -4 -o a | awk '/eth/ { sub ("/..", "", $4); print $4 }')
+    elif [ ${MON_IP_AUTO_DETECT} -eq 6 ]; then
+      MON_IP=$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)
     fi
-  elif [ ${MON_IP_AUTO_DETECT} -eq 4 ]; then
-    MON_IP=$(ip -4 -o a | awk '/eth/ { sub ("/..", "", $4); print $4 }')
-  elif [ ${MON_IP_AUTO_DETECT} -eq 6 ]; then
-    MON_IP=$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)
+  # best effort, only works with ipv4
+  else
+    MON_IP=$(grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}' /proc/net/fib_trie | grep -vE "^127|255$|0$")
   fi
 
-  if [ ! -n "$MON_IP" && ${MON_IP_AUTO_DETECT} -ne 0 ]; then
+  if [[ ! -n "$MON_IP" && ${MON_IP_AUTO_DETECT} -ne 0 ]]; then
     echo "ERROR- MON_IP must be defined as the IP address of the monitor"
     exit 1
   fi
