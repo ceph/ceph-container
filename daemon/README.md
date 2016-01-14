@@ -101,7 +101,7 @@ List of available options:
 * `CEPH_PUBLIC_NETWORK`: CIDR of the host running Docker, it should be in the same network as the `MON_IP`
 * `CEPH_CLUSTER_NETWORK`: CIDR of a secondary interface of the host running Docker. Used for the OSD replication traffic
 * `MON_IP`: IP address of the host running Docker
-* `MON_IP_AUTO_DETECT`: Whether and how to attempt IP autodetection.
+* `NETWORK_AUTO_DETECT`: Whether and how to attempt IP and network autodetection. Meant to be used without `--net=host`.
     *  0 = Do not detect (default)
     *  1 = Detect IPv6, fallback to IPv4 (if no globally-routable IPv6 address detected)
     *  4 = Detect IPv4 only
