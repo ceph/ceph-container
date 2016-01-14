@@ -126,7 +126,7 @@ function start_mon {
     MON_IP=$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)
   fi
 
-  if [ ! -n "$MON_IP" ]; then
+  if [ ! -n "$MON_IP" && ${MON_IP_AUTO_DETECT} -ne 0 ]; then
     echo "ERROR- MON_IP must be defined as the IP address of the monitor"
     exit 1
   fi
