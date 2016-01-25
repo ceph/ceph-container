@@ -366,7 +366,7 @@ function osd_disk {
       echo "OSD (PID ${OSD_PID}) is running, waiting till it exits"
       while [ -e /proc/${OSD_PID} ]; do sleep 1;done
   else
-      exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup ceph
+      exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup disk
   fi
 }
 
