@@ -8,7 +8,8 @@ FROM ceph/base
 MAINTAINER Sébastien Han "seb@redhat.com"
 
 RUN apt-get update && apt-get -y install runit && \
-apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    apt-get install patch && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Add bootstrap script
 ADD entrypoint.sh /entrypoint.sh
@@ -27,6 +28,10 @@ ADD ceph.defaults /
 # Add templates for confd
 ADD ./confd/templates/* /etc/confd/templates/
 ADD ./confd/conf.d/* /etc/confd/conf.d/
+
+# Patch out ceph-disk, to allow overrides to user and group names
+ADD ./ceph-disk.patch /ceph-disk.patch
+RUN cd /usr/sbin && patch -p1 -n -u < /ceph-disk.patch
 
 # Add volumes for Ceph config and data
 VOLUME ["/etc/ceph","/var/lib/ceph"]
