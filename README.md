@@ -5,7 +5,7 @@ Ceph-related dockerfiles
 
 ## Core Components:
 
-* [`ceph/base`](base/):  Ceph base container image.  This is nothing but a fresh install of the latest Ceph on Ubuntu LTS (14.04)
+* [`ceph/base`](base/):  Ceph base container image.  This is nothing but a fresh install of the latest Ceph on CentOS (latest)
 * [`ceph/mds`](mds/): Ceph MDS (Metadata server)
 * [`ceph/mon`](mon/): Ceph Mon(itor)
 * [`ceph/osd`](osd/): Ceph OSD (object storage daemon)
