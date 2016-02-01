@@ -360,9 +360,10 @@ function osd_disk {
   ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
 
   # ceph-disk activiate has exec'ed /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID}
-  # wait till ceph-osd exit
+  # wait till docker stop or ceph-osd is killed, 
   OSD_PID=$(ps -ef |grep ceph-osd |grep osd.${OSD_ID} |awk '{print $2}')
   if [ ! -z ${OSD_ID} ]; then
+      echo "OSD (PID ${OSD_PID} is running, waiting till it exits"
       while [ -e /proc/${OSD_PID} ]; do sleep 1;done
   else
       exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup ceph
@@ -389,9 +390,10 @@ function osd_activate {
   ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
 
   # ceph-disk activiate has exec'ed /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID}
-  # wait till ceph-osd exit
+  # wait till docker stop or ceph-osd is killed
   OSD_PID=$(ps -ef |grep ceph-osd |grep osd.${OSD_ID} |awk '{print $2}')
   if [ ! -z ${OSD_ID} ]; then
+     echo "OSD (PID ${OSD_PID} is running, waiting till it exits"
       while [ -e /proc/${OSD_PID} ]; do sleep 1;done
   else
       exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup ceph
