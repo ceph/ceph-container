@@ -83,7 +83,6 @@ With KV store, run:
 
 ```
 $ sudo docker run -d --net=host \
--v /var/lib/ceph/:/var/lib/ceph/ \
 -e MON_IP=192.168.0.20 \
 -e CEPH_PUBLIC_NETWORK=192.168.0.0/24 \
 -e KV_TYPE=etcd \
@@ -145,7 +144,6 @@ With KV backend:
 $ sudo docker run -d --net=host \
 --privileged=true \
 --pid=host \
--v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
 -e OSD_DEVICE=/dev/vdd \
 -e OSD_FORCE_ZAP=1 \
@@ -176,7 +174,6 @@ With KV backend:
 $ sudo docker run -d --net=host \
 --privileged=true \
 --pid=host \
--v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
 -e OSD_DEVICE=/dev/vdd \
 -e OSD_TYPE=disk \
@@ -292,11 +289,10 @@ $ sudo docker run -d --net=host \
 ceph/daemon mds
 ```
 
-Without KV backend, run:
+With KV backend, run:
 
 ```
 $ sudo docker run -d --net=host \
--v /var/lib/ceph/:/var/lib/ceph/ \
 -e CEPHFS_CREATE=1 \
 -e KV_TYPE=etcd \
 -e KV_IP=192.168.0.20 \
@@ -331,7 +327,6 @@ With kv backend, run:
 
 ```
 $ sudo docker run -d --net=host \
--v /var/lib/ceph/:/var/lib/ceph/ \
 -e KV_TYPE=etcd \
 -e KV_IP=192.168.0.20 \
 ceph/daemon rgw
