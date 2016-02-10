@@ -33,6 +33,7 @@
 #/osd/public_network 198.100.128.0/19
 /osd/osd_mkfs_type xfs
 /osd/osd_mkfs_options_xfs "-f -i size=2048"
+/osd/osd_mkfs_options_btrfs "-f"
 /osd/osd_mon_heartbeat_interval 30
 
 #crush
