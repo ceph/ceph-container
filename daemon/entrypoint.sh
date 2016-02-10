@@ -354,7 +354,7 @@ function osd_disk {
     chown ceph. ${OSD_DEVICE}2
   fi
 
-  ceph-disk -v activate ${OSD_DEVICE}1
+  ceph-disk -v --setuser ceph --setgroup disk activate ${OSD_DEVICE}1
   OSD_ID=$(cat /var/lib/ceph/osd/$(ls -ltr /var/lib/ceph/osd/ | tail -n1 | awk -v pattern="$CLUSTER" '$0 ~ pattern {print $9}')/whoami)
   OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
   ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
@@ -366,7 +366,7 @@ function osd_disk {
       echo "OSD (PID ${OSD_PID}) is running, waiting till it exits"
       while [ -e /proc/${OSD_PID} ]; do sleep 1;done
   else
-      exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup ceph
+      exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup disk
   fi
 }
 
@@ -384,7 +384,7 @@ function osd_activate {
   mkdir -p /var/lib/ceph/osd
   chown ceph. /var/lib/ceph/osd
   chown ceph. ${OSD_DEVICE}2
-  ceph-disk -v activate ${OSD_DEVICE}1
+  ceph-disk -v --setuser ceph --setgroup disk activate ${OSD_DEVICE}1
   OSD_ID=$(cat /var/lib/ceph/osd/$(ls -ltr /var/lib/ceph/osd/ | tail -n1 | awk -v pattern="$CLUSTER" '$0 ~ pattern {print $9}')/whoami)
   OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
   ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
@@ -396,7 +396,7 @@ function osd_activate {
       echo "OSD (PID ${OSD_PID}) is running, waiting till it exits"
       while [ -e /proc/${OSD_PID} ]; do sleep 1;done
   else
-      exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup ceph
+      exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup disk
   fi
 }
 
