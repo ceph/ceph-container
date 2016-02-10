@@ -362,7 +362,7 @@ function osd_disk {
   # ceph-disk activiate has exec'ed /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID}
   # wait till docker stop or ceph-osd is killed,
   OSD_PID=$(ps -ef |grep ceph-osd |grep osd.${OSD_ID} |awk '{print $2}')
-  if [ -n ${OSD_PID} ]; then
+  if [ -n "${OSD_PID}" ]; then
       echo "OSD (PID ${OSD_PID}) is running, waiting till it exits"
       while [ -e /proc/${OSD_PID} ]; do sleep 1;done
   else
@@ -392,7 +392,7 @@ function osd_activate {
   # ceph-disk activiate has exec'ed /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID}
   # wait till docker stop or ceph-osd is killed
   OSD_PID=$(ps -ef |grep ceph-osd |grep osd.${OSD_ID} |awk '{print $2}')
-  if [ -n ${OSD_PID} ]; then
+  if [ -n "${OSD_PID}" ]; then
       echo "OSD (PID ${OSD_PID}) is running, waiting till it exits"
       while [ -e /proc/${OSD_PID} ]; do sleep 1;done
   else
