@@ -7,7 +7,7 @@
 FROM ceph/base
 MAINTAINER Sébastien Han "seb@redhat.com"
 
-# patch is only needed until PR #7531 is merged in ceph/ceph (and backported
+# patch is only needed until PR #7351 is merged in ceph/ceph (and backported
 # to the version used in ceph/ceph-docker)
 RUN apt-get update && apt-get -y install runit && \
     apt-get install patch && \
