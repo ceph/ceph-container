@@ -7,6 +7,8 @@
 FROM ceph/base
 MAINTAINER Sébastien Han "seb@redhat.com"
 
+# patch is only needed until PR #7531 is merged in ceph/ceph (and backported
+# to the version used in ceph/ceph-docker)
 RUN apt-get update && apt-get -y install runit && \
     apt-get install patch && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -30,6 +32,8 @@ ADD ./confd/templates/* /etc/confd/templates/
 ADD ./confd/conf.d/* /etc/confd/conf.d/
 
 # Patch out ceph-disk, to allow overrides to user and group names
+# This can be removed once PR #7351 is merged in ceph/ceph (and backported to
+# the version used by ceph/ceph-docker)
 ADD ./ceph-disk.patch /ceph-disk.patch
 RUN cd /usr/sbin && patch -p1 -n -u < /ceph-disk.patch
 
