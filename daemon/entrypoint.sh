@@ -211,6 +211,9 @@ function start_osd {
       disk)
          osd_disk
          ;;
+      prepare)
+         osd_disk_prepare
+         ;;
       activate)
          osd_activate
          ;;
@@ -316,11 +319,11 @@ EOF
 exec /sbin/my_init
 }
 
-#################
-# OSD_CEPH_DISK #
-#################
+#########################
+# OSD_CEPH_DISK_PREPARE #
+#########################
 
-function osd_disk {
+function osd_disk_prepare {
   if [[ -z "${OSD_DEVICE}" ]];then
     echo "ERROR- You must provide a device to build your OSD ie: /dev/sdb"
     exit 1
@@ -358,18 +361,16 @@ function osd_disk {
   OSD_ID=$(cat /var/lib/ceph/osd/$(ls -ltr /var/lib/ceph/osd/ | tail -n1 | awk -v pattern="$CLUSTER" '$0 ~ pattern {print $9}')/whoami)
   OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
   ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
-
-  # ceph-disk activiate has exec'ed /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID}
-  # wait till docker stop or ceph-osd is killed,
-  OSD_PID=$(ps -ef |grep ceph-osd |grep osd.${OSD_ID} |awk '{print $2}')
-  if [ -n "${OSD_PID}" ]; then
-      echo "OSD (PID ${OSD_PID}) is running, waiting till it exits"
-      while [ -e /proc/${OSD_PID} ]; do sleep 1;done
-  else
-      exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup disk
-  fi
 }
 
+
+#################
+# OSD_CEPH_DISK #
+#################
+function osd_disk {
+  osd_disk_prepare
+  osd_activate
+}
 
 ##########################
 # OSD_CEPH_DISK_ACTIVATE #
@@ -381,6 +382,8 @@ function osd_activate {
     exit 1
   fi
 
+  # wait till partition exists
+  timeout 10  bash -c "while [ ! -e ${OSD_DEVICE}1 ]; do sleep 1; done"
   mkdir -p /var/lib/ceph/osd
   chown ceph. /var/lib/ceph/osd
   chown ceph. ${OSD_DEVICE}2
@@ -564,6 +567,10 @@ case "$CEPH_DAEMON" in
       OSD_TYPE="disk"
       start_osd
       ;;
+   osd_ceph_disk_prepare)
+      OSD_TYPE="prepare"
+      start_osd
+      ;;
    osd_ceph_disk_activate)
       OSD_TYPE="activate"
       start_osd
@@ -578,8 +585,8 @@ case "$CEPH_DAEMON" in
       if [ ! -n "$CEPH_DAEMON" ]; then
           echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
           echo "of the daemon you want to deploy."
-          echo "Valid values for CEPH_DAEMON are MON, OSD, OSD_DIRECTORY, OSD_CEPH_DISK, OSD_CEPH_DISK_ACTIVATE, MDS, RGW, RESTAPI"
-          echo "Valid values for the daemon parameter are mon, osd, osd_directory, osd_ceph_disk, osd_ceph_disk_activate, mds, rgw, restapi"
+          echo "Valid values for CEPH_DAEMON are MON, OSD, OSD_DIRECTORY, OSD_CEPH_DISK, OSD_CEPH_DISK_PREPARE, OSD_CEPH_DISK_ACTIVATE, MDS, RGW, RESTAPI"
+          echo "Valid values for the daemon parameter are mon, osd, osd_directory, osd_ceph_disk, osd_ceph_disk_prepare, osd_ceph_disk_activate, mds, rgw, restapi"
           exit 1
       fi
       ;;
