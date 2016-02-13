@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+/remove-mon.sh || true
+
 : ${CLUSTER:=ceph}
 : ${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}
 : ${CEPH_DAEMON:=${1}} # default daemon to first argument
@@ -72,7 +74,7 @@ case "$KV_TYPE" in
       source /config.kv.sh
       ;;
    k8s|kubernetes)
-      source config.k8s.sh
+      source /config.k8s.sh
       ;;
    *)
       source /config.static.sh
