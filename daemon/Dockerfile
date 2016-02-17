@@ -10,7 +10,7 @@ MAINTAINER Sébastien Han "seb@redhat.com"
 # patch is only needed until PR #7351 is merged in ceph/ceph (and backported
 # to the version used in ceph/ceph-docker)
 RUN apt-get update && apt-get -y install runit && \
-    apt-get -y install patch && \
+    apt-get -y install patch sharutils && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Add bootstrap script
