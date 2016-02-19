@@ -1,0 +1,27 @@
+{
+  "id": "ceph-osd1",
+  "kind": "Pod",
+  "apiVersion": "v1",
+  "metadata": {
+     "name": "ceph-osd1",
+     "labels": {
+       "name": "ceph-osd"
+     }
+  },
+  "spec": {
+     "nodeSelector": {"name": "nodeA"},
+     "volumes": [{"name": "hostdevices", "hostPath": {"path":"/dev/"}}],
+     "containers": [{
+        "name": "ceph-osd1-pod",
+        "image": "ceph/daemon:centos-latest",
+        "securityContext": {
+	   "capabilities":{},
+	   "privileged": true
+        },
+        "env": [{"name":"CEPH_DAEMON", "value":"OSD"}, {"name":"OSD_DEVICE", "value":"/dev/sdc"}, {"name":"OSD_TYPE", "value":"disk"},
+                {"name":"KV_TYPE", "value":"etcd"}, {"name": "KV_PORT", "value":"2379"}, {"name":"KV_IP", "value":"etcd_service"},
+	        {"name":"OSD_FORCE_ZAP", "value": "1"}],
+        "volumeMounts": [{"name": "hostdevices", "mountPath": "/dev"}]
+     }]
+  }
+}
