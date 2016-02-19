@@ -25,11 +25,6 @@
 /mon/mon_clock_drift_warn_backoff 30
 /mon/mon_osd_report_timeout 300
 
-#debug osd
-/osd/debug_osd 20
-/osd/debug_ms 1
-/osd/debug_monc 20
-
 #osd
 /osd/journal_size 100
 
