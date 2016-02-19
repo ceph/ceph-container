@@ -21,6 +21,14 @@ You can use this container to bootstrap any Ceph daemon.
 * `CLUSTER` is the name of the cluster (DEFAULT: ceph)
 * `HOSTNAME` is the hostname of the machine  (DEFAULT: $(hostname))
 
+SELinux
+-------
+If SELinux is enabled, run the following commands:
+
+```
+$ sudo chcon -Rt svirt_sandbox_file_t /etc/ceph
+$ sudo chcon -Rt svirt_sandbox_file_t /var/lib/ceph		
+```
 
 KV backends
 -----------
@@ -39,6 +47,16 @@ Important variables in `populate.sh` to change when you bootstrap an OSD:
 * `/osd/cluster_network`
 * `/osd/public_network`
 
+Populate Key Value store
+------------------------
+
+```
+$ sudo docker run -d --net=host \
+-e KV_TYPE=etcd \
+-e KV_IP=127.0.0.1 \
+-e KV_PORT=2379 \
+ceph/daemon populate_kvstore
+```
 
 Deploy a monitor
 ----------------
