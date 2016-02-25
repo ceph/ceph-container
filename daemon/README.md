@@ -68,6 +68,16 @@ ceph/daemon populate_kvstore
 Deploy a monitor
 ----------------
 
+A monitor requires some persistent storage for the docker container.  If a KV
+store is used, `/etc/ceph` will be auto-generated from data kept in the KV
+store.  `/var/lib/ceph`, however, *must* be provided by a docker volume.
+The ceph mon will periodically store data into /var/lib/ceph, including the
+latest copy of the CRUSH map.  If a mon restarts, it will attempt to download
+the latest monmap and CRUSH map from other peer monitors.  However, if all
+mon daemons have gone down, monitors must be able to recover their previous
+maps.  The docker volume used for `/var/lib/ceph` should be backed by some
+durable storage, and must be able to survive container and node restarts.
+
 Without KV store, run:
 
 ```
@@ -83,6 +93,7 @@ With KV store, run:
 
 ```
 $ sudo docker run -d --net=host \
+-v /var/lib/ceph:/var/lib/ceph \
 -e MON_IP=192.168.0.20 \
 -e CEPH_PUBLIC_NETWORK=192.168.0.0/24 \
 -e KV_TYPE=etcd \
