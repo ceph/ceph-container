@@ -361,12 +361,13 @@ function osd_disk_prepare {
   if [[ ! -z "${OSD_JOURNAL}" ]]; then
     ceph-disk -v prepare ${OSD_DEVICE} ${OSD_JOURNAL}
     chown ceph. ${OSD_JOURNAL}
+    ceph-disk -v --setuser ceph --setgroup disk activate ${OSD_DEVICE}
   else
     ceph-disk -v prepare ${OSD_DEVICE}
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
+    ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
   fi
 
-  ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
   OSD_ID=$(cat /var/lib/ceph/osd/$(ls -ltr /var/lib/ceph/osd/ | tail -n1 | awk -v pattern="$CLUSTER" '$0 ~ pattern {print $9}')/whoami)
   OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
   ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
@@ -392,11 +393,20 @@ function osd_activate {
   fi
 
   # wait till partition exists
-  timeout 10  bash -c "while [ ! -e $(dev_part ${OSD_DEVICE} 1) ]; do sleep 1; done"
+  if [[ ! -z "${OSD_JOURNAL}" ]]; then
+    timeout 10  bash -c "while [ ! -e ${OSD_DEVICE} ]; do sleep 1; done"
+  else
+    timeout 10  bash -c "while [ ! -e $(dev_part ${OSD_DEVICE} 1) ]; do sleep 1; done"
+  fi
   mkdir -p /var/lib/ceph/osd
   chown ceph. /var/lib/ceph/osd
-  chown ceph. $(dev_part ${OSD_DEVICE} 2)
-  ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
+  if [[ ! -z "${OSD_JOURNAL}" ]]; then
+    chown ceph. ${OSD_JOURNAL}
+    ceph-disk -v --setuser ceph --setgroup disk activate ${OSD_DEVICE}
+  else
+    chown ceph. $(dev_part ${OSD_DEVICE} 2)
+    ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
+  fi
   OSD_ID=$(cat /var/lib/ceph/osd/$(ls -ltr /var/lib/ceph/osd/ | tail -n1 | awk -v pattern="$CLUSTER" '$0 ~ pattern {print $9}')/whoami)
   OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
   ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
