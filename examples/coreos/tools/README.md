@@ -23,4 +23,4 @@ Then use the CLI tools as you normally would.
 `rados lspools`  
 `rbd ls`  
 
-** Note: ** If the directory where you have loaded the files is not in PATH, you may need to add the directory or call using the full path to the wrapper (i.e. `/opt/bin/rbd ls`)
+__Note:__ If the directory where you have loaded the files is not in PATH, you may need to add the directory or call using the full path to the wrapper (i.e. `/opt/bin/rbd ls`)
