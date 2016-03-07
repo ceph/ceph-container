@@ -1,5 +1,5 @@
 FROM busybox
-MAINTAINER Matthew Hook "hookenz@gmail.com"
+MAINTAINER Jason Murray "jason@murrayinfotech.com"
 
 ADD ceph /
 ADD ceph-disk /
