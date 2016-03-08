@@ -1,0 +1,2 @@
+#!/bin/sh
+/usr/bin/docker run --rm -v /etc/ceph:/etc/ceph ceph/base rbd "$@"
