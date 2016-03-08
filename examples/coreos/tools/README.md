@@ -1,8 +1,8 @@
-#ceph-tools
+# ceph-tools
 
 These are wrapper files for ceph CLI tools to make working with ceph a little easier and allow direct usage from the host OS.
 
-##Installation
+## Installation
 
 
 Copy the tools files wherever you would like them.  e.g. /opt/bin
