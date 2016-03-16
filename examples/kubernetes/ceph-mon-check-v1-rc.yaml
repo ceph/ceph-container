@@ -4,21 +4,21 @@ apiVersion: v1
 metadata:
   labels:
     app: ceph
-    daemon: mon
-  name: ceph-mon
+    daemon: moncheck
+  name: ceph-mon-check
   namespace: ceph
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     app: ceph
-    daemon: mon
+    daemon: moncheck
   template:
     metadata:
       name: ceph-mon
       namespace: ceph
       labels:
         app: ceph
-        daemon: mon
+        daemon: moncheck
     spec:
       serviceAccount: default
       volumes:
@@ -36,19 +36,14 @@ spec:
             secretName: ceph-bootstrap-rgw-keyring
       containers:
         - name: ceph-mon
-          image: quay.io/cornelius/ceph-daemon:kubernetes
-#          imagePullPolicy: Always
-          lifecycle:
-            preStop:
-                exec:
-                  # remove the mon on Pod stop.
-                  command:
-                    - "/remove-mon.sh"
+        #image: quay.io/acaleph/ceph-daemon:kubernetes
+          image: quay.io/cornelius/ceph-daemon:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 6789
           env:
             - name: CEPH_DAEMON
-              value: MON
+              value: MON_HEALTH
             - name: CEPH_PUBLIC_NETWORK
               value: 10.1.0.0/16
             - name: CEPH_CLUSTER_NETWORK
@@ -68,12 +63,3 @@ spec:
               mountPath: /var/lib/ceph/bootstrap-mds
             - name: ceph-bootstrap-rgw-keyring
               mountPath: /var/lib/ceph/bootstrap-rgw
-          livenessProbe:
-              tcpSocket:
-                port: 6789
-              initialDelaySeconds: 60
-              timeoutSeconds: 5
-          readinessProbe:
-              tcpSocket:
-                port: 6789
-              timeoutSeconds: 5

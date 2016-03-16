@@ -27,8 +27,8 @@ mon_osd_report_timeout = ${mon_mon_osd_report_timeout:-"300"}
 
 [osd]
 journal_size = ${osd_journal_size:-"100"}
-cluster_network = ${osd_cluster_network:-'10.2.0.0/16'}
-public_network = ${osd_public_network:-'10.2.0.0/16'}
+cluster_network = ${osd_cluster_network:-'10.1.0.0/16'}
+public_network = ${osd_public_network:-'10.1.0.0/16'}
 osd_mkfs_type = ${osd_osd_mkfs_type:-"xfs"}
 osd_mkfs_options_xfs = ${osd_osd_mkfs_options_xfs:-"-f -i size=2048"}
 osd_mon_heartbeat_interval = ${osd_osd_mon_heartbeat_interval:-"30"}

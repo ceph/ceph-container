@@ -1,6 +1,6 @@
 ---
-kind: ReplicationController
-apiVersion: v1
+kind: DaemonSet
+apiVersion: extensions/v1beta1
 metadata:
   labels:
     app: ceph
@@ -8,7 +8,6 @@ metadata:
   name: ceph-mon
   namespace: ceph
 spec:
-  replicas: 3
   selector:
     app: ceph
     daemon: mon
@@ -20,6 +19,8 @@ spec:
         app: ceph
         daemon: mon
     spec:
+      nodeSelector:
+        node-type: storage
       serviceAccount: default
       volumes:
         - name: ceph-conf
@@ -36,7 +37,8 @@ spec:
             secretName: ceph-bootstrap-rgw-keyring
       containers:
         - name: ceph-mon
-          image: quay.io/cornelius/ceph-daemon:kubernetes
+          image: quay.io/cornelius/ceph-daemon:latest
+#         image: quay.io/acaleph/ceph-daemon:kubernetes
 #          imagePullPolicy: Always
           lifecycle:
             preStop:

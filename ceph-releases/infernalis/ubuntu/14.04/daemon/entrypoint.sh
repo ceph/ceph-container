@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-/remove-mon.sh || true
-
 : ${CLUSTER:=ceph}
 : ${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}
 : ${CEPH_DAEMON:=${1}} # default daemon to first argument
@@ -451,6 +449,24 @@ ENDHERE
 
 }
 
+####################
+# WATCH MON HEALTH #
+###################
+
+function watch_mon_health {
+echo "checking for zombie mons"
+
+while [ true ]
+do
+ echo "checking for zombie mons"
+ /check_zombie_mons.py || true;
+ echo "sleep 30 sec"
+ sleep 30
+done
+
+
+}
+
 ###############
 # CEPH_DAEMON #
 ###############
@@ -487,6 +503,9 @@ case "$CEPH_DAEMON" in
       ;;
    restapi)
       start_restapi
+      ;;
+   mon_health)
+      watch_mon_health
       ;;
    *)
       if [ ! -n "$CEPH_DAEMON" ]; then
