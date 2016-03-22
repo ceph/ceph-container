@@ -276,7 +276,12 @@ function osd_directory {
   fi
 
   for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }'); do
-    if [ -n "${JOURNAL_DIR}" ]; then
+    OSD_JOURNAL_TMP="OSD_JOURNAL$OSD_ID"
+    OSD_JOURNAL=${!OSD_JOURNAL_TMP}
+    if [ -n "${OSD_JOURNAL}" ]; then
+      ceph-disk -v prepare ${OSD_JOURNAL}
+      OSD_J=${OSD_JOURNAL}
+    elif [ -n "${JOURNAL_DIR}" ]; then
        OSD_J="${JOURNAL_DIR}/journal.${OSD_ID}"
        chown -R ceph. ${JOURNAL_DIR}
     else
@@ -292,7 +297,7 @@ function osd_directory {
     if [ ! -e /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring ]; then
       chown ceph. /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}
       # Create OSD key and file structure
-      ceph-osd ${CEPH_OPTS} -i $OSD_ID --mkfs --mkkey --mkjournal --osd-journal ${OSD_J} --setuser ceph --setgroup ceph
+      ceph-osd ${CEPH_OPTS} -i $OSD_ID --mkfs --mkkey --mkjournal --osd-journal ${OSD_J} --setuser ceph --setgroup disk
 
       if [ ! -e /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring ]; then
         echo "ERROR- /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-osd -o /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring'"
