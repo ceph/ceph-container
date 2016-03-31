@@ -15,7 +15,7 @@ RUN apt-get update && apt-get -y install runit patch sharutils && \
 # Add bootstrap script, ceph defaults key/values for KV store
 # Also add patch to ceph-disk.  This can be removed once PR #7351 is merged
 # in ceph/ceph (and backported to the version used by ceph/ceph-docker)
-ADD entrypoint.sh config.*.sh ceph.defaults ceph.defaults /
+ADD entrypoint.sh config.*.sh ceph-disk.patch ceph.defaults /
 
 ADD my_init/my_init /sbin/my_init
 ADD 2.sh /etc/runit/2
