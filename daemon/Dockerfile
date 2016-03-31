@@ -17,8 +17,8 @@ ADD entrypoint.sh /entrypoint.sh
 ADD config.*.sh /
 
 ADD my_init/my_init /sbin/my_init
-RUN chmod +x /sbin/my_init
-RUN mkdir -p /etc/container_environment
+RUN chmod +x /sbin/my_init && \
+    mkdir -p /etc/container_environment
 
 ADD 2.sh /etc/runit/2
 RUN chmod +x /etc/runit/2
