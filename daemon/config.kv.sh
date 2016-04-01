@@ -56,7 +56,8 @@ function get_mon_config {
 
     echo "Trying to get the most recent monmap..."
     if timeout 5 ceph ${CEPH_OPTS} mon getmap -o /etc/ceph/monmap; then
-      echo "Monmap successfully retrieved."
+      echo "Monmap successfully retrieved.  Updating KV store."
+      uuencode /etc/ceph/monmap - | kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/monmap -
     else
       echo "Peers not found, using initial monmap."
     fi
