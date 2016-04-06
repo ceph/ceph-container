@@ -361,11 +361,9 @@ function osd_disk_prepare {
   if [[ ! -z "${OSD_JOURNAL}" ]]; then
     ceph-disk -v prepare ${OSD_DEVICE} ${OSD_JOURNAL}
     chown ceph. ${OSD_JOURNAL}
-    ceph-disk -v --setuser ceph --setgroup disk activate ${OSD_DEVICE}
   else
     ceph-disk -v prepare ${OSD_DEVICE}
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
-    ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
   fi
 
   OSD_ID=$(cat /var/lib/ceph/osd/$(ls -ltr /var/lib/ceph/osd/ | tail -n1 | awk -v pattern="$CLUSTER" '$0 ~ pattern {print $9}')/whoami)
