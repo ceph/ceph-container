@@ -1,3 +1,7 @@
+# /!\ WARNING - DEPRECATED - NOT MAINTAINED ANYMORE /!\
+
+Given that the `ceph/daemon` image has the same capabilities and is more featureful we would recommend to use it as a replacement.
+
 ceph-config
 ===========
 
