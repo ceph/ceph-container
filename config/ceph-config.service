@@ -17,10 +17,10 @@ ExecStartPre=/bin/mkdir -p /etc/ceph
 #
 # https://github.com/docker/docker/issues/6791#issuecomment-72338100
 
-ExecStartPre=/usr/bin/docker pull ceph/ceph-config
+ExecStartPre=/usr/bin/docker pull ceph/config
 ExecStartPre=-/usr/bin/docker kill %n
 ExecStartPre=-/usr/bin/docker rm %n
-ExecStartPre=/usr/bin/docker run -d -e MON_IP=${COREOS_PUBLIC_IPV4} -e MON_NAME=%H -e ETCDCTL_PEERS=http://${COREOS_PUBLIC_IPV4}:4001 -e CLUSTER=ceph --name %n -v /etc/ceph:/etc/ceph ceph/ceph-config 
+ExecStartPre=/usr/bin/docker run -d -e MON_IP=${COREOS_PUBLIC_IPV4} -e MON_NAME=%H -e ETCDCTL_PEERS=http://${COREOS_PUBLIC_IPV4}:4001 -e CLUSTER=ceph --name %n -v /etc/ceph:/etc/ceph ceph/config 
 ExecStart=/usr/bin/docker logs -f %n
 ExecStop=-/usr/bin/docker stop %n
 ExecStopPost=-/usr/bin/docker stop %n
