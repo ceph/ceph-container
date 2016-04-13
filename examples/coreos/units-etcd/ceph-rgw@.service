@@ -1,0 +1,24 @@
+[Unit]
+Description=Rados Gateway Service
+After=docker.service
+
+[Service]
+EnvironmentFile=/etc/environment
+Environment=RGW_NAME=%H
+ExecStartPre=-/usr/bin/docker kill %p
+ExecStartPre=-/usr/bin/docker rm %p
+ExecStart=/usr/bin/docker run --rm --name %p -p 80:80 \
+   --net=host \
+   -e RGW_NAME=%H \
+   -e KV_TYPE=etcd \
+   -e KV_IP=127.0.0.1 \
+   ceph/daemon rgw
+ExecStopPost=-/usr/bin/docker stop %p
+ExecStopPost=-/usr/bin/docker rm %p
+Restart=always
+RestartSec=10s
+TimeoutStartSec=120
+TimeoutStopSec=15
+
+[X-Fleet]
+Conflicts=ceph-rgw@*.service
