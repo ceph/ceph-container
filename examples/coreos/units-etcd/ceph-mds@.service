@@ -1,0 +1,27 @@
+[Unit]
+Description=Ceph Metadata Service
+After=docker.service
+
+[Service]
+EnvironmentFile=/etc/environment
+; Note: the MDS_NAME must not be (solely?) numeric.  I use "a", "b", etc (ceph-mds@a, ceph-mds@b, etc)
+Environment=MDS_NAME=%i
+ExecStartPre=-/usr/bin/docker kill %p
+ExecStartPre=-/usr/bin/docker rm %p
+ExecStart=/usr/bin/docker run --rm --name %p --net=host \
+   -e MDS_NAME=%i \
+   -e CEPHFS_CREATE=1 \
+   -e KV_TYPE=etcd \
+   -e KV_IP=127.0.0.1 \
+   ceph/daemon mds
+ExecStopPost=-/usr/bin/docker stop %p
+ExecStopPost=-/usr/bin/docker rm %p
+Restart=always
+RestartSec=10s
+TimeoutStartSec=120
+TimeoutStopSec=15
+
+; The Ceph MDS service can roam the cluster, so we only really need to make sure no more
+; than one runs on any given machines
+[X-Fleet]
+Conflicts=ceph-mds@*.service

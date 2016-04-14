@@ -1,0 +1,40 @@
+[Unit]
+Description=Ceph OSD
+After=docker.service
+
+; You can mount your OSD directories when needed
+; with something like this:
+;RequiresMountsFor=/var/lib/ceph/osd/ceph-%i
+
+[Service]
+EnvironmentFile=-/etc/environment
+Environment=HOSTNAME=%H
+ExecStartPre=-/usr/bin/docker kill %p
+ExecStartPre=-/usr/bin/docker rm %p
+ExecStart=/usr/bin/docker run --rm --name %p --net=host \
+   --privileged=true \
+   --pid=host \
+   -e JOURNAL_DIR=/var/lib/ceph/osd/journal \
+   -e HOSTNAME=${HOSTNAME} \
+   -e KV_TYPE=etcd \
+   -e KV_IP=127.0.0.1 \
+   -e OSD_DEVICE=/dev/sdb \
+   -e OSD_FORCE_ZAP=1 \
+   -v /var/log/ceph:/var/log/ceph \
+   -v /var/lib/ceph:/var/lib/ceph \
+   -v /dev/:/dev/ \
+   ceph/daemon osd
+ExecStopPost=-/usr/bin/docker stop %p
+ExecStopPost=-/usr/bin/docker rm %p
+Restart=always
+RestartSec=10s
+TimeoutStartSec=120
+TimeoutStopSec=15
+
+[X-Fleet]
+;; All machines with the osd=true metadata
+;MachineMetadata=osd=true
+;Global=true
+
+;; Machine with ID matching the instance id
+;MachineID=%i
