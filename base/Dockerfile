@@ -1,14 +1,14 @@
 # CEPH BASE IMAGE
-# CEPH VERSION: Infernalis
-# CEPH VERSION DETAIL: 9.2.x
+# CEPH VERSION: Jewel
+# CEPH VERSION DETAIL: 10.2.x
 
-FROM ubuntu:14.04
+FROM ubuntu:trusty
 MAINTAINER Sébastien Han "seb@redhat.com"
 
+ARG DEBIAN_FRONTEND=noninteractive
 ENV ETCDCTL_VERSION v2.2.4
 ENV ETCDCTL_ARCH linux-amd64
-ENV CEPH_VERSION infernalis
-
+ENV CEPH_VERSION jewel
 ENV KVIATOR_VERSION 0.0.5
 ENV CONFD_VERSION 0.10.0
 
@@ -18,12 +18,12 @@ ADD https://github.com/AcalephStorage/kviator/releases/download/v${KVIATOR_VERSI
 # Download confd
 ADD https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-linux-amd64 /usr/local/bin/confd
 
-# Install prerequisites
-RUN apt-get update &&  apt-get install -y wget unzip uuid-runtime && \
+# install prerequisites
+RUN apt-get update &&  apt-get install -y wget unzip uuid-runtime python-setuptools udev && \
 \
-# Install Ceph
+# install ceph
     wget -q -O- 'https://download.ceph.com/keys/release.asc' | apt-key add - && \
-    echo deb http://ceph.com/debian-${CEPH_VERSION}/ trusty main | tee /etc/apt/sources.list.d/ceph-${CEPH_VERSION}.list && \
+    echo "deb http://download.ceph.com/debian-$CEPH_VERSION/ trusty main" | tee /etc/apt/sources.list.d/ceph-$CEPH_VERSION.list && \
     apt-get update && apt-get install -y --force-yes ceph radosgw && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
 \
@@ -39,4 +39,3 @@ RUN apt-get update &&  apt-get install -y wget unzip uuid-runtime && \
 
 ADD entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
-
