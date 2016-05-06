@@ -1,2 +1,2 @@
 #!/bin/sh
-/usr/bin/docker run --rm  -ti -v /dev:/dev -v /sys:/sys --net=host --privileged=true -v /etc/ceph:/etc/ceph ceph/base rbd
+/usr/bin/docker run --rm  -ti -v /dev:/dev -v /sys:/sys --net=host --privileged=true -v /etc/ceph:/etc/ceph ceph/base rbd "$@"
