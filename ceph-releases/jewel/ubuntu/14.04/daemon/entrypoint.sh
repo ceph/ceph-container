@@ -11,7 +11,6 @@ set -e
 : ${MDS_NAME:=mds-${HOSTNAME}}
 : ${OSD_FORCE_ZAP:=0}
 : ${OSD_JOURNAL_SIZE:=100}
-: ${CEPH_DISK_PREPARE_FLAGS:=''}
 : ${CRUSH_LOCATION:=root=default host=${HOSTNAME}}
 : ${CEPHFS_CREATE:=0}
 : ${CEPHFS_NAME:=cephfs}
@@ -367,10 +366,10 @@ function osd_disk_prepare {
   fi
 
   if [[ ! -z "${OSD_JOURNAL}" ]]; then
-    ceph-disk -v prepare ${CEPH_DISK_PREPARE_FLAGS} ${OSD_DEVICE} ${OSD_JOURNAL}
+    ceph-disk -v prepare ${OSD_DEVICE} ${OSD_JOURNAL}
     chown ceph. ${OSD_JOURNAL}
   else
-    ceph-disk -v prepare ${CEPH_DISK_PREPARE_FLAGS} ${OSD_DEVICE}
+    ceph-disk -v prepare ${OSD_DEVICE}
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
   fi
 }

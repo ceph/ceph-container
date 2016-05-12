@@ -26,7 +26,7 @@
 /mon/mon_osd_report_timeout 300
 
 #osd
-/osd/osd_journal_size 100
+/osd/journal_size 100
 
 # these 2 should be passed at runtime to the container.
 #/osd/cluster_network 198.100.128.0/19
