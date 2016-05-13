@@ -52,5 +52,6 @@ kubectl create -f combined.yaml --namespace=ceph
 kubectl create -f bootstrap-osd.yaml --namespace=ceph
 kubectl create -f bootstrap-mds.yaml --namespace=ceph
 kubectl create -f bootstrap-rgw.yaml --namespace=ceph
+kubectl create secret generic ceph-client-key --from-file=ceph-client-key --namespace=ceph
 
 ```

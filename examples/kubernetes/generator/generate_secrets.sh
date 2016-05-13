@@ -45,6 +45,7 @@ gen-combined-conf() {
   key=$(python ceph-key.py)
   keyring=$(sigil -f templates/ceph/admin.keyring.tmpl "key=${key}")
   ceph_admin_keyring_val=$(echo "${keyring}" | base64 | tr -d '\r\n')
+  echo "${key}" > ceph-client-key
 
   key=$(python ceph-key.py)
   keyring=$(sigil -f templates/ceph/mon.keyring.tmpl "key=${key}")

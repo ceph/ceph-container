@@ -1,20 +1,21 @@
 ---
-kind: DaemonSet
-apiVersion: extensions/v1beta1
+kind: ReplicationController
+apiVersion: v1
 metadata:
   labels:
     app: ceph
-    daemon: mon
-  name: ceph-mon
+    daemon: mds 
+  name: ceph-mds
   namespace: ceph
 spec:
+  replicas: 1
   template:
     metadata:
-      name: ceph-mon
+      name: ceph-mds
       namespace: ceph
       labels:
         app: ceph
-        daemon: mon
+        daemon: mds
     spec:
       nodeSelector:
         node-type: storage
@@ -36,26 +37,15 @@ spec:
         - name: ceph-mon
           image: quay.io/cornelius/ceph-daemon:latest
 #         image: quay.io/acaleph/ceph-daemon:kubernetes
-#          imagePullPolicy: Always
-          lifecycle:
-            preStop:
-                exec:
-                  # remove the mon on Pod stop.
-                  command:
-                    - "/remove-mon.sh"
           ports:
-            - containerPort: 6789
+            - containerPort: 6800
           env:
             - name: CEPH_DAEMON
-              value: MON
-            - name: CEPH_PUBLIC_NETWORK
-              value: 10.1.0.0/16
-            - name: CEPH_CLUSTER_NETWORK
-              value: 10.1.0.0/16
+              value: MDS
+            - name: CEPHFS_CREATE
+              value: "1"
             - name: KV_TYPE
               value: k8s
-            - name: MON_IP_AUTO_DETECT
-              value: "1"
             - name: CLUSTER
               value: ceph
           volumeMounts:
@@ -69,10 +59,10 @@ spec:
               mountPath: /var/lib/ceph/bootstrap-rgw
           livenessProbe:
               tcpSocket:
-                port: 6789
+                port: 6800
               initialDelaySeconds: 60
               timeoutSeconds: 5
           readinessProbe:
               tcpSocket:
-                port: 6789
+                port: 6800
               timeoutSeconds: 5
