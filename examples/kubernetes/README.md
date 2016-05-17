@@ -57,7 +57,7 @@ ceph-mon-check-deek9   1/1          Running       0          24s
 You must label your storage nodes in order to run Ceph pods on them.
 
 ```
-kubectl label node <nodename> node-type-storage
+kubectl label node <nodename> node-type=storage
 ```
 
 If you want all nodes in your Kubernetes cluster to be a part of your Ceph cluster, label them all.
