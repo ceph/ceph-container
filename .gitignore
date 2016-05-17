@@ -1,1 +1,9 @@
 /rebase-to-upstream.sh
+ceph-client-key
+ceph.client.admin.keyring
+ceph.conf
+ceph.mds.keyring
+ceph.mon.keyring
+ceph.osd.keyring
+ceph.rgw.keyring
+client-admin-key

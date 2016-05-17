@@ -3,11 +3,13 @@ kind: Pod
 metadata:
   name: ceph-mount-test
 spec:
-  nodeSelector:
-    cephtest: "true"
   containers:
   - name: cephfs-rw
-    image: nginx
+    image: busybox 
+    command: 
+    - sh
+    - -c
+    - while true; do sleep 1; done
     volumeMounts:
     - mountPath: "/mnt/cephfs"
       name: cephfs
@@ -15,7 +17,7 @@ spec:
   - name: cephfs
     cephfs:
       monitors:
-#This only works if you have skyDNS resolveable from the kubernetes node. Otherwise you must manually put in a mon-ip.
+#This only works if you have skyDNS resolveable from the kubernetes node. Otherwise you must manually put in one or more mon pod ips.
       - ceph-mon.ceph:6789
       user: admin
       secretRef:

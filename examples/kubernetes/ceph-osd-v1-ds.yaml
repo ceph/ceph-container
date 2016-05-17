@@ -21,8 +21,9 @@ spec:
           hostPath:
             path: /dev
         - name: ceph
-          hostPath:
-            path: /opt/ceph
+          emptyDir: {}
+#          hostPath:
+#            path: /opt/ceph
         - name: ceph-conf
           secret:
             secretName: ceph-conf-combined
@@ -36,8 +37,9 @@ spec:
           secret:
             secretName: ceph-bootstrap-rgw-keyring
         - name: osd-directory
-          hostPath:
-            path: /home/core/data/ceph/osd
+          emptyDir: {}
+#          hostPath:
+#            path: /home/core/data/ceph/osd
       containers:
         - name: osd-pod
           image: quay.io/cornelius/ceph-daemon
