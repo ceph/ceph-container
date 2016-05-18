@@ -1,6 +1,6 @@
 ---
-kind: ReplicationController
-apiVersion: v1
+kind: Deployment
+apiVersion: extensions/v1beta1
 metadata:
   labels:
     app: ceph

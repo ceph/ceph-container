@@ -4,9 +4,9 @@ metadata:
   name: ceph-rbd-test
 spec:
   containers:
-  - name: cephfs-rw
-    image: busybox 
-    command: 
+  - name: cephrbd-rw
+    image: busybox
+    command:
     - sh
     - -c
     - while true; do sleep 1; done

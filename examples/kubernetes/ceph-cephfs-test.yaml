@@ -5,8 +5,8 @@ metadata:
 spec:
   containers:
   - name: cephfs-rw
-    image: busybox 
-    command: 
+    image: busybox
+    command:
     - sh
     - -c
     - while true; do sleep 1; done
