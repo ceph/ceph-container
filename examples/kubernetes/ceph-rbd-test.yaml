@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: ceph-mount-test
+  name: ceph-rbd-test
 spec:
   containers:
   - name: cephfs-rw
@@ -11,14 +11,16 @@ spec:
     - -c
     - while true; do sleep 1; done
     volumeMounts:
-    - mountPath: "/mnt/cephfs"
-      name: cephfs
+    - mountPath: "/mnt/cephrbd"
+      name: cephrbd
   volumes:
-  - name: cephfs
-    cephfs:
+  - name: cephrbd
+    rbd:
       monitors:
 #This only works if you have skyDNS resolveable from the kubernetes node. Otherwise you must manually put in one or more mon pod ips.
       - ceph-mon.ceph:6789
       user: admin
+      image: ceph-rbd-test
+      pool: rbd
       secretRef:
-        name: ceph-client-key
+        name: ceph-client-key 
