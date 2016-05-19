@@ -17,6 +17,7 @@ function get_mon_config {
     etcdctl mkdir ${CLUSTER_PATH}/mds > /dev/null 2>&1  || echo "key already exists"
     etcdctl mkdir ${CLUSTER_PATH}/osd > /dev/null 2>&1  || echo "key already exists"
     etcdctl mkdir ${CLUSTER_PATH}/client > /dev/null 2>&1  || echo "key already exists"
+    KV_PREFIX="http://"
   fi
 
   echo "Adding Mon Host - ${MON_NAME}"
@@ -33,7 +34,7 @@ function get_mon_config {
     echo "Configuration found for cluster ${CLUSTER}. Writing to disk."
 
 
-    until confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
+    until confd -onetime -backend ${KV_TYPE} -node ${KV_PREFIX}${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
       echo "Waiting for confd to update templates..."
       sleep 1
     done
@@ -69,7 +70,7 @@ function get_mon_config {
     FSID=$(uuidgen)
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} put ${CLUSTER_PATH}/auth/fsid ${FSID}
 
-    until confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
+    until confd -onetime -backend ${KV_TYPE} -node ${KV_PREFIX}${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
       echo "Waiting for confd to write initial templates..."
       sleep 1
     done
@@ -116,13 +117,14 @@ function get_mon_config {
 function get_config {
 
   CLUSTER_PATH=ceph-config/${CLUSTER}
+  [[ "$KV_TYPE" == "etcd" ]] && KV_PREFIX="http://"
 
   until kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/monSetupComplete > /dev/null 2>&1 ; do
     echo "OSD: Waiting for monitor setup to complete..."
     sleep 5
   done
 
-  until confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
+  until confd -onetime -backend ${KV_TYPE} -node ${KV_PREFIX}${KV_IP}:${KV_PORT} -prefix="/${CLUSTER_PATH}/" ; do
     echo "Waiting for confd to update templates..."
     sleep 1
   done
