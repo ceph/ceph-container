@@ -48,10 +48,6 @@ spec:
           env:
             - name: CEPH_DAEMON
               value: MON
-            - name: CEPH_PUBLIC_NETWORK
-              value: 10.244.0.0/16
-            - name: CEPH_CLUSTER_NETWORK
-              value: 10.244.0.0/16
             - name: KV_TYPE
               value: k8s
             - name: MON_IP_AUTO_DETECT

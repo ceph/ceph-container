@@ -20,6 +20,17 @@ We will be working on making this setup more agnostic, especially in regards to 
 
 # Tutorial
 
+### Override the default network settings
+
+By default, 10.244.0.0/16 is used for the `cluster_network` and `public_network` in ceph.conf. To change these defaults, set the following environment variables according to your network requirements. These IPs should be set according to the range of your Pod IPs in your kubernetes cluster:
+
+```
+export osd_cluster_network=192.168.0.0/16
+export osd_public_network=192.168.0.0/16
+```
+
+These will be picked up by sigil when generating the kubernetes secrets in the next section.
+
 ### Generate keys and configuration
 
 Run the following commands to generate the required configuration and keys.
@@ -50,7 +61,7 @@ kubectl create \
 -f ceph-mds-v1-dp.yaml \
 -f ceph-mon-v1-svc.yaml \
 -f ceph-mon-v1-ds.yaml \
--f ceph-mon-check-v1-rc.yaml \
+-f ceph-mon-check-v1-dp.yaml \
 -f ceph-osd-v1-ds.yaml \
 --namespace=ceph
 ```
@@ -178,4 +189,3 @@ kubectl exec -it --namespace=ceph ceph-rbd-test -- df -h
 
 By default `emptyDir` is used for everything. If you have durable storage on your nodes, replace the emptyDirs with a `hostPath` to that storage.
 
-Also, 10.244.0.0/16 is used for the default network settings, change these in the Kubernetes yaml objects and the sigil templates to reflect your network.
