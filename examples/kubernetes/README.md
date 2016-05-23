@@ -60,7 +60,7 @@ With the secrets created, you can now deploy ceph.
 kubectl create \
 -f ceph-mds-v1-dp.yaml \
 -f ceph-mon-v1-svc.yaml \
--f ceph-mon-v1-ds.yaml \
+-f ceph-mon-v1-dp.yaml \
 -f ceph-mon-check-v1-dp.yaml \
 -f ceph-osd-v1-ds.yaml \
 --namespace=ceph
