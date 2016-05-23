@@ -404,7 +404,7 @@ function osd_activate {
   chown ceph. /var/lib/ceph/osd
   if [[ ! -z "${OSD_JOURNAL}" ]]; then
     chown ceph. ${OSD_JOURNAL}
-    ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
+    ceph-disk -v --setuser ceph --setgroup disk activate ${OSD_DEVICE}
   else
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
     ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
