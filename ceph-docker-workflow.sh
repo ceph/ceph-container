@@ -138,4 +138,4 @@ do
   push_new_branch
   move_back_to_initial_working_branch
 done
-popd
+popd > /dev/null
