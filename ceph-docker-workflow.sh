@@ -73,7 +73,13 @@ function create_new_branch {
 function copy_files {
   echo_info "COPYING FILES"
   rm -rf base daemon
-  cp -av ceph-releases/$1/$2/$3/ .
+  cp -av ceph-releases/$1/$2/$3/* .
+  for link in $(find ceph-releases/$1/$2/$3/ -type l);
+  do
+    dest_link=$(echo $link | awk -F '/' '{print $(NF-1),$NF}' | tr ' ' '/')
+    rm $dest_link
+    cp -av --remove-destination $(readlink -f $link) $dest_link
+  done
 }
 
 function commit_new_changes {
@@ -132,4 +138,4 @@ do
   push_new_branch
   move_back_to_initial_working_branch
 done
-popd
+popd > /dev/null
