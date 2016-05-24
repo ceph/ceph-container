@@ -14,7 +14,7 @@ RUN yum install -y unzip
 
 # Install Ceph
 RUN rpm --import 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc'
-RUN rpm -Uvh http://ceph.com/rpm-${CEPH_VERSION}/rhel7/noarch/ceph-release-1-1.el7.noarch.rpm
+RUN rpm -Uvh http://ceph.com/rpm-${CEPH_VERSION}/el7/noarch/ceph-release-1-1.el7.noarch.rpm
 RUN yum install -y epel-release && yum clean all
 RUN yum install -y ceph ceph-radosgw sharutils && yum clean all
 ENV KVIATOR_VERSION 0.0.5
