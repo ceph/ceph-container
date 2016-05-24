@@ -32,7 +32,7 @@ kviator --kvstore=${KV} --client=${IP}:${PORT} put ${CLUSTER_PATH}/mon/mon_clock
 kviator --kvstore=${KV} --client=${IP}:${PORT} put ${CLUSTER_PATH}/mon/mon_osd_report_timeout 300
 
 #osd
-kviator --kvstore=${KV} --client=${IP}:${PORT} put ${CLUSTER_PATH}/osd/journal_size 100
+kviator --kvstore=${KV} --client=${IP}:${PORT} put ${CLUSTER_PATH}/osd/osd_journal_size 100
 kviator --kvstore=${KV} --client=${IP}:${PORT} put ${CLUSTER_PATH}/osd/cluster_network 192.168.42.0/24
 kviator --kvstore=${KV} --client=${IP}:${PORT} put ${CLUSTER_PATH}/osd/public_network 192.168.42.0/24
 kviator --kvstore=${KV} --client=${IP}:${PORT} put ${CLUSTER_PATH}/osd/osd_mkfs_type xfs
