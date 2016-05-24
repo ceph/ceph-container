@@ -47,7 +47,7 @@ To supply your own defaults, make sure to mount the /etc/ceph/ volume and place 
 
 Important variables in `ceph.defaults` to add/change when you bootstrap an OSD:
 
-* `/osd/journal_size`
+* `/osd/osd_journal_size`
 * `/osd/cluster_network`
 * `/osd/public_network`
 

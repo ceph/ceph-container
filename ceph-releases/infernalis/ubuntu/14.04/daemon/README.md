@@ -35,7 +35,7 @@ As soon as this done, you can bootstrap your first monitor.
 
 Important variables in `populate.sh` to change when you bootstrap an OSD:
 
-* `/osd/journal_size`
+* `/osd/osd_journal_size`
 * `/osd/cluster_network`
 * `/osd/public_network`
 
