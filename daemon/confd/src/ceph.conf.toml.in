@@ -1,6 +1,6 @@
 [template]
 src = "ceph.conf.tmpl"
-dest = "/etc/ceph/ceph.conf"
+dest = "/etc/ceph/@CLUSTER@.conf"
 keys = [
  "/auth/",
  "/global/",
