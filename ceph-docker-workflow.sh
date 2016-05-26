@@ -10,6 +10,7 @@ PREFIX=build
 BRANCH_NAME=""
 BASEDIR=$(dirname "$0")
 LOCAL_BRANCH=$(cd $BASEDIR && git rev-parse --abbrev-ref HEAD)
+LINK_MAP=$(mktemp -p /tmp)
 
 
 # FUNCTIONS
@@ -103,10 +104,27 @@ function move_back_to_initial_working_branch {
   git checkout $LOCAL_BRANCH
 }
 
+function generate_link_map {
+  for file in $(find -type l); do
+    link=$(readlink -f $file | awk -F '/' '{print $(NF-4), $(NF-3), $(NF-2), $(NF-1), $NF}'  | tr ' ' '/' |sort -u);
+    original_file=$(echo $file |cut -d '/' -f 3-);
+    echo "$original_file|$link" >> $LINK_MAP
+  done
+}
+
+function find_impacted_file_by_link {
+  impacted_links=$(mktemp -p /tmp)
+  for file in $todo; do
+    grep $file $LINK_MAP | cut -d '|' -f 1 >> $impacted_links
+  done
+  cat $impacted_links | tr " " "\n" | awk -F '/' '{print $1,"/",$2,"/",$3}' | tr -d " " | sort -u | uniq
+  rm -f $impacted_links
+}
 
 # MAIN
 goto_basedir
 git_update
+generate_link_map
 for tag in $(git tag | grep "^tag-$PREFIX");
 do
   sha=$(git log --pretty=format:'%H' $tag~1 -n1)
@@ -118,6 +136,11 @@ do
     fi
   fi
 done
+
+todo="$todo $(find_impacted_file_by_link)"
+rm -f $LINK_MAP
+
+
 if [[ -z "$todo" ]]; then
   echo "Nothing to do, go back to work!"
   exit 0
