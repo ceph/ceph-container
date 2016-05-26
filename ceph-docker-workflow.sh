@@ -141,7 +141,7 @@ todo="$todo $(find_impacted_file_by_link)"
 rm -f $LINK_MAP
 
 
-if [[ -z "$todo" ]]; then
+if [[ -z "$(echo $todo | tr -d ' ')" ]]; then
   echo "Nothing to do, go back to work!"
   exit 0
 fi
