@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+sed -r "s/@CLUSTER@/${CLUSTER:-ceph}/g" \
+  /etc/confd/src/ceph.conf.toml.in > /etc/confd/conf.d/ceph.conf.toml
+
 function get_admin_key {
    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/${CLUSTER}.client.admin.keyring
 }
