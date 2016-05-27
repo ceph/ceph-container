@@ -129,7 +129,7 @@ Options for OSDs (TODO: consolidate these options between the types):
 * `JOURNAL_DIR` - if provided, new OSDs will be bootstrapped to use the specified directory as a common journal area.  This is usually used to store the journals for more than one OSD on a common, separate disk.  This currently only applies to the `directory` OSD type.
 * `JOURNAL` - if provided, the new OSD will be bootstrapped to use the specified journal file (if you do not wish to use the default).  This is currently only supported by the `directory` OSD type
 * `OSD_DEVICE` - mandatory for `activate` and `disk` OSD types; this specifies which block device to use as the OSD
-* `OSD_JOURNAL` - optional override of the OSD journal file. this only applies to the `activate` and `disk` OSD types
+* `OSD_JOURNAL` - optional override of the OSD journal file.
 
 ### Without OSD_TYPE ###
 
@@ -236,6 +236,7 @@ following environment variables will control its creation:
 * `WEIGHT` is the of the OSD when it is added to the CRUSH map (default is `1.0`)
 * `JOURNAL` is the location of the journal (default is the `journal` file inside the OSD data directory)
 * `HOSTNAME` is the name of the host; it is used as a flag when adding the OSD to the CRUSH map
+* `OSD_JOURNAL<osd-id>` optional - providing for each OSD directory to be used will prepare and mount the supplied block device
 
 The old option `OSD_ID` is now unused.  Instead, the script will scan for each directory in `/var/lib/ceph/osd` of the form `<cluster>-<osd-id>`.
 
@@ -258,6 +259,9 @@ There are two workarounds, at present:
 
 To run multiple OSDs within the same container, simply bind-mount each OSD datastore directory:
 * `docker run -v /osds/1:/var/lib/ceph/osd/ceph-1 -v /osds/2:/var/lib/ceph/osd/ceph-2`
+
+To run multiple OSDs (for example: osd.5 & osd.11) in the same container, with multiple journals on block devices:
+* `docker run -v /var/lib/ceph:/var/lib/ceph -v /dev:/dev -e OSD_TYPE=directory -e OSD_JOURNAL5=/dev/sdb1 -e OSD_JOURNAL11=/dev/sdb2 ...`
 
 
 #### BTRFS and journal ####
