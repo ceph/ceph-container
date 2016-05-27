@@ -348,6 +348,8 @@ List of available options:
 
 * `RGW_CIVETWEB_PORT` is the port to which civetweb is listening on (DEFAULT: 8080)
 * `RGW_NAME`: default to hostname
+* `RGW_ZONEGROUP`: zonegroup to use (DEFAULT: empty)
+* `RGW_ZONE`: zone to use (DEFAULT: empty)
 
 Administration via [radosgw-admin](http://docs.ceph.com/docs/infernalis/man/8/radosgw-admin/) from the Docker host if the `RGW_NAME` variable hasn't been supplied:
 
