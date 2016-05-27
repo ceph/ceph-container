@@ -73,13 +73,13 @@ function create_new_branch {
 
 function copy_files {
   echo_info "COPYING FILES"
-  rm -rf base daemon
+  rm -rf base daemon demo
   cp -Lvr ceph-releases/$1/$2/$3/* .
 }
 
 function commit_new_changes {
   echo_info "CREATING COMMIT"
-  git add base daemon
+  git add base daemon demo
   git commit -s -m "Building $BRANCH_NAME"
 }
 
