@@ -1,1 +1,4 @@
 /rebase-to-upstream.sh
+./base
+./daemon
+./demo
