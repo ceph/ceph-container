@@ -1,0 +1,27 @@
+language: python
+python:
+  - 2.7
+
+branches:
+  only:
+    - master
+    - /^build-master-*/
+
+services:
+  - docker
+
+before_install:
+  - sudo ./travis-builds/build_imgs.sh
+
+# NOTE(leseb): somehow putting everything in a 'script' task does not work
+# so we have to split it up that way.
+# It seems that we have an issue when not running 'docker run' from an install step
+install:
+  - docker run -d --name ceph-mon --net=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph:/var/lib/ceph -e MON_IP=127.0.0.1 -e CEPH_PUBLIC_NETWORK=127.0.0.0/8 daemon mon
+  - sudo ./travis-builds/bootstrap_osd.sh
+  - docker run -d --name ceph-osd -v /etc/ceph:/etc/ceph -v /var/lib/ceph:/var/lib/ceph daemon osd_directory
+  - docker run -d --name ceph-mds --net=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph:/var/lib/ceph -e CEPHFS_CREATE=1 daemon mds
+  - docker run -d --name ceph-rgw --net=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph:/var/lib/ceph daemon rgw
+
+script:
+  - sudo ./travis-builds/validate_cluster.sh
