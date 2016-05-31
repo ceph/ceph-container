@@ -11,3 +11,4 @@ https://registry.hub.docker.com/u/ceph/base/
 ```bash
 $ docker run -i -t ceph/base:fedora
 ```
+ 
