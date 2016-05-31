@@ -34,3 +34,6 @@ If you get user_xattr error, try to remount your docker partition:
 ```
 $ sudo mount -o remount,user_xattr,rw $(df -P /var/lib/docker |tail -1 |tr -s ' ' |cut -d' ' -f6)
 ```
+ 
+ 
+ 
