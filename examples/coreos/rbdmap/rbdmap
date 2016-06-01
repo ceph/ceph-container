@@ -34,7 +34,7 @@ do_map() {
 
     if [ ! -b /dev/rbd/$DEV ]; then
       echo "Map: $DEV"
-      mons=`egrep 'mon[ _]host' $CONF | cut -f2 -d'=' | sed 's/ //g'`
+      mons=`egrep '[ _]host' $CONF | cut -f2 -d'=' | sed 's/ //g'`
       rbddev=`echo $DEV | tr '/' ' '`
 
       IFS=, read -r -a params <<< "$PARAMS"
