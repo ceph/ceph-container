@@ -13,7 +13,7 @@ ENV KVIATOR_VERSION 0.0.5
 ENV CONFD_VERSION 0.10.0
 
 # Install prerequisites
-RUN apt-get update &&  apt-get install -y wget unzip
+RUN apt-get update && apt-get install -y wget unzip runit
 
 # Install Ceph
 RUN wget -q -O- 'https://download.ceph.com/keys/release.asc' | apt-key add -

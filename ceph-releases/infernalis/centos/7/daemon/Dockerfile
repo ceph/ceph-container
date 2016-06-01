@@ -7,10 +7,6 @@
 FROM ceph/base:tag-build-master-infernalis-centos-7
 MAINTAINER Sébastien Han "seb@redhat.com"
 
-# Install Runit
-RUN curl -s https://packagecloud.io/install/repositories/imeyer/runit/script.rpm.sh | bash
-RUN yum install -y runit-2.1.1-7.el7.centos.x86_64
-
 # Add bootstrap script
 ADD entrypoint.sh /entrypoint.sh
 ADD config.*.sh /

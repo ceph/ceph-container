@@ -18,7 +18,7 @@ ADD https://github.com/AcalephStorage/kviator/releases/download/v${KVIATOR_VERSI
 ADD https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-linux-amd64 /usr/local/bin/confd
 
 # install prerequisites
-RUN DEBIAN_FRONTEND=noninteractive apt-get update &&  apt-get install -y wget unzip uuid-runtime python-setuptools udev && \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update &&  apt-get install -y wget unzip uuid-runtime python-setuptools udev runit sharutils && \
 \
 # install ceph
     wget -q -O- 'https://download.ceph.com/keys/release.asc' | apt-key add - && \
