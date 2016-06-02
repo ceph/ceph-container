@@ -5,7 +5,6 @@
 FROM ubuntu:trusty
 MAINTAINER Sébastien Han "seb@redhat.com"
 
-ARG DEBIAN_FRONTEND=noninteractive
 ENV ETCDCTL_VERSION v2.2.4
 ENV ETCDCTL_ARCH linux-amd64
 ENV CEPH_VERSION jewel
