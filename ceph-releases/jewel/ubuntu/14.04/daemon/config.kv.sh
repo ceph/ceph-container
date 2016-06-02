@@ -8,6 +8,7 @@ function get_admin_key {
    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/${CLUSTER}.client.admin.keyring
 }
 
+
 function get_mon_config {
 
   CLUSTER_PATH=ceph-config/${CLUSTER}
