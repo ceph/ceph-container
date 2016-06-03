@@ -42,6 +42,7 @@ function copy_files {
   done
   echo ${dir} > base/SOURCE_TREE
   echo ${dir} > daemon/SOURCE_TREE
+  echo ${dir} > demo/SOURCE_TREE
 }
 
 function test_combination {

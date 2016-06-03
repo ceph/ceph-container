@@ -1,20 +1,16 @@
 docker-ceph
 ===========
 
-Ceph-related dockerfiles
+Ceph-related Docker files.
 
 ## Core Components:
 
-* [`ceph/base`](base/):  Ceph base container image.  This is nothing but a fresh install of the latest Ceph on Ubuntu LTS (14.04)
-* [`ceph/daemon`](daemon/): All-in-one container for all core daemons.
-* [`ceph/mds`](mds/): _DEPRECATED (use `daemon`)_ Ceph MDS (Metadata server)
-* [`ceph/mon`](mon/): _DEPRECATED (use `daemon`)_ Ceph Mon(itor)
-* [`ceph/osd`](osd/): _DEPRECATED (use `daemon`)_ Ceph OSD (object storage daemon)
-* [`ceph/radosgw`](radosgw/): _DEPRECATED (use `daemon`)_ Ceph Rados gateway service; S3/swift API server
+* [`ceph/base`](ceph-releases/jewel/ubuntu/14.04/base/):  Ceph base container image.  This is nothing but a fresh install of the latest Ceph on Ubuntu LTS (14.04)
+* [`ceph/daemon`](ceph-releases/jewel/ubuntu/14.04/daemon/): All-in-one container for all core daemons.
 
 ## Utilities and convenience wrappers
 
-* [`ceph/config`](config/): Initializes and distributes cluster configuration
+* [`ceph/config`](config/): _DEPRECATED (not maintained anymore since the logic is now embedded in the daemon image)_ Initializes and distributes cluster configuration
 * [`ceph/docker-registry`](docker-registry/): Rados backed docker-registry images repository
 * [`ceph/rados`](rados/): Convenience wrapper to execute the `rados` CLI tool
 * [`ceph/rbd`](rbd/): Convenience wrapper to execute the `rbd` CLI tool
@@ -24,7 +20,7 @@ Ceph-related dockerfiles
 
 ## Demo
 
-* [`ceph/demo`](demo/): Demonstration cluster for testing and learning.  This container runs all the major ceph components installed, bootstrapped, and executed for you to play with.  (not intended for use in building a production cluster)
+* [`ceph/demo`](ceph-releases/jewel/ubuntu/14.04/demo/): Demonstration cluster for testing and learning.  This container runs all the major ceph components installed, bootstrapped, and executed for you to play with.  (not intended for use in building a production cluster)
 
 # How to contribute?!
 
@@ -35,15 +31,19 @@ The following assumes that you already forked the repository, added the correct 
 Simply execute `./generate-dev-env.sh CEPH_RELEASE DISTRO DISTRO_VERSION`.
 For example if you run `./generate-dev-env.sh jewel ubuntu 16.04` the script will:
 
-* hardlink the files from `ceph-releases/jewel/ubuntu/16.04/{base,daemon}` in `./base` and `./daemon`.
-* create a file in `{base,daemon}/SOURCE_TREE` which will remind you the version you are working on.
+* hardlink the files from `ceph-releases/jewel/ubuntu/16.04/{base,daemon,demo}` in `./base`, `./daemon` and `./demo`.
+* create a file in `{base,daemon,demo}/SOURCE_TREE` which will remind you the version you are working on.
 
 From this, you can start modifying your code and building your images locally.
 
 ## My code is ready, what's next?
 
 Contributions must go in the 'ceph-releases' tree, in the appropriate Ceph version, distribution and distribution version.
-So once you are done, we can just run `cp -av base $(cat base/SOURCE_TREE)` and `cp -av daemon $(cat base/SOURCE_TREE)`.
+So once you are done, we can just run:
+
+* `cp -av base $(cat base/SOURCE_TREE)`
+* `cp -av daemon $(cat base/SOURCE_TREE)`
+* `cp -av demo $(cat base/SOURCE_TREE)`
 
 We identified 2 types of contributions:
 
@@ -53,17 +53,12 @@ The code only changes the `base` image content of a specific distro, nothing to 
 
 ### New functionality contributions
 
-If you look at the ceph-releases directory you will notice that most of the daemons images content is symlinked to the Ubuntu daemon.
-Even if we support multi-distro, Ubuntu remains the default.
+If you look at the ceph-releases directory you will notice that for each release the daemon image's content is symlinked to the Ubuntu daemon 14.04.
+Even if we support multi-distro, Ubuntu 14.04 remains the default.
 It would nice if you could get familiar with this approach.
-So even if you change something in the `entrypoint` of CentOS please update the Ubuntu default file so symlinks can continue to operate.
-With this method every distro can benefit from your change.
-If your code touches one of the entrypoints from the daemon image, you **must** apply this change to **all** the `CEPH_RELEASE`, `DISTRO` and `DISTRO_VERSION` as it brings a new functionality.
-At some point, we will start deprecating some `CEPH_RELEASE`, so the process will be smoother.
-So please do not do work for your own distro if you believe your change can benefit other distributions.
-So yes this is a bit painful but it's the price to pay to have a proper multi-distribution compliant workflow.
-
-In the end, remember that Ubuntu owns the files that you should consider modifying, symlinks will do the rest.
+This basically means that if you are testing on CentOS then you should update the Ubuntu image instead.
+All the changes in the entrypoints *should not* diverse from one distro to another, so this should be safe :).
+We are currently **only** bringing new functionality in the `jewel` release.
 
 # CI
 
