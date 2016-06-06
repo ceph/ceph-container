@@ -21,7 +21,7 @@ RUN rpm --import 'https://download.ceph.com/keys/release.asc'
 RUN rpm -Uvh https://download.ceph.com/rpm-${CEPH_VERSION}/rhel7/noarch/ceph-release-1-1.el7.noarch.rpm
 RUN yum install -y epel-release && yum clean all
 RUN yum install -y ceph ceph-radosgw sharutils && yum clean all
-ENV KVIATOR_VERSION 0.0.5
+ENV KVIATOR_VERSION 0.0.7
 ENV CONFD_VERSION 0.10.0
 
 # Install etcdctl

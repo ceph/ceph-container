@@ -34,6 +34,11 @@ set -e
 : ${KV_IP:=127.0.0.1}
 : ${KV_PORT:=4001} # PORT 8500 for Consul
 
+if [ ! -z "${KV_CA_CERT}" ]; then
+	KV_TLS="--ca-cert=${KV_CA_CERT} --client-cert=${KV_CLIENT_CERT} --client-key=${KV_CLIENT_KEY}"
+	CONFD_KV_TLS="--scheme=https --client-ca-keys=${KV_CA_CERT} --client-cert=${KV_CLIENT_CERT} --client-key=${KV_CLIENT_KEY}"
+fi
+
 CEPH_OPTS="--cluster ${CLUSTER}"
 MOUNT_OPTS="-t xfs -o noatime,inode64"
 
@@ -93,7 +98,7 @@ function kv {
 	shift
 	VALUE="$*"
 	echo "adding key ${KEY} with value ${VALUE} to KV store"
-	kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} cas ${CLUSTER_PATH}"${KEY}" "${VALUE}" || echo "value is already set"
+	kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} cas ${CLUSTER_PATH}"${KEY}" "${VALUE}" || echo "value is already set"
 }
 
 function populate_kv {
