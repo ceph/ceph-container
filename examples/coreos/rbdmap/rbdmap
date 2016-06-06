@@ -34,7 +34,7 @@ do_map() {
 
   if [ ! -b /dev/rbd/$DEV ]; then
       echo "Map: $DEV"
-      #mons=`egrep '[ _]host' $CONF | cut -f2 -d'=' | sed 's/ //g'` # choose the right selector for the configuration
+      #mons=`egrep 'mon[ _]host' $CONF | cut -f2 -d'=' | sed 's/ //g'` # choose the right selector for the configuration
       mons=`egrep 'mon_addr' $CONF | cut -f2 -d'=' | sed 's/ //g' | tr '\n' ',' | sed 's/.$//'`
       rbddev=`echo $DEV | tr '/' ' '`
 
