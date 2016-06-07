@@ -342,7 +342,7 @@ function start_mds {
 
     # Generate the MDS key
     ceph ${CEPH_OPTS} $KEYRING_OPT auth get-or-create mds.$MDS_NAME osd 'allow rwx' mds 'allow' mon 'allow profile mds' -o /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring
-    chown ceph. /var/lib/ceph/mds/${MDS_NAME}/keyring
+    chown ceph. /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring
     chmod 600 /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring
 
   fi
