@@ -7,9 +7,6 @@
 FROM ceph/base:tag-build-master-jewel-ubuntu-14.04
 MAINTAINER Sébastien Han "seb@redhat.com"
 
-RUN apt-get update && apt-get -y install runit sharutils && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 # Add bootstrap script, ceph defaults key/values for KV store
 ADD entrypoint.sh config.*.sh ceph.defaults /
 

@@ -7,9 +7,6 @@
 FROM ceph/base:tag-build-master-hammer-ubuntu-16.04
 MAINTAINER Sébastien Han "seb@redhat.com"
 
-RUN apt-get update && apt-get -y install runit && \
-apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 # Add bootstrap script
 ADD entrypoint.sh /entrypoint.sh
 ADD config.*.sh /

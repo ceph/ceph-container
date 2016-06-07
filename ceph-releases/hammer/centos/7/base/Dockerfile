@@ -12,6 +12,10 @@ ENV CEPH_VERSION hammer
 # Install prerequisites
 RUN yum install -y unzip
 
+# Install Runit
+RUN curl -s https://packagecloud.io/install/repositories/imeyer/runit/script.rpm.sh | bash
+RUN yum install -y runit-2.1.1-7.el7.centos.x86_64
+
 # Install Ceph
 RUN rpm --import 'https://download.ceph.com/keys/release.asc'
 RUN rpm -Uvh https://download.ceph.com/rpm-${CEPH_VERSION}/rhel7/noarch/ceph-release-1-1.el7.noarch.rpm
