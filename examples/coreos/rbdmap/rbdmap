@@ -8,6 +8,7 @@
 # http://cephnotes.ksperis.com/downloads/rbdmap
 
 RBDMAPFILE="/etc/ceph/rbdmap"
+CONF="/etc/ceph/ceph.conf"
 DESC="RBD Mapping"
 
 modprobe rbd || exit 1
@@ -31,9 +32,10 @@ do_map() {
         DEV=rbd/$DEV ;;
     esac
 
-    if [ ! -b /dev/rbd/$DEV ]; then
+  if [ ! -b /dev/rbd/$DEV ]; then
       echo "Map: $DEV"
-      mons=`egrep 'mon[ _]host' /etc/ceph/ceph.conf | cut -f2 -d'=' | sed 's/ //g'`
+      #mons=`egrep 'mon[ _]host' $CONF | cut -f2 -d'=' | sed 's/ //g'` # choose the right selector for the configuration
+      mons=`egrep 'mon_addr' $CONF | cut -f2 -d'=' | sed 's/ //g' | tr '\n' ',' | sed 's/.$//'`
       rbddev=`echo $DEV | tr '/' ' '`
 
       IFS=, read -r -a params <<< "$PARAMS"
@@ -49,10 +51,22 @@ do_map() {
         echo "$mons name=$name,secret=$secret $rbddev" > /sys/bus/rbd/add
         [ $? -ne "0" ] && RET=1
         newrbd="yes"
+        timeout=0
+        while [[ ! -e /dev/rbd/$DEV  && timeout -lt 20 ]]; do
+          sleep 0.5
+          timeout=$((timeout+1))
+        done
+        if [ ! -e /dev/rbd/$DEV ]; then
+          echo "Device $DEV was unresponsive"
+          continue
+        fi
       fi
     fi
   done < "$RBDMAPFILE"
   [[ $RET -eq 0 ]] && { echo "Success"; } || { echo "Failed"; }
+
+  # Exit in specified
+  if [[ -e $1 && $1 = "-m" ]]; then exit 0 ; fi;
 
   # Mount new rbd
   if [ "$newrbd" ]; then
@@ -79,13 +93,13 @@ do_unmap() {
       [ $? -ne "0" ] && RET=1
     done
   fi
-  [[ $RET -eq 1 ]] && { echo "Success"; } || { echo "Failed"; }
+  [[ $RET -ne "1" ]] && { echo "Success"; } || { echo "Failed"; }
 }
 
 
 case "$1" in
   start)
-  do_map
+  do_map $2
   ;;
 
   stop)
