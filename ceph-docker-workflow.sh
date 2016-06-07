@@ -11,6 +11,7 @@ BRANCH_NAME=""
 BASEDIR=$(dirname "$0")
 LOCAL_BRANCH=$(cd $BASEDIR && git rev-parse --abbrev-ref HEAD)
 LINK_MAP=$(mktemp -p /tmp)
+DRY_RUN=false
 
 
 # FUNCTIONS
@@ -20,6 +21,10 @@ function echo_info {
   echo "$1"
   echo "**************************************************"
   echo ""
+}
+
+function check_dry_run {
+  echo "$@" | grep -q "\-\-dry-run" && DRY_RUN=true && echo_info "Dry run mode activated"
 }
 
 function goto_basedir {
@@ -116,6 +121,7 @@ function find_impacted_file_by_link {
 }
 
 # MAIN
+check_dry_run $@
 goto_basedir
 git_update
 generate_link_map
@@ -145,14 +151,17 @@ do
   DISTRO=$(echo $changes | awk -F '/' '{print $2}')
   DISTRO_VERSION=$(echo $changes | awk -F '/' '{print $3}')
 
-  echo "$CEPH_RELEASE $DISTRO $DISTRO_VERSION"
-  create_new_branch_name $CEPH_RELEASE $DISTRO $DISTRO_VERSION
-  delete_old_branch_tag
-  create_new_branch
-  copy_files $CEPH_RELEASE $DISTRO $DISTRO_VERSION
-  commit_new_changes
-  tag_new_changes
-  push_new_branch
-  move_back_to_initial_working_branch
+  if $DRY_RUN; then
+    echo "$CEPH_RELEASE $DISTRO $DISTRO_VERSION will be updated"
+  else
+    create_new_branch_name $CEPH_RELEASE $DISTRO $DISTRO_VERSION
+    delete_old_branch_tag
+    create_new_branch
+    copy_files $CEPH_RELEASE $DISTRO $DISTRO_VERSION
+    commit_new_changes
+    tag_new_changes
+    push_new_branch
+    move_back_to_initial_working_branch
+  fi
 done
 popd &> /dev/null
