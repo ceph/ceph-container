@@ -12,14 +12,41 @@ CEPH_OPTS="--cluster ${CLUSTER}"
 # MON #
 #######
 
-if [ ! -n "$CEPH_NETWORK" ]; then
-   echo "ERROR- CEPH_NETWORK must be defined as the name of the network for the OSDs"
-   exit 1
+if [[ ! -n "$CEPH_PUBLIC_NETWORK" && ${NETWORK_AUTO_DETECT} -eq 0 ]]; then
+  echo "ERROR- CEPH_PUBLIC_NETWORK must be defined as the name of the network for the OSDs"
+  exit 1
 fi
 
-if [ ! -n "$MON_IP" ]; then
-   echo "ERROR- MON_IP must be defined as the IP address of the monitor"
-   exit 1
+if [[ ! -n "$MON_IP" && ${NETWORK_AUTO_DETECT} -eq 0 ]]; then
+  echo "ERROR- MON_IP must be defined as the IP address of the monitor"
+  exit 1
+fi
+
+if [ ${NETWORK_AUTO_DETECT} -ne 0 ]; then
+  if [ -x $(command -v ip) ]; then
+    if [ ${NETWORK_AUTO_DETECT} -eq 1 ]; then
+      MON_IP=$(ip -6 -o a | grep scope.global | awk '/eth|ens|eno|enp/ { sub ("/..", "", $4); print $4 }' | head -n1)
+      if [ -z "$MON_IP" ]; then
+        MON_IP=$(ip -4 -o a | awk '/eth|ens|eno|enp/ { sub ("/..", "", $4); print $4 }')
+        CEPH_PUBLIC_NETWORK=$(ip r | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/[0-9]\{1,2\}' | head -1)
+      fi
+    elif [ ${NETWORK_AUTO_DETECT} -eq 4 ]; then
+      MON_IP=$(ip -4 -o a | awk '/eth|ens|eno|enp/ { sub ("/..", "", $4); print $4 }')
+      CEPH_PUBLIC_NETWORK=$(ip r | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/[0-9]\{1,2\}' | head -1)
+    elif [ ${NETWORK_AUTO_DETECT} -eq 6 ]; then
+      MON_IP=$(ip -6 -o a | grep scope.global | awk '/eth|ens|eno|enp/ { sub ("/..", "", $4); print $4 }' | head -n1)
+      CEPH_PUBLIC_NETWORK=$(ip r | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/[0-9]\{1,2\}' | head -1)
+    fi
+  # best effort, only works with ipv4
+  else
+    MON_IP=$(grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}' /proc/net/fib_trie | grep -vE "^127|255$|0$")
+    CEPH_PUBLIC_NETWORK=$(grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/[0-9]\{1,2\}' /proc/net/fib_trie | grep -vE "^127|0$" | head -1)
+  fi
+fi
+
+if [[ -z "$MON_IP" || -z "$CEPH_PUBLIC_NETWORK" ]]; then
+  echo "ERROR- it looks like we have not been able to discover the network settings"
+  exit 1
 fi
 
 # bootstrap MON
@@ -38,8 +65,8 @@ osd journal size = 100
 osd pool default pg num = 8
 osd pool default pgp num = 8
 osd pool default size = 1
-public network = ${CEPH_NETWORK}
-cluster network = ${CEPH_NETWORK}
+public network = ${CEPH_PUBLIC_NETWORK}
+cluster network = ${CEPH_PUBLIC_NETWORK}
 ENDHERE
 
    # Generate administrator key
