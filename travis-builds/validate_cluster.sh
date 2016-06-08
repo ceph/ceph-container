@@ -23,20 +23,20 @@ function test_rgw {
 }
 
 function test_mds {
-  if docker exec ceph-mon ceph osd dump | grep cephfs; then
-    echo "Waiting for the MDS to be ready"
-    # NOTE(leseb): metadata server always takes up to 5 sec to run
-    # so we first check if the pools exit, from that we assume that
-    # the process will start. We stop waiting after 10 seconds.
-    counter=10
-    while [ $counter -ne 0 ]; do
+  echo "Waiting for the MDS to be ready"
+  # NOTE(leseb): metadata server always takes up to 5 sec to run
+  # so we first check if the pools exit, from that we assume that
+  # the process will start. We stop waiting after 10 seconds.
+  counter=10
+  while [ $counter -ne 0 ]; do
+    if docker exec ceph-mon ceph osd dump | grep cephfs; then
       if docker exec ceph-mon ceph -s | grep "up:active"; then
         break
       fi
       sleep 1
       let counter=counter-1
-   done
-  fi
+    fi
+ done
 }
 
 
