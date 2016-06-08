@@ -15,15 +15,17 @@ function copy_dirs {
     fi
   fi
   if [[ ! -z "$dir_to_test" ]]; then
-    mkdir -p {base,daemon}
+    mkdir -p {base,daemon,demo}
     cp -Lrv $dir_to_test/base/* base
     cp -Lrv $dir_to_test/daemon/* daemon
+    cp -Lrv $dir_to_test/demo/* demo
   else
    echo "looks like your commit did not bring any changes"
    echo "building jewel ubuntu 14.04 anyway"
-    mkdir -p {base,daemon}
+    mkdir -p {base,daemon,demo}
     cp -Lrv ceph-releases/jewel/ubuntu/14.04/base/* base
     cp -Lrv ceph-releases/jewel/ubuntu/14.04/daemon/* daemon
+    cp -Lrv ceph-releases/jewel/ubuntu/14.04/demo/* demo
   fi
 }
 
@@ -42,8 +44,16 @@ function build_daemon_img {
   popd
 }
 
+function build_demo_img {
+  pushd demo
+  sed -i 's|FROM .*|FROM base|g' Dockerfile
+  docker build -t demo .
+  rm -rf demo
+  popd
+}
 
 # MAIN
 copy_dirs
 build_base_img
 build_daemon_img
+build_demo_img

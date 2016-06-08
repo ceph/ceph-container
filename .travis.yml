@@ -26,18 +26,23 @@ install:
   - docker run -d --name ceph-osd --net=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph:/var/lib/ceph daemon osd_directory
   - docker run -d --name ceph-mds --net=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph:/var/lib/ceph -e CEPHFS_CREATE=1 daemon mds
   - docker run -d --name ceph-rgw --net=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph:/var/lib/ceph daemon rgw
+  - docker run -d --name ceph-demo -e NETWORK_AUTO_DETECT=1 demo
 
 script:
   - sudo ./travis-builds/validate_cluster.sh
 
 after_failure:
+  - docker images
   - docker ps
   - docker ps -a
   - docker logs ceph-mon
   - docker logs ceph-osd
   - docker logs ceph-mds
   - docker logs ceph-rgw
+  - docker logs ceph-demo
   - docker exec ceph-mon ceph -s
+  - docker exec ceph-demo ceph -s
 
 after_success:
   - docker exec ceph-mon ceph -s
+  - docker exec ceph-demo ceph -s
