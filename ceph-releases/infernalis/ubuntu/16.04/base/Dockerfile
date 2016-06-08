@@ -13,7 +13,7 @@ ENV KVIATOR_VERSION 0.0.5
 ENV CONFD_VERSION 0.10.0
 
 # Install prerequisites
-RUN apt-get update && apt-get install -y wget unzip uuid-runtime runit
+RUN apt-get update && apt-get install -y wget unzip uuid-runtime runit python3
 
 # Install Ceph
 RUN wget -q -O- 'https://download.ceph.com/keys/release.asc' | apt-key add -
