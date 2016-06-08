@@ -18,6 +18,12 @@ function copy_dirs {
     mkdir -p {base,daemon}
     cp -Lrv $dir_to_test/base/* base
     cp -Lrv $dir_to_test/daemon/* daemon
+  else
+   echo "looks like your commit did not bring any changes"
+   echo "building jewel ubuntu 14.04 anyway"
+    mkdir -p {base,daemon}
+    cp -Lrv ceph-releases/jewel/ubuntu/14.04/base/* base
+    cp -Lrv ceph-releases/jewel/ubuntu/14.04/daemon/* daemon
   fi
 }
 
