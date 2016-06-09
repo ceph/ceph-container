@@ -16,7 +16,6 @@ before_install:
   - sudo apt-get install -y --force-yes xfsprogs
   - sudo ./travis-builds/build_imgs.sh
 
-  #- sudo apt-get update && sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
 # NOTE(leseb): somehow putting everything in a 'script' task does not work
 # so we have to split it up that way.
 # It seems that we have an issue when not running 'docker run' from an install step
@@ -30,15 +29,22 @@ install:
 
 script:
   - sudo ./travis-builds/validate_cluster.sh
+  - sudo ./travis-builds/prepare_osd_fs.sh
+  - docker run -d --name ceph-demo --net=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph:/var/lib/ceph -e NETWORK_AUTO_DETECT=1 demo
+  - sudo ./travis-builds/validate_demo_cluster.sh
 
 after_failure:
+  - docker images
   - docker ps
   - docker ps -a
   - docker logs ceph-mon
   - docker logs ceph-osd
   - docker logs ceph-mds
   - docker logs ceph-rgw
+  - docker logs ceph-demo
   - docker exec ceph-mon ceph -s
+  - docker exec ceph-demo ceph -s
 
 after_success:
   - docker exec ceph-mon ceph -s
+  - docker exec ceph-demo ceph -s

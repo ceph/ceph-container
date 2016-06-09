@@ -3,11 +3,22 @@ set -xe
 
 
 # FUNCTIONS
+function wait_for_daemon () {
+  timeout=10
+  daemon_to_test=$1
+  while [ $timeout -ne 0 ]; do
+    if eval $daemon_to_test; then
+      return 0
+    fi
+    sleep 1
+    let timeout=timeout-1
+  done
+  return 1
+}
+
 function ceph_status {
   echo "Waiting for Ceph to be ready"
-  until docker exec ceph-mon ceph health | grep HEALTH_OK; do
-    sleep 1
-  done
+  return $(wait_for_daemon "docker exec ceph-mon ceph health | grep -sq HEALTH_OK")
 }
 
 function test_mon {
@@ -23,31 +34,20 @@ function test_rgw {
 }
 
 function test_mds {
-  if docker exec ceph-mon ceph osd dump | grep cephfs; then
-    echo "Waiting for the MDS to be ready"
-    # NOTE(leseb): metadata server always takes up to 5 sec to run
-    # so we first check if the pools exit, from that we assume that
-    # the process will start. We stop waiting after 10 seconds.
-    counter=10
-    while [ $counter -ne 0 ]; do
-      if docker exec ceph-mon ceph -s | grep "up:active"; then
-        break
-      fi
-      sleep 1
-      let counter=counter-1
-   done
-  fi
+  echo "Waiting for the MDS to be ready"
+  # NOTE(leseb): metadata server always takes up to 5 sec to run
+  # so we first check if the pools exit, from that we assume that
+  # the process will start. We stop waiting after 10 seconds.
+  return $(wait_for_daemon "docker exec ceph-mon ceph osd dump | grep -sq cephfs && docker exec ceph-mon ceph -s | grep -sq 'up:active'")
 }
 
 
 # MAIN
 ceph_status # wait for the cluster to stabilize
-
 test_mon
 test_osd
 test_rgw
 test_mds
-
 ceph_status # wait again for the cluster to stabilize (mds pools)
 
 if [[ "$(docker ps | grep ceph- | wc -l)" -ne 4 ]]; then
@@ -56,3 +56,11 @@ if [[ "$(docker ps | grep ceph- | wc -l)" -ne 4 ]]; then
   echo "please see the previous output to figure out which one"
   exit 1
 fi
+
+echo "IT'S ALL GOOD"
+docker exec ceph-mon ceph -s
+
+# purge everything for testing the demo container
+docker rm -f $(docker ps -a -q)
+pushd /var/lib/ceph/ && rm -rf * && popd
+pushd /etc/ceph/ && rm -rf * && popd

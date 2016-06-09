@@ -12,12 +12,12 @@ function create_disk {
     # Create a loopback disk and format it to XFS.
     if [[ -e ${disk_image} ]]; then
         if egrep -q ${storage_data_dir} /proc/mounts; then
-            sudo umount ${storage_data_dir}/drives/sdb1
+            sudo umount ${storage_data_dir}
             sudo rm -f ${disk_image}
         fi
     fi
 
-    sudo mkdir -p ${storage_data_dir}/drives/images
+    sudo mkdir -p ${storage_data_dir}
 
     sudo truncate -s ${loopback_disk_size} ${disk_image}
 
