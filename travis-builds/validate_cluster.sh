@@ -41,29 +41,26 @@ function test_mds {
   return $(wait_for_daemon "docker exec ceph-mon ceph osd dump | grep -sq cephfs && docker exec ceph-mon ceph -s | grep -sq 'up:active'")
 }
 
-function test_demo {
-  docker exec ceph-demo ceph health | grep HEALTH_OK
-  docker exec ceph-demo ceph -s | grep "quorum"
-  docker exec ceph-demo ceph -s | grep "1 osds: 1 up, 1 in"
-  docker exec ceph-demo ceph osd dump | grep "rgw"
-  return $(wait_for_daemon "docker exec ceph-demo ceph osd dump | grep cephfs && docker exec ceph-demo ceph -s | grep 'up:active'")
-  return $(wait_for_daemon "docker exec ceph-demo ceph health | grep HEALTH_OK")
-}
 
 # MAIN
 ceph_status # wait for the cluster to stabilize
-
 test_mon
 test_osd
 test_rgw
 test_mds
-test_demo
-
 ceph_status # wait again for the cluster to stabilize (mds pools)
 
-if [[ "$(docker ps | grep ceph- | wc -l)" -ne 5 ]]; then
+if [[ "$(docker ps | grep ceph- | wc -l)" -ne 4 ]]; then
   docker ps | grep ceph-
   echo "looks like one container died :("
   echo "please see the previous output to figure out which one"
   exit 1
 fi
+
+echo "IT'S ALL GOOD"
+docker exec ceph-mon ceph -s
+
+# purge everything for testing the demo container
+docker rm -f $(docker ps -a -q)
+pushd /var/lib/ceph/ && rm -rf * && popd
+pushd /etc/ceph/ && rm -rf * && popd
