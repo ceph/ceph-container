@@ -24,7 +24,7 @@ function echo_info {
 }
 
 function check_dry_run {
-  echo "$@" | grep -q "\-\-dry-run" && DRY_RUN=true && echo_info "Dry run mode activated"
+  set +e && echo "$@" | grep -q "\-\-dry-run" && DRY_RUN=true && echo_info "Dry run mode activated"
 }
 
 function goto_basedir {
