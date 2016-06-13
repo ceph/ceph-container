@@ -59,8 +59,3 @@ fi
 
 echo "IT'S ALL GOOD"
 docker exec ceph-mon ceph -s
-
-# purge everything for testing the demo container
-docker rm -f $(docker ps -a -q)
-pushd /var/lib/ceph/ && rm -rf * && popd
-pushd /etc/ceph/ && rm -rf * && popd

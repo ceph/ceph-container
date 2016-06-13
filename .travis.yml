@@ -14,6 +14,7 @@ services:
 before_install:
   - docker --version
   - sudo apt-get install -y --force-yes xfsprogs
+  - sudo ./travis-builds/purge_cluster.sh
   - sudo ./travis-builds/build_imgs.sh
 
 # NOTE(leseb): somehow putting everything in a 'script' task does not work
@@ -29,6 +30,7 @@ install:
 
 script:
   - sudo ./travis-builds/validate_cluster.sh
+  - sudo ./travis-builds/purge_cluster.sh
   - sudo ./travis-builds/prepare_osd_fs.sh
   - docker run -d --name ceph-demo --net=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph:/var/lib/ceph -e NETWORK_AUTO_DETECT=1 demo
   - sudo ./travis-builds/validate_demo_cluster.sh
