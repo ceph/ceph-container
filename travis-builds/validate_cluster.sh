@@ -23,14 +23,15 @@ function ceph_status {
 
 function test_mon {
   docker exec ceph-mon ceph -s | grep "quorum"
+  return $(wait_for_daemon "docker exec ceph-mon ceph -s | grep -sq quorum")
 }
 
 function test_osd {
-  docker exec ceph-mon ceph -s | grep "1 osds: 1 up, 1 in"
+  return $(wait_for_daemon "docker exec ceph-mon ceph -s | grep -sq '1 osds: 1 up, 1 in'")
 }
 
 function test_rgw {
-  docker exec ceph-mon ceph osd dump | grep "rgw"
+  return $(wait_for_daemon "docker exec ceph-mon ceph osd dump | grep -sq rgw")
 }
 
 function test_mds {
