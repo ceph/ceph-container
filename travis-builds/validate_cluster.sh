@@ -23,14 +23,15 @@ function ceph_status {
 
 function test_mon {
   docker exec ceph-mon ceph -s | grep "quorum"
+  return $(wait_for_daemon "docker exec ceph-mon ceph -s | grep -sq quorum")
 }
 
 function test_osd {
-  docker exec ceph-mon ceph -s | grep "1 osds: 1 up, 1 in"
+  return $(wait_for_daemon "docker exec ceph-mon ceph -s | grep -sq '1 osds: 1 up, 1 in'")
 }
 
 function test_rgw {
-  docker exec ceph-mon ceph osd dump | grep "rgw"
+  return $(wait_for_daemon "docker exec ceph-mon ceph osd dump | grep -sq rgw")
 }
 
 function test_mds {
@@ -59,8 +60,3 @@ fi
 
 echo "IT'S ALL GOOD"
 docker exec ceph-mon ceph -s
-
-# purge everything for testing the demo container
-docker rm -f $(docker ps -a -q)
-pushd /var/lib/ceph/ && rm -rf * && popd
-pushd /etc/ceph/ && rm -rf * && popd
