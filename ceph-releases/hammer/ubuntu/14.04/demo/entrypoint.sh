@@ -26,7 +26,7 @@ function bootstrap_mon {
   fi
 
   if [ ${NETWORK_AUTO_DETECT} -ne 0 ]; then
-    if [ -x $(command -v ip) ]; then
+    if command -v ip; then
       if [ ${NETWORK_AUTO_DETECT} -eq 1 ]; then
         MON_IP=$(ip -6 -o a | grep scope.global | awk '/eth|ens|eno|enp/ { sub ("/..", "", $4); print $4 }' | head -n1)
         if [ -z "$MON_IP" ]; then
@@ -42,7 +42,7 @@ function bootstrap_mon {
       fi
     # best effort, only works with ipv4
     else
-      MON_IP=$(grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}' /proc/net/fib_trie | grep -vE "^127|255$|0$")
+      MON_IP=$(grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}' /proc/net/fib_trie | grep -vE "^127|255$|0$" | head -1)
       CEPH_PUBLIC_NETWORK=$(grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/[0-9]\{1,2\}' /proc/net/fib_trie | grep -vE "^127|0$" | head -1)
     fi
   fi
