@@ -32,6 +32,11 @@ set -e
 : ${KV_IP:=127.0.0.1}
 : ${KV_PORT:=4001} # PORT 8500 for Consul
 
+if [ ! -z "${KV_CA_CERT}" ]; then
+	KV_TLS="--ca-cert=${KV_CA_CERT} --client-cert=${KV_CLIENT_CERT} --client-key=${KV_CLIENT_KEY}"
+	CONFD_KV_TLS="--scheme=https --client-ca-keys=${KV_CA_CERT} --client-cert=${KV_CLIENT_CERT} --client-key=${KV_CLIENT_KEY}"
+fi
+
 CEPH_OPTS="--cluster ${CLUSTER}"
 
 # ceph config file exists or die
