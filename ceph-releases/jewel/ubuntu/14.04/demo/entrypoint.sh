@@ -5,6 +5,7 @@ set -e
 : ${RGW_NAME:=$(hostname -s)}
 : ${MON_NAME:=$(hostname -s)}
 : ${RGW_CIVETWEB_PORT:=80}
+: ${NETWORK_AUTO_DETECT:=0}
 
 CEPH_OPTS="--cluster ${CLUSTER}"
 

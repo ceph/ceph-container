@@ -4,7 +4,8 @@ set -e
 : ${CLUSTER:=ceph}
 : ${RGW_NAME:=$(hostname -s)}
 : ${MON_NAME:=$(hostname -s)}
-: ${RGW_CIVETWEB_PORT:=80}
+: ${RGW_CIVETWEB_PORT:=8080}
+: ${NETWORK_AUTO_DETECT:=1}
 
 CEPH_OPTS="--cluster ${CLUSTER}"
 
