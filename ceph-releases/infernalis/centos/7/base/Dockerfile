@@ -8,6 +8,8 @@ MAINTAINER Sébastien Han "seb@redhat.com"
 ENV ETCDCTL_VERSION v2.2.0
 ENV ETCDCTL_ARCH linux-amd64
 ENV CEPH_VERSION infernalis
+ENV KVIATOR_VERSION 0.0.7
+ENV CONFD_VERSION 0.10.0
 
 # Install prerequisites
 RUN yum install -y unzip
@@ -21,8 +23,6 @@ RUN rpm --import 'https://download.ceph.com/keys/release.asc'
 RUN rpm -Uvh http://download.ceph.com/rpm-${CEPH_VERSION}/el7/noarch/ceph-release-1-1.el7.noarch.rpm
 RUN yum install -y epel-release && yum clean all
 RUN yum install -y ceph ceph-radosgw sharutils python34 && yum clean all
-ENV KVIATOR_VERSION 0.0.7
-ENV CONFD_VERSION 0.10.0
 
 # Install etcdctl
 RUN curl -L --remote-name https://github.com/coreos/etcd/releases/download/${ETCDCTL_VERSION}/etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}.tar.gz && tar xfz etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}.tar.gz -C /tmp/ etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}/etcdctl
