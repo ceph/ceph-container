@@ -2,7 +2,7 @@
 # CEPH VERSION: Jewel
 # CEPH VERSION DETAIL: 10.2.x
 
-FROM ubuntu:trusty
+FROM ubuntu:14.04
 MAINTAINER Sébastien Han "seb@redhat.com"
 
 ENV ETCDCTL_VERSION v2.2.4
