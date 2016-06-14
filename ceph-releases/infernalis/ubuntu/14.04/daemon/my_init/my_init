@@ -234,13 +234,13 @@ def wait_for_runit_or_interrupt(pid):
 
 def shutdown_runit_services():
 	debug("Begin shutting down runit services...")
-	os.system("/usr/bin/sv down /etc/service/*")
+	os.system("sv down /etc/service/*")
 
 def wait_for_runit_services():
 	debug("Waiting for runit services to exit...")
 	done = False
 	while not done:
-		done = os.system("/usr/bin/sv status /etc/service/* | grep -q '^run:'") != 0
+		done = os.system("sv status /etc/service/* | grep -q '^run:'") != 0
 		if not done:
 			time.sleep(0.1)
 
