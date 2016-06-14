@@ -5,7 +5,7 @@ python:
 branches:
   only:
     - master
-    - /^build-master-*/
+    - /^build-master-jewel-*/
 
 services:
   - docker
