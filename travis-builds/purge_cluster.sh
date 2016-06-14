@@ -3,7 +3,7 @@
 
 # FUNCTIONS
 function purge_ceph {
-  docker rm -f $(docker ps -a -q)
+  docker stop $(docker ps -q)
   rm -rf /var/lib/ceph/*
   rm -rf /etc/ceph
 }
