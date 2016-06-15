@@ -4,7 +4,7 @@
 #
 # VERSION 0.0.1
 
-FROM ceph/base:tag-build-master-jewel-fedora-23
+FROM ceph/base:tag-build-master-hammer-fedora-23
 MAINTAINER Daniel Gryniewicz "dang@redhat.com"
 
 
