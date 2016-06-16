@@ -225,6 +225,9 @@ function start_osd {
       directory)
          osd_directory
          ;;
+      directory_single)
+         osd_directory_single
+         ;;
       disk)
          osd_disk
          ;;
@@ -257,6 +260,40 @@ function start_osd {
    esac
 }
 
+
+########################
+# OSD_DIRECTORY_SINGLE #
+########################
+
+function osd_directory_single {
+  if [[ ! -d /var/lib/ceph/osd ]]; then
+    echo "ERROR- could not find the osd directory, did you bind mount the OSD data directory?"
+    echo "ERROR- use -v <host_osd_data_dir>:/var/lib/ceph/osd"
+    exit 1
+  fi
+
+  # make sure ceph owns the directory
+  chown -R ceph. /var/lib/ceph/osd
+
+  # pick one osd and make sure no lock is held
+  for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }'); do
+    if [[ -n "$(find /var/lib/ceph/osd/${CLUSTER}-${OSD_ID} -prune -empty)" ]]; then
+      echo "Looks like OSD: ${OSD_ID} has not been bootstrapped yet, doing nothing, moving on to the next discoverable OSD"
+    else
+      # check if the osd has a lock, if yes moving on, if not we run it
+      # many thanks to Julien Danjou for the python piece
+      if python -c "import sys, fcntl, struct; l = fcntl.fcntl(open('/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/fsid', 'a'), fcntl.F_GETLK, struct.pack('hhllhh', fcntl.F_WRLCK, 0, 0, 0, 0, 0)); l_type, l_whence, l_start, l_len, l_pid, l_sysid = struct.unpack('hhllhh', l); sys.exit(0 if l_type == fcntl.F_UNLCK else 1)"; then
+        echo "Looks like OSD: ${OSD_ID} is not started, starting it..."
+        exec ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} -k /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
+        break
+      fi
+    fi
+  done
+
+  echo "Looks like all the OSDs are already running, doing nothing"
+  echo "Exiting the container"
+  exit 0
+}
 
 #################
 # OSD_DIRECTORY #
@@ -718,6 +755,10 @@ case "$CEPH_DAEMON" in
       ;;
    osd_directory)
       OSD_TYPE="directory"
+      start_osd
+      ;;
+   osd_directory_single)
+      OSD_TYPE="directory_single"
       start_osd
       ;;
    osd_ceph_disk)
