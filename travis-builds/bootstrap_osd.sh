@@ -18,6 +18,7 @@ function bootstrap_osd {
   docker exec ceph-mon ceph-osd -i 0 --mkfs
   docker exec ceph-mon ceph auth get-or-create osd.0 osd 'allow *' mon 'allow profile osd' -o /var/lib/ceph/osd/ceph-0/keyring
   docker exec ceph-mon ceph osd crush add 0 1 root=default host=$(hostname -s)
+  chown -R 64045:64045 /var/lib/ceph/osd/*
 }
 
 

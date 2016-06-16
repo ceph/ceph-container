@@ -7,7 +7,8 @@ Valid values are:
 
 * `mon` deploys a Ceph monitor
 * `osd` deploys an OSD using the method specified by `OSD_TYPE`
-* `osd_directory` deploys an OSD using a prepared directory (used in scenario where the operator doesn't want to use `--privileged=true`)
+* `osd_directory` deploys **one or multiple OSDs in a single container** using a prepared directory (used in scenario where the operator doesn't want to use `--privileged=true`)
+* `osd_directory_single` deploys an **single OSD per container** using a prepared directory (used in scenario where the operator doesn't want to use `--privileged=true`)
 * `osd_ceph_disk` deploys an OSD using ceph-disk, so you have to provide a whole device (ie: /dev/sdb)
 * `mds` deploys a MDS
 * `rgw` deploys a Rados Gateway
@@ -40,9 +41,9 @@ We currently support 2 KV backends to store our configuration flags, keys and ma
 * etcd
 * consul
 
-There is a `ceph.defaults` config file in the image that is used for defaults to bootstrap daemons. 
+There is a `ceph.defaults` config file in the image that is used for defaults to bootstrap daemons.
 It will add the keys if they are not already present.
-You can either pre-populate the KV store with your own settings, or provide a ceph.defaults config file 
+You can either pre-populate the KV store with your own settings, or provide a ceph.defaults config file.
 To supply your own defaults, make sure to mount the /etc/ceph/ volume and place your ceph.defaults file there.
 
 Important variables in `ceph.defaults` to add/change when you bootstrap an OSD:
@@ -51,7 +52,7 @@ Important variables in `ceph.defaults` to add/change when you bootstrap an OSD:
 * `/osd/cluster_network`
 * `/osd/public_network`
 
-Note: `cluster_network` and `public_network` are currently not populated in the defaults, but can be passed as environment 
+Note: `cluster_network` and `public_network` are currently not populated in the defaults, but can be passed as environment
 variables with `-e CEPH_PUBLIC_NETWORK=...` for more flexibility
 
 Populate Key Value store
@@ -237,7 +238,7 @@ following environment variables will control its creation:
 * `JOURNAL` is the location of the journal (default is the `journal` file inside the OSD data directory)
 * `HOSTNAME` is the name of the host; it is used as a flag when adding the OSD to the CRUSH map
 
-The old option `OSD_ID` is now unused.  Instead, the script will scan for each directory in `/var/lib/ceph/osd` of the form `<cluster>-<osd-id>`.
+The old option `OSD_ID` is now unused.  Instead, the script will scan for each directory in `/var/lib/ceph/osd` of the form `<cluster>_<osd_id>`.
 
 To create your OSDs simply run the following command:
 
@@ -245,7 +246,7 @@ To create your OSDs simply run the following command:
 
 Note that we now default to dropping root privileges, so it is important to set the proper ownership for your OSD directories.  The Ceph OSD runs as UID:64045, GID:64045, so:
 
-`chown -R 64045:64045 /var/lib/ceph/osd/*`
+`chown -R 64045:64045 /var/lib/ceph/osd/`
 
 
 #### Multiple OSDs ####
@@ -259,6 +260,20 @@ There are two workarounds, at present:
 To run multiple OSDs within the same container, simply bind-mount each OSD datastore directory:
 * `docker run -v /osds/1:/var/lib/ceph/osd/ceph-1 -v /osds/2:/var/lib/ceph/osd/ceph-2`
 
+
+### Ceph OSD directory single ###
+
+Ceph OSD directory single has a similar design to Ceph OSD directory since they both aim to run OSD processes from an already bootstrapped directory.
+So we assume the OSD directory has been populated already.
+The major different is that Ceph OSD directory single has a much simpler implementation since it only runs a single OSD process per container.
+It doesn't do anything with the journal as it assumes journal's symlink was provided during the initialization sequence of the OSD.
+
+This scenario goes through the OSD directory (`/var/lib/ceph/osd`) and looks for OSDs that don't have a lock held by any other OSD.
+If no lock is found, the OSD process starts.
+If all the OSDs are already running, we gently exit 0 and explain that all the OSDs are already running.
+
+**Important note**: if you are aiming at running multiple OSD containers on a same machine (things that you will likely do with Ceph anyway), you must enable `--pid=host`.
+However if you are running Docker 1.12 (based on https://github.com/docker/docker/pull/22481), you can just share the same PID namespace for the OSD containers only using: `--pid=container:<id>`.
 
 #### BTRFS and journal ####
 
@@ -384,7 +399,4 @@ List of available options:
 * `RESTAPI_BASE_URL` is the base URL of the API (DEFAULT: /api/v0.1)
 * `RESTAPI_LOG_LEVEL` is the log level of the API (DEFAULT: warning)
 * `RESTAPI_LOG_FILE` is the location of the log file (DEFAULT: /var/log/ceph/ceph-restapi.log)
- 
- 
- 
  
