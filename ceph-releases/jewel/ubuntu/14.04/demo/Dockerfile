@@ -4,7 +4,7 @@
 #
 # VERSION 0.0.1
 
-FROM ceph/base:tag-build-master-jewel-fedora-23
+FROM ceph/base:tag-build-master-jewel-ubuntu-14.04
 MAINTAINER Sébastien Han "seb@redhat.com"
 
 # Add bootstrap script
