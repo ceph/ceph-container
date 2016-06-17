@@ -12,6 +12,7 @@ BASEDIR=$(dirname "$0")
 LOCAL_BRANCH=$(cd $BASEDIR && git rev-parse --abbrev-ref HEAD)
 LINK_MAP=$(mktemp -p /tmp)
 DRY_RUN=false
+IGNORED_CHANGES="ceph-releases/jewel/fedora/23/*"
 
 
 # FUNCTIONS
@@ -24,7 +25,7 @@ function echo_info {
 }
 
 function check_dry_run {
-  set +e && echo "$@" | grep -q "\-\-dry-run" && DRY_RUN=true && echo_info "Dry run mode activated"
+  set +e && echo "$@" | grep -q "\-\-dry-run" && DRY_RUN=true && echo_info "DRY RUN MODE ACTIVATED"
 }
 
 function goto_basedir {
@@ -130,7 +131,7 @@ do
   sha=$(git log --pretty=format:'%H' $tag~1 -n1)
   impacted_files=$(git diff --name-only $sha..origin/$LOCAL_BRANCH)
   if [[ -n "$impacted_files" ]]; then
-    impacted_sort=$(echo $impacted_files | tr " " "\n" | awk -F '/' '/ceph-releases/ {print $2,"/",$3,"/",$4}' | tr -d " " | sort -u | uniq)
+    impacted_sort=$(echo $impacted_files | sed "s|$IGNORED_CHANGES||g" | tr " " "\n" | awk -F '/' '/ceph-releases/ {print $2,"/",$3,"/",$4}' | tr -d " " | sort -u | uniq)
     if [[ -n "$impacted_sort" ]]; then
       todo="$impacted_sort $todo"
     fi
