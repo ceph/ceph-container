@@ -19,12 +19,12 @@ The environment variables `MON_NAME` and `MON_IP` are required:
 *  `RGW_NAME` is the name of rados gateway instance (DEFAULT: hostname)
 *  `RGW_CIVETWEB_PORT` is the port of the rados gateway (DEFAULT: 80)
 *  `CLUSTER` is the name of the cluster (DEFAULT: ceph)
-*  `CEPH_NETWORK` is the network where the OSD should communicate
+*  `CEPH_PUBLIC_NETWORK` is the network where the OSD should communicate
 
 Commonly, you will want to bind-mount your host's `/etc/ceph` into the container.
 For example:
 
-`docker run -d --net=host -v /etc/ceph:/etc/ceph -e MON_IP=192.168.0.20 -e CEPH_NETWORK=192.168.0.0/24 ceph/demo`
+`docker run -d --net=host -v /etc/ceph:/etc/ceph -e MON_IP=192.168.0.20 -e CEPH_PUBLIC_NETWORK=192.168.0.0/24 ceph/demo`
 
 
 Tip
