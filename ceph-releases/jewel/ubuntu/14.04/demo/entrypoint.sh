@@ -78,6 +78,14 @@ public network = ${CEPH_PUBLIC_NETWORK}
 cluster network = ${CEPH_PUBLIC_NETWORK}
 ENDHERE
 
+		# For ext4
+		if [ "$(findmnt -n -o FSTYPE -T /var/lib/ceph)" = "ext4" ]; then
+			cat <<ENDHERE >> /etc/ceph/${CLUSTER}.conf
+osd max object name len = 256
+osd max object namespace len = 64
+ENDHERE
+		fi
+
     # Generate administrator key
     ceph-authtool /etc/ceph/${CLUSTER}.client.admin.keyring --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
 
