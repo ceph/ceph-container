@@ -445,14 +445,16 @@ function osd_activate {
   fi
   mkdir -p /var/lib/ceph/osd
   chown ceph. /var/lib/ceph/osd
+  # resolve /dev/disk/by-* names
+  ACTUAL_OSD_DEVICE=$(readlink -f ${OSD_DEVICE})
   if [[ ! -z "${OSD_JOURNAL}" ]]; then
     chown ceph. ${OSD_JOURNAL}
     ceph-disk -v --setuser ceph --setgroup disk activate ${OSD_DEVICE}
-    OSD_ID=$(ceph-disk list |grep "${OSD_DEVICE} ceph data" | awk -F, '{print $4}'|awk -F. '{print $2}')
+    OSD_ID=$(ceph-disk list |grep "${ACTUAL_OSD_DEVICE} ceph data" | awk -F, '{print $4}'|awk -F. '{print $2}')
   else
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
     ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
-    OSD_ID=$(ceph-disk list |grep "$(dev_part ${OSD_DEVICE} 1) ceph data" | awk -F, '{print $4}'|awk -F. '{print $2}')
+    OSD_ID=$(ceph-disk list |grep "$(dev_part ${ACTUAL_OSD_DEVICE} 1) ceph data" | awk -F, '{print $4}'|awk -F. '{print $2}')
   fi
   OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
   ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
