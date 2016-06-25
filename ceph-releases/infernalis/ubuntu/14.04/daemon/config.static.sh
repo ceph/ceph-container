@@ -7,11 +7,6 @@ function get_admin_key {
 }
 
 function get_mon_config {
-  if [ ! -n "$CEPH_PUBLIC_NETWORK" ]; then
-    echo "ERROR- CEPH_PUBLIC_NETWORK must be defined as the name of the network for the OSDs"
-    exit 1
-  fi
-  
   if [ ! -e /etc/ceph/${CLUSTER}.conf ]; then
     fsid=$(uuidgen)
     cat <<ENDHERE >/etc/ceph/${CLUSTER}.conf

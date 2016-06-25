@@ -19,7 +19,7 @@ RUN chmod +x /sbin/my_init && \
     chmod +x /etc/runit/2
 
 # Add bootstrap script, ceph defaults key/values for KV store
-ADD entrypoint.sh config.*.sh ceph.defaults /
+ADD entrypoint.sh config.*.sh ceph.defaults check_zombie_mons.py remove-mon.sh /
 
 # Add volumes for Ceph config and data
 VOLUME ["/etc/ceph","/var/lib/ceph"]

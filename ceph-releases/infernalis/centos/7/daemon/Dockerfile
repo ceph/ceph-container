@@ -8,7 +8,7 @@ FROM ceph/base:tag-build-master-infernalis-centos-7
 MAINTAINER Sébastien Han "seb@redhat.com"
 
 # Add bootstrap script, ceph defaults key/values for KV store
-ADD entrypoint.sh config.*.sh ceph.defaults /
+ADD  entrypoint.sh config.*.sh check_zombie_mons.py remove-mon.sh ceph.defaults /
 
 ADD my_init/my_init /sbin/my_init
 ADD 2.sh /etc/runit/2

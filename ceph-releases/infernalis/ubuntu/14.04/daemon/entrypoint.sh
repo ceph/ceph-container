@@ -4,6 +4,7 @@ set -e
 : ${CLUSTER:=ceph}
 : ${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}
 : ${CEPH_DAEMON:=${1}} # default daemon to first argument
+: ${CEPH_GET_ADMIN_KEY:=0}
 : ${HOSTNAME:=$(hostname -s)}
 : ${MON_NAME:=${HOSTNAME}}
 : ${MON_IP_AUTO_DETECT:=0}
@@ -85,6 +86,10 @@ esac
 #######
 
 function start_mon {
+  if [ ! -n "$CEPH_PUBLIC_NETWORK" ]; then
+    echo "ERROR- CEPH_PUBLIC_NETWORK must be defined as the name of the network for the OSDs"
+    exit 1
+  fi
 
   if [ ${MON_IP_AUTO_DETECT} -eq 1 ]; then
     MON_IP=$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)

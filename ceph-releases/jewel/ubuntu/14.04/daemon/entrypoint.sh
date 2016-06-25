@@ -112,6 +112,10 @@ case "$KV_TYPE" in
    etcd|consul)
       source /config.kv.sh
       ;;
+   k8s|kubernetes)
+      source /config.k8s.sh
+      ;;
+
    *)
       source /config.static.sh
       ;;
@@ -791,6 +795,24 @@ function zap_device {
   fi
 }
 
+####################
+# WATCH MON HEALTH #
+###################
+
+function watch_mon_health {
+echo "checking for zombie mons"
+
+while [ true ]
+do
+ echo "checking for zombie mons"
+ /check_zombie_mons.py || true;
+ echo "sleep 30 sec"
+ sleep 30
+done
+
+
+}
+
 
 ###############
 # CEPH_DAEMON #
@@ -849,6 +871,9 @@ case "$CEPH_DAEMON" in
     ;;
   zap_device)
     zap_device
+    ;;
+  mon_health)
+    watch_mon_health
     ;;
   *)
   if [ ! -n "$CEPH_DAEMON" ]; then
