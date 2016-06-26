@@ -34,7 +34,7 @@ spec:
       containers:
         - name: ceph-mon
         #image: quay.io/acaleph/ceph-daemon:kubernetes
-          image: quay.io/cornelius/ceph-daemon:latest
+          image: quay.io/cornelius/ceph-daemon-test:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 6789
