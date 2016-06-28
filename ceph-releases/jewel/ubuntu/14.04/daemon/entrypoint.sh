@@ -400,7 +400,7 @@ EOF
     chmod +x /etc/service/${CLUSTER}-${OSD_ID}/run
   done
 
-exec /sbin/my_init
+exec /usr/bin/runsvdir -P /etc/service
 }
 
 
