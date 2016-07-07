@@ -4,6 +4,15 @@ set -e
 sed -r "s/@CLUSTER@/${CLUSTER:-ceph}/g" \
     /etc/confd/src/ceph.conf.toml.in > /etc/confd/conf.d/ceph.conf.toml
 
+# make sure etcd uses http or https as a prefix
+if [[ "$KV_TYPE" == "etcd" ]]; then
+  if [ ! -z "${KV_CA_CERT}" ]; then
+  	CONFD_NODE_SCHEMA="https://"
+  else
+    CONFD_NODE_SCHEMA="http://"
+  fi
+fi
+
 function get_admin_key {
    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/${CLUSTER}.client.admin.keyring
 }
@@ -26,7 +35,7 @@ function get_mon_config {
     echo "Configuration found for cluster ${CLUSTER}. Writing to disk."
 
 
-    until confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} ${CONFD_KV_TLS} -prefix="/${CLUSTER_PATH}/" ; do
+    until confd -onetime -backend ${KV_TYPE} -node ${CONFD_NODE_SCHEMA}${KV_IP}:${KV_PORT} ${CONFD_KV_TLS} -prefix="/${CLUSTER_PATH}/" ; do
       echo "Waiting for confd to update templates..."
       sleep 1
     done
@@ -61,7 +70,7 @@ function get_mon_config {
     FSID=$(uuidgen)
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} put ${CLUSTER_PATH}/auth/fsid ${FSID}
 
-    until confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} ${CONFD_KV_TLS} -prefix="/${CLUSTER_PATH}/" ; do
+    until confd -onetime -backend ${KV_TYPE} -node ${CONFD_NODE_SCHEMA}${KV_IP}:${KV_PORT} ${CONFD_KV_TLS} -prefix="/${CLUSTER_PATH}/" ; do
       echo "Waiting for confd to write initial templates..."
       sleep 1
     done
@@ -114,7 +123,7 @@ function get_config {
     sleep 5
   done
 
-  until confd -onetime -backend ${KV_TYPE} -node ${KV_IP}:${KV_PORT} ${CONFD_KV_TLS} -prefix="/${CLUSTER_PATH}/" ; do
+  until confd -onetime -backend ${KV_TYPE} -node ${CONFD_NODE_SCHEMA}${KV_IP}:${KV_PORT} ${CONFD_KV_TLS} -prefix="/${CLUSTER_PATH}/" ; do
     echo "Waiting for confd to update templates..."
     sleep 1
   done
@@ -128,4 +137,3 @@ function get_config {
   kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/bootstrapRgwKeyring > /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
 
 }
-
