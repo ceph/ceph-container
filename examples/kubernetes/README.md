@@ -2,7 +2,61 @@ Ceph on Kubernetes
 =====
 This Guide will take you through the process of deploying a Ceph cluster on to a Kubernetes cluster.
 
-Sigil is required for template handling and must be installed in system PATH. Instructions can be found here: [https://github.com/gliderlabs/sigil](https://github.com/gliderlabs/sigil)
+# Client Requirements
+
+In addiation to kubectl, Sigil is required for template handling and must be installed in your system PATH. Instructions can be found here: [https://github.com/gliderlabs/sigil](https://github.com/gliderlabs/sigil)
+
+# Cluster Requirements
+
+At a High level:
+
+- The Kubernetes SkyDNS addon needs to be set as a resolver on masters and nodes
+- Ceph and RBD utilities must be installed on masters and nodes
+- Linux Kernel should be newer than 4.2.0
+
+### SkyDNS Resolution
+
+The Ceph MONs are what clients talk to when mounting Ceph storage. Because Ceph MON IPs can change, we need a Kubernetes service to front them. Otherwise your clients will eventually stop working over time as MONs are rescheduled.
+
+To get skyDNS resolution working, the resolv.conf on your nodes should look something like this:
+
+```
+domain <EXISTING_DOMAIN>
+search <EXISTING_DOMAIN>
+
+search svc.cluster.local #Your kubernetes cluster ip domain
+
+nameserver 10.0.0.10     #The cluster IP of skyDNS
+nameserver <EXISTING_RESOLVER_IP>
+```
+
+### Ceph and RBD utilities installed on the nodes
+
+The Kubernetes kubelet shells out to system utilities to mount Ceph volumes. This means that every system must have these utilities installed. This requirement extends to the control plane, since there may be interactions between kube-controller-manager and the Ceph cluster.
+
+For Debian-based distros:
+
+```
+apt-get install ceph-fs-common ceph-common
+```
+
+For Redhat-based distros:
+
+```
+yum install ceph
+```
+
+### Linux Kernel version 4.2.0 or newer
+
+You'll need a newer kernel to use this. Kernel panics have been observed on older versions. Your kernel should also have RBD support.
+
+This has been tested on:
+
+- Ubuntu 15.10
+
+This will not work on:
+
+- Debian 8.5
 
 # Quickstart
 
@@ -50,7 +104,7 @@ kubectl create secret generic ceph-client-key --from-file=ceph-client-key --name
 cd ..
 ```
 
-Please note that you should save the output files of this command, they will overwrite existing keys and configuration. If you lose these files they can still be retrieved from Kubernetes via `kubectl get secret`.
+Please note that you should save the output files of this command, future invocations of scripts will overwrite existing keys and configuration. If you lose these files they can still be retrieved from Kubernetes via `kubectl get secret`.
 
 ### Deploy Ceph Components
 
@@ -131,34 +185,6 @@ You should be able to see the filesystem mounted now
 kubectl exec -it --namespace=ceph ceph-cephfs-test df
 ```
 
-Otherwise you must edit the file and replace `ceph-mon.ceph` with a Pod IP. It is highly reccomended that you place skyDNS as a resolver, otherwise your configuration WILL eventually stop working as Mons are rescheduled.
-
-To get skyDNS resolution working, your resolv.conf should look something like this:
-
-```
-domain <EXISTING_DOMAIN>
-search <EXISTING_DOMAIN>
-
-search svc.cluster.local
-
-nameserver 10.0.0.10
-nameserver <EXISTING_RESOLVER_IP>
-```
-
-If your pod has issues mounting, make sure mount.ceph is installed on all nodes.
-
-For Debian-based distros:
-
-```
-apt-get install ceph-fs-common ceph-common
-```
-
-For Redhat:
-
-```
-yum install ceph
-```
-
 ### Mounting a Ceph RBD in a pod
 
 First we have to create an RBD volume.
@@ -184,8 +210,25 @@ And again you should see your mount, but with 20 gigs free
 kubectl exec -it --namespace=ceph ceph-rbd-test -- df -h
 ```
 
-
 ### Common Modifications
+
+#### Durable Storage
 
 By default `emptyDir` is used for everything. If you have durable storage on your nodes, replace the emptyDirs with a `hostPath` to that storage.
 
+#### Enabling Jewel RBD features
+
+We disable new RBD features by default since most operating systems cannot mount volumes using these features. You can override this by setting the following before running sigil or the convenience scripts.
+
+```
+export client_rbd_default_features=61
+```
+
+If you have older nodes in your cluster that may need to mount a volume that has been created with these newer features, you must remove the features from the volume by running these commands from a Ceph pod:
+
+```
+rbd feature disable <VOLUME NAME> fast-diff
+rbd feature disable <VOLUME NAME> deep-flatten
+rbd feature disable <VOLUME NAME> object-map
+rbd feature disable <VOLUME NAME> exclusive-lock
+```
