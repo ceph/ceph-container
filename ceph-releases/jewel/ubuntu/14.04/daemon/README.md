@@ -66,6 +66,22 @@ $ sudo docker run -d --net=host \
 ceph/daemon populate_kvstore
 ```
 
+
+Zap a device
+------------
+
+Sometimes you might want to destroy partition tables from a disk.
+For this you can use the `zap_device` scenario that works as follow:
+
+```
+docker run -d --privileged=true \
+-v /dev/:/dev/
+-e OSD_DEVICE=/dev/sdd 
+ceph/daemon
+zap_device
+```
+
+
 Deploy a monitor
 ----------------
 
