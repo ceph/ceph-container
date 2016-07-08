@@ -759,6 +759,25 @@ ENDHERE
 
 
 ##############
+# RBD MIRROR #
+##############
+
+function start_rbd_mirror {
+  get_config
+  check_config
+  create_socket_dir
+
+  # ensure we have the admin key
+  get_admin_key
+  check_admin_key
+
+  # start rbd-mirror
+  exec /usr/bin/rbd-mirror ${CEPH_OPTS} -d --setuser ceph --setgroup ceph
+
+}
+
+
+##############
 # ZAP DEVICE #
 ##############
 
@@ -825,6 +844,9 @@ case "$CEPH_DAEMON" in
   restapi)
     start_restapi
     ;;
+  rbd_mirror)
+    start_rbd_mirror
+    ;;
   zap_device)
     zap_device
     ;;
@@ -832,8 +854,8 @@ case "$CEPH_DAEMON" in
   if [ ! -n "$CEPH_DAEMON" ]; then
     echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
     echo "of the daemon you want to deploy."
-    echo "Valid values for CEPH_DAEMON are MON, OSD, OSD_DIRECTORY, OSD_CEPH_DISK, OSD_CEPH_DISK_PREPARE, OSD_CEPH_DISK_ACTIVATE, OSD_CEPH_ACTIVATE_JOURNAL, MDS, RGW, RESTAPI, ZAP_DEVICE"
-    echo "Valid values for the daemon parameter are mon, osd, osd_directory, osd_ceph_disk, osd_ceph_disk_prepare, osd_ceph_disk_activate, osd_ceph_activate_journal, mds, rgw, restapi, zap_device"
+    echo "Valid values for CEPH_DAEMON are MON, OSD, OSD_DIRECTORY, OSD_CEPH_DISK, OSD_CEPH_DISK_PREPARE, OSD_CEPH_DISK_ACTIVATE, OSD_CEPH_ACTIVATE_JOURNAL, MDS, RGW, RESTAPI, ZAP_DEVICE, RBD_MIRROR"
+    echo "Valid values for the daemon parameter are mon, osd, osd_directory, osd_ceph_disk, osd_ceph_disk_prepare, osd_ceph_disk_activate, osd_ceph_activate_journal, mds, rgw, restapi, zap_device, rbd_mirror"
     exit 1
   fi
   ;;

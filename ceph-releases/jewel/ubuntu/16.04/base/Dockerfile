@@ -23,7 +23,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget unz
 # install ceph
     wget -q -O- 'https://download.ceph.com/keys/release.asc' | apt-key add - && \
     echo "deb http://download.ceph.com/debian-$CEPH_VERSION/ xenial main" | tee /etc/apt/sources.list.d/ceph-$CEPH_VERSION.list && \
-    apt-get update && apt-get install -y --force-yes ceph radosgw && \
+    apt-get update && apt-get install -y --force-yes ceph radosgw rbd-mirror && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
 \
 # Install etcdctl
