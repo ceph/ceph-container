@@ -408,6 +408,25 @@ $ sudo docker run -d --net=host \
 ceph/daemon restapi
 ```
 
+Deploy a RBD mirror
+-----------------
+
+This is pretty straighforward. The `--net=host` is not mandatory, with KV we do:
+
+```
+$ sudo docker run -d --net=host \
+-e KV_TYPE=etcd \
+-e KV_IP=192.168.0.20 \
+ceph/daemon rbd_mirror
+```
+
+Without KV we do:
+
+```
+$ sudo docker run -d --net=host \
+ceph/daemon rbd_mirror
+```
+
 List of available options:
 
 * `RESTAPI_IP` is the IP address to listen on (DEFAULT: 0.0.0.0)
