@@ -469,8 +469,8 @@ function osd_activate {
   if [[ ! -z "${OSD_JOURNAL}" ]]; then
     timeout 10  bash -c "while [ ! -e ${OSD_DEVICE} ]; do sleep 1; done"
     chown ceph. ${OSD_JOURNAL}
-    ceph-disk -v --setuser ceph --setgroup disk activate ${OSD_DEVICE}
-    OSD_ID=$(ceph-disk list |grep "${ACTUAL_OSD_DEVICE} ceph data" | awk -F, '{print $4}'|awk -F. '{print $2}')
+    ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
+    OSD_ID=$(ceph-disk list |grep "$(dev_part ${ACTUAL_OSD_DEVICE} 1) ceph data" | awk -F, '{print $4}'|awk -F. '{print $2}')
   else
     timeout 10  bash -c "while [ ! -e $(dev_part ${OSD_DEVICE} 1) ]; do sleep 1; done"
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
