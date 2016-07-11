@@ -129,7 +129,12 @@ generate_link_map
 for tag in $(git tag | grep "^tag-$PREFIX");
 do
   sha=$(git log --pretty=format:'%H' $tag~1 -n1)
-  impacted_files=$(git diff --name-only $sha..origin/$LOCAL_BRANCH)
+  # NOTE (leseb):
+  # we grep so we only get the changes that are part of our branch, if don't do this
+  # the following will occor:
+  # infernalis will see that jewel changed and will request jewel to change
+  # however jewel is already up to date. Then we fall into an infite loop
+  impacted_files=$(git diff --name-only $sha..origin/$LOCAL_BRANCH | grep "^tag-$PREFIX")
   if [[ -n "$impacted_files" ]]; then
     impacted_sort=$(echo $impacted_files | sed "s|$IGNORED_CHANGES||g" | tr " " "\n" | awk -F '/' '/ceph-releases/ {print $2,"/",$3,"/",$4}' | tr -d " " | sort -u | uniq)
     if [[ -n "$impacted_sort" ]]; then
