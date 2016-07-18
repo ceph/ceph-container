@@ -201,6 +201,14 @@ function bootstrap_rgw {
   radosgw ${CEPH_OPTS} -c /etc/ceph/${CLUSTER}.conf -n client.radosgw.gateway -k /var/lib/ceph/radosgw/${RGW_NAME}/keyring --rgw-socket-path="" --rgw-frontends="civetweb port=${RGW_CIVETWEB_PORT}" --setuser ceph --setgroup ceph
 }
 
+function bootstrap_demo_user {
+  if [ -n "$CEPH_DEMO_UID" ] && [ -n "$CEPH_DEMO_ACCESS_KEY" ] && [ -n "$CEPH_DEMO_SECRET_KEY" ]
+  then
+    echo "Creating a demo user..."
+    radosgw-admin user info --uid=$CEPH_DEMO_UID || radosgw-admin user create --uid=$CEPH_DEMO_UID --display-name="Ceph demo user" --access-key=$CEPH_DEMO_ACCESS_KEY --secret-key=$CEPH_DEMO_SECRET_KEY
+  fi
+}
+
 #######
 # API #
 #######
@@ -219,5 +227,7 @@ bootstrap_mon
 bootstrap_osd
 bootstrap_mds
 bootstrap_rgw
+bootstrap_demo_user
 bootstrap_rest_api
+
 exec ceph ${CEPH_OPTS} -w
