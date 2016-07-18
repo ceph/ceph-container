@@ -79,19 +79,10 @@ function dev_part {
 }
 
 function osd_trying_to_determine_scenario {
-  if [[ ! -d /var/lib/ceph/osd || -n "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
-    echo "No bootstrapped OSDs found; trying ceph-disk"
-    osd_disk
-    return
-  fi
-
   if [ -z "${OSD_DEVICE}" ]; then
     echo "Bootstrapped OSD(s) found; using OSD directory"
     osd_directory
-    return
-  fi
-
-  if $(parted --script ${OSD_DEVICE} print | egrep -sq '^ 1.*ceph data'); then
+  elif $(parted --script ${OSD_DEVICE} print | egrep -sq '^ 1.*ceph data'); then
     echo "Bootstrapped OSD found; activating ${OSD_DEVICE}"
     osd_activate
   else
