@@ -49,24 +49,24 @@ MOUNT_OPTS="-t xfs -o noatime,inode64"
 
 # ceph config file exists or die
 function check_config {
-if [[ ! -e /etc/ceph/${CLUSTER}.conf ]]; then
-  echo "ERROR- /etc/ceph/${CLUSTER}.conf must exist; get it from your existing mon"
-  exit 1
-fi
+  if [[ ! -e /etc/ceph/${CLUSTER}.conf ]]; then
+    echo "ERROR- /etc/ceph/${CLUSTER}.conf must exist; get it from your existing mon"
+    exit 1
+  fi
 }
 
 # ceph admin key exists or die
 function check_admin_key {
-if [[ ! -e /etc/ceph/${CLUSTER}.client.admin.keyring ]]; then
-    echo "ERROR- /etc/ceph/${CLUSTER}.client.admin.keyring must exist; get it from your existing mon"
-    exit 1
-fi
+  if [[ ! -e /etc/ceph/${CLUSTER}.client.admin.keyring ]]; then
+      echo "ERROR- /etc/ceph/${CLUSTER}.client.admin.keyring must exist; get it from your existing mon"
+      exit 1
+  fi
 }
 
 # create socket directory
 function create_socket_dir {
-mkdir -p /var/run/ceph
-chown ceph. /var/run/ceph
+  mkdir -p /var/run/ceph
+  chown ceph. /var/run/ceph
 }
 
 # Calculate proper device names, given a device and partition number
@@ -197,6 +197,7 @@ function start_mon {
   # get_mon_config is also responsible for bootstrapping the
   # cluster, if necessary
   get_mon_config
+  create_socket_dir
 
   # If we don't have a monitor keyring, this is a new monitor
   if [ ! -e /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}/keyring ]; then
@@ -222,8 +223,6 @@ function start_mon {
     # Make the monitor directory
     mkdir -p /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
     chown ceph. /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
-
-    create_socket_dir
 
     # Prepare the monitor daemon's directory with the map and keyring
     ceph-mon --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap --keyring /tmp/${CLUSTER}.mon.keyring --mon-data /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
@@ -694,6 +693,7 @@ function start_mds {
 function start_rgw {
   get_config
   check_config
+  create_socket_dir
 
   if [ ${CEPH_GET_ADMIN_KEY} -eq "1" ]; then
     get_admin_key
@@ -717,7 +717,6 @@ function start_rgw {
     ceph ${CEPH_OPTS} --name client.bootstrap-rgw --keyring /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring auth get-or-create client.rgw.${RGW_NAME} osd 'allow rwx' mon 'allow rw' -o /var/lib/ceph/radosgw/${RGW_NAME}/keyring
     chown ceph. /var/lib/ceph/radosgw/${RGW_NAME}/keyring
     chmod 0600 /var/lib/ceph/radosgw/${RGW_NAME}/keyring
-    create_socket_dir
   fi
 
   if [ "$RGW_REMOTE_CGI" -eq 1 ]; then
