@@ -204,8 +204,24 @@ function bootstrap_rgw {
 function bootstrap_demo_user {
   if [ -n "$CEPH_DEMO_UID" ] && [ -n "$CEPH_DEMO_ACCESS_KEY" ] && [ -n "$CEPH_DEMO_SECRET_KEY" ]
   then
-    echo "Creating a demo user..."
-    radosgw-admin user info --uid=$CEPH_DEMO_UID || radosgw-admin user create --uid=$CEPH_DEMO_UID --display-name="Ceph demo user" --access-key=$CEPH_DEMO_ACCESS_KEY --secret-key=$CEPH_DEMO_SECRET_KEY
+    if [ -f /ceph-demo-user ]
+    then
+      echo "Demo user already exists with credentials:"
+      cat /ceph-demo-user
+    else
+      echo "Setting up a demo user..."
+      radosgw-admin user create --uid=$CEPH_DEMO_UID --display-name="Ceph demo user" --access-key=$CEPH_DEMO_ACCESS_KEY --secret-key=$CEPH_DEMO_SECRET_KEY
+      sed -i s/AWS_ACCESS_KEY_PLACEHOLDER/$CEPH_DEMO_ACCESS_KEY/ /root/.s3cfg
+      sed -i s/AWS_SECRET_KEY_PLACEHOLDER/$CEPH_DEMO_SECRET_KEY/ /root/.s3cfg
+      echo "Access key: $CEPH_DEMO_ACCESS_KEY" > /ceph-demo-user
+      echo "Secret key: $CEPH_DEMO_SECRET_KEY" >> /ceph-demo-user
+
+      if [ -n "$CEPH_DEMO_BUCKET" ]
+      then
+        echo "Creating bucket..."
+        s3cmd mb s3://$CEPH_DEMO_BUCKET
+      fi
+    fi
   fi
 }
 

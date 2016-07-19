@@ -20,7 +20,7 @@ The environment variables `MON_NAME` and `MON_IP` are required:
 *  `RGW_CIVETWEB_PORT` is the port of the rados gateway (DEFAULT: 80)
 *  `CLUSTER` is the name of the cluster (DEFAULT: ceph)
 *  `CEPH_PUBLIC_NETWORK` is the network where the OSD should communicate
-*  `CEPH_DEMO_UID`, `CEPH_DEMO_ACCESS_KEY`, AND `CEPH_DEMO_SECRET_KEY` can be used to auto-provision an account.
+*  `CEPH_DEMO_UID`, `CEPH_DEMO_ACCESS_KEY`, `CEPH_DEMO_SECRET_KEY`, and `CEPH_DEMO_BUCKET` can be used to auto-provision an account.
 
 Commonly, you will want to bind-mount your host's `/etc/ceph` into the container.
 For example:
