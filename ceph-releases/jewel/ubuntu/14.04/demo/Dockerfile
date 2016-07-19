@@ -10,6 +10,8 @@ MAINTAINER Sébastien Han "seb@redhat.com"
 # Install s3cmd to support creation of buckets
 RUN ["apt-get", "update", "-y"]
 RUN ["apt-get", "install", "-y", "python-dateutil", "python-magic"]
+
+# Ubuntu 14.04's s3cmd is old and doesn't support altnerative endpoints
 RUN ["wget", "http://mirrors.kernel.org/ubuntu/pool/universe/s/s3cmd/s3cmd_1.6.1-1_all.deb"]
 RUN ["dpkg", "-i", "s3cmd_1.6.1-1_all.deb"]
 
