@@ -9,6 +9,7 @@ ENV ETCDCTL_VERSION v2.2.4
 ENV ETCDCTL_ARCH linux-amd64
 ENV KVIATOR_VERSION 0.0.7
 ENV CONFD_VERSION 0.10.0
+ENV KUBECTL_VERSION v1.2.4
 
 # Download kviator
 ADD https://github.com/AcalephStorage/kviator/releases/download/v${KVIATOR_VERSION}/kviator-${KVIATOR_VERSION}-linux-amd64.zip /kviator.zip
@@ -28,6 +29,13 @@ RUN dnf install -y ceph ceph-radosgw rbd-mirror sharutils wget unzip && dnf clea
 \
 # Install confd
     chmod +x /usr/local/bin/confd && mkdir -p /etc/confd/conf.d && mkdir -p /etc/confd/templates
+
+# Install kubectl
+ADD https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl /usr/local/bin/kubectl
+RUN chmod +x /usr/local/bin/kubectl
+
+ADD https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 /usr/local/bin/jq
+RUN chmod +x /usr/local/bin/jq
 
 ADD entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]

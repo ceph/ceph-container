@@ -9,6 +9,7 @@ MAINTAINER Sébastien Han "seb@redhat.com"
 
 # Add bootstrap script
 ADD entrypoint.sh /entrypoint.sh
+ADD remove-mon.sh /remove-mon.sh
 ADD config.*.sh /
 
 ADD my_init/my_init /sbin/my_init
@@ -21,6 +22,8 @@ RUN chmod +x /etc/runit/2
 # Add templates for confd
 ADD ./confd/templates/* /etc/confd/templates/
 ADD ./confd/conf.d/* /etc/confd/conf.d/
+
+ADD check_zombie_mons.py /check_zombie_mons.py
 
 # Add volumes for Ceph config and data
 VOLUME ["/etc/ceph","/var/lib/ceph"]

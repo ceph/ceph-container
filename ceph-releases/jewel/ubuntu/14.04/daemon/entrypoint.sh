@@ -49,24 +49,24 @@ MOUNT_OPTS="-t xfs -o noatime,inode64"
 
 # ceph config file exists or die
 function check_config {
-if [[ ! -e /etc/ceph/${CLUSTER}.conf ]]; then
-  echo "ERROR- /etc/ceph/${CLUSTER}.conf must exist; get it from your existing mon"
-  exit 1
-fi
+  if [[ ! -e /etc/ceph/${CLUSTER}.conf ]]; then
+    echo "ERROR- /etc/ceph/${CLUSTER}.conf must exist; get it from your existing mon"
+    exit 1
+  fi
 }
 
 # ceph admin key exists or die
 function check_admin_key {
-if [[ ! -e /etc/ceph/${CLUSTER}.client.admin.keyring ]]; then
-    echo "ERROR- /etc/ceph/${CLUSTER}.client.admin.keyring must exist; get it from your existing mon"
-    exit 1
-fi
+  if [[ ! -e /etc/ceph/${CLUSTER}.client.admin.keyring ]]; then
+      echo "ERROR- /etc/ceph/${CLUSTER}.client.admin.keyring must exist; get it from your existing mon"
+      exit 1
+  fi
 }
 
 # create socket directory
 function create_socket_dir {
-mkdir -p /var/run/ceph
-chown ceph. /var/run/ceph
+  mkdir -p /var/run/ceph
+  chown ceph. /var/run/ceph
 }
 
 # Calculate proper device names, given a device and partition number
@@ -79,19 +79,10 @@ function dev_part {
 }
 
 function osd_trying_to_determine_scenario {
-  if [[ ! -d /var/lib/ceph/osd || -n "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
-    echo "No bootstrapped OSDs found; trying ceph-disk"
-    osd_disk
-    return
-  fi
-
   if [ -z "${OSD_DEVICE}" ]; then
     echo "Bootstrapped OSD(s) found; using OSD directory"
     osd_directory
-    return
-  fi
-
-  if $(parted --script ${OSD_DEVICE} print | egrep -sq '^ 1.*ceph data'); then
+  elif $(parted --script ${OSD_DEVICE} print | egrep -sq '^ 1.*ceph data'); then
     echo "Bootstrapped OSD found; activating ${OSD_DEVICE}"
     osd_activate
   else
@@ -112,6 +103,10 @@ case "$KV_TYPE" in
    etcd|consul)
       source /config.kv.sh
       ;;
+   k8s|kubernetes)
+      source /config.k8s.sh
+      ;;
+
    *)
       source /config.static.sh
       ;;
@@ -197,6 +192,7 @@ function start_mon {
   # get_mon_config is also responsible for bootstrapping the
   # cluster, if necessary
   get_mon_config
+  create_socket_dir
 
   # If we don't have a monitor keyring, this is a new monitor
   if [ ! -e /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}/keyring ]; then
@@ -222,8 +218,6 @@ function start_mon {
     # Make the monitor directory
     mkdir -p /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
     chown ceph. /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
-
-    create_socket_dir
 
     # Prepare the monitor daemon's directory with the map and keyring
     ceph-mon --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap --keyring /tmp/${CLUSTER}.mon.keyring --mon-data /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
@@ -396,7 +390,7 @@ EOF
     chmod +x /etc/service/${CLUSTER}-${OSD_ID}/run
   done
 
-exec /sbin/my_init
+exec /usr/bin/runsvdir -P /etc/service
 }
 
 
@@ -694,6 +688,7 @@ function start_mds {
 function start_rgw {
   get_config
   check_config
+  create_socket_dir
 
   if [ ${CEPH_GET_ADMIN_KEY} -eq "1" ]; then
     get_admin_key
@@ -717,7 +712,6 @@ function start_rgw {
     ceph ${CEPH_OPTS} --name client.bootstrap-rgw --keyring /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring auth get-or-create client.rgw.${RGW_NAME} osd 'allow rwx' mon 'allow rw' -o /var/lib/ceph/radosgw/${RGW_NAME}/keyring
     chown ceph. /var/lib/ceph/radosgw/${RGW_NAME}/keyring
     chmod 0600 /var/lib/ceph/radosgw/${RGW_NAME}/keyring
-    create_socket_dir
   fi
 
   if [ "$RGW_REMOTE_CGI" -eq 1 ]; then
@@ -791,6 +785,24 @@ function zap_device {
   fi
 }
 
+####################
+# WATCH MON HEALTH #
+###################
+
+function watch_mon_health {
+echo "checking for zombie mons"
+
+while [ true ]
+do
+ echo "checking for zombie mons"
+ /check_zombie_mons.py || true;
+ echo "sleep 30 sec"
+ sleep 30
+done
+
+
+}
+
 
 ###############
 # CEPH_DAEMON #
@@ -849,6 +861,9 @@ case "$CEPH_DAEMON" in
     ;;
   zap_device)
     zap_device
+    ;;
+  mon_health)
+    watch_mon_health
     ;;
   *)
   if [ ! -n "$CEPH_DAEMON" ]; then
