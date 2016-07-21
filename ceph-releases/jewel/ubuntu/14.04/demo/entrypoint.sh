@@ -156,7 +156,7 @@ function bootstrap_osd {
     ceph-osd ${CEPH_OPTS} -i 0 --mkfs --setuser ceph --setgroup ceph
     ceph ${CEPH_OPTS} auth get-or-create osd.0 osd 'allow *' mon 'allow profile osd' -o /var/lib/ceph/osd/${CLUSTER}-0/keyring
     if [ $(hostname -s) == 'default' ]; then
-      echo "A hostname of 'default' as used by docker-machine conflicts with ceph."
+      echo "A hostname of 'default' as used by docker-machine conflicts with Ceph."
       echo "Rename your machine to fix this issue."
       echo "https://github.com/ceph/ceph-docker/issues/168"
     fi
