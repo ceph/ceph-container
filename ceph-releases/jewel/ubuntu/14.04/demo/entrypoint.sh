@@ -207,10 +207,8 @@ function bootstrap_rgw {
 }
 
 function bootstrap_demo_user {
-  if [ -n "$CEPH_DEMO_UID" ] && [ -n "$CEPH_DEMO_ACCESS_KEY" ] && [ -n "$CEPH_DEMO_SECRET_KEY" ]
-  then
-    if [ -f /ceph-demo-user ]
-    then
+  if [ -n "$CEPH_DEMO_UID" ] && [ -n "$CEPH_DEMO_ACCESS_KEY" ] && [ -n "$CEPH_DEMO_SECRET_KEY" ]; then
+    if [ -f /ceph-demo-user ]; then
       echo "Demo user already exists with credentials:"
       cat /ceph-demo-user
     else
@@ -221,8 +219,7 @@ function bootstrap_demo_user {
       echo "Access key: $CEPH_DEMO_ACCESS_KEY" > /ceph-demo-user
       echo "Secret key: $CEPH_DEMO_SECRET_KEY" >> /ceph-demo-user
 
-      if [ -n "$CEPH_DEMO_BUCKET" ]
-      then
+      if [ -n "$CEPH_DEMO_BUCKET" ]; then
         echo "Creating bucket..."
         s3cmd mb s3://$CEPH_DEMO_BUCKET
       fi
