@@ -431,10 +431,10 @@ function osd_disk_prepare {
   fi
 
   if [[ ! -z "${OSD_JOURNAL}" ]]; then
-    ceph-disk -v prepare ${OSD_DEVICE} ${OSD_JOURNAL}
+    ceph-disk -v prepare --cluster ${CLUSTER} ${OSD_DEVICE} ${OSD_JOURNAL}
     chown ceph. ${OSD_JOURNAL}
   else
-    ceph-disk -v prepare ${OSD_DEVICE}
+    ceph-disk -v prepare --cluster ${CLUSTER} ${OSD_DEVICE}
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
   fi
 }
@@ -560,11 +560,11 @@ function osd_disks {
       fi
 
       if [[ ! -z "${OSD_JOURNAL}" ]]; then
-        ceph-disk -v prepare ${OSD_DEV} ${OSD_JOURNAL}
+        ceph-disk -v prepare --cluster ${CLUSTER} ${OSD_DEV} ${OSD_JOURNAL}
 #        chown ceph. ${OSD_JOURNAL}
         ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEV} 1)
       else
-        ceph-disk -v prepare ${OSD_DEV}
+        ceph-disk -v prepare --cluster ${CLUSTER} ${OSD_DEV}
 #        chown ceph. $(dev_part ${OSD_DEV} 2)
         ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEV} 1)
       fi
