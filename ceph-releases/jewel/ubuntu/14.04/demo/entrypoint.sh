@@ -159,12 +159,7 @@ function bootstrap_osd {
     chown -R ceph. /var/lib/ceph/osd/${CLUSTER}-0
     ceph-osd ${CEPH_OPTS} -i 0 --mkfs --setuser ceph --setgroup ceph
     ceph ${CEPH_OPTS} auth get-or-create osd.0 osd 'allow *' mon 'allow profile osd' -o /var/lib/ceph/osd/${CLUSTER}-0/keyring
-    if [ $(hostname -s) == 'default' ]; then
-      echo "A hostname of 'default' as used by docker-machine conflicts with Ceph."
-      echo "Rename your machine to fix this issue."
-      echo "https://github.com/ceph/ceph-docker/issues/168"
-    fi
-    ceph ${CEPH_OPTS} osd crush add 0 1 root=default host=$(hostname -s)
+    ceph ${CEPH_OPTS} osd crush add 0 1 root=default host=localhost
   fi
 
   # start OSD
@@ -210,6 +205,27 @@ function bootstrap_rgw {
   radosgw ${CEPH_OPTS} -c /etc/ceph/${CLUSTER}.conf -n client.radosgw.gateway -k /var/lib/ceph/radosgw/${RGW_NAME}/keyring --rgw-socket-path="" --rgw-frontends="civetweb port=${RGW_CIVETWEB_PORT}" --setuser ceph --setgroup ceph
 }
 
+function bootstrap_demo_user {
+  if [ -n "$CEPH_DEMO_UID" ] && [ -n "$CEPH_DEMO_ACCESS_KEY" ] && [ -n "$CEPH_DEMO_SECRET_KEY" ]; then
+    if [ -f /ceph-demo-user ]; then
+      echo "Demo user already exists with credentials:"
+      cat /ceph-demo-user
+    else
+      echo "Setting up a demo user..."
+      radosgw-admin user create --uid=$CEPH_DEMO_UID --display-name="Ceph demo user" --access-key=$CEPH_DEMO_ACCESS_KEY --secret-key=$CEPH_DEMO_SECRET_KEY
+      sed -i s/AWS_ACCESS_KEY_PLACEHOLDER/$CEPH_DEMO_ACCESS_KEY/ /root/.s3cfg
+      sed -i s/AWS_SECRET_KEY_PLACEHOLDER/$CEPH_DEMO_SECRET_KEY/ /root/.s3cfg
+      echo "Access key: $CEPH_DEMO_ACCESS_KEY" > /ceph-demo-user
+      echo "Secret key: $CEPH_DEMO_SECRET_KEY" >> /ceph-demo-user
+
+      if [ -n "$CEPH_DEMO_BUCKET" ]; then
+        echo "Creating bucket..."
+        s3cmd mb s3://$CEPH_DEMO_BUCKET
+      fi
+    fi
+  fi
+}
+
 #######
 # API #
 #######
@@ -228,5 +244,7 @@ bootstrap_mon
 bootstrap_osd
 bootstrap_mds
 bootstrap_rgw
+bootstrap_demo_user
 bootstrap_rest_api
+
 exec ceph ${CEPH_OPTS} -w
