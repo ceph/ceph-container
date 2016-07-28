@@ -4,7 +4,7 @@ This Guide will take you through the process of deploying a Ceph cluster on to a
 
 # Client Requirements
 
-In addiation to kubectl, Sigil is required for template handling and must be installed in your system PATH. Instructions can be found here: [https://github.com/gliderlabs/sigil](https://github.com/gliderlabs/sigil)
+In addition to kubectl, Sigil is required for template handling and must be installed in your system PATH. Instructions can be found here: [https://github.com/gliderlabs/sigil](https://github.com/gliderlabs/sigil)
 
 # Cluster Requirements
 
