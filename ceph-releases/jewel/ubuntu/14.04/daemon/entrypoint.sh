@@ -246,8 +246,8 @@ function start_mon {
       exit 1
     fi
 
-    if [ ! -e /etc/ceph/monmap ]; then
-      echo "ERROR- /etc/ceph/monmap must exist.  You can extract it from your current monitor by running 'ceph mon getmap -o /etc/ceph/monmap' or use a KV Store"
+    if [ ! -e /etc/ceph/monmap-${CLUSTER} ]; then
+      echo "ERROR- /etc/ceph/monmap-${CLUSTER} must exist.  You can extract it from your current monitor by running 'ceph mon getmap -o /etc/ceph/monmap-<cluster>' or use a KV Store"
       exit 1
     fi
 
@@ -264,7 +264,7 @@ function start_mon {
     chown ceph. /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
 
     # Prepare the monitor daemon's directory with the map and keyring
-    ceph-mon --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap --keyring /tmp/${CLUSTER}.mon.keyring --mon-data /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
+    ceph-mon --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring --mon-data /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
 
     # Clean up the temporary key
     rm /tmp/${CLUSTER}.mon.keyring
@@ -471,10 +471,10 @@ function osd_disk_prepare {
   fi
 
   if [[ ! -z "${OSD_JOURNAL}" ]]; then
-    ceph-disk -v prepare --cluster ${CLUSTER} ${OSD_DEVICE} ${OSD_JOURNAL}
+    ceph-disk -v prepare ${CEPH_OPTS} ${OSD_DEVICE} ${OSD_JOURNAL}
     chown ceph. ${OSD_JOURNAL}
   else
-    ceph-disk -v prepare --cluster ${CLUSTER} ${OSD_DEVICE}
+    ceph-disk -v prepare ${CEPH_OPTS} ${OSD_DEVICE}
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
   fi
 }
@@ -600,11 +600,11 @@ function osd_disks {
       fi
 
       if [[ ! -z "${OSD_JOURNAL}" ]]; then
-        ceph-disk -v prepare --cluster ${CLUSTER} ${OSD_DEV} ${OSD_JOURNAL}
+        ceph-disk -v prepare ${CEPH_OPTS} ${OSD_DEV} ${OSD_JOURNAL}
 #        chown ceph. ${OSD_JOURNAL}
         ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEV} 1)
       else
-        ceph-disk -v prepare --cluster ${CLUSTER} ${OSD_DEV}
+        ceph-disk -v prepare ${CEPH_OPTS} ${OSD_DEV}
 #        chown ceph. $(dev_part ${OSD_DEV} 2)
         ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEV} 1)
       fi
