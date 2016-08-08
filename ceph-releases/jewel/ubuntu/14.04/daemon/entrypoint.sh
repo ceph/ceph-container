@@ -63,6 +63,17 @@ function check_admin_key {
   fi
 }
 
+# Given two strings, return the length of the shared prefix
+function prefix_length {
+  local maxlen=${#1}
+  for ((i=maxlen-1;i>=0;i--)); do
+    if [[ "${1:0:i}" == "${2:0:i}" ]]; then
+      echo $i
+      return
+    fi
+  done
+}
+
 # create socket directory
 function create_socket_dir {
   mkdir -p /var/run/ceph
@@ -71,7 +82,36 @@ function create_socket_dir {
 
 # Calculate proper device names, given a device and partition number
 function dev_part {
-  if [[ "${1:0-1:1}" == [0-9] ]]; then
+  if [[ -L ${1} ]]; then
+    # This device is a symlink. Work out it's actual device
+    local actual_device=$(readlink -f ${1})
+    local bn=$(basename $1)
+    if [[ "${ACTUAL_DEVICE:0-1:1}" == [0-9] ]]; then
+      local desired_partition="${actual_device}p${2}"
+    else
+      local desired_partition="${actual_device}${2}"
+    fi
+    # Now search for a symlink in the directory of $1
+    # that has the correct desired partition, and the longest
+    # shared prefix with the original symlink
+    local symdir=$(dirname $1)
+    local link=""
+    local pfxlen=0
+    for option in $(ls $symdir); do
+    if [[ $(readlink -f $symdir/$option) == $desired_partition ]]; then
+      local optprefixlen=$(prefix_length $option $bn)
+      if [[ $optprefixlen > $pfxlen ]]; then
+        link=$symdir/$option
+        pfxlen=$optprefixlen
+      fi
+    fi
+    done
+    if [[ $pfxlen -eq 0 ]]; then
+      >&2 echo "Could not locate appropriate symlink for partition $2 of $1"
+      exit 1
+    fi
+    echo "$link"
+  elif [[ "${1:0-1:1}" == [0-9] ]]; then
     echo "${1}p${2}"
   else
     echo "${1}${2}"
