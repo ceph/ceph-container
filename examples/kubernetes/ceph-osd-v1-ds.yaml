@@ -42,8 +42,8 @@ spec:
 #            path: /home/core/data/ceph/osd
       containers:
         - name: osd-pod
-          image: quay.io/cornelius/ceph-daemon-test:latest
-#          imagePullPolicy: Always
+          image: ceph/daemon:latest
+          imagePullPolicy: Always
           volumeMounts:
             - name: devices
               mountPath: /dev

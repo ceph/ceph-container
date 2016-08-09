@@ -34,9 +34,8 @@ spec:
             secretName: ceph-bootstrap-rgw-keyring
       containers:
         - name: ceph-mon
-          image: quay.io/cornelius/ceph-daemon-test:latest
-#         image: quay.io/acaleph/ceph-daemon:kubernetes
-#          imagePullPolicy: Always
+          image: ceph/daemon:latest
+          imagePullPolicy: Always
           lifecycle:
             preStop:
                 exec:

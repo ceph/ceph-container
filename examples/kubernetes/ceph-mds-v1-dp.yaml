@@ -4,7 +4,7 @@ apiVersion: extensions/v1beta1
 metadata:
   labels:
     app: ceph
-    daemon: mds 
+    daemon: mds
   name: ceph-mds
   namespace: ceph
 spec:
@@ -35,8 +35,7 @@ spec:
             secretName: ceph-bootstrap-rgw-keyring
       containers:
         - name: ceph-mon
-          image: quay.io/cornelius/ceph-daemon-test:latest
-#         image: quay.io/acaleph/ceph-daemon:kubernetes
+          image: ceph/daemon:latest
           ports:
             - containerPort: 6800
           env:
