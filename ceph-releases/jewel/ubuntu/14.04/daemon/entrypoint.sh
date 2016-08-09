@@ -11,6 +11,8 @@ set -e
 : ${MDS_NAME:=mds-${HOSTNAME}}
 : ${OSD_FORCE_ZAP:=0}
 : ${OSD_JOURNAL_SIZE:=100}
+: ${OSD_BLUESTORE:=0}
+: ${OSD_DMCRYPT:=0}
 : ${CRUSH_LOCATION:=root=default host=${HOSTNAME}}
 : ${CEPHFS_CREATE:=0}
 : ${CEPHFS_NAME:=cephfs}
@@ -471,10 +473,30 @@ function osd_disk_prepare {
   fi
 
   if [[ ! -z "${OSD_JOURNAL}" ]]; then
-    ceph-disk -v prepare ${CEPH_OPTS} ${OSD_DEVICE} ${OSD_JOURNAL}
+    if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
+      ceph-disk -v prepare ${CEPH_OPTS} --bluestore ${OSD_DEVICE} ${OSD_JOURNAL}
+    elif [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+      get_admin_key
+      check_admin_key
+      # the admin key must be present on the node
+      # in order to store the encrypted key in the monitor's k/v store
+      ceph-disk -v prepare ${CEPH_OPTS} --dmcrypt ${OSD_DEVICE} ${OSD_JOURNAL}
+    else
+      ceph-disk -v prepare ${CEPH_OPTS} ${OSD_DEVICE} ${OSD_JOURNAL}
+    fi
     chown ceph. ${OSD_JOURNAL}
   else
-    ceph-disk -v prepare ${CEPH_OPTS} ${OSD_DEVICE}
+    if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
+      ceph-disk -v prepare ${CEPH_OPTS} --bluestore ${OSD_DEVICE}
+    elif [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+      get_admin_key
+      check_admin_key
+      # the admin key must be present on the node
+      # in order to store the encrypted key in the monitor's k/v store
+      ceph-disk -v prepare ${CEPH_OPTS} --dmcrypt ${OSD_DEVICE}
+    else
+      ceph-disk -v prepare ${CEPH_OPTS} ${OSD_DEVICE}
+    fi
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
   fi
 }
@@ -507,12 +529,20 @@ function osd_activate {
   if [[ ! -z "${OSD_JOURNAL}" ]]; then
     timeout 10  bash -c "while [ ! -e ${OSD_DEVICE} ]; do sleep 1; done"
     chown ceph. ${OSD_JOURNAL}
-    ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
+    if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+      ceph-disk -v --setuser ceph --setgroup --dmcrypt disk activate $(dev_part ${OSD_DEVICE} 1)
+    else
+      ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
+    fi
     OSD_ID=$(ceph-disk list | grep "$(dev_part ${ACTUAL_OSD_DEVICE} 1) ceph data" | awk -F, '{print $4}' | awk -F. '{print $2}')
   else
     timeout 10  bash -c "while [ ! -e $(dev_part ${OSD_DEVICE} 1) ]; do sleep 1; done"
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
-    ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
+    if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+      ceph-disk -v --setuser ceph --setgroup disk --dmcrypt activate $(dev_part ${OSD_DEVICE} 1)
+    else
+      ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
+    fi
     OSD_ID=$(ceph-disk list | grep "$(dev_part ${ACTUAL_OSD_DEVICE} 1) ceph data" | awk -F, '{print $4}' | awk -F. '{print $2}')
   fi
   OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
