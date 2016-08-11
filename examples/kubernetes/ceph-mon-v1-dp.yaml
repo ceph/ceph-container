@@ -49,7 +49,7 @@ spec:
             secretName: ceph-bootstrap-rgw-keyring
       containers:
         - name: ceph-mon
-          image: quay.io/cornelius/ceph-daemon-test:latest
+          image: ceph/daemon:latest
 #          imagePullPolicy: Always
           lifecycle:
             preStop:
