@@ -25,6 +25,7 @@ set -e
 : ${RGW_REMOTE_CGI:=0}
 : ${RGW_REMOTE_CGI_PORT:=9000}
 : ${RGW_REMOTE_CGI_HOST:=0.0.0.0}
+: ${RGW_USER:="cephnfs"}
 : ${RESTAPI_IP:=0.0.0.0}
 : ${RESTAPI_PORT:=5000}
 : ${RESTAPI_BASE_URL:=/api/v0.1}
@@ -33,6 +34,8 @@ set -e
 : ${KV_TYPE:=none} # valid options: consul, etcd or none
 : ${KV_IP:=127.0.0.1}
 : ${KV_PORT:=4001} # PORT 8500 for Consul
+: ${GANESHA_OPTIONS:=""}
+: ${GANESHA_EPOCH:=""} # For restarting
 
 if [ ! -z "${KV_CA_CERT}" ]; then
 	KV_TLS="--ca-cert=${KV_CA_CERT} --client-cert=${KV_CLIENT_CERT} --client-key=${KV_CLIENT_KEY}"
@@ -765,6 +768,24 @@ function start_rgw {
   fi
 }
 
+function create_rgw_user {
+
+  # Check to see if our RGW has been initialized
+  if [ ! -e /var/lib/ceph/radosgw/keyring ]; then
+    echo "ERROR- /var/lib/ceph/radosgw/keyring must exist. Please get it from your Rados Gateway"
+    exit 1
+  fi
+
+  mkdir -p "/var/lib/ceph/radosgw/${RGW_NAME}"
+  mv /var/lib/ceph/radosgw/keyring /var/lib/ceph/radosgw/${RGW_NAME}/keyring
+
+  if [ -z "${RGW_USER_SECRET_KEY}" ]; then
+    radosgw-admin user create --uid=${RGW_USER} --display-name="RGW ${RGW_USER} User" -c /etc/ceph/${CLUSTER}.conf
+  else
+    radosgw-admin user create --uid=${RGW_USER} --access-key=${RGW_USER_ACCESS_KEY} --secret=${RGW_USER_SECRET_KEY} --display-name="RGW ${RGW_USER} User" -c /etc/ceph/${CLUSTER}.conf
+  fi
+}
+
 
 ###########
 # RESTAPI #
@@ -811,6 +832,31 @@ function start_rbd_mirror {
 
   # start rbd-mirror
   exec /usr/bin/rbd-mirror ${CEPH_OPTS} -d --setuser ceph --setgroup ceph
+
+}
+
+
+#######
+# NFS #
+#######
+
+function start_rpc {
+  rpcbind || return 0
+  rpc.statd -L || return 0
+  rpc.idmapd || return 0
+
+}
+
+function start_nfs {
+  get_config
+  check_config
+  create_socket_dir
+
+  # Init RPC
+  start_rpc
+
+  # start ganesha
+  exec /usr/bin/ganesha.nfsd -F ${GANESHA_OPTIONS} ${GANESHA_EPOCH}
 
 }
 
@@ -897,11 +943,17 @@ case "$CEPH_DAEMON" in
   rgw)
     start_rgw
     ;;
+  rgw_user)
+    create_rgw_user
+    ;;
   restapi)
     start_restapi
     ;;
   rbd_mirror)
     start_rbd_mirror
+    ;;
+  nfs)
+    start_nfs
     ;;
   zap_device)
     zap_device
@@ -913,8 +965,8 @@ case "$CEPH_DAEMON" in
   if [ ! -n "$CEPH_DAEMON" ]; then
     echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
     echo "of the daemon you want to deploy."
-    echo "Valid values for CEPH_DAEMON are MON, OSD, OSD_DIRECTORY, OSD_CEPH_DISK, OSD_CEPH_DISK_PREPARE, OSD_CEPH_DISK_ACTIVATE, OSD_CEPH_ACTIVATE_JOURNAL, MDS, RGW, RESTAPI, ZAP_DEVICE, RBD_MIRROR"
-    echo "Valid values for the daemon parameter are mon, osd, osd_directory, osd_ceph_disk, osd_ceph_disk_prepare, osd_ceph_disk_activate, osd_ceph_activate_journal, mds, rgw, restapi, zap_device, rbd_mirror"
+    echo "Valid values for CEPH_DAEMON are MON, OSD, OSD_DIRECTORY, OSD_CEPH_DISK, OSD_CEPH_DISK_PREPARE, OSD_CEPH_DISK_ACTIVATE, OSD_CEPH_ACTIVATE_JOURNAL, MDS, RGW, RGW_USER, RESTAPI, ZAP_DEVICE, RBD_MIRROR, NFS"
+    echo "Valid values for the daemon parameter are mon, osd, osd_directory, osd_ceph_disk, osd_ceph_disk_prepare, osd_ceph_disk_activate, osd_ceph_activate_journal, mds, rgw, rgw_user, restapi, zap_device, rbd_mirror, nfs"
     exit 1
   fi
   ;;

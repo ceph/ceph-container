@@ -22,7 +22,7 @@ RUN chmod +x /sbin/my_init && \
     chmod +x /etc/runit/2
 
 # Add volumes for Ceph config and data
-VOLUME ["/etc/ceph","/var/lib/ceph"]
+VOLUME ["/etc/ceph","/var/lib/ceph", "/etc/ganesha"]
 
 # Execute the entrypoint
 WORKDIR /
