@@ -109,8 +109,8 @@ function start_mon {
       exit 1
     fi
 
-    if [ ! -e /etc/ceph/monmap ]; then
-      echo "ERROR- /etc/ceph/monmap must exist.  You can extract it from your current monitor by running 'ceph mon getmap -o /etc/ceph/monmap' or use a KV Store"
+    if [ ! -e /etc/ceph/monmap-${CLUSTER} ]; then
+      echo "ERROR- /etc/ceph/monmap must exist.  You can extract it from your current monitor by running 'ceph mon getmap -o /etc/ceph/monmap-${CLUSTER}' or use a KV Store"
       exit 1
     fi
 
@@ -125,7 +125,7 @@ function start_mon {
     mkdir -p /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
 
     # Prepare the monitor daemon's directory with the map and keyring
-    ceph-mon --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap --keyring /tmp/${CLUSTER}.mon.keyring
+    ceph-mon --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring
 
     # Clean up the temporary key
     rm /tmp/${CLUSTER}.mon.keyring

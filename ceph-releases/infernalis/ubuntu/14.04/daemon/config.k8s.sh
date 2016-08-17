@@ -14,7 +14,7 @@ function get_mon_config {
   MONMAP_ADD=$(kubectl get pods --namespace=${CLUSTER} -l daemon=mon -o template --template="{{range .items}}--add {{.metadata.name}} {{.status.podIP}} {{end}}")
 
   # Create a monmap with the Pod Names and IP
-  monmaptool --create ${MONMAP_ADD} --fsid ${FSID} /etc/ceph/monmap
+  monmaptool --create ${MONMAP_ADD} --fsid ${FSID} /etc/ceph/monmap-${CLUSTER}
 
 }
 
