@@ -436,7 +436,7 @@ EOF
     chmod +x /etc/service/${CLUSTER}-${OSD_ID}/run
   done
 
-exec /usr/bin/runsvdir -P /etc/service
+exec /sbin/my_init
 }
 
 
