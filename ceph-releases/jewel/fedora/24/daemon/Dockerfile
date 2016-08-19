@@ -22,7 +22,7 @@ RUN chmod +x /sbin/my_init && \
 ADD entrypoint.sh config.*.sh ceph.defaults check_zombie_mons.py remove-mon.sh /
 
 # Add volumes for Ceph config and data
-VOLUME ["/etc/ceph","/var/lib/ceph"]
+VOLUME ["/etc/ceph","/var/lib/ceph", "/etc/ganesha"]
 
 # Execute the entrypoint
 WORKDIR /
