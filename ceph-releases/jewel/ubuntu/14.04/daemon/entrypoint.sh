@@ -897,17 +897,47 @@ function start_nfs {
 
 function zap_device {
   if [[ -z ${OSD_DEVICE} ]]; then
-    echo "Please provide a device to zap!"
-    echo "ie: '-e OSD_DEVICE=/dev/sdb'"
+    echo "Please provide device(s) to zap!"
+    echo "ie: '-e OSD_DEVICE=/dev/sdb' or '-e OSD_DEVICE=/dev/sdb,/dev/sdc'"
     exit 1
-  else
-    ceph-disk -v zap ${OSD_DEVICE}
   fi
+
+  # testing all the devices first so we just don't do anything if one device is wrong
+  for device in $(echo ${OSD_DEVICE} | tr "," " "); do
+    if ! file -s $device &> /dev/null; then
+      echo "Provided device $device does not exist."
+      exit 1
+    fi
+    # if the disk passed is a raw device AND the boot system disk
+    if echo $device | egrep -sq '/dev/([hsv]d[a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}$' && parted -s $(echo $device | egrep -o '/dev/([hsv]d[a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}') print | grep -sq boot; then
+      echo "Looks like $device has a boot partition,"
+      echo "if you want to delete specific partitions point to the partition instead of the raw device"
+      echo "Do not use your system disk!"
+      exit 1
+    fi
+  done
+
+  for device in $(echo ${OSD_DEVICE} | tr "," " "); do
+    raw_device=$(echo $device | egrep -o '/dev/([hsv]d[a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}')
+    if echo $device | egrep -sq '/dev/([hsv]d[a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}$'; then
+      echo "Zapping the entire device $device"
+      sgdisk --zap-all --clear --mbrtogpt -g -- $device
+    else
+      # get the desired partition number(s)
+      partition_nb=$(echo $device | egrep -o '[0-9]{1,2}$')
+      echo "Zapping partition $device"
+      sgdisk --delete $partition_nb $raw_device
+    fi
+    echo "Executing partprobe on $raw_device"
+    partprobe $raw_device
+    udevadm settle
+  done
 }
+
 
 ####################
 # WATCH MON HEALTH #
-###################
+####################
 
 function watch_mon_health {
 echo "checking for zombie mons"
