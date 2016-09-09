@@ -1,0 +1,34 @@
+---
+kind: DaemonSet
+apiVersion: extensions/v1beta1
+metadata:
+  labels:
+    app: ceph
+    daemon: install
+  name: ceph-install
+  namespace: ceph
+spec:
+  template:
+    metadata:
+      name: ceph-install
+      namespace: ceph
+      labels:
+        app: ceph-install
+        daemon: install
+    spec:
+      serviceAccount: default
+      volumes:
+      - name: etc
+        hostPath:
+          path: /etc
+      - name: opt
+        hostPath:
+          path: /opt
+      containers:
+      - name: install-ceph
+        image: quay.io/coffeepac/ceph-install:latest
+        volumeMounts:
+        - mountPath: /etc
+          name: etc
+        - mountPath: /opt
+          name: opt
