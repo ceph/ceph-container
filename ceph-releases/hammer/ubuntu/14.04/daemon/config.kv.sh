@@ -2,7 +2,7 @@
 set -e
 
 sed -r "s/@CLUSTER@/${CLUSTER:-ceph}/g" \
-    /etc/confd/src/ceph.conf.toml.in > /etc/confd/conf.d/ceph.conf.toml
+    /etc/confd/conf.d/ceph.conf.toml.in > /etc/confd/conf.d/ceph.conf.toml
 
 # make sure etcd uses http or https as a prefix
 if [[ "$KV_TYPE" == "etcd" ]]; then
