@@ -212,6 +212,7 @@ function start_mon {
     if command -v ip; then
       if [ ${NETWORK_AUTO_DETECT} -eq 1 ]; then
         MON_IP=$(ip -6 -o a s $NIC_MORE_TRAFFIC | awk '{ sub ("/..", "", $4); print $4 }')
+        CEPH_PUBLIC_NETWORK=$(ip -6 r | grep $NIC_MORE_TRAFFIC | awk '{ print $1 }')
         if [ -z "$MON_IP" ]; then
           MON_IP=$(ip -4 -o a s $NIC_MORE_TRAFFIC | awk '{ sub ("/..", "", $4); print $4 }')
           CEPH_PUBLIC_NETWORK=$(ip r | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/[0-9]\{1,2\}' | head -1)
