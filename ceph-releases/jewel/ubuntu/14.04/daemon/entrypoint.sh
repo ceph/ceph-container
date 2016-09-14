@@ -239,13 +239,11 @@ function start_mon {
     exit 1
   fi
 
-  # get_mon_config is also responsible for bootstrapping the
-  # cluster, if necessary
-  get_mon_config
-  create_socket_dir
-
   # If we don't have a monitor keyring, this is a new monitor
   if [ ! -e /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}/keyring ]; then
+
+    get_mon_config
+    create_socket_dir
 
     if [ ! -e /etc/ceph/${CLUSTER}.mon.keyring ]; then
       echo "ERROR- /etc/ceph/${CLUSTER}.mon.keyring must exist.  You can extract it from your current monitor by running 'ceph auth get mon. -o /etc/ceph/${CLUSTER}.mon.keyring' or use a KV Store"
