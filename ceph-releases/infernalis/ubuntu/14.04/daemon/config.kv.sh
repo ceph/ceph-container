@@ -51,13 +51,13 @@ function get_mon_config {
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/bootstrapRgwKeyring > /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
 
 
-    if [ ! -f /etc/ceph/monmap ]; then
+    if [ ! -f /etc/ceph/monmap-${CLUSTER} ]; then
       echo "Monmap is missing. Adding initial monmap..."
-      kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/monmap > /etc/ceph/monmap
+      kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/monmap > /etc/ceph/monmap-${CLUSTER}
     fi
 
     echo "Trying to get the most recent monmap..."
-    if timeout 5 ceph ${CEPH_OPTS} mon getmap -o /etc/ceph/monmap; then
+    if timeout 5 ceph ${CEPH_OPTS} mon getmap -o /etc/ceph/monmap-${CLUSTER}; then
       echo "Monmap successfully retrieved."
     else
       echo "Peers not found, using initial monmap."
@@ -93,7 +93,7 @@ function get_mon_config {
 
 
     echo "Creating Monmap"
-    monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${FSID} /etc/ceph/monmap
+    monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${FSID} /etc/ceph/monmap-${CLUSTER}
 
     echo "Importing Keyrings and Monmap to KV"
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} put ${CLUSTER_PATH}/monKeyring - < /etc/ceph/${CLUSTER}.mon.keyring
@@ -102,7 +102,7 @@ function get_mon_config {
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} put ${CLUSTER_PATH}/bootstrapMdsKeyring - < /var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} put ${CLUSTER_PATH}/bootstrapRgwKeyring - < /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
 
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} put ${CLUSTER_PATH}/monmap - < /etc/ceph/monmap
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} put ${CLUSTER_PATH}/monmap - < /etc/ceph/monmap-${CLUSTER}
 
     echo "Completed initialization for ${MON_NAME}"
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} put ${CLUSTER_PATH}/monSetupComplete true > /dev/null 2>&1

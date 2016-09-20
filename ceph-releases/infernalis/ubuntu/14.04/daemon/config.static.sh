@@ -51,8 +51,8 @@ ENDHERE
     chown ceph. /etc/ceph/${CLUSTER}.mon.keyring /etc/ceph/${CLUSTER}.mon.keyring /var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
 
     # Generate initial monitor map
-    monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} /etc/ceph/monmap
-    chown ceph. /etc/ceph/monmap
+    monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} /etc/ceph/monmap-${CLUSTER}
+    chown ceph. /etc/ceph/monmap-${CLUSTER}
   fi
 }
 

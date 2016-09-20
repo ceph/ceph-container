@@ -5,7 +5,7 @@ Ceph-related Docker files.
 
 ## Core Components:
 
-* [`ceph/base`](ceph-releases/jewel/ubuntu/14.04/base/):  Ceph base container image.  This is nothing but a fresh install of the latest Ceph on Ubuntu LTS (14.04)
+* [`ceph/base`](ceph-releases/jewel/ubuntu/14.04/base/):  Ceph base container image.  This is nothing but a fresh install of the latest Ceph + Ganesha on Ubuntu LTS (14.04)
 * [`ceph/daemon`](ceph-releases/jewel/ubuntu/14.04/daemon/): All-in-one container for all core daemons.
 
 ## Utilities and convenience wrappers
@@ -20,7 +20,7 @@ Ceph-related Docker files.
 
 ## Demo
 
-* [`ceph/demo`](ceph-releases/jewel/ubuntu/14.04/demo/): Demonstration cluster for testing and learning.  This container runs all the major ceph components installed, bootstrapped, and executed for you to play with.  (not intended for use in building a production cluster)
+* [`ceph/demo`](ceph-releases/jewel/ubuntu/14.04/demo/): Demonstration cluster for testing and learning.  This container runs all the major ceph and ganesha components installed, bootstrapped, and executed for you to play with.  (not intended for use in building a production cluster)
 
 # How to contribute?!
 

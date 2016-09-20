@@ -18,7 +18,8 @@ ADD https://github.com/AcalephStorage/kviator/releases/download/v${KVIATOR_VERSI
 ADD https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-linux-amd64 /usr/local/bin/confd
 
 # install prerequisites
-RUN dnf install -y ceph ceph-radosgw rbd-mirror sharutils wget unzip && dnf clean all && \
+RUN dnf install -y ceph ceph-radosgw rbd-mirror nfs-ganesha-rgw nfs-ganesha-vfs sharutils systemd-udev wget unzip && \
+    dnf clean all && \
 \
 # Install etcdctl
     wget -q -O- "https://github.com/coreos/etcd/releases/download/${ETCDCTL_VERSION}/etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}.tar.gz" |tar xfz - -C/tmp/ etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}/etcdctl && \

@@ -227,6 +227,20 @@ function bootstrap_demo_user {
 }
 
 #######
+# NFS #
+#######
+
+function bootstrap_nfs {
+  # Init RPC
+  rpcbind || return 0
+  rpc.statd -L || return 0
+  rpc.idmapd || return 0
+
+  # start ganesha
+  exec /usr/bin/ganesha.nfsd -F ${GANESHA_OPTIONS} ${GANESHA_EPOCH}
+}
+
+#######
 # API #
 #######
 
@@ -246,5 +260,6 @@ bootstrap_mds
 bootstrap_rgw
 bootstrap_demo_user
 bootstrap_rest_api
+bootstrap_nfs
 
 exec ceph ${CEPH_OPTS} -w

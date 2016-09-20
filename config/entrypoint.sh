@@ -62,8 +62,8 @@ if [ $RET -eq 0 ]; then
   etcdctl get ${CLUSTER_PATH}/ceph.client.admin.keyring > /etc/ceph/ceph.client.admin.keyring
 
   echo "Attempting to pull monitor map from existing cluster."
-  ceph mon getmap -o /etc/ceph/monmap
-else 
+  ceph mon getmap -o /etc/ceph/monmap-${CLUSTER}
+else
   echo "No configuration found for cluster ${CLUSTER}. Generating."
 
   fsid=$(uuidgen)
@@ -78,7 +78,7 @@ ENDHERE
 
   ceph-authtool /etc/ceph/ceph.client.admin.keyring --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
   ceph-authtool /etc/ceph/ceph.mon.keyring --create-keyring --gen-key -n mon. --cap mon 'allow *'
-  monmaptool --create --add ${MON_NAME} ${MON_IP} --fsid ${fsid}  /etc/ceph/monmap
+  monmaptool --create --add ${MON_NAME} ${MON_IP} --fsid ${fsid}  /etc/ceph/monmap-${CLUSTER}
 
   etcdctl set ${CLUSTER_PATH}/ceph.conf < /etc/ceph/ceph.conf > /dev/null
   etcdctl set ${CLUSTER_PATH}/ceph.mon.keyring < /etc/ceph/ceph.mon.keyring > /dev/null

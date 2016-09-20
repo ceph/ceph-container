@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ceph-install
+spec:
+  template:
+    metadata:
+      name: ceph-install
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: ceph-install
+        image: quay.io/coffeepac/ceph-install:latest
+        volumeMounts:
+        - mountPath: /etc
+          name: etc
+        - mountPath: /opt
+          name: opt
+      volumes:
+      - name: etc
+        hostPath:
+          path: /etc
+      - name: opt
+        hostPath:
+          path: /opt

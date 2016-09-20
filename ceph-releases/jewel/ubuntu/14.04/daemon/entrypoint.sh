@@ -11,6 +11,8 @@ set -e
 : ${MDS_NAME:=mds-${HOSTNAME}}
 : ${OSD_FORCE_ZAP:=0}
 : ${OSD_JOURNAL_SIZE:=100}
+: ${OSD_BLUESTORE:=0}
+: ${OSD_DMCRYPT:=0}
 : ${CRUSH_LOCATION:=root=default host=${HOSTNAME}}
 : ${CEPHFS_CREATE:=0}
 : ${CEPHFS_NAME:=cephfs}
@@ -25,6 +27,7 @@ set -e
 : ${RGW_REMOTE_CGI:=0}
 : ${RGW_REMOTE_CGI_PORT:=9000}
 : ${RGW_REMOTE_CGI_HOST:=0.0.0.0}
+: ${RGW_USER:="cephnfs"}
 : ${RESTAPI_IP:=0.0.0.0}
 : ${RESTAPI_PORT:=5000}
 : ${RESTAPI_BASE_URL:=/api/v0.1}
@@ -33,6 +36,8 @@ set -e
 : ${KV_TYPE:=none} # valid options: consul, etcd or none
 : ${KV_IP:=127.0.0.1}
 : ${KV_PORT:=4001} # PORT 8500 for Consul
+: ${GANESHA_OPTIONS:=""}
+: ${GANESHA_EPOCH:=""} # For restarting
 
 if [ ! -z "${KV_CA_CERT}" ]; then
 	KV_TLS="--ca-cert=${KV_CA_CERT} --client-cert=${KV_CLIENT_CERT} --client-key=${KV_CLIENT_KEY}"
@@ -207,6 +212,7 @@ function start_mon {
     if command -v ip; then
       if [ ${NETWORK_AUTO_DETECT} -eq 1 ]; then
         MON_IP=$(ip -6 -o a s $NIC_MORE_TRAFFIC | awk '{ sub ("/..", "", $4); print $4 }')
+        CEPH_PUBLIC_NETWORK=$(ip -6 r | grep $NIC_MORE_TRAFFIC | awk '{ print $1 }')
         if [ -z "$MON_IP" ]; then
           MON_IP=$(ip -4 -o a s $NIC_MORE_TRAFFIC | awk '{ sub ("/..", "", $4); print $4 }')
           CEPH_PUBLIC_NETWORK=$(ip r | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/[0-9]\{1,2\}' | head -1)
@@ -233,13 +239,11 @@ function start_mon {
     exit 1
   fi
 
-  # get_mon_config is also responsible for bootstrapping the
-  # cluster, if necessary
-  get_mon_config
-  create_socket_dir
-
   # If we don't have a monitor keyring, this is a new monitor
   if [ ! -e /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}/keyring ]; then
+
+    get_mon_config
+    create_socket_dir
 
     if [ ! -e /etc/ceph/${CLUSTER}.mon.keyring ]; then
       echo "ERROR- /etc/ceph/${CLUSTER}.mon.keyring must exist.  You can extract it from your current monitor by running 'ceph auth get mon. -o /etc/ceph/${CLUSTER}.mon.keyring' or use a KV Store"
@@ -434,7 +438,7 @@ EOF
     chmod +x /etc/service/${CLUSTER}-${OSD_ID}/run
   done
 
-exec /usr/bin/runsvdir -P /etc/service
+exec /sbin/my_init
 }
 
 
@@ -471,10 +475,30 @@ function osd_disk_prepare {
   fi
 
   if [[ ! -z "${OSD_JOURNAL}" ]]; then
-    ceph-disk -v prepare ${CEPH_OPTS} ${OSD_DEVICE} ${OSD_JOURNAL}
+    if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
+      ceph-disk -v prepare ${CEPH_OPTS} --bluestore ${OSD_DEVICE} ${OSD_JOURNAL}
+    elif [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+      get_admin_key
+      check_admin_key
+      # the admin key must be present on the node
+      # in order to store the encrypted key in the monitor's k/v store
+      ceph-disk -v prepare ${CEPH_OPTS} --dmcrypt ${OSD_DEVICE} ${OSD_JOURNAL}
+    else
+      ceph-disk -v prepare ${CEPH_OPTS} ${OSD_DEVICE} ${OSD_JOURNAL}
+    fi
     chown ceph. ${OSD_JOURNAL}
   else
-    ceph-disk -v prepare ${CEPH_OPTS} ${OSD_DEVICE}
+    if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
+      ceph-disk -v prepare ${CEPH_OPTS} --bluestore ${OSD_DEVICE}
+    elif [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+      get_admin_key
+      check_admin_key
+      # the admin key must be present on the node
+      # in order to store the encrypted key in the monitor's k/v store
+      ceph-disk -v prepare ${CEPH_OPTS} --dmcrypt ${OSD_DEVICE}
+    else
+      ceph-disk -v prepare ${CEPH_OPTS} ${OSD_DEVICE}
+    fi
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
   fi
 }
@@ -507,12 +531,20 @@ function osd_activate {
   if [[ ! -z "${OSD_JOURNAL}" ]]; then
     timeout 10  bash -c "while [ ! -e ${OSD_DEVICE} ]; do sleep 1; done"
     chown ceph. ${OSD_JOURNAL}
-    ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
+    if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+      ceph-disk -v --setuser ceph --setgroup --dmcrypt disk activate $(dev_part ${OSD_DEVICE} 1)
+    else
+      ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
+    fi
     OSD_ID=$(ceph-disk list | grep "$(dev_part ${ACTUAL_OSD_DEVICE} 1) ceph data" | awk -F, '{print $4}' | awk -F. '{print $2}')
   else
     timeout 10  bash -c "while [ ! -e $(dev_part ${OSD_DEVICE} 1) ]; do sleep 1; done"
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
-    ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
+    if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+      ceph-disk -v --setuser ceph --setgroup disk --dmcrypt activate $(dev_part ${OSD_DEVICE} 1)
+    else
+      ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
+    fi
     OSD_ID=$(ceph-disk list | grep "$(dev_part ${ACTUAL_OSD_DEVICE} 1) ceph data" | awk -F, '{print $4}' | awk -F. '{print $2}')
   fi
   OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
@@ -520,7 +552,7 @@ function osd_activate {
 
   # ceph-disk activiate has exec'ed /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID}
   # wait till docker stop or ceph-osd is killed
-  OSD_PID=$(ps -ef |grep ceph-osd |grep osd.${OSD_ID} |awk '{print $2}')
+  OSD_PID=$(pgrep -U ceph -f "^/usr/bin/ceph-osd \-\-cluster ${CLUSTER}.*\-i ${OSD_ID} \-\-setuser") || true
   if [ -n "${OSD_PID}" ]; then
       echo "OSD (PID ${OSD_PID}) is running, waiting till it exits"
       while [ -e /proc/${OSD_PID} ]; do sleep 1;done
@@ -765,6 +797,24 @@ function start_rgw {
   fi
 }
 
+function create_rgw_user {
+
+  # Check to see if our RGW has been initialized
+  if [ ! -e /var/lib/ceph/radosgw/keyring ]; then
+    echo "ERROR- /var/lib/ceph/radosgw/keyring must exist. Please get it from your Rados Gateway"
+    exit 1
+  fi
+
+  mkdir -p "/var/lib/ceph/radosgw/${RGW_NAME}"
+  mv /var/lib/ceph/radosgw/keyring /var/lib/ceph/radosgw/${RGW_NAME}/keyring
+
+  if [ -z "${RGW_USER_SECRET_KEY}" ]; then
+    radosgw-admin user create --uid=${RGW_USER} --display-name="RGW ${RGW_USER} User" -c /etc/ceph/${CLUSTER}.conf
+  else
+    radosgw-admin user create --uid=${RGW_USER} --access-key=${RGW_USER_ACCESS_KEY} --secret=${RGW_USER_SECRET_KEY} --display-name="RGW ${RGW_USER} User" -c /etc/ceph/${CLUSTER}.conf
+  fi
+}
+
 
 ###########
 # RESTAPI #
@@ -815,23 +865,78 @@ function start_rbd_mirror {
 }
 
 
+#######
+# NFS #
+#######
+
+function start_rpc {
+  rpcbind || return 0
+  rpc.statd -L || return 0
+  rpc.idmapd || return 0
+
+}
+
+function start_nfs {
+  get_config
+  check_config
+  create_socket_dir
+
+  # Init RPC
+  start_rpc
+
+  # start ganesha
+  exec /usr/bin/ganesha.nfsd -F ${GANESHA_OPTIONS} ${GANESHA_EPOCH}
+
+}
+
+
 ##############
 # ZAP DEVICE #
 ##############
 
 function zap_device {
   if [[ -z ${OSD_DEVICE} ]]; then
-    echo "Please provide a device to zap!"
-    echo "ie: '-e OSD_DEVICE=/dev/sdb'"
+    echo "Please provide device(s) to zap!"
+    echo "ie: '-e OSD_DEVICE=/dev/sdb' or '-e OSD_DEVICE=/dev/sdb,/dev/sdc'"
     exit 1
-  else
-    ceph-disk -v zap ${OSD_DEVICE}
   fi
+
+  # testing all the devices first so we just don't do anything if one device is wrong
+  for device in $(echo ${OSD_DEVICE} | tr "," " "); do
+    if ! file -s $device &> /dev/null; then
+      echo "Provided device $device does not exist."
+      exit 1
+    fi
+    # if the disk passed is a raw device AND the boot system disk
+    if echo $device | egrep -sq '/dev/([hsv]d[a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}$' && parted -s $(echo $device | egrep -o '/dev/([hsv]d[a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}') print | grep -sq boot; then
+      echo "Looks like $device has a boot partition,"
+      echo "if you want to delete specific partitions point to the partition instead of the raw device"
+      echo "Do not use your system disk!"
+      exit 1
+    fi
+  done
+
+  for device in $(echo ${OSD_DEVICE} | tr "," " "); do
+    raw_device=$(echo $device | egrep -o '/dev/([hsv]d[a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}')
+    if echo $device | egrep -sq '/dev/([hsv]d[a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}$'; then
+      echo "Zapping the entire device $device"
+      sgdisk --zap-all --clear --mbrtogpt -g -- $device
+    else
+      # get the desired partition number(s)
+      partition_nb=$(echo $device | egrep -o '[0-9]{1,2}$')
+      echo "Zapping partition $device"
+      sgdisk --delete $partition_nb $raw_device
+    fi
+    echo "Executing partprobe on $raw_device"
+    partprobe $raw_device
+    udevadm settle
+  done
 }
+
 
 ####################
 # WATCH MON HEALTH #
-###################
+####################
 
 function watch_mon_health {
 echo "checking for zombie mons"
@@ -897,11 +1002,17 @@ case "$CEPH_DAEMON" in
   rgw)
     start_rgw
     ;;
+  rgw_user)
+    create_rgw_user
+    ;;
   restapi)
     start_restapi
     ;;
   rbd_mirror)
     start_rbd_mirror
+    ;;
+  nfs)
+    start_nfs
     ;;
   zap_device)
     zap_device
@@ -913,8 +1024,8 @@ case "$CEPH_DAEMON" in
   if [ ! -n "$CEPH_DAEMON" ]; then
     echo "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
     echo "of the daemon you want to deploy."
-    echo "Valid values for CEPH_DAEMON are MON, OSD, OSD_DIRECTORY, OSD_CEPH_DISK, OSD_CEPH_DISK_PREPARE, OSD_CEPH_DISK_ACTIVATE, OSD_CEPH_ACTIVATE_JOURNAL, MDS, RGW, RESTAPI, ZAP_DEVICE, RBD_MIRROR"
-    echo "Valid values for the daemon parameter are mon, osd, osd_directory, osd_ceph_disk, osd_ceph_disk_prepare, osd_ceph_disk_activate, osd_ceph_activate_journal, mds, rgw, restapi, zap_device, rbd_mirror"
+    echo "Valid values for CEPH_DAEMON are MON, OSD, OSD_DIRECTORY, OSD_CEPH_DISK, OSD_CEPH_DISK_PREPARE, OSD_CEPH_DISK_ACTIVATE, OSD_CEPH_ACTIVATE_JOURNAL, MDS, RGW, RGW_USER, RESTAPI, ZAP_DEVICE, RBD_MIRROR, NFS"
+    echo "Valid values for the daemon parameter are mon, osd, osd_directory, osd_ceph_disk, osd_ceph_disk_prepare, osd_ceph_disk_activate, osd_ceph_activate_journal, mds, rgw, rgw_user, restapi, zap_device, rbd_mirror, nfs"
     exit 1
   fi
   ;;
