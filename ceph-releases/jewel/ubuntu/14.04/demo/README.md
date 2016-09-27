@@ -27,5 +27,5 @@ Commonly, you will want to bind-mount your host's `/etc/ceph` into the container
 If you get user_xattr error, try to remount your docker partition:
 
 ```
-$ sudo mount -o remount,user_xattr,rw $(df -P /var/lib/docker |tail -1 |tr -s ' ' |cut -d' ' -f6)
+sudo mount -o remount,user_xattr,rw $(df -P /var/lib/docker |tail -1 |tr -s ' ' |cut -d' ' -f6)
 ```

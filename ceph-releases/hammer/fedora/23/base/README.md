@@ -9,5 +9,5 @@ Ceph base image (Fedora 23 with the latest Ceph release installed).
 ## Usage (example)
 
 ```bash
-$ docker run -i -t ceph/base:fedora
+docker run -i -t ceph/base:fedora
 ```

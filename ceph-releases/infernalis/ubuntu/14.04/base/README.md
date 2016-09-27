@@ -9,5 +9,5 @@ Ceph base image (ubuntu 14.04 with the latest Ceph release installed).
 ## Usage (example)
 
 ```bash
-$ docker run -i -t ceph/base
+docker run -i -t ceph/base
 ```

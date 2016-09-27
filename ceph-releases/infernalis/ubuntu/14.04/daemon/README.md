@@ -36,7 +36,7 @@ Important variables in `populate.sh` to change when you bootstrap an OSD:
 Without KV store, run:
 
 ```
-$ sudo docker run -d --net=host \
+docker run -d --net=host \
 -v /etc/ceph:/etc/ceph \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -e MON_IP=192.168.0.20 \
@@ -47,7 +47,7 @@ ceph/daemon mon
 With KV store, run:
 
 ```
-$ sudo docker run -d --net=host \
+docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -e MON_IP=192.168.0.20 \
 -e CEPH_PUBLIC_NETWORK=192.168.0.0/24 \
@@ -96,7 +96,7 @@ If the operator does not specify an `OSD_TYPE` autodetection happens:
 Without KV backend:
 
 ```
-$ sudo docker run -d --net=host \
+docker run -d --net=host \
 --privileged=true \
 -v /etc/ceph:/etc/ceph \
 -v /var/lib/ceph/:/var/lib/ceph/ \
@@ -109,7 +109,7 @@ ceph/daemon osd
 With KV backend:
 
 ```
-$ sudo docker run -d --net=host \
+docker run -d --net=host \
 --privileged=true \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
@@ -125,7 +125,7 @@ ceph/daemon osd
 Without KV backend:
 
 ```
-$ sudo docker run -d --net=host \
+docker run -d --net=host \
 --privileged=true \
 -v /etc/ceph:/etc/ceph \
 -v /var/lib/ceph/:/var/lib/ceph/ \
@@ -138,7 +138,7 @@ ceph/daemon osd
 With KV backend:
 
 ```
-$ sudo docker run -d --net=host \
+docker run -d --net=host \
 --privileged=true \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
@@ -162,7 +162,7 @@ If you do not want to use `--privileged=true`, please fall back on the second ex
 This function is balance between ceph-disk and osd directory where the operator can use ceph-disk outside of the container (directly on the host) to prepare the devices. Devices will be prepared with `ceph-disk prepare`, then they will get activated inside the container. A priviledged container is still required as ceph-disk needs to access /dev/. So this has minimum value compare to the ceph-disk but might fit some use cases where the operators want to prepare their devices outside of a container.
 
 ```
-$ sudo docker run -d --net=host \
+docker run -d --net=host \
 --privileged=true \
 -v /etc/ceph:/etc/ceph \
 -v /var/lib/ceph/:/var/lib/ceph/ \
@@ -236,7 +236,7 @@ For most people, the defaults for the following optional environment variables a
 Without KV backend, run:
 
 ```
-$ sudo docker run -d --net=host \
+docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /etc/ceph:/etc/ceph \
 -e CEPHFS_CREATE=1 \
@@ -246,7 +246,7 @@ ceph/daemon mds
 Without KV backend, run:
 
 ```
-$ sudo docker run -d --net=host \
+docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -e CEPHFS_CREATE=1 \
 -e KV_TYPE=etcd \
@@ -265,7 +265,7 @@ For the Rados Gateway, we deploy it with `civetweb` enabled by default. However 
 Without kv backend, run:
 
 ```
-$ sudo docker run -d --net=host \
+docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /etc/ceph:/etc/ceph \
 ceph/daemon rgw
@@ -274,7 +274,7 @@ ceph/daemon rgw
 With kv backend, run:
 
 ```
-$ sudo docker run -d --net=host \
+docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -e KV_TYPE=etcd \
 -e KV_IP=192.168.0.20 \
@@ -299,7 +299,7 @@ And run the container like this `docker run -d -v /etc/ceph:/etc/ceph -v /var/li
 This is pretty straighforward. The `--net=host` is not mandatory, if you don't use it do not forget to expose the `RESTAPI_PORT`.
 
 ```
-$ sudo docker run -d --net=host \
+docker run -d --net=host \
 -e KV_TYPE=etcd \
 -e KV_IP=192.168.0.20 \
 ceph/daemon restapi

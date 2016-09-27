@@ -9,5 +9,5 @@ Ceph base image (CentOS (latest) with the latest Ceph release installed).
 ## Usage (example)
 
 ```bash
-$ docker run -i -t ceph/base
+docker run -i -t ceph/base
 ```
