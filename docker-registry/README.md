@@ -1,5 +1,4 @@
-Docker-registry
-===============
+# Docker-registry
 
 ```
 docker run -d \
@@ -15,11 +14,14 @@ docker run -d \
          ceph/docker-registry
 ```
 
-In the example boto.s3.connection.OrdinaryCallingFormat  makes API calls in the format:
+In the example boto.s3.connection.OrdinaryCallingFormat makes API calls in the format:
+
 ```
 http://HOST:PORT/BUCKET/OBJECT
 ```
+
 if AWS_CALLING_FORMAT is empty, it calls like:
+
 ```
 http://BUCKET.HOST:PORT/OBJECT
 ```
