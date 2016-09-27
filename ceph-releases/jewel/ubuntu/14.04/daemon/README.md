@@ -59,10 +59,9 @@ Sometimes you might want to destroy partition tables from a disk. For this you c
 
 ```
 docker run -d --privileged=true \
--v /dev/:/dev/
--e OSD_DEVICE=/dev/sdd
-ceph/daemon
-zap_device
+-v /dev/:/dev/ \
+-e OSD_DEVICE=/dev/sdd \
+ceph/daemon zap_device
 ```
 
 ## Deploy a monitor
