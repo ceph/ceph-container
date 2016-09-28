@@ -2,17 +2,19 @@
 
 ## Clone
 
+```bash
 git clone https://your_github_id:your_github_password@github.com/roofmonkey/rhcs
+```
 
 ## build docker image
 
-```console
+```bash
 docker build -t rhcs .
 ```
 
 ## prepare
 
-```console
+```bash
 mkdir -p /etc/ceph
 # for /var/lib/ceph
 mkdir -p /srv/ceph-var
@@ -24,17 +26,19 @@ rm -rf /etc/ceph/* /srv/ceph/* /srv/ceph-1/*
 ```
 
 ## start Ceph mon
-```console
+
+```bash
 docker run -ti --net=host -e MON_IP=10.1.4.12  -e CEPH_PUBLIC_NETWORK=10.1.4.0/24 -e CEPH_DAEMON=mon -e  -v /etc/ceph:/etc/ceph -v /srv/ceph-var:/var/lib/ceph rhcs
 ```
 
 ## start Ceph osd 0
 
-```console
+```bash
 docker run -ti --privileged --net=host -e MON_IP=10.1.4.12  -e CEPH_PUBLIC_NETWORK=10.1.4.0/24 -e CEPH_DAEMON=osd -e  OSD_TYPE=directory -v /srv/ceph:/var/lib/ceph/osd/ -v /etc/ceph:/etc/ceph -v /srv/ceph-var:/var/lib/ceph rhcs
 ```
 
 ## start Ceph osd 1
-```console
+
+```bash
 docker run -ti --privileged --net=host -e MON_IP=10.1.4.12  -e CEPH_PUBLIC_NETWORK=10.1.4.0/24 -e CEPH_DAEMON=osd -e  OSD_TYPE=directory -v /srv/ceph-1:/var/lib/ceph/osd/ -v /etc/ceph:/etc/ceph -v /srv/ceph-var:/var/lib/ceph rhcs
 ```
