@@ -1,5 +1,5 @@
 #!/usr/bin/python3 -u
-import os, os.path, sys, stat, signal, errno, argparse, time, json, re
+import os, os.path, sys, stat, signal, errno, argparse, time, json, re, shutil
 
 KILL_PROCESS_TIMEOUT = 5
 KILL_ALL_PROCESSES_TIMEOUT = 5
@@ -55,6 +55,13 @@ def is_exe(path):
 		return os.path.isfile(path) and os.access(path, os.X_OK)
 	except OSError:
 		return False
+
+def find_exec_file(filename):
+	try:
+		return shutil.which(filename)
+	except shutil.Error:
+		error("%s executable not found\n" % filename)
+		sys.exit(1)
 
 def import_envvars(clear_existing_environment = True, override_existing_environment = True):
 	new_env = {}
@@ -219,8 +226,9 @@ def run_startup_files():
 		run_command_killable_and_import_envvars("/etc/rc.local")
 
 def start_runit():
+	runsvdir_file = find_exec_file('runsvdir')
 	info("Booting runit daemon...")
-	pid = os.spawnl(os.P_NOWAIT, "/usr/bin/runsvdir", "/usr/bin/runsvdir",
+	pid = os.spawnl(os.P_NOWAIT, runsvdir_file, runsvdir_file,
 		"-P", "/etc/service")
 	info("Runit started as PID %d" % pid)
 	return pid
@@ -233,14 +241,16 @@ def wait_for_runit_or_interrupt(pid):
 		return (False, None)
 
 def shutdown_runit_services():
+	sv_file = find_exec_file('sv')
 	debug("Begin shutting down runit services...")
-	os.system("/usr/bin/sv down /etc/service/*")
+	os.system(sv_file + " down /etc/service/*")
 
 def wait_for_runit_services():
+	sv_file = find_exec_file('sv')
 	debug("Waiting for runit services to exit...")
 	done = False
 	while not done:
-		done = os.system("/usr/bin/sv status /etc/service/* | grep -q '^run:'") != 0
+		done = os.system(sv_file + " status /etc/service/* | grep -q '^run:'") != 0
 		if not done:
 			time.sleep(0.1)
 

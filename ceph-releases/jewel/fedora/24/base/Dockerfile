@@ -35,6 +35,12 @@ RUN dnf install -y ceph ceph-radosgw rbd-mirror nfs-ganesha-rgw nfs-ganesha-vfs 
 ADD https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl /usr/local/bin/kubectl
 RUN chmod +x /usr/local/bin/kubectl
 
+# Install runit
+RUN dnf install -y gcc glibc-static
+RUN cd / && mkdir -p /package && wget -q -O- "http://smarden.org/runit/runit-2.1.2.tar.gz" |tar xfz - -C/package/ && cd /package/admin/runit-2.1.2/ && ./package/install
+RUN mkdir -p /etc/service && chmod +x /etc/service/
+RUN dnf remove -y gcc glibc-static
+
 ADD https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 /usr/local/bin/jq
 RUN chmod +x /usr/local/bin/jq
 
