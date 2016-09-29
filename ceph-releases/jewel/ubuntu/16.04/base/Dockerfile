@@ -18,6 +18,10 @@ ADD https://github.com/AcalephStorage/kviator/releases/download/v${KVIATOR_VERSI
 # Download confd
 ADD https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-linux-amd64 /usr/local/bin/confd
 
+# Download forego
+ADD https://bin.equinox.io/c/ekMN3bCZFUn/forego-stable-linux-amd64.tgz /forego.tgz
+
+
 # install prerequisites
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget unzip uuid-runtime python-setuptools udev runit sharutils python3 && \
 \
@@ -38,7 +42,10 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget unz
     cd /usr/local/bin && unzip /kviator.zip && chmod +x /usr/local/bin/kviator && rm /kviator.zip && \
 \
 # Install confd
-    chmod +x /usr/local/bin/confd && mkdir -p /etc/confd/conf.d && mkdir -p /etc/confd/templates
+    chmod +x /usr/local/bin/confd && mkdir -p /etc/confd/conf.d && mkdir -p /etc/confd/templates && \
+\
+# Install forego
+    cd /usr/local/bin && tar xfz /forego.zip && chmod +x /usr/local/bin/forego && rm /forego.zip
 
 # Install kubectl
 ADD https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl /usr/local/bin/kubectl
@@ -46,7 +53,6 @@ RUN chmod +x /usr/local/bin/kubectl
 
 ADD https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 /usr/local/bin/jq
 RUN chmod +x /usr/local/bin/jq
-
 
 ADD entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
