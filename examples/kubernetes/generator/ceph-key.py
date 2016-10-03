@@ -1,7 +1,5 @@
-import errno
-import logging
+#!/bin/python
 import os
-import uuid
 import struct
 import time
 import base64
@@ -14,4 +12,4 @@ header = struct.pack(
     0,                 # le32 created: nanoseconds,
     len(key),          # le16: len(key)
 )
-print base64.b64encode(header + key)
+print(base64.b64encode(header + key).decode('ascii'))
