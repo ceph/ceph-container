@@ -80,7 +80,9 @@ function create_new_branch {
 function copy_files {
   echo_info "COPYING FILES"
   rm -rf base daemon demo
-  cp -Lvr ceph-releases/$1/$2/$3/* .
+  if ! echo $2 | grep -sq redhat; then
+    cp -Lvr ceph-releases/$1/$2/$3/* .
+  fi
 }
 
 function commit_new_changes {
@@ -134,7 +136,7 @@ do
   # the following will occor:
   # infernalis will see that jewel changed and will request jewel to change
   # however jewel is already up to date. Then we fall into an infite loop
-  impacted_files=$(git diff --name-only $sha..origin/$LOCAL_BRANCH | grep "^tag-$PREFIX")
+  impacted_files=$(git diff --name-only $sha..origin/$LOCAL_BRANCH)
   if [[ -n "$impacted_files" ]]; then
     impacted_sort=$(echo $impacted_files | sed "s|$IGNORED_CHANGES||g" | tr " " "\n" | awk -F '/' '/ceph-releases/ {print $2,"/",$3,"/",$4}' | tr -d " " | sort -u | uniq)
     if [[ -n "$impacted_sort" ]]; then
@@ -164,7 +166,9 @@ do
     delete_old_branch_tag
     create_new_branch
     copy_files $CEPH_RELEASE $DISTRO $DISTRO_VERSION
-    commit_new_changes
+    if ! echo $DISTRO | grep -sq redhat; then
+      commit_new_changes
+    fi
     tag_new_changes
     push_new_branch
     move_back_to_initial_working_branch
