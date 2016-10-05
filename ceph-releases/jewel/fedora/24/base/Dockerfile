@@ -18,7 +18,7 @@ ADD https://github.com/AcalephStorage/kviator/releases/download/v${KVIATOR_VERSI
 ADD https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-linux-amd64 /usr/local/bin/confd
 
 # install prerequisites
-RUN dnf install -y ceph ceph-radosgw rbd-mirror nfs-ganesha-rgw nfs-ganesha-vfs nfs-ganesha-ceph sharutils systemd-udev wget unzip && \
+RUN dnf install -y ceph ceph-radosgw rbd-mirror nfs-ganesha-vfs nfs-ganesha-ceph sharutils systemd-udev wget unzip && \
     dnf clean all && \
 \
 # Install etcdctl
