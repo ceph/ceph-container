@@ -11,7 +11,7 @@ ENV CEPH_VERSION infernalis
 
 ENV KVIATOR_VERSION 0.0.7
 ENV CONFD_VERSION 0.10.0
-ENV KUBECTL_VERSION v1.2.4
+ENV KUBECTL_VERSION v1.4.0
 
 # Install prerequisites
 RUN apt-get update && apt-get install -y wget unzip uuid-runtime runit python3
@@ -43,4 +43,3 @@ RUN chmod +x /usr/local/bin/jq
 
 ADD entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
-
