@@ -46,7 +46,3 @@ after_failure:
   - docker logs ceph-demo
   - docker exec ceph-mon ceph -s
   - docker exec ceph-demo ceph -s
-
-after_success:
-  - docker exec ceph-mon ceph -s
-  - docker exec ceph-demo ceph -s
