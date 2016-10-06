@@ -35,7 +35,7 @@ RUN dnf install -y ceph ceph-radosgw rbd-mirror nfs-ganesha-rgw nfs-ganesha-vfs 
     chmod +x /usr/local/bin/confd && mkdir -p /etc/confd/conf.d && mkdir -p /etc/confd/templates && \
 \
 # Install forego
-    cd /usr/local/bin && tar xfz /forego.zip && chmod +x /usr/local/bin/forego && rm /forego.zip
+    cd /usr/local/bin && tar xfz /forego.tgz && chmod +x /usr/local/bin/forego && rm /forego.tgz
 
 # Install kubectl
 ADD https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl /usr/local/bin/kubectl

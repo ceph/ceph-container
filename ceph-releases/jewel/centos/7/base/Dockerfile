@@ -42,7 +42,7 @@ RUN chmod +x /usr/local/bin/jq
 
 # Download forego
 ADD https://bin.equinox.io/c/ekMN3bCZFUn/forego-stable-linux-amd64.tgz /forego.tgz
-RUN cd /usr/local/bin && tar xfz /forego.zip && chmod +x /usr/local/bin/forego && rm /forego.zip
+RUN cd /usr/local/bin && tar xfz /forego.tgz && chmod +x /usr/local/bin/forego && rm /forego.tgz
 
 ADD entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
