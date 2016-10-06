@@ -40,8 +40,8 @@ set -e
 : ${GANESHA_EPOCH:=""} # For restarting
 
 if [ ! -z "${KV_CA_CERT}" ]; then
-	KV_TLS="--ca-cert=${KV_CA_CERT} --client-cert=${KV_CLIENT_CERT} --client-key=${KV_CLIENT_KEY}"
-	CONFD_KV_TLS="-scheme=https -client-ca-keys=${KV_CA_CERT} -client-cert=${KV_CLIENT_CERT} -client-key=${KV_CLIENT_KEY}"
+  KV_TLS="--ca-cert=${KV_CA_CERT} --client-cert=${KV_CLIENT_CERT} --client-key=${KV_CLIENT_KEY}"
+  CONFD_KV_TLS="-scheme=https -client-ca-keys=${KV_CA_CERT} -client-cert=${KV_CLIENT_CERT} -client-key=${KV_CLIENT_KEY}"
 fi
 
 CEPH_OPTS="--cluster ${CLUSTER}"
@@ -162,12 +162,12 @@ esac
 # CONFIG #
 ##########
 function kv {
-	# Note the 'cas' command puts a value in the KV store if it is empty
-	KEY="$1"
-	shift
-	VALUE="$*"
-	echo "adding key ${KEY} with value ${VALUE} to KV store"
-	kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} cas ${CLUSTER_PATH}"${KEY}" "${VALUE}" || echo "value is already set"
+  # Note the 'cas' command puts a value in the KV store if it is empty
+  KEY="$1"
+  shift
+  VALUE="$*"
+  echo "adding key ${KEY} with value ${VALUE} to KV store"
+  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} cas ${CLUSTER_PATH}"${KEY}" "${VALUE}" || echo "value is already set"
 }
 
 function populate_kv {
@@ -388,9 +388,9 @@ function osd_directory {
     echo "created folder /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}"
   fi
 
-	# Create the directory and an empty Procfile
-	mkdir -p /etc/forego/${CLUSTER}
-	echo "" > /etc/forego/${CLUSTER}/Procfile
+  # Create the directory and an empty Procfile
+  mkdir -p /etc/forego/${CLUSTER}
+  echo "" > /etc/forego/${CLUSTER}/Procfile
 
   for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }'); do
     if [ -n "${JOURNAL_DIR}" ]; then
@@ -593,9 +593,9 @@ function osd_disks {
   # make sure ceph owns the directory
   chown ceph. /var/lib/ceph/osd
 
-	# Create the directory and an empty Procfile
-	mkdir -p /etc/forego/${CLUSTER}
-	echo "" > /etc/forego/${CLUSTER}/Procfile
+  # Create the directory and an empty Procfile
+  mkdir -p /etc/forego/${CLUSTER}
+  echo "" > /etc/forego/${CLUSTER}/Procfile
 
   # check if anything is there, if not create an osd with directory
   if [[ -z "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
@@ -613,11 +613,11 @@ function osd_disks {
         exit 1
       fi
 
-			echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup disk" | tee -a /etc/forego/${CLUSTER}/Procfile
+      echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup disk" | tee -a /etc/forego/${CLUSTER}/Procfile
 
     done
 
-		exec /usr/local/bin/forego start -f /etc/forego/${CLUSTER}/Procfile
+    exec /usr/local/bin/forego start -f /etc/forego/${CLUSTER}/Procfile
   else
     for i in ${OSD_DISKS}; do
       OSD_ID=$(echo ${i}|sed 's/\(.*\):\(.*\)/\1/')
@@ -651,13 +651,13 @@ function osd_disks {
           while [ -e /proc/${OSD_PID} ]; do sleep 1;done
       fi
 
-			echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup disk" | tee -a /etc/forego/${CLUSTER}/Procfile
+      echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup disk" | tee -a /etc/forego/${CLUSTER}/Procfile
 
 
     done
 
 
-		exec /usr/local/bin/forego start -f /etc/forego/${CLUSTER}/Procfile
+    exec /usr/local/bin/forego start -f /etc/forego/${CLUSTER}/Procfile
   fi
 }
 
