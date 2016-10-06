@@ -40,8 +40,8 @@ set -e
 : ${GANESHA_EPOCH:=""} # For restarting
 
 if [ ! -z "${KV_CA_CERT}" ]; then
-	KV_TLS="--ca-cert=${KV_CA_CERT} --client-cert=${KV_CLIENT_CERT} --client-key=${KV_CLIENT_KEY}"
-	CONFD_KV_TLS="-scheme=https -client-ca-keys=${KV_CA_CERT} -client-cert=${KV_CLIENT_CERT} -client-key=${KV_CLIENT_KEY}"
+  KV_TLS="--ca-cert=${KV_CA_CERT} --client-cert=${KV_CLIENT_CERT} --client-key=${KV_CLIENT_KEY}"
+  CONFD_KV_TLS="-scheme=https -client-ca-keys=${KV_CA_CERT} -client-cert=${KV_CLIENT_CERT} -client-key=${KV_CLIENT_KEY}"
 fi
 
 CEPH_OPTS="--cluster ${CLUSTER}"
@@ -162,12 +162,12 @@ esac
 # CONFIG #
 ##########
 function kv {
-	# Note the 'cas' command puts a value in the KV store if it is empty
-	KEY="$1"
-	shift
-	VALUE="$*"
-	echo "adding key ${KEY} with value ${VALUE} to KV store"
-	kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} cas ${CLUSTER_PATH}"${KEY}" "${VALUE}" || echo "value is already set"
+  # Note the 'cas' command puts a value in the KV store if it is empty
+  KEY="$1"
+  shift
+  VALUE="$*"
+  echo "adding key ${KEY} with value ${VALUE} to KV store"
+  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} cas ${CLUSTER_PATH}"${KEY}" "${VALUE}" || echo "value is already set"
 }
 
 function populate_kv {
@@ -388,6 +388,10 @@ function osd_directory {
     echo "created folder /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}"
   fi
 
+  # Create the directory and an empty Procfile
+  mkdir -p /etc/forego/${CLUSTER}
+  echo "" > /etc/forego/${CLUSTER}/Procfile
+
   for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }'); do
     if [ -n "${JOURNAL_DIR}" ]; then
        OSD_J="${JOURNAL_DIR}/journal.${OSD_ID}"
@@ -429,16 +433,13 @@ function osd_directory {
       ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
     fi
 
-    mkdir -p /etc/service/${CLUSTER}-${OSD_ID}
-    cat >/etc/service/${CLUSTER}-${OSD_ID}/run <<EOF
-#!/bin/bash
-echo "store-daemon: starting daemon on ${HOSTNAME}..."
-exec ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --osd-journal ${OSD_J} -k /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
-EOF
-    chmod +x /etc/service/${CLUSTER}-${OSD_ID}/run
+
+
+echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --osd-journal ${OSD_J} -k /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring" | tee -a /etc/forego/${CLUSTER}/Procfile
+
   done
 
-exec /sbin/my_init
+exec /usr/local/bin/forego start -f /etc/forego/${CLUSTER}/Procfile
 }
 
 
@@ -576,16 +577,6 @@ function get_osd_dev {
   done
 }
 
-function set_osd_run {
-  mkdir -p /etc/service/${1}-${2}
-  cat >/etc/service/${1}-${2}/run <<EOF
-#!/bin/bash
-echo "store-daemon: starting daemon on ${HOSTNAME}..."
-exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${2} --setuser ceph --setgroup disk
-EOF
-  chmod +x /etc/service/${1}-${2}/run
-}
-
 function osd_disks {
   if [[ ! -d /var/lib/ceph/osd ]]; then
     echo "ERROR- could not find the osd directory, did you bind mount the OSD data directory?"
@@ -602,6 +593,10 @@ function osd_disks {
   # make sure ceph owns the directory
   chown ceph. /var/lib/ceph/osd
 
+  # Create the directory and an empty Procfile
+  mkdir -p /etc/forego/${CLUSTER}
+  echo "" > /etc/forego/${CLUSTER}/Procfile
+
   # check if anything is there, if not create an osd with directory
   if [[ -z "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
     echo "Mount existing and prepared OSD disks for ceph-cluster ${CLUSTER}"
@@ -617,9 +612,12 @@ function osd_disks {
         echo "Device ${OSD_DEV} is corrupt for /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}"
         exit 1
       fi
-      set_osd_run ${CLUSTER} ${OSD_ID}
+
+      echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup disk" | tee -a /etc/forego/${CLUSTER}/Procfile
+
     done
-    exec /sbin/my_init
+
+    exec /usr/local/bin/forego start -f /etc/forego/${CLUSTER}/Procfile
   else
     for i in ${OSD_DISKS}; do
       OSD_ID=$(echo ${i}|sed 's/\(.*\):\(.*\)/\1/')
@@ -652,9 +650,14 @@ function osd_disks {
           echo "OSD (PID ${OSD_PID}) is running, waiting till it exits"
           while [ -e /proc/${OSD_PID} ]; do sleep 1;done
       fi
-      set_osd_run ${CLUSTER} ${OSD_ID}
+
+      echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup disk" | tee -a /etc/forego/${CLUSTER}/Procfile
+
+
     done
-    exec /sbin/my_init
+
+
+    exec /usr/local/bin/forego start -f /etc/forego/${CLUSTER}/Procfile
   fi
 }
 
