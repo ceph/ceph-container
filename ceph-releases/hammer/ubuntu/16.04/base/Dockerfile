@@ -5,7 +5,7 @@
 FROM ubuntu:16.04
 MAINTAINER Sébastien Han "seb@redhat.com"
 
-ENV ETCDCTL_VERSION v2.2.0
+ENV ETCDCTL_VERSION v2.3.7
 ENV ETCDCTL_ARCH linux-amd64
 ENV CEPH_VERSION hammer
 
