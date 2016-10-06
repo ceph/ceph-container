@@ -66,6 +66,10 @@ You can check the files in `travis-builds` to learn more about the entire proces
 
 If you don't want to run a build for a particular commit, because all you are changing is the README for example, add `[ci skip]` to the git commit message. Commits that have `[ci skip]` anywhere in the commit messages are ignored by Travis CI.
 
+We are also transitioning to have builds in Jenkins, this is still a work in
+progress and will start taking precedence once it is solid enough. Be sure to
+check the links and updates provided on pull requests.
+
 # Images workflow
 
 Once your contribution is done and merged in master. Either @Ulexus or @leseb will execute `ceph-docker-workflow.sh`, this will basically compare the content of each tag/branch to master. If any difference is found it will push the appropriate changes in each individual branches. Ultimately new pushed tags will trigger a Docker build on the Docker Hub.
