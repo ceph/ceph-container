@@ -4,7 +4,7 @@ set -xe
 
 # FUNCTIONS
 function wait_for_daemon () {
-  timeout=10
+  timeout=20
   daemon_to_test=$1
   while [ $timeout -ne 0 ]; do
     if eval $daemon_to_test; then
