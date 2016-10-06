@@ -10,7 +10,7 @@ ENV ETCDCTL_ARCH linux-amd64
 ENV CEPH_VERSION jewel
 ENV KVIATOR_VERSION 0.0.7
 ENV CONFD_VERSION 0.10.0
-ENV KUBECTL_VERSION v1.2.4
+ENV KUBECTL_VERSION v1.4.0
 
 # Download kviator
 ADD https://github.com/AcalephStorage/kviator/releases/download/v${KVIATOR_VERSION}/kviator-${KVIATOR_VERSION}-linux-amd64.zip /kviator.zip
