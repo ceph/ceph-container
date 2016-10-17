@@ -6,6 +6,11 @@ set -e
 : ${MON_NAME:=$(hostname -s)}
 : ${RGW_CIVETWEB_PORT:=80}
 : ${NETWORK_AUTO_DETECT:=0}
+: ${RESTAPI_IP:=0.0.0.0}
+: ${RESTAPI_PORT:=5000}
+: ${RESTAPI_BASE_URL:=/api/v0.1}
+: ${RESTAPI_LOG_LEVEL:=warning}
+: ${RESTAPI_LOG_FILE:=/var/log/ceph/ceph-restapi.log}
 
 CEPH_OPTS="--cluster ${CLUSTER}"
 
@@ -245,6 +250,16 @@ function bootstrap_nfs {
 #######
 
 function bootstrap_rest_api {
+  if [[ ! "$(egrep "\[client.restapi\]" /etc/ceph/${CLUSTER}.conf)" ]]; then
+    cat <<ENDHERE >>/etc/ceph/${CLUSTER}.conf
+[client.restapi]
+  public addr = ${RESTAPI_IP}:${RESTAPI_PORT}
+  restapi base url = ${RESTAPI_BASE_URL}
+  restapi log level = ${RESTAPI_LOG_LEVEL}
+  log file = ${RESTAPI_LOG_FILE}
+ENDHERE
+		fi
+
   # start ceph-rest-api
   ceph-rest-api ${CEPH_OPTS} -n client.admin &
 }
