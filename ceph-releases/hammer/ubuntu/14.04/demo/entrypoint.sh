@@ -197,4 +197,5 @@ bootstrap_osd
 bootstrap_mds
 bootstrap_rgw
 bootstrap_rest_api
+echo "SUCCESS"
 exec ceph ${CEPH_OPTS} -w

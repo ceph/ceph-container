@@ -269,6 +269,7 @@ function start_mon {
     rm /tmp/${CLUSTER}.mon.keyring
   fi
 
+  echo "SUCCESS"
   # start MON
   exec /usr/bin/ceph-mon ${CEPH_OPTS} -d -i ${MON_NAME} --public-addr "${MON_IP}:6789" --setuser ceph --setgroup ceph
 }
@@ -383,6 +384,7 @@ function osd_directory {
       ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
     fi
 
+    echo "SUCCESS"
     echo "store-daemon: starting daemon on ${HOSTNAME}..."
     exec ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --osd-journal ${OSD_J} -k /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
 
@@ -477,6 +479,7 @@ function osd_activate {
       echo "OSD (PID ${OSD_PID}) is running, waiting till it exits"
       while [ -e /proc/${OSD_PID} ]; do sleep 1;done
   else
+      echo "SUCCESS"
       exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup disk
   fi
 }
@@ -511,6 +514,7 @@ function osd_activate_journal {
       echo "OSD (PID ${OSD_PID}) is running, waiting till it exits"
       while [ -e /proc/${OSD_PID} ]; do sleep 1;done
   else
+      echo "SUCCESS"
       exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup disk
   fi
 }
@@ -575,6 +579,7 @@ function start_mds {
     fi
   fi
 
+  echo "SUCCESS"
   # NOTE: prefixing this with exec causes it to die (commit suicide)
   /usr/bin/ceph-mds ${CEPH_OPTS} -d -i ${MDS_NAME} --setuser ceph --setgroup ceph
 }
@@ -613,6 +618,7 @@ function start_rgw {
     chmod 0600 /var/lib/ceph/radosgw/${RGW_NAME}/keyring
   fi
 
+  echo "SUCCESS"
   if [ "$RGW_REMOTE_CGI" -eq 1 ]; then
     /usr/bin/radosgw -d ${CEPH_OPTS} -n client.rgw.${RGW_NAME} -k /var/lib/ceph/radosgw/$RGW_NAME/keyring --rgw-socket-path="" --rgw-zonegroup="$RGW_ZONEGROUP" --rgw-zone="$RGW_ZONE" --rgw-frontends="fastcgi socket_port=$RGW_REMOTE_CGI_PORT socket_host=$RGW_REMOTE_CGI_HOST" --setuser ceph --setgroup ceph
   else
@@ -663,6 +669,7 @@ function start_restapi {
 ENDHERE
   fi
 
+  echo "SUCCESS"
   # start ceph-rest-api
   exec /usr/bin/ceph-rest-api ${CEPH_OPTS} -n client.admin
 
@@ -691,6 +698,8 @@ function start_nfs {
   # Init RPC
   start_rpc
 
+  echo "SUCCESS"
+
   # start nfs
   exec /usr/bin/ganesha.nfsd -F ${GANESHA_OPTIONS} ${GANESHA_EPOCH}
 
@@ -709,6 +718,8 @@ function start_rbd_mirror {
   # ensure we have the admin key
   get_admin_key
   check_admin_key
+
+  echo "SUCCESS"
 
   # start rbd-mirror
   exec /usr/bin/rbd-mirror ${CEPH_OPTS} -d --setuser ceph --setgroup ceph

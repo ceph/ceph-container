@@ -145,6 +145,8 @@ function start_mon {
     rm /tmp/${CLUSTER}.mon.keyring
   fi
 
+  echo "SUCCESS"
+
   # start MON
   exec /usr/bin/ceph-mon ${CEPH_OPTS} -d -i ${MON_NAME} --public-addr "${MON_IP}:6789" --setuser ceph --setgroup ceph
 }
@@ -248,6 +250,8 @@ exec ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --osd-journal ${OSD_J} -k /var/lib
 EOF
     chmod +x /etc/service/${CLUSTER}-${OSD_ID}/run
   done
+
+echo "SUCCESS"
 
 exec /sbin/my_init
 }
@@ -379,6 +383,8 @@ function start_mds {
     fi
   fi
 
+  echo "SUCCESS"
+
   # NOTE: prefixing this with exec causes it to die (commit suicide)
   /usr/bin/ceph-mds ${CEPH_OPTS} -d -i ${MDS_NAME} --setuser ceph --setgroup ceph
 }
@@ -417,6 +423,8 @@ function start_rgw {
     create_socket_dir
   fi
 
+  echo "SUCCESS"
+
   if [ "$RGW_REMOTE_CGI" -eq 1 ]; then
     /usr/bin/radosgw -d ${CEPH_OPTS} -n client.rgw.${RGW_NAME} -k /var/lib/ceph/radosgw/$RGW_NAME/keyring --rgw-socket-path="" --rgw-frontends="fastcgi socket_port=$RGW_REMOTE_CGI_PORT socket_host=$RGW_REMOTE_CGI_HOST" --setuser ceph --setgroup ceph
   else
@@ -448,6 +456,8 @@ function start_restapi {
   log file = ${RESTAPI_LOG_FILE}
 ENDHERE
   fi
+
+  echo "SUCCESS"
 
   # start ceph-rest-api
   exec /usr/bin/ceph-rest-api ${CEPH_OPTS} -n client.admin

@@ -274,6 +274,8 @@ function start_mon {
     rm /tmp/${CLUSTER}.mon.keyring
   fi
 
+  echo "SUCCESS"
+
   # start MON
   exec /usr/bin/ceph-mon ${CEPH_OPTS} -d -i ${MON_NAME} --public-addr "${MON_IP}:6789" --setuser ceph --setgroup ceph
 }
@@ -345,6 +347,7 @@ function osd_directory_single {
       # many thanks to Julien Danjou for the python piece
       if python -c "import sys, fcntl, struct; l = fcntl.fcntl(open('/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/fsid', 'a'), fcntl.F_GETLK, struct.pack('hhllhh', fcntl.F_WRLCK, 0, 0, 0, 0, 0)); l_type, l_whence, l_start, l_len, l_pid, l_sysid = struct.unpack('hhllhh', l); sys.exit(0 if l_type == fcntl.F_UNLCK else 1)"; then
         echo "Looks like OSD: ${OSD_ID} is not started, starting it..."
+        echo "SUCCESS"
         exec ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} -k /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
         break
       fi
@@ -353,6 +356,7 @@ function osd_directory_single {
 
   echo "Looks like all the OSDs are already running, doing nothing"
   echo "Exiting the container"
+  echo "SUCCESS"
   exit 0
 }
 
@@ -438,6 +442,8 @@ function osd_directory {
 echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --osd-journal ${OSD_J} -k /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring" | tee -a /etc/forego/${CLUSTER}/Procfile
 
   done
+
+echo "SUCCESS"
 
 exec /usr/local/bin/forego start -f /etc/forego/${CLUSTER}/Procfile
 }
@@ -558,6 +564,7 @@ function osd_activate {
       echo "OSD (PID ${OSD_PID}) is running, waiting till it exits"
       while [ -e /proc/${OSD_PID} ]; do sleep 1;done
   else
+      echo "SUCCESS"
       exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup disk
   fi
 }
@@ -656,6 +663,7 @@ function osd_disks {
 
     done
 
+    echo "SUCCESS"
 
     exec /usr/local/bin/forego start -f /etc/forego/${CLUSTER}/Procfile
   fi
@@ -691,6 +699,7 @@ function osd_activate_journal {
       echo "OSD (PID ${OSD_PID}) is running, waiting till it exits"
       while [ -e /proc/${OSD_PID} ]; do sleep 1;done
   else
+      echo "SUCCESS"
       exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID} --setuser ceph --setgroup disk
   fi
 }
@@ -755,6 +764,7 @@ function start_mds {
     fi
   fi
 
+  echo "SUCCESS"
   # NOTE: prefixing this with exec causes it to die (commit suicide)
   /usr/bin/ceph-mds ${CEPH_OPTS} -d -i ${MDS_NAME} --setuser ceph --setgroup ceph
 }
@@ -792,6 +802,8 @@ function start_rgw {
     chown ceph. /var/lib/ceph/radosgw/${RGW_NAME}/keyring
     chmod 0600 /var/lib/ceph/radosgw/${RGW_NAME}/keyring
   fi
+
+  echo "SUCCESS"
 
   if [ "$RGW_REMOTE_CGI" -eq 1 ]; then
     /usr/bin/radosgw -d ${CEPH_OPTS} -n client.rgw.${RGW_NAME} -k /var/lib/ceph/radosgw/$RGW_NAME/keyring --rgw-socket-path="" --rgw-zonegroup="$RGW_ZONEGROUP" --rgw-zone="$RGW_ZONE" --rgw-frontends="fastcgi socket_port=$RGW_REMOTE_CGI_PORT socket_host=$RGW_REMOTE_CGI_HOST" --setuser ceph --setgroup ceph
@@ -843,6 +855,8 @@ function start_restapi {
 ENDHERE
   fi
 
+  echo "SUCCESS"
+
   # start ceph-rest-api
   exec /usr/bin/ceph-rest-api ${CEPH_OPTS} -n client.admin
 
@@ -862,6 +876,7 @@ function start_rbd_mirror {
   get_admin_key
   check_admin_key
 
+  echo "SUCCESS"
   # start rbd-mirror
   exec /usr/bin/rbd-mirror ${CEPH_OPTS} -d --setuser ceph --setgroup ceph
 
@@ -887,6 +902,7 @@ function start_nfs {
   # Init RPC
   start_rpc
 
+  echo "SUCCESS"
   # start ganesha
   exec /usr/bin/ganesha.nfsd -F ${GANESHA_OPTIONS} ${GANESHA_EPOCH}
 
