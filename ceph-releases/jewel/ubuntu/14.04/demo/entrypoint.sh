@@ -276,5 +276,5 @@ bootstrap_rgw
 bootstrap_demo_user
 bootstrap_rest_api
 bootstrap_nfs
-
+echo "SUCCESS"
 exec ceph ${CEPH_OPTS} -w
