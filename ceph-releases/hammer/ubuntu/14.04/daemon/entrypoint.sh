@@ -131,6 +131,8 @@ function start_mon {
     rm /tmp/${CLUSTER}.mon.keyring
   fi
 
+  echo "SUCCESS"
+
   # start MON
   exec /usr/bin/ceph-mon ${CEPH_OPTS} -d -i ${MON_NAME} --public-addr "${MON_IP}:6789"
 }
@@ -232,6 +234,8 @@ EOF
     chmod +x /etc/service/${CLUSTER}-${OSD_ID}/run
   done
 
+echo "SUCCESS"
+
 exec /sbin/my_init
 }
 
@@ -275,6 +279,8 @@ function osd_disk {
   OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
   ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
 
+  echo "SUCCESS"
+
   exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID}
 }
 
@@ -294,6 +300,8 @@ function osd_activate {
   OSD_ID=$(cat /var/lib/ceph/osd/$(ls -ltr /var/lib/ceph/osd/ | tail -n1 | awk -v pattern="$CLUSTER" '$0 ~ pattern {print $9}')/whoami)
   OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
   ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
+
+  echo "SUCCESS"
 
   exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -d -i ${OSD_ID}
 }
@@ -353,6 +361,8 @@ function start_mds {
     fi
   fi
 
+  echo "SUCCESS"
+
   # NOTE: prefixing this with exec causes it to die (commit suicide)
   /usr/bin/ceph-mds ${CEPH_OPTS} -d -i ${MDS_NAME}
 }
@@ -387,6 +397,8 @@ function start_rgw {
     ceph ${CEPH_OPTS} --name client.bootstrap-rgw --keyring /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring auth get-or-create client.rgw.${RGW_NAME} osd 'allow rwx' mon 'allow rw' -o /var/lib/ceph/radosgw/${RGW_NAME}/keyring
   fi
 
+  echo "SUCCESS"
+
   if [ "$RGW_REMOTE_CGI" -eq 1 ]; then
     /usr/bin/radosgw -d ${CEPH_OPTS} -n client.rgw.${RGW_NAME} -k /var/lib/ceph/radosgw/$RGW_NAME/keyring --rgw-socket-path="" --rgw-frontends="fastcgi socket_port=$RGW_REMOTE_CGI_PORT socket_host=$RGW_REMOTE_CGI_HOST"
   else
@@ -418,6 +430,8 @@ function start_restapi {
   log file = ${RESTAPI_LOG_FILE}
 ENDHERE
   fi
+
+  echo "SUCCESS"
 
   # start ceph-rest-api
   exec /usr/bin/ceph-rest-api ${CEPH_OPTS} -n client.admin
