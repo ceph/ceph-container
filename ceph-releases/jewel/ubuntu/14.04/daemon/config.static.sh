@@ -3,7 +3,7 @@ set -e
 
 function get_admin_key {
    # No-op for static
-   echo "static: does not generate admin key"
+   log "static: does not generate admin key"
 }
 
 function get_mon_config {
@@ -81,6 +81,6 @@ ENDHERE
 
 function get_config {
    # No-op for static
-   echo "static: does not generate config"
+   log "static: does not generate config"
 }
 
