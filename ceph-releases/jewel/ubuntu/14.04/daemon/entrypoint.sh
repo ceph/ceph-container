@@ -472,6 +472,11 @@ function osd_disk_prepare {
   # TODO:
   # -  add device format check (make sure only one device is passed
 
+  # check device status first
+  if ! parted --script ${OSD_DEVICE} print > /dev/null 2>&1; then
+    ceph-disk -v zap ${OSD_DEVICE}
+  fi
+
   if [[ "$(parted --script ${OSD_DEVICE} print | egrep '^ 1.*ceph data')" && ${OSD_FORCE_ZAP} -ne "1" ]]; then
     echo "ERROR- It looks like ${OSD_DEVICE} is an OSD, set OSD_FORCE_ZAP=1 to use this device anyway and zap its content"
     echo "You can also use the zap_device scenario on the appropriate device to zap it"
