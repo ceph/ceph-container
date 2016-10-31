@@ -190,7 +190,6 @@ container_tags = [
     'ceph/daemon:tag-build-master-hammer-ubuntu-14.04',
     'ceph/daemon:tag-build-master-infernalis-ubuntu-14.04',
     'ceph/daemon:tag-build-master-jewel-ubuntu-14.04',
-    'ceph/daemon:tag-build-master-jewel-fedora-23',
     'ceph/daemon:tag-build-master-jewel-fedora-24'
 ]
 
