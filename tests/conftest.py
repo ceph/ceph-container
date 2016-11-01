@@ -3,12 +3,18 @@ import pprint
 import os
 
 import docker
+from docker.errors import DockerException
 import pytest
 
 
 def pytest_runtest_logreport(report):
     if report.failed:
-        client = docker.Client('unix://var/run/docker.sock', version="auto")
+        try;
+            client = docker.Client('unix://var/run/docker.sock', version="auto")
+        except DockerException as e:
+            raise pytest.UsageError(
+                    "Could not connect to a running docker socket: %s" % str(e))
+
         test_containers = client.containers(
             all=True,
             filters={"label": "ceph/daemon"})
@@ -168,7 +174,11 @@ def create_mon_container(client, container_tag):
 
 @pytest.fixture(scope='session')
 def client():
-    return docker.Client('unix://var/run/docker.sock', version="auto")
+    try:
+        return docker.Client('unix://var/run/docker.sock', version="auto")
+    except DockerException as e:
+        raise pytest.UsageError(
+                "Could not connect to a running docker socket: %s" % str(e))
 
 container_tags = [
     'ceph/daemon:tag-build-master-hammer-centos-7',
@@ -180,7 +190,6 @@ container_tags = [
     'ceph/daemon:tag-build-master-hammer-ubuntu-14.04',
     'ceph/daemon:tag-build-master-infernalis-ubuntu-14.04',
     'ceph/daemon:tag-build-master-jewel-ubuntu-14.04',
-    'ceph/daemon:tag-build-master-jewel-fedora-23',
     'ceph/daemon:tag-build-master-jewel-fedora-24'
 ]
 
