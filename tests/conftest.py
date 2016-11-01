@@ -35,6 +35,9 @@ def pull_image(image, client):
     This function will parse the result from docker-py and raise an exception
     if there is an error.
     """
+    # FIXME: this makes it really slow when re-running tests (about x5 slower).
+    # This function should check if it has already pulled in the last 10
+    # minutes, along with a way to override that (maybe with a flag?)
     response = client.pull(image)
     lines = [line for line in response.splitlines() if line]
 
