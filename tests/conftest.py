@@ -1,6 +1,7 @@
 import json
-import pprint
 import os
+import pprint
+import time
 
 import docker
 from docker.errors import DockerException
@@ -97,14 +98,20 @@ def start_container(client, container, container_network):
         teardown_container(client, container, container_network)
         raise
     else:
-        # this is non-ideal, we can't tell for sure when the container is really really up
-        # after the entry point script has run
-        import time;time.sleep(0.5)
+        start = time.time()
+        while time.time() - start < 0.5:
+            if 'SUCCESS\n' in client.logs(container):
+                return container
+
         if client.inspect_container(container)['State']['ExitCode'] > 0:
             print "[ERROR][setup] failed to setup container for %s" %  request.param
             for line in client.logs(container, stream=True):
                 print "[ERROR][setup]", line.strip('\n')
             raise RuntimeError()
+
+        # if it has been longer than 0.5s and the container didn't get
+        # a SUCCESS marker out and the `ExitCode` was 0 we can only assume this
+        # is good to be used
         return container
 
 
