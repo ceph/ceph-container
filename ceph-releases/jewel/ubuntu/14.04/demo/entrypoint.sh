@@ -16,6 +16,17 @@ CEPH_OPTS="--cluster ${CLUSTER}"
 
 
 # FUNCTIONS
+# Log arguments with timestamp
+function log {
+  if [ -z "$*" ]; then
+    return 1
+  fi
+
+  TIMESTAMP=$(date '+%F %T')
+  echo "${TIMESTAMP}  $0: $*"
+  return 0
+}
+
 function create_socket_dir {
   mkdir -p /var/run/ceph
   chown ceph. /var/run/ceph
@@ -27,12 +38,12 @@ function create_socket_dir {
 
 function bootstrap_mon {
   if [[ ! -n "$CEPH_PUBLIC_NETWORK" && ${NETWORK_AUTO_DETECT} -eq 0 ]]; then
-    echo "ERROR- CEPH_PUBLIC_NETWORK must be defined as the name of the network for the OSDs"
+    log "ERROR- CEPH_PUBLIC_NETWORK must be defined as the name of the network for the OSDs"
     exit 1
   fi
 
   if [[ ! -n "$MON_IP" && ${NETWORK_AUTO_DETECT} -eq 0 ]]; then
-    echo "ERROR- MON_IP must be defined as the IP address of the monitor"
+    log "ERROR- MON_IP must be defined as the IP address of the monitor"
     exit 1
   fi
 
@@ -63,7 +74,7 @@ function bootstrap_mon {
   fi
 
   if [[ -z "$MON_IP" || -z "$CEPH_PUBLIC_NETWORK" ]]; then
-    echo "ERROR- it looks like we have not been able to discover the network settings"
+    log "ERROR- it looks like we have not been able to discover the network settings"
     exit 1
   fi
 
@@ -109,17 +120,17 @@ ENDHERE
   if [ ! -e /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}/keyring ]; then
 
     if [ ! -e /etc/ceph/${CLUSTER}.client.admin.keyring ]; then
-      echo "ERROR- /etc/ceph/${CLUSTER}.client.admin.keyring must exist; get it from your existing mon"
+      log "ERROR- /etc/ceph/${CLUSTER}.client.admin.keyring must exist; get it from your existing mon"
       exit 2
     fi
 
     if [ ! -e /etc/ceph/${CLUSTER}.mon.keyring ]; then
-      echo "ERROR- /etc/ceph/${CLUSTER}.mon.keyring must exist.  You can extract it from your current monitor by running 'ceph ${CEPH_OPTS} auth get mon. -o /tmp/${CLUSTER}.mon.keyring'"
+      log "ERROR- /etc/ceph/${CLUSTER}.mon.keyring must exist.  You can extract it from your current monitor by running 'ceph ${CEPH_OPTS} auth get mon. -o /tmp/${CLUSTER}.mon.keyring'"
       exit 3
     fi
 
     if [ ! -e /etc/ceph/${CLUSTER}.monmap ]; then
-      echo "ERROR- /etc/ceph/${CLUSTER}.monmap must exist.  You can extract it from your current monitor by running 'ceph ${CEPH_OPTS} mon getmap -o /tmp/monmap'"
+      log "ERROR- /etc/ceph/${CLUSTER}.monmap must exist.  You can extract it from your current monitor by running 'ceph ${CEPH_OPTS} mon getmap -o /tmp/monmap'"
       exit 4
     fi
 
@@ -213,10 +224,10 @@ function bootstrap_rgw {
 function bootstrap_demo_user {
   if [ -n "$CEPH_DEMO_UID" ] && [ -n "$CEPH_DEMO_ACCESS_KEY" ] && [ -n "$CEPH_DEMO_SECRET_KEY" ]; then
     if [ -f /ceph-demo-user ]; then
-      echo "Demo user already exists with credentials:"
+      log "Demo user already exists with credentials:"
       cat /ceph-demo-user
     else
-      echo "Setting up a demo user..."
+      log "Setting up a demo user..."
       radosgw-admin user create --uid=$CEPH_DEMO_UID --display-name="Ceph demo user" --access-key=$CEPH_DEMO_ACCESS_KEY --secret-key=$CEPH_DEMO_SECRET_KEY
       sed -i s/AWS_ACCESS_KEY_PLACEHOLDER/$CEPH_DEMO_ACCESS_KEY/ /root/.s3cfg
       sed -i s/AWS_SECRET_KEY_PLACEHOLDER/$CEPH_DEMO_SECRET_KEY/ /root/.s3cfg
@@ -224,7 +235,7 @@ function bootstrap_demo_user {
       echo "Secret key: $CEPH_DEMO_SECRET_KEY" >> /ceph-demo-user
 
       if [ -n "$CEPH_DEMO_BUCKET" ]; then
-        echo "Creating bucket..."
+        log "Creating bucket..."
         s3cmd mb s3://$CEPH_DEMO_BUCKET
       fi
     fi
@@ -276,5 +287,5 @@ bootstrap_rgw
 bootstrap_demo_user
 bootstrap_rest_api
 bootstrap_nfs
-echo "SUCCESS"
+log "SUCCESS"
 exec ceph ${CEPH_OPTS} -w
