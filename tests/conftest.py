@@ -182,10 +182,24 @@ def create_mon_container(client, container_tag):
     return container, container_network
 
 
+def run(client):
+    def run_command(container_id, command):
+        created_command = client.exec_create(container_id, cmd=command)
+        result = client.exec_start(created_command)
+        exit_code = client.exec_inspect(created_command)['ExitCode']
+        if exit_code != 0:
+            msg = 'Non-zero exit code (%d) for command: %s' % (command, exit_status)
+            raise AssertionError(result), msg
+        return result
+    return run_command
+
+
 @pytest.fixture(scope='session')
 def client():
     try:
-        return docker.Client('unix://var/run/docker.sock', version="auto")
+        c = docker.Client('unix://var/run/docker.sock', version="auto")
+        c.run = run(c)
+        return c
     except DockerException as e:
         raise pytest.UsageError(
                 "Could not connect to a running docker socket: %s" % str(e))
