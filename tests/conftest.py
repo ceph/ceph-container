@@ -10,7 +10,7 @@ import pytest
 
 def pytest_runtest_logreport(report):
     if report.failed:
-        try;
+        try:
             client = docker.Client('unix://var/run/docker.sock', version="auto")
         except DockerException as e:
             raise pytest.UsageError(
