@@ -30,6 +30,12 @@ class TestAll(object):
         if client.exec_inspect(command)['ExitCode'] != 0:
             raise AssertionError(result)
 
+    def test_monmap_exists(self, mon_containers, client):
+        command = client.exec_create(mon_containers, cmd='stat /etc/ceph/monmap-ceph')
+        result = client.exec_start(command)
+        if client.exec_inspect(command)['ExitCode'] != 0:
+            raise AssertionError(result)
+
 
 class TestJewel(object):
 
@@ -40,12 +46,6 @@ class TestJewel(object):
             raise AssertionError(result)
         assert result.split()[2] == 'ceph'
 
-    def test_monmap_exists(self, jewel_containers, client):
-        command = client.exec_create(jewel_containers, cmd='stat /etc/ceph/ceph.monmap')
-        result = client.exec_start(command)
-        if client.exec_inspect(command)['ExitCode'] != 0:
-            raise AssertionError(result)
-
 
 class TestHammer(object):
 
@@ -55,9 +55,3 @@ class TestHammer(object):
         if client.exec_inspect(command)['ExitCode'] != 0:
             raise AssertionError(result)
         assert result.split()[2] == 'root'
-
-    def test_monmap_exists(self, hammer_containers, client):
-        command = client.exec_create(hammer_containers, cmd='stat /etc/ceph/monmap-ceph')
-        result = client.exec_start(command)
-        if client.exec_inspect(command)['ExitCode'] != 0:
-            raise AssertionError(result)
