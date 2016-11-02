@@ -255,89 +255,14 @@ def infernalis_containers(client, request):
 
 @pytest.fixture(scope='class', params=container_tags)
 def mon_containers(client, request):
-    # XXX there is lots of duplication here with the helpers, this needs to get
-    # cleaned up
+    # XXX these are using 'mon' names, we need to cleanup when
+    # adding tests for OSDs
     pull_image(request.param, client)
-    # These subnets and gateways are made up. It is *really* hard to come up
-    # with a sane gateway/subnet/IP to programmatically set it for the
-    # container(s)
-    subnet = '172.172.172.0/16'
+    remove_container(client, 'pytest_ceph_mon')
+    remove_container_network(client, 'pytest_monitor')
+    container, container_network = create_mon_container(client, request.param)
+    start_container(client, container, container_network)
 
-    # XXX This only generates a single IP, it is useful as-is because when this
-    # setup wants to create multiple containers it can easily get a range of
-    # IP's for the given subnet
-    container_ip = generate_ips('172.172.172.1', offset=1)[-1]
+    yield container
 
-    ipam_pool = docker.utils.create_ipam_pool(
-        subnet='172.172.172.0/16',
-        gateway='172.172.172.1'
-    )
-
-    ipam_config = docker.utils.create_ipam_config(
-        pool_configs=[ipam_pool]
-    )
-
-    # remove any existing test monitor container
-    for test_container in client.containers(all=True):
-        for name in test_container['Names']:
-            if 'pytest_ceph_mon' in name:
-                client.remove_container(container=test_container['Id'], force=True)
-
-    # now remove any network associated with the containers
-    for network in client.networks():
-        if network['Name'] == 'pytest_monitor':
-            client.remove_network(network['Id'])
-
-    # create the network for the monitor, using the bridge driver
-    container_network = client.create_network(
-        "pytest_monitor",
-        driver="bridge",
-        internal=True,
-        ipam=ipam_config
-    )
-
-    # now map it as part of the networking configuration
-    networking_config = client.create_networking_config({
-		'pytest_monitor': client.create_endpoint_config(ipv4_address=container_ip)
-	})
-
-    # "create" the container, which really doesn't create an actual image, it
-    # basically constructs the object needed to start one. This is a 2-step
-    # process (equivalent to 'docker run'). It also uses the
-    # `networking_config` and `container_network` created above. These are
-    # needed because the requirement for the Ceph containers is to know the IP
-    # and the subnet(s) beforehand.
-    container = client.create_container(
-        image=request.param,
-        name='pytest_ceph_mon',
-        environment={'CEPH_DAEMON': 'MON', 'MON_IP': container_ip, 'CEPH_PUBLIC_NETWORK': subnet},
-        detach=True,
-        networking_config=networking_config,
-        command='ceph/daemon mon'
-    )
-
-    def teardown():
-        client.remove_container(
-            container=container['Id'],
-            force=True
-        )
-        client.remove_network(container_network['Id'])
-
-    try:
-        client.start(container=container["Id"])
-    except Exception as err:
-        teardown()
-        raise
-    else:
-        # this is non-ideal, we can't tell for sure when the container is really really up
-        # after the entry point script has run
-        import time;time.sleep(0.5)
-        if client.inspect_container(container)['State']['ExitCode'] > 0:
-            print "[ERROR][setup] failed to setup container for %s" %  request.param
-            for line in client.logs(container, stream=True):
-                print "[ERROR][setup]", line.strip('\n')
-            raise RuntimeError()
-
-        yield container
-
-    teardown()
+    teardown_container(client, container, container_network)
