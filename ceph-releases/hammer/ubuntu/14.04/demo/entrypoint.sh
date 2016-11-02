@@ -80,7 +80,7 @@ ENDHERE
      ceph-authtool /etc/ceph/${CLUSTER}.mon.keyring --create-keyring --gen-key -n mon. --cap mon 'allow *'
 
      # Generate initial monitor map
-     monmaptool --create --add ${MON_NAME} ${MON_IP} --fsid ${fsid} /etc/ceph/${CLUSTER}.monmap
+     monmaptool --create --add ${MON_NAME} ${MON_IP} --fsid ${fsid} /etc/ceph/monmap-${CLUSTER}
   fi
 
   # If we don't have a monitor keyring, this is a new monitor
@@ -96,8 +96,8 @@ ENDHERE
         exit 3
      fi
 
-     if [ ! -e /etc/ceph/${CLUSTER}.monmap ]; then
-        echo "ERROR- /etc/ceph/${CLUSTER}.monmap must exist.  You can extract it from your current monitor by running 'ceph ${CEPH_OPTS} mon getmap -o /tmp/monmap'"
+     if [ ! -e /etc/ceph/monmap-${CLUSTER} ]; then
+        echo "ERROR- /etc/ceph/monmap-${CLUSTER} must exist.  You can extract it from your current monitor by running 'ceph ${CEPH_OPTS} mon getmap -o /tmp/monmap-${CLUSTER}'"
         exit 4
      fi
 
@@ -109,7 +109,7 @@ ENDHERE
      mkdir -p /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
 
      # Prepare the monitor daemon's directory with the map and keyring
-     ceph-mon ${CEPH_OPTS} --mkfs -i ${MON_NAME} --monmap /etc/ceph/${CLUSTER}.monmap --keyring /tmp/${CLUSTER}.mon.keyring
+     ceph-mon ${CEPH_OPTS} --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring
 
      # Clean up the temporary key
      rm /tmp/${CLUSTER}.mon.keyring
