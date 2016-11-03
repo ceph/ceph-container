@@ -3,10 +3,10 @@
 
 # FUNCTIONS
 function purge_ceph {
-  container_count=$(docker ps -q | wc -l)
+  containers_to_stop=$(docker ps -q)
 
-  if [[ "${container_count}" -gt 0 ]]; then
-    docker stop $(docker ps -q) || echo failed to stop containers
+  if [ "${containers_to_stop}" ]; then
+    docker stop ${containers_to_stop} || echo failed to stop containers
   fi
 
   rm -rf /var/lib/ceph/*
