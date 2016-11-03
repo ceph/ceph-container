@@ -1,0 +1,2 @@
+#!/bin/sh
+/usr/bin/docker run --rm --privileged=true -v /etc/ceph:/etc/ceph -v /dev:/dev ceph/base ceph-disk "$@"

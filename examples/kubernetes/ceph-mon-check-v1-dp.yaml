@@ -1,0 +1,64 @@
+---
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  labels:
+    app: ceph
+    daemon: moncheck
+  name: ceph-mon-check
+  namespace: ceph
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: ceph-mon
+      namespace: ceph
+      labels:
+        app: ceph
+        daemon: moncheck
+    spec:
+      serviceAccount: default
+      volumes:
+        - name: ceph-conf
+          secret:
+            secretName: ceph-conf-combined
+        - name: ceph-bootstrap-osd-keyring
+          secret:
+            secretName: ceph-bootstrap-osd-keyring
+        - name: ceph-bootstrap-mds-keyring
+          secret:
+            secretName: ceph-bootstrap-mds-keyring
+        - name: ceph-bootstrap-rgw-keyring
+          secret:
+            secretName: ceph-bootstrap-rgw-keyring
+      containers:
+        - name: ceph-mon
+          image: ceph/daemon:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 6789
+          env:
+            - name: CEPH_DAEMON
+              value: MON_HEALTH
+            - name: KV_TYPE
+              value: k8s
+            - name: MON_IP_AUTO_DETECT
+              value: "1"
+            - name: CLUSTER
+              value: ceph
+          volumeMounts:
+            - name: ceph-conf
+              mountPath: /etc/ceph
+            - name: ceph-bootstrap-osd-keyring
+              mountPath: /var/lib/ceph/bootstrap-osd
+            - name: ceph-bootstrap-mds-keyring
+              mountPath: /var/lib/ceph/bootstrap-mds
+            - name: ceph-bootstrap-rgw-keyring
+              mountPath: /var/lib/ceph/bootstrap-rgw
+          resources:
+            requests:
+              memory: "5Mi"
+              cpu: "250m"
+            limits:
+              memory: "50Mi"
+              cpu: "500m"

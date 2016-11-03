@@ -1,0 +1,95 @@
+---
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  labels:
+    app: ceph
+    daemon: mon
+  name: ceph-mon
+  namespace: ceph
+spec:
+  replicas: 3
+  template:
+    metadata:
+      name: ceph-mon
+      namespace: ceph
+      labels:
+        app: ceph
+        daemon: mon
+      annotations:
+        scheduler.alpha.kubernetes.io/affinity: >
+          {
+            "podAntiAffinity": {
+              "RequiredDuringSchedulingIgnoredDuringExecution": [{
+                "labelSelector": {
+                  "matchExpressions": [{
+                    "key": "daemon",
+                    "operator": "In",
+                    "values":["mon"]
+                  }]
+                },
+              "topologyKey": "kubernetes.io/hostname"
+              }]
+            }
+          }
+    spec:
+      serviceAccount: default
+      volumes:
+        - name: ceph-conf
+          secret:
+            secretName: ceph-conf-combined
+        - name: ceph-bootstrap-osd-keyring
+          secret:
+            secretName: ceph-bootstrap-osd-keyring
+        - name: ceph-bootstrap-mds-keyring
+          secret:
+            secretName: ceph-bootstrap-mds-keyring
+        - name: ceph-bootstrap-rgw-keyring
+          secret:
+            secretName: ceph-bootstrap-rgw-keyring
+      containers:
+        - name: ceph-mon
+          image: ceph/daemon:latest
+#          imagePullPolicy: Always
+          lifecycle:
+            preStop:
+                exec:
+                  # remove the mon on Pod stop.
+                  command:
+                    - "/remove-mon.sh"
+          ports:
+            - containerPort: 6789
+          env:
+            - name: CEPH_DAEMON
+              value: MON
+            - name: KV_TYPE
+              value: k8s
+            - name: NETWORK_AUTO_DETECT
+              value: "1"
+            - name: CLUSTER
+              value: ceph
+          volumeMounts:
+            - name: ceph-conf
+              mountPath: /etc/ceph
+            - name: ceph-bootstrap-osd-keyring
+              mountPath: /var/lib/ceph/bootstrap-osd
+            - name: ceph-bootstrap-mds-keyring
+              mountPath: /var/lib/ceph/bootstrap-mds
+            - name: ceph-bootstrap-rgw-keyring
+              mountPath: /var/lib/ceph/bootstrap-rgw
+          livenessProbe:
+              tcpSocket:
+                port: 6789
+              initialDelaySeconds: 60
+              timeoutSeconds: 5
+          readinessProbe:
+              tcpSocket:
+                port: 6789
+              timeoutSeconds: 5
+          resources:
+            requests:
+              memory: "50Mi"
+              cpu: "1000m"
+            limits:
+              memory: "100Mi"
+              cpu: "2000m"

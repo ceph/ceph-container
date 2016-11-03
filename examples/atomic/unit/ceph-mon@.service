@@ -1,0 +1,28 @@
+[Unit]
+Description=Ceph Monitor
+After=docker.service
+
+[Service]
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker stop %i
+ExecStartPre=-/usr/bin/docker rm %i
+ExecStartPre=/usr/bin/mkdir -p /etc/ceph /var/lib/ceph/mon
+ExecStart=/usr/bin/docker run --rm --name %p --net=host \
+   -v /var/lib/ceph:/var/lib/ceph \
+   -v /etc/ceph:/etc/ceph \
+   --privileged \
+   -e CEPH_DAEMON=MON \
+   -e MON_IP=192.168.33.10 \
+   -e CEPH_PUBLIC_NETWORK=192.168.33.0/24 \
+   -e MON_NAME=ceph-mon \
+   --name=ceph-mon \
+    ceph/daemon
+ExecStopPost=-/usr/bin/docker stop %i
+Restart=always
+RestartSec=10s
+TimeoutStartSec=120
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target
+

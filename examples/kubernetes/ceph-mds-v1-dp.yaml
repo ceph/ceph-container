@@ -1,0 +1,74 @@
+---
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  labels:
+    app: ceph
+    daemon: mds
+  name: ceph-mds
+  namespace: ceph
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: ceph-mds
+      namespace: ceph
+      labels:
+        app: ceph
+        daemon: mds
+    spec:
+      nodeSelector:
+        node-type: storage
+      serviceAccount: default
+      volumes:
+        - name: ceph-conf
+          secret:
+            secretName: ceph-conf-combined
+        - name: ceph-bootstrap-osd-keyring
+          secret:
+            secretName: ceph-bootstrap-osd-keyring
+        - name: ceph-bootstrap-mds-keyring
+          secret:
+            secretName: ceph-bootstrap-mds-keyring
+        - name: ceph-bootstrap-rgw-keyring
+          secret:
+            secretName: ceph-bootstrap-rgw-keyring
+      containers:
+        - name: ceph-mon
+          image: ceph/daemon:latest
+          ports:
+            - containerPort: 6800
+          env:
+            - name: CEPH_DAEMON
+              value: MDS
+            - name: CEPHFS_CREATE
+              value: "1"
+            - name: KV_TYPE
+              value: k8s
+            - name: CLUSTER
+              value: ceph
+          volumeMounts:
+            - name: ceph-conf
+              mountPath: /etc/ceph
+            - name: ceph-bootstrap-osd-keyring
+              mountPath: /var/lib/ceph/bootstrap-osd
+            - name: ceph-bootstrap-mds-keyring
+              mountPath: /var/lib/ceph/bootstrap-mds
+            - name: ceph-bootstrap-rgw-keyring
+              mountPath: /var/lib/ceph/bootstrap-rgw
+          livenessProbe:
+              tcpSocket:
+                port: 6800
+              initialDelaySeconds: 60
+              timeoutSeconds: 5
+          readinessProbe:
+              tcpSocket:
+                port: 6800
+              timeoutSeconds: 5
+          resources:
+            requests:
+              memory: "10Mi"
+              cpu: "250m"
+            limits:
+              memory: "50Mi"
+              cpu: "500m"
