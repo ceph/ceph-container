@@ -11,8 +11,7 @@ function get_mon_config {
   FSID=$(ceph-conf --lookup fsid -c /etc/ceph/ceph.conf)
 
   # Get the ceph mon pods (name and IP) from the Kubernetes API. Formatted as a set of monmap params
-  MONMAP_ADD=$(kubectl get pods --namespace=${CLUSTER} -l daemon=mon -o template --template="{{range .items}}--add {{.metadata.name}} {{.status.podIP}} {{end}}")
-
+  MONMAP_ADD=$(kubectl get pods --namespace=${CLUSTER} -l daemon=mon -o template --template="{{range .items}}{{if .status.podIP}}--add {{.metadata.name}} {{.status.podIP}} {{end}} {{end}}")
   # Create a monmap with the Pod Names and IP
   monmaptool --create ${MONMAP_ADD} --fsid ${FSID} /etc/ceph/monmap-${CLUSTER}
 
