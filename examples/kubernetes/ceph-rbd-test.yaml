@@ -1,7 +1,10 @@
 apiVersion: v1
 kind: Pod
 metadata:
+  labels:
+    test: rbd
   name: ceph-rbd-test
+  namespace: ceph
 spec:
   containers:
   - name: cephrbd-rw
