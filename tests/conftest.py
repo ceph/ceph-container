@@ -205,36 +205,17 @@ def client():
                 "Could not connect to a running docker socket: %s" % str(e))
 
 container_tags = [
-    'ceph/daemon:tag-build-master-hammer-centos-7',
     'ceph/daemon:tag-build-master-infernalis-centos-7',
     'ceph/daemon:tag-build-master-jewel-centos-7',
-    'ceph/daemon:tag-build-master-hammer-ubuntu-16.04',
     'ceph/daemon:tag-build-master-infernalis-ubuntu-16.04',
     'ceph/daemon:tag-build-master-jewel-ubuntu-16.04',
-    'ceph/daemon:tag-build-master-hammer-ubuntu-14.04',
     'ceph/daemon:tag-build-master-infernalis-ubuntu-14.04',
     'ceph/daemon:tag-build-master-jewel-ubuntu-14.04',
     'ceph/daemon:tag-build-master-jewel-fedora-24'
 ]
 
-hammer_tags = [t for t in container_tags if 'hammer' in t]
 jewel_tags = [t for t in container_tags if 'jewel' in t]
 infernalis_tags = [t for t in container_tags if 'infernalis' in t]
-
-
-@pytest.fixture(scope='class', params=hammer_tags)
-def hammer_containers(client, request):
-    # XXX these are using 'mon' names, we need to cleanup when
-    # adding tests for OSDs
-    pull_image(request.param, client)
-    remove_container(client, 'pytest_ceph_mon')
-    remove_container_network(client, 'pytest_monitor')
-    container, container_network = create_mon_container(client, request.param)
-    start_container(client, container, container_network)
-
-    yield container
-
-    teardown_container(client, container, container_network)
 
 
 @pytest.fixture(scope='class', params=jewel_tags)

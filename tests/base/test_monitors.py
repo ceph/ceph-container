@@ -45,13 +45,3 @@ class TestJewel(object):
         if client.exec_inspect(command)['ExitCode'] != 0:
             raise AssertionError(result)
         assert result.split()[2] == 'ceph'
-
-
-class TestHammer(object):
-
-    def test_socket_dir_is_owned_by_root(self, hammer_containers, client):
-        command = client.exec_create(hammer_containers, cmd='ls -ld /var/run/ceph')
-        result = client.exec_start(command)
-        if client.exec_inspect(command)['ExitCode'] != 0:
-            raise AssertionError(result)
-        assert result.split()[2] == 'root'
