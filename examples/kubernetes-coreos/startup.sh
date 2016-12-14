@@ -1,5 +1,5 @@
 #!/bin/sh
-#  borrowed from ceph-docker/exmample/coreos/tools
+#  borrowed from ceph-docker/examples/coreos/tools
 set -e
 
 checksum()
