@@ -1,0 +1,1 @@
+../../../../jewel/ubuntu/14.04/base/entrypoint.sh
