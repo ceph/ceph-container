@@ -50,7 +50,7 @@ spec:
             - name: KV_TYPE
               value: k8s
             - name: NETWORK_AUTO_DETECT
-              value: "1"
+              value: "4"
             - name: CLUSTER
               value: ceph
           volumeMounts:
