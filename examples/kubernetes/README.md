@@ -173,7 +173,13 @@ First you must add the admin client key to your current namespace (or the namesp
 kubectl create secret generic ceph-client-key --from-file=./generator/ceph-client-key
 ```
 
-Now, if skyDNS is set as a resolver for your host nodes:
+Make sure to label at least one of your nodes as a `ceph-client` node:
+
+```
+kubectl label node ${CEPH_CLIENT_NODE} node-type=ceph-client
+```
+
+Now, if skyDNS is set as a resolver for your host nodes then execute the below command as is. Otherwise modify the `ceph-mon.ceph` host to match the IP address of one of your ceph-mon pods.
 
 ```
 kubectl create -f ceph-cephfs-test.yaml --namespace=ceph
@@ -196,6 +202,12 @@ export PODNAME=`kubectl get pods --selector="app=ceph,daemon=mon" --output=templ
 kubectl exec -it $PODNAME --namespace=ceph -- rbd create ceph-rbd-test --size 20G
 
 kubectl exec -it $PODNAME --namespace=ceph -- rbd info ceph-rbd-test
+```
+
+Make sure to label at least one of your nodes as a `ceph-client` node just like the CephFS example above:
+
+```
+kubectl label node ${CEPH_CLIENT_NODE} node-type=ceph-client
 ```
 
 The same caveats apply for RBDs as Ceph FS volumes. Edit the pod accordingly. Once you're set:
