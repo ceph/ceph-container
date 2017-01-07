@@ -4,7 +4,7 @@ apiVersion: extensions/v1beta1
 metadata:
   labels:
     app: ceph
-    daemon: rgw 
+    daemon: rgw
   name: ceph-rgw
   namespace: ceph
 spec:
