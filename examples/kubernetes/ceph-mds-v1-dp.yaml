@@ -34,7 +34,7 @@ spec:
           secret:
             secretName: ceph-bootstrap-rgw-keyring
       containers:
-        - name: ceph-mon
+        - name: ceph-mds
           image: ceph/daemon:latest
           ports:
             - containerPort: 6800

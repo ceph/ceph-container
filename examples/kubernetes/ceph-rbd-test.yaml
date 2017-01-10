@@ -6,6 +6,8 @@ metadata:
   name: ceph-rbd-test
   namespace: ceph
 spec:
+  nodeSelector:
+    node-type: ceph-client
   containers:
   - name: cephrbd-rw
     image: busybox

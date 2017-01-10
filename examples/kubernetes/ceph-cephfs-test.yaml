@@ -6,6 +6,8 @@ metadata:
   name: ceph-cephfs-test
   namespace: ceph
 spec:
+  nodeSelector:
+    node-type: ceph-client
   containers:
   - name: cephfs-rw
     image: busybox
