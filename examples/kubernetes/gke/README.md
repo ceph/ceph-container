@@ -782,7 +782,78 @@ Hello PVC World!
 
 And that shows we've set up an RBD persistent volume claim with static provisioning that can be consumed by a pod!
 
-#### Ceph Filesystem (TBD)
+#### Ceph Filesystem (CephFS)
+
+We will be using the same MON_POD_IP and ceph-admin-secret that were created above so make sure these are set before continuing.
+
+Using the same `${MON_POD_IP}` we set earlier issue the command:
+
+```
+sed -i "s/ceph-mon.ceph/${MON_POD_IP}/" cephfs-pv.yaml
+```
+
+Create the persistent volume and check its status:
+
+```
+→ kubectl create -f cephfs-pv.yaml
+persistentvolume "cephfs-pv" created
+→ kubectl get pv
+NAME      CAPACITY   ACCESSMODES   RECLAIMPOLICY   STATUS      CLAIM                REASON    AGE
+ceph-pv   10Gi       RWO           Recycle         Bound       ceph/ceph-pv-claim             4m
+cephfs-pv 10Gi       RWX           Recycle         Available                                  8s
+```
+
+Next we create the persistent volume claim:
+
+```
+→ kubectl create -f cephfs-pv-claim.yaml
+persistentvolumeclaim "cephfs-pv-claim" created
+→ kubectl get pvc
+NAME              STATUS    VOLUME      CAPACITY   ACCESSMODES   AGE
+ceph-pv-claim     Bound     ceph-pv     10Gi       RWO           4m
+cephfs-pv-claim   Bound     cephfs-pv   10Gi       RWX           9s
+```
+
+Lastly, we create a test pod to utilize the persistent volume claim. This test pod still uses the `node-type: ceph-client` `nodeSelector` so that we target the `ceph-client` node i.e. the one we were able to install the necessary CephFS utilities on.
+
+```
+→ kubectl create -f cephfs-pvc-pod.yaml
+pod "cephfs-pv-pod1" created
+→ kubectl get pod -l test=cephfs-pvc-pod -o wide --watch
+NAME             READY     STATUS              RESTARTS   AGE       IP        NODE
+cephfs-pv-pod1   0/1       ContainerCreating   0          5s        <none>    gke-kube-ceph-cluster-ceph-client-57758f2d-nkv7
+NAME             READY     STATUS    RESTARTS   AGE       IP          NODE
+cephfs-pv-pod1   1/1       Running   0          6s        10.0.10.7   gke-kube-ceph-cluster-ceph-client-57758f2d-nkv7
+```
+Once the pod is running we can display the CephFS PVC mount:
+
+```
+→ kubectl exec -it cephfs-pv-pod1 -- df -hT
+Filesystem           Type            Size      Used Available Use% Mounted on
+none                 aufs           98.3G      3.6G     90.5G   4% /
+tmpfs                tmpfs           3.7G         0      3.7G   0% /dev
+tmpfs                tmpfs           3.7G         0      3.7G   0% /sys/fs/cgroup
+/dev/sda1            ext4           98.3G      3.6G     90.5G   4% /dev/termination-log
+10.0.3.3:6789:/      ceph          659.7G     58.9G    600.8G   9% /mnt/cephfs-pvc
+tmpfs                tmpfs           3.7G     12.0K      3.7G   0% /var/run/secrets/kubernetes.io/serviceaccount
+/dev/sda1            ext4           98.3G      3.6G     90.5G   4% /etc/resolv.conf
+/dev/sda1            ext4           98.3G      3.6G     90.5G   4% /etc/hostname
+/dev/sda1            ext4           98.3G      3.6G     90.5G   4% /etc/hosts
+shm                  tmpfs          64.0M         0     64.0M   0% /dev/shm
+tmpfs                tmpfs           3.7G         0      3.7G   0% /proc/kcore
+tmpfs                tmpfs           3.7G         0      3.7G   0% /proc/timer_stats
+tmpfs                tmpfs           3.7G         0      3.7G   0% /proc/sched_debug
+```
+
+Make sure we can do a simple test to write a test file and then read it back:
+
+```
+→ kubectl exec -it cephfs-pv-pod1 -- sh -c "echo Hello cephfs PVC World! > /mnt/cephfs-pvc/testfile.txt"
+→ kubectl exec -it cephfs-pv-pod1 -- cat /mnt/cephfs-pvc/testfile.txt
+Hello cephfs PVC World!
+```
+
+And that shows we've set up an CephFS persistent volume claim with static provisioning that can be consumed by a pod!
 
 ### Persistent Volume Claim with Dynamic Provisioning (TBD)
 
