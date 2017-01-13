@@ -1,5 +1,7 @@
 #!/bin/bash -ex
 
+set -ex
+
 # Proxy script from tox. This is an intermediate script so that we can setup
 # the environment properly then call ceph-ansible for testing, and finally tear
 # down, while keeping tox features of simplicity and combinatorial confgiruation.
