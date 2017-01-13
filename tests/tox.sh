@@ -15,6 +15,7 @@ set -ex
 # it means we are tied to an apt-get distro
 sudo apt-get install -y --force-yes docker.io
 sudo apt-get install -y --force-yes xfsprogs
+rm -rf "$WORKSPACE"/ceph-ansible || true
 git clone -b $CEPH_ANSIBLE_BRANCH --single-branch https://github.com/ceph/ceph-ansible.git ceph-ansible
 pip install -r $TOXINIDIR/ceph-ansible/tests/requirements.txt
 
