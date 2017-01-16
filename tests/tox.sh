@@ -39,7 +39,10 @@ bash "$WORKSPACE"/travis-builds/build_imgs.sh
 docker run -d -p 5000:5000 --restart=always --name registry registry:2
 # add the image we just built to the registry
 docker tag ceph/daemon localhost:5000/ceph/daemon
-docker push localhost:5000/ceph/daemon > /dev/null ; test ${PIPESTATUS[0]} -eq 0
+# this avoids a race condition between the tagging and the push
+# which causes this to sometimes fail when run by jenkins
+sleep 1
+docker --debug push localhost:5000/ceph/daemon
 
 # test
 #################################################################################
