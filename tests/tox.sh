@@ -1,5 +1,7 @@
 #!/bin/bash -ex
 
+set -ex
+
 # Proxy script from tox. This is an intermediate script so that we can setup
 # the environment properly then call ceph-ansible for testing, and finally tear
 # down, while keeping tox features of simplicity and combinatorial confgiruation.
@@ -13,6 +15,7 @@
 # it means we are tied to an apt-get distro
 sudo apt-get install -y --force-yes docker.io
 sudo apt-get install -y --force-yes xfsprogs
+rm -rf "$WORKSPACE"/ceph-ansible || true
 git clone -b $CEPH_ANSIBLE_BRANCH --single-branch https://github.com/ceph/ceph-ansible.git ceph-ansible
 pip install -r $TOXINIDIR/ceph-ansible/tests/requirements.txt
 
@@ -32,6 +35,15 @@ fi
 
 bash "$WORKSPACE"/travis-builds/build_imgs.sh
 
+# start a local docker registry
+docker run -d -p 5000:5000 --restart=always --name registry registry:2
+# add the image we just built to the registry
+docker tag ceph/daemon localhost:5000/ceph/daemon
+# this avoids a race condition between the tagging and the push
+# which causes this to sometimes fail when run by jenkins
+sleep 1
+docker --debug push localhost:5000/ceph/daemon
+
 # test
 #################################################################################
 
@@ -46,7 +58,10 @@ bash $TOXINIDIR/ceph-ansible/tests/scripts/generate_ssh_config.sh $CEPH_ANSIBLE_
 
 export ANSIBLE_SSH_ARGS="-F $CEPH_ANSIBLE_SCENARIO_PATH/vagrant_ssh_config"
 
-ansible-playbook -vv -i $CEPH_ANSIBLE_SCENARIO_PATH/hosts $TOXINIDIR/ceph-ansible/site-docker.yml.sample --extra-vars="ceph_docker_dev_image=true fetch_directory=$CEPH_ANSIBLE_SCENARIO_PATH/fetch"
+
+# runs a playbook to configure nodes for testing
+ansible-playbook -vv -i $CEPH_ANSIBLE_SCENARIO_PATH/hosts $TOXINIDIR/tests/setup.yml
+ansible-playbook -vv -i $CEPH_ANSIBLE_SCENARIO_PATH/hosts $TOXINIDIR/ceph-ansible/site-docker.yml.sample --extra-vars="ceph_docker_registry=$REGISTRY_ADDRESS fetch_directory=$CEPH_ANSIBLE_SCENARIO_PATH/fetch"
 
 ansible-playbook -vv -i $CEPH_ANSIBLE_SCENARIO_PATH/hosts $TOXINIDIR/ceph-ansible/tests/functional/setup.yml
 

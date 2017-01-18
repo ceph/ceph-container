@@ -1,0 +1,19 @@
+---
+
+- hosts: all
+  gather_facts: true
+  tasks :
+    - name: allow nodes to use an insecure registry
+      become: yes
+      blockinfile:
+        dest: /etc/sysconfig/docker
+        block: |
+          INSECURE_REGISTRY='--insecure-registry {{ public_network }}'
+          BLOCK_REGISTRY='--block-registry docker.io'
+        marker: "# {mark} ANSIBLE MANAGED BLOCK" 
+
+    - name: restart docker
+      become: yes
+      service:
+        name: docker
+        state: restarted
