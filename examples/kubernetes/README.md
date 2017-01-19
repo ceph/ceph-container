@@ -2,6 +2,10 @@
 
 This Guide will take you through the process of deploying a Ceph cluster on to a Kubernetes cluster.
 
+## WARNING
+
+This example does not survive Kubernetes cluster restart! The Monitors need persistent storage. This is not covered here.
+
 ## Client Requirements
 
 In addition to kubectl, Sigil is required for template handling and must be installed in your system PATH. Instructions can be found here: <https://github.com/gliderlabs/sigil>
