@@ -3,19 +3,19 @@ kind: Pod
 metadata:
   labels:
     test: rbd-pvc-pod
-  name: ceph-pv-pod1
+  name: ceph-rbd-pv-pod1
 spec:
   nodeSelector:
-    node-type: ceph-client
+    node-type: storage
   containers:
-  - name: ceph-pv-busybox
+  - name: ceph-rbd-pv-busybox
     image: busybox
     command: ["sleep", "60000"]
     volumeMounts:
-    - name: ceph-vol1
-      mountPath: /var/lib/busybox
+    - name: ceph-rbd-vol1
+      mountPath: /mnt/ceph-rbd-pvc
       readOnly: false
   volumes:
-  - name: ceph-vol1
+  - name: ceph-rbd-vol1
     persistentVolumeClaim:
-      claimName: ceph-pv-claim
+      claimName: ceph-rbd-pv-claim

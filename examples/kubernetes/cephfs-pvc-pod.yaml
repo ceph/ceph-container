@@ -6,7 +6,7 @@ metadata:
   name: cephfs-pv-pod1
 spec:
   nodeSelector:
-    node-type: ceph-client
+    node-type: storage
   containers:
   - name: cephfs-pv-busybox
     image: busybox

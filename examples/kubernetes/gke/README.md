@@ -543,6 +543,12 @@ We then modify `ceph-cephfs-test.yaml` to use this ceph-mon pod IP address:
 sed -i "s/ceph-mon.ceph/${MON_POD_IP}/" ceph-cephfs-test.yaml
 ```
 
+Also modify the `node-type` to use `ceph-client`:
+
+```
+sed -i 's/node-type: storage/node-type: ceph-client/' ceph-cephfs-test.yaml
+```
+
 We're now ready to create the cephfs test:
 
 ```
@@ -608,6 +614,12 @@ The same caveats apply for RBDs as Ceph FS volumes so we edit the pod IP accordi
 
 ```
 sed -i "s/ceph-mon.ceph/${MON_POD_IP}/" ceph-rbd-test.yaml
+```
+
+Then modify the `node-type` to use `ceph-client`:
+
+```
+sed -i 's/node-type: storage/node-type: ceph-client/' ceph-rbd-test.yaml
 ```
 
 Once you're set just create the resource and check its status:
@@ -744,24 +756,24 @@ Lastly, we create a test pod to utilize the persistent volume claim. This test p
 
 ```
 → kubectl create -f rbd-pvc-pod.yaml
-pod "ceph-pv-pod1" created
+pod "ceph-rbd-pv-pod1" created
 → kubectl get pod -l test=rbd-pvc-pod -o wide --watch
 NAME           READY     STATUS              RESTARTS   AGE       IP        NODE
-ceph-pv-pod1   0/1       ContainerCreating   0          5s        <none>    gke-kube-ceph-cluster-ceph-client-57758f2d-nkv7
+ceph-rbd-pv-pod1   0/1       ContainerCreating   0          5s        <none>    gke-kube-ceph-cluster-ceph-client-57758f2d-nkv7
 NAME           READY     STATUS    RESTARTS   AGE       IP          NODE
-ceph-pv-pod1   1/1       Running   0          6s        10.0.10.5   gke-kube-ceph-cluster-ceph-client-57758f2d-nkv7
+ceph-rbd-pv-pod1   1/1       Running   0          6s        10.0.10.5   gke-kube-ceph-cluster-ceph-client-57758f2d-nkv7
 ```
 
 Once the pod is running we can display the RBD PVC mount with 10G free:
 
 ```
-→ kubectl exec ceph-pv-pod1 -- df -hT
+→ kubectl exec ceph-rbd-pv-pod1 -- df -hT
 Filesystem           Type            Size      Used Available Use% Mounted on
 none                 aufs           98.3G      3.4G     90.8G   4% /
 tmpfs                tmpfs           3.7G         0      3.7G   0% /dev
 tmpfs                tmpfs           3.7G         0      3.7G   0% /sys/fs/cgroup
 /dev/sda1            ext4           98.3G      3.4G     90.8G   4% /dev/termination-log
-/dev/rbd1            ext4            9.7G     22.5M      9.2G   0% /var/lib/busybox
+/dev/rbd1            ext4            9.7G     22.5M      9.2G   0% /mnt/ceph-rbd-pvc
 tmpfs                tmpfs           3.7G     12.0K      3.7G   0% /var/run/secrets/kubernetes.io/serviceaccount
 /dev/sda1            ext4           98.3G      3.4G     90.8G   4% /etc/resolv.conf
 /dev/sda1            ext4           98.3G      3.4G     90.8G   4% /etc/hostname
@@ -775,9 +787,9 @@ tmpfs                tmpfs           3.7G         0      3.7G   0% /proc/sched_d
 Make sure we can do a simple test to write a test file and then read it back:
 
 ```
-→ kubectl exec ceph-pv-pod1 -- sh -c "echo Hello PVC World! > /var/lib/busybox/testfile.txt"
-→ kubectl exec ceph-pv-pod1 -- cat /var/lib/busybox/testfile.txt
-Hello PVC World!
+→ kubectl exec ceph-rbd-pv-pod1 -- sh -c "echo Hello RBD PVC World! > /mnt/ceph-rbd-pvc/testfile.txt"
+→ kubectl exec ceph-rbd-pv-pod1 -- cat /mnt/ceph-rbd-pvc/testfile.txt
+Hello RBD PVC World!
 ```
 
 And that shows we've set up an RBD persistent volume claim with static provisioning that can be consumed by a pod!
