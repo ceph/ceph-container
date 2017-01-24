@@ -10,7 +10,8 @@ conn = boto.connect_s3(
         aws_access_key_id = access_key,
         aws_secret_access_key = secret_key,
         host = '0.0.0.0',
-        is_secure=False,       # uncomment or set to True if you are using ssl
+        port = None,     # Leave as None to use default port 80 or 443
+        is_secure=False, # comment out or set to True if you are using ssl
         calling_format = boto.s3.connection.OrdinaryCallingFormat(),
         )
 
@@ -35,9 +36,9 @@ plans_key = bucket.get_key('secret_plans.txt')
 plans_key.set_canned_acl('private')
 
 hello_key = bucket.get_key('hello.txt')
-hello_url = hello_key.generate_url(0, query_auth=False, force_http=True)
+hello_url = hello_key.generate_url(0, query_auth=False, force_http=False)
 print hello_url
 
 plans_key = bucket.get_key('secret_plans.txt')
-plans_url = plans_key.generate_url(3600, query_auth=True, force_http=True)
+plans_url = plans_key.generate_url(3600, query_auth=True, force_http=False)
 print plans_url

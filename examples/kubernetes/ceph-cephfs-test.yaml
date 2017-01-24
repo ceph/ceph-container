@@ -7,7 +7,7 @@ metadata:
   namespace: ceph
 spec:
   nodeSelector:
-    node-type: ceph-client
+    node-type: storage
   containers:
   - name: cephfs-rw
     image: busybox
