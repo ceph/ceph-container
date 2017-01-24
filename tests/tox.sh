@@ -33,6 +33,13 @@ if [ "${containers_to_remove}" ]; then
     docker rm -f $@ ${containers_to_remove} || echo failed to remove containers
 fi
 
+# copy the files to the root for the
+# types of images we're going to build
+mkdir -p {base,daemon,demo}
+cp -Lrv ceph-releases/$CEPH_RELEASE/$IMAGE_DISTRO/base/* base
+cp -Lrv ceph-releases/$CEPH_RELEASE/$IMAGE_DISTRO/daemon/* daemon
+cp -Lrv ceph-releases/$CEPH_RELEASE/$IMAGE_DISTRO/demo/* demo
+
 bash "$WORKSPACE"/travis-builds/build_imgs.sh
 
 # start a local docker registry
