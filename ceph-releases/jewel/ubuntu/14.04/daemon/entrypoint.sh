@@ -944,7 +944,7 @@ function zap_device {
       exit 1
     fi
     # if the disk passed is a raw device AND the boot system disk
-    if echo $device | egrep -sq '/dev/([hsv]d[a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}$' && parted -s $(echo $device | egrep -o '/dev/([hsv]d[a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}') print | grep -sq boot; then
+    if echo $device | egrep -sq '/dev/([hsvx][vd][a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}$' && parted -s $(echo $device | egrep -o '/dev/([hsvx][vd][a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}') print | grep -sq boot; then
       log "Looks like $device has a boot partition,"
       log "if you want to delete specific partitions point to the partition instead of the raw device"
       log "Do not use your system disk!"
@@ -953,8 +953,8 @@ function zap_device {
   done
 
   for device in $(echo ${OSD_DEVICE} | tr "," " "); do
-    raw_device=$(echo $device | egrep -o '/dev/([hsv]d[a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}')
-    if echo $device | egrep -sq '/dev/([hsv]d[a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}$'; then
+    raw_device=$(echo $device | egrep -o '/dev/([hsvx][vd][a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}')
+    if echo $device | egrep -sq '/dev/([hsvx][vd][a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}$'; then
       log "Zapping the entire device $device"
       sgdisk --zap-all --clear --mbrtogpt -g -- $device
     else
