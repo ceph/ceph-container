@@ -9,4 +9,4 @@ kubectl create \
 -f ceph-mon-v1-dp.yaml \
 -f ceph-mon-check-v1-dp.yaml \
 -f ceph-osd-v1-ds.yaml \
---namespace=ceph --validate=false
+--namespace=ceph
