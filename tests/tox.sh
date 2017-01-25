@@ -36,7 +36,8 @@ fi
 # copy the files to the root for the
 # types of images we're going to build
 mkdir -p {base,daemon,demo}
-cp -Lrv ceph-releases/$CEPH_RELEASE/$IMAGE_DISTRO/base/* base
+# starting with kraken, the base image does not exist
+cp -Lrv ceph-releases/$CEPH_RELEASE/$IMAGE_DISTRO/base/* base || true
 cp -Lrv ceph-releases/$CEPH_RELEASE/$IMAGE_DISTRO/daemon/* daemon
 cp -Lrv ceph-releases/$CEPH_RELEASE/$IMAGE_DISTRO/demo/* demo
 
