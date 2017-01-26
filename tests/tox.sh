@@ -39,7 +39,7 @@ mkdir -p {base,daemon,demo}
 # starting with kraken, the base image does not exist
 cp -Lrv ceph-releases/$CEPH_RELEASE/$IMAGE_DISTRO/base/* base || true
 cp -Lrv ceph-releases/$CEPH_RELEASE/$IMAGE_DISTRO/daemon/* daemon
-cp -Lrv ceph-releases/$CEPH_RELEASE/$IMAGE_DISTRO/demo/* demo
+cp -Lrv ceph-releases/$CEPH_RELEASE/$IMAGE_DISTRO/demo/* demo || true
 
 bash "$WORKSPACE"/travis-builds/build_imgs.sh
 
