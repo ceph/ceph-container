@@ -1,1 +1,3 @@
-../../14.04/daemon/remove-mon.sh
+#!/bin/bash
+
+ceph mon remove $(hostname -s)
