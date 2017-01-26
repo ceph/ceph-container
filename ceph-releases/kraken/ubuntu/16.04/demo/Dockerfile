@@ -4,7 +4,7 @@
 #
 # VERSION 0.0.1
 
-FROM ceph/base:tag-build-master-kraken-ubuntu-16.04
+FROM ceph/daemon:tag-build-master-kraken-ubuntu-16.04
 MAINTAINER Sébastien Han "seb@redhat.com"
 
 # Add bootstrap script

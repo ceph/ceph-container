@@ -4,7 +4,7 @@
 #
 # VERSION 0.0.1
 
-FROM ceph/base:tag-build-master-kraken-centos-7
+FROM ceph/daemon:tag-build-master-kraken-centos-7
 MAINTAINER Sébastien Han "seb@redhat.com"
 
 # Add bootstrap script
