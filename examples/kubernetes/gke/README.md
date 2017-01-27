@@ -125,15 +125,6 @@ export global_osd_pool_default_pg_num=64
 export global_osd_pool_default_pgp_num=64
 ```
 
-### Configure kubectl to use the ceph namespace in current GKE context
-
-After setting the current context's namespace, all subsequent comands will default to the `ceph` namespace. So let's do that now:
-
-```
-→ kubectl config set-context gke_kube-ceph-cluster_us-west1-a_kube-ceph-cluster --namespace ceph
-Context "gke_kube-ceph-cluster_us-west1-a_kube-ceph-cluster" set.
-```
-
 ### Generate Ceph Kubernetes keys and configuration
 
 Run the following command to generate the required configuration and keys. This will also create a Kubernetes `ceph` namespace, then create secrets in that namespace using the generated configuration and keys.
@@ -143,6 +134,15 @@ Run the following command to generate the required configuration and keys. This 
 ```
 
 Please note that you should save the output files of this command. Future invocations of scripts will overwrite existing keys and configuration. If you lose these files they can still be retrieved from Kubernetes via `kubectl get secret`.
+
+### Configure kubectl to use the ceph namespace in current GKE context
+
+After setting the current context's namespace, all subsequent comands will default to the `ceph` namespace. So let's do that now:
+
+```
+→ kubectl config set-context gke_kube-ceph-cluster_us-west1-a_kube-ceph-cluster --namespace ceph
+Context "gke_kube-ceph-cluster_us-west1-a_kube-ceph-cluster" set.
+```
 
 ### Deploy Ceph Components
 
