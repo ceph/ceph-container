@@ -146,15 +146,6 @@ export global_osd_pool_default_pg_num=32
 export global_osd_pool_default_pgp_num=32
 ```
 
-### Configure kubectl to use the ceph namespace in current default-context
-
-After setting the current context's namespace, all subsequent comands will default to the `ceph` namespace. So let's do that now:
-
-```
-→ kubectl config set-context default-context --namespace ceph
-Context "default-context" set.
-```
-
 ### Generate Ceph Kubernetes keys and configuration
 
 Run the following command to generate the required configuration and keys. This will create a Kubernetes `ceph` namespace, then create secrets in that namespace using the generated configuration and keys.
@@ -164,6 +155,15 @@ Run the following command to generate the required configuration and keys. This 
 ```
 
 Please note that you should save the output files of this command. Future invocations of scripts will overwrite existing keys and configuration. If you lose these files they can still be retrieved from Kubernetes via `kubectl get secret`.
+
+### Configure kubectl to use the ceph namespace in current default-context
+
+After setting the current context's namespace, all subsequent comands will default to the `ceph` namespace. So let's do that now:
+
+```
+→ kubectl config set-context default-context --namespace ceph
+Context "default-context" set.
+```
 
 ### Deploy Ceph Components
 
@@ -546,7 +546,7 @@ ceph-cephfs-test   1/1       Running   0          6s        10.200.4.5   worker4
 Once the pod is up and running you should be able to see the filesystem mounted as a `ceph` filesystem type:
 
 ```
-→ kubectl exec -it --namespace=ceph ceph-cephfs-test -- df -hT | grep ceph
+→ kubectl exec ceph-cephfs-test -- df -hT | grep ceph
 10.200.2.4:6789:/    ceph            1.3T     54.7G      1.3T   4% /mnt/cephfs
 ```
 
@@ -555,8 +555,8 @@ Once the pod is up and running you should be able to see the filesystem mounted 
 A simple test we can perform is to write a test file and then read it back:
 
 ```
-→ kubectl exec -it ceph-cephfs-test -- sh -c "echo Hello CephFS World! > /mnt/cephfs/testfile.txt"
-→ kubectl exec -it ceph-cephfs-test -- cat /mnt/cephfs/testfile.txt
+→ kubectl exec ceph-cephfs-test -- sh -c "echo Hello CephFS World! > /mnt/cephfs/testfile.txt"
+→ kubectl exec ceph-cephfs-test -- cat /mnt/cephfs/testfile.txt
 Hello CephFS World!
 ```
 
@@ -565,8 +565,8 @@ Hello CephFS World!
 First we have to create an RBD volume. We already have a Ceph Monitor pod name assigned to the `MON_POD_NAME` variable from previously so we'll re-use it:
 
 ```
-→ kubectl exec -it ${MON_POD_NAME} -- rbd create ceph-rbd-test --size 20G
-→ kubectl exec -it ${MON_POD_NAME} -- rbd info ceph-rbd-test
+→ kubectl exec ${MON_POD_NAME} -- rbd create ceph-rbd-test --size 20G
+→ kubectl exec ${MON_POD_NAME} -- rbd info ceph-rbd-test
 rbd image 'ceph-rbd-test':
         size 20480 MB in 5120 objects
         order 22 (4096 kB objects)
@@ -606,8 +606,8 @@ Again you should see your `ext4` RBD mount, but with 20 GB size:
 We can do the same simple test to write a test file and then read it back:
 
 ```
-→ kubectl exec -it ceph-rbd-test -- sh -c "echo Hello Ceph RBD World! > /mnt/cephrbd/testfile.txt"
-→ kubectl exec -it ceph-rbd-test -- cat /mnt/cephrbd/testfile.txt
+→ kubectl exec ceph-rbd-test -- sh -c "echo Hello Ceph RBD World! > /mnt/cephrbd/testfile.txt"
+→ kubectl exec ceph-rbd-test -- cat /mnt/cephrbd/testfile.txt
 Hello Ceph RBD World!
 ```
 
@@ -793,15 +793,15 @@ cephfs-pv-pod1   1/1       Running   0          3s        10.200.9.4   worker9
 Once the pod is running we can display the CephFS PVC mount:
 
 ```
-→ kubectl exec -it cephfs-pv-pod1 -- df -hT | grep ceph
+→ kubectl exec cephfs-pv-pod1 -- df -hT | grep ceph
 10.200.2.4:6789:/    ceph            1.3T     55.5G      1.3T   4% /mnt/cephfs-pvc
 ```
 
 Make sure we can do a simple test to write a test file and then read it back:
 
 ```
-→ kubectl exec -it cephfs-pv-pod1 -- sh -c "echo Hello CephFS PVC World! > /mnt/cephfs-pvc/testfile.txt"
-→ kubectl exec -it cephfs-pv-pod1 -- cat /mnt/cephfs-pvc/testfile.txt
+→ kubectl exec cephfs-pv-pod1 -- sh -c "echo Hello CephFS PVC World! > /mnt/cephfs-pvc/testfile.txt"
+→ kubectl exec cephfs-pv-pod1 -- cat /mnt/cephfs-pvc/testfile.txt
 Hello CephFS PVC World!
 ```
 
@@ -942,3 +942,9 @@ Hello Dynamically Provisioned PVC World!
 ```
 
 And that shows we've set up an RBD persistent volume claim with dynamic provisioning that can be consumed by a pod!
+
+# Video Demonstration
+
+A recorded video demonstrating a containerized Ceph deployment on a Kubernetes cluster running on Google Compute Engine:
+
+[![Demo Ceph deployment on Kubernetes with GCE](https://img.youtube.com/vi/ic38-19wIGY/0.jpg)](https://youtu.be/ic38-19wIGY "Demo Ceph deployment on Kubernetes with GCE")
