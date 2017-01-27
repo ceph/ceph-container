@@ -942,3 +942,9 @@ Hello Dynamically Provisioned PVC World!
 ```
 
 And that shows we've set up an RBD persistent volume claim with dynamic provisioning that can be consumed by a pod!
+
+# Video Demonstration
+
+A recorded video demonstrating a containerized Ceph deployment on a Kubernetes cluster running on Google Compute Engine:
+
+[![Demo Ceph deployment on Kubernetes with GCE](https://img.youtube.com/vi/ic38-19wIGY/0.jpg)](https://youtu.be/ic38-19wIGY "Demo Ceph deployment on Kubernetes with GCE")
