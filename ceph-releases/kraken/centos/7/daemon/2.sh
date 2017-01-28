@@ -1,1 +1,1 @@
-../../../ubuntu/14.04/daemon/2.sh
+../../../ubuntu/16.04/daemon/2.sh
