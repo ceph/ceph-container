@@ -87,8 +87,12 @@ function copy_files {
 
 function commit_new_changes {
   echo_info "CREATING COMMIT"
-  git add base daemon demo || true
-  git commit -s -m "Building $BRANCH_NAME"
+  if [[ ! -d base ]]; then
+    mkdir base
+    echo "workaround for kraken and above, do not care about me" > base/README.md
+    git add base daemon demo || true
+    git commit -s -m "Building $BRANCH_NAME"
+  fi
 }
 
 function tag_new_changes {
