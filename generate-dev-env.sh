@@ -40,7 +40,7 @@ function copy_files {
     mkdir -p $file_dir
     ln $orig_file $file_dir/
   done
-  echo ${dir} > base/SOURCE_TREE
+  echo ${dir} | tee base/SOURCE_TREE &> /dev/null || true
   echo ${dir} > daemon/SOURCE_TREE
   echo ${dir} > demo/SOURCE_TREE
 }
@@ -63,7 +63,7 @@ goto_basedir
 test_args $@
 
 case "$1" in
-  hammer|infernalis|jewel)
+  hammer|infernalis|jewel|kraken)
     case "$2" in
       centos|ubuntu|fedora|opensuse)
           test_combination $@

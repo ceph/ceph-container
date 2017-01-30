@@ -87,7 +87,7 @@ function copy_files {
 
 function commit_new_changes {
   echo_info "CREATING COMMIT"
-  git add base daemon demo
+  git add base daemon demo || true
   git commit -s -m "Building $BRANCH_NAME"
 }
 
