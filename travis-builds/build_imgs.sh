@@ -32,7 +32,7 @@ function copy_dirs {
 }
 
 function build_base_img {
-  if [[ -d base ]]; then
+if [[ -d base && ! -n "$(find base -prune -empty)" ]]; then
     pushd base
     docker build -t base .
     rm -rf base
