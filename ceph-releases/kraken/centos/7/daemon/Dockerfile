@@ -44,9 +44,8 @@ RUN chmod +x /usr/local/bin/jq
 ADD https://bin.equinox.io/c/ekMN3bCZFUn/forego-stable-linux-amd64.tgz /forego.tgz
 RUN cd /usr/local/bin && tar xfz /forego.tgz && chmod +x /usr/local/bin/forego && rm /forego.tgz
 
-
 # Add bootstrap script, ceph defaults key/values for KV store
-ADD entrypoint.sh config.*.sh check_zombie_mons.py remove-mon.sh ceph.defaults /
+ADD *.sh ceph.defaults check_zombie_mons.py ./osd_scenarios/* /
 
 # Add templates for confd
 ADD ./confd/templates/* /etc/confd/templates/
