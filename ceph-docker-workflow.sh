@@ -90,9 +90,9 @@ function commit_new_changes {
   if [[ ! -d base ]]; then
     mkdir base
     echo "workaround for kraken and above, do not care about me" > base/README.md
-    git add base daemon demo || true
-    git commit -s -m "Building $BRANCH_NAME"
   fi
+  git add base daemon demo
+  git commit -s -m "Building $BRANCH_NAME"
 }
 
 function tag_new_changes {
