@@ -6,10 +6,9 @@ FROM opensuse:42.2
 MAINTAINER Ricardo Dias "rdias@suse.com"
 
 # Install Ceph
-RUN zypper -n ref
-RUN zypper -n install net-tools
-RUN zypper -n install "ceph<11" "ceph-radosgw<11" "rbd-mirror<11"
-
+RUN zypper -n ref && \
+    zypper -n install net-tools "ceph<11" "ceph-radosgw<11" "rbd-mirror<11" && \
+    zypper clean -a
 
 ADD entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
