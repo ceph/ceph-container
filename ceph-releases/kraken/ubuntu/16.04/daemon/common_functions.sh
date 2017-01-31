@@ -108,3 +108,12 @@ function get_osd_dev {
   done
 }
 
+function non_supported_scenario_on_redhat {
+  if [[ -f /etc/redhat-release ]]; then
+    if grep -sq "Red Hat Enterprise Linux Server" /etc/redhat-release; then
+      echo "ERROR: scenario not supported by this distribution"
+      echo "Valid scenarios for RHEL are: ... ... ..."
+      exit 1
+    fi
+  fi
+}
