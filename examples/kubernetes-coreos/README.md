@@ -5,7 +5,7 @@ This project enables running Ceph systems on Kubernetes on CoreOS and accessing 
 - Manually execute the image built by the included Dockerfile:
 
   ```
-  sudo /usr/bin/docker run --rm -v /opt/bin:/opt/bin coffeepac/ceph-Instal
+  sudo /usr/bin/docker run --rm -v /opt/bin:/opt/bin quay.io/coffeepac/ceph-install
   ```
 
 - Modify `install-job.yaml` to have at least one job per node in the kubernetes cluster. This is only a best effort as Kubernetes may schedule several of the pods for a single high performing node
