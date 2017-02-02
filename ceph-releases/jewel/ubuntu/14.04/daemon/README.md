@@ -112,7 +112,7 @@ There are four available `OSD_TYPE` values:
 - `activate` - the daemon expects to be passed a block device of a `ceph-disk`-prepared disk (via the `OSD_DEVICE` environment variable); no bootstrapping will be performed
 - `directory` - the daemon expects to find the OSD filesystem(s) already mounted in `/var/lib/ceph/osd/`
 - `disk` - the daemon expects to be passed a block device via the `OSD_DEVICE` environment variable
-- `prepare` - the daemon expects to be passed a block device and run `ceph-disk` prepare to bootstra the disk (via the `OSD_DEVICE` environment variable)
+- `prepare` - the daemon expects to be passed a block device and run `ceph-disk` prepare to bootstrap the disk (via the `OSD_DEVICE` environment variable)
 
 Options for OSDs (TODO: consolidate these options between the types):
 
@@ -283,7 +283,7 @@ If the OSD is not already created (key, configuration, OSD data), the following 
 - `JOURNAL` is the location of the journal (default is the `journal` file inside the OSD data directory)
 - `HOSTNAME` is the name of the host; it is used as a flag when adding the OSD to the CRUSH map
 
-The old option `OSD_ID` is now unused. Instead, the script will scan for each directory in `/var/lib/ceph/osd` of the form `<cluster>_<osd_id>`.
+The old option `OSD_ID` is now unused. Instead, the script will scan for each directory in `/var/lib/ceph/osd` of the form `<cluster>-<osd_id>`.
 
 To create your OSDs simply run the following command:
 
