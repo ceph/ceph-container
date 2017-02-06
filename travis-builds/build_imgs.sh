@@ -42,7 +42,9 @@ if [[ -d base && ! -n "$(find base -prune -empty)" ]]; then
 
 function build_daemon_img {
   pushd daemon
-  sed -i 's|FROM .*|FROM base|g' Dockerfile
+  if grep "FROM ceph/base" Dockerfile; then
+    sed -i 's|FROM .*|FROM base|g' Dockerfile
+  fi
   docker build -t ceph/daemon .
   rm -rf daemon
   popd
@@ -50,7 +52,9 @@ function build_daemon_img {
 
 function build_demo_img {
   pushd demo
-  sed -i 's|FROM .*|FROM base|g' Dockerfile
+  if grep "FROM ceph/base" Dockerfile; then
+    sed -i 's|FROM .*|FROM base|g' Dockerfile
+  fi
   docker build -t ceph/demo .
   rm -rf demo
   popd
