@@ -547,12 +547,6 @@ function osd_activate {
     exit 1
   fi
 
-  if [[ `ceph-detect-init` == "systemd" ]]; then
-    CEPH_DISK_ACTIVATE_OPTS="--no-start-daemon"
-  else
-    CEPH_DISK_ACTIVATE_OPTS=""
-  fi
-
   mkdir -p /var/lib/ceph/osd
   chown ceph. /var/lib/ceph/osd
   # resolve /dev/disk/by-* names
@@ -562,26 +556,20 @@ function osd_activate {
     timeout 10  bash -c "while [ ! -e ${OSD_DEVICE} ]; do sleep 1; done"
     chown ceph. ${OSD_JOURNAL}
     if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
-      ceph-disk -v --setuser ceph --setgroup disk --dmcrypt activate $(dev_part ${OSD_DEVICE} 1) ${CEPH_DISK_ACTIVATE_OPTS}
+      ceph-disk -v --setuser ceph --setgroup disk --dmcrypt activate --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
     else
-      ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1) ${CEPH_DISK_ACTIVATE_OPTS}
+      ceph-disk -v --setuser ceph --setgroup disk activate --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
     fi
     OSD_ID=$(ceph-disk list | grep "$(dev_part ${ACTUAL_OSD_DEVICE} 1) ceph data" | awk -F, '{print $4}' | awk -F. '{print $2}')
-    if [[ `ceph-detect-init` == "systemd" ]]; then
-      /usr/bin/ceph-osd ${CEPH_OPTS} -i ${OSD_ID} --setuser ceph --setgroup disk
-    fi
   else
     timeout 10  bash -c "while [ ! -e $(dev_part ${OSD_DEVICE} 1) ]; do sleep 1; done"
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
     if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
-      ceph-disk -v --setuser ceph --setgroup disk --dmcrypt activate $(dev_part ${OSD_DEVICE} 1) ${CEPH_DISK_ACTIVATE_OPTS}
+      ceph-disk -v --setuser ceph --setgroup disk --dmcrypt activate --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
     else
-      ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1) ${CEPH_DISK_ACTIVATE_OPTS}
+      ceph-disk -v --setuser ceph --setgroup disk activate --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
     fi
     OSD_ID=$(ceph-disk list | grep "$(dev_part ${ACTUAL_OSD_DEVICE} 1) ceph data" | awk -F, '{print $4}' | awk -F. '{print $2}')
-    if [[ `ceph-detect-init` == "systemd" ]]; then
-      /usr/bin/ceph-osd ${CEPH_OPTS} -i ${OSD_ID} --setuser ceph --setgroup disk
-    fi
   fi
   OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
   ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}

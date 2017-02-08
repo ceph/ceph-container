@@ -556,18 +556,18 @@ function osd_activate {
     timeout 10  bash -c "while [ ! -e ${OSD_DEVICE} ]; do sleep 1; done"
     chown ceph. ${OSD_JOURNAL}
     if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
-      ceph-disk -v --setuser ceph --setgroup --dmcrypt disk activate $(dev_part ${OSD_DEVICE} 1)
+      ceph-disk -v --setuser ceph --setgroup disk --dmcrypt activate --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
     else
-      ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
+      ceph-disk -v --setuser ceph --setgroup disk activate --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
     fi
     OSD_ID=$(ceph-disk list | grep "$(dev_part ${ACTUAL_OSD_DEVICE} 1) ceph data" | awk -F, '{print $4}' | awk -F. '{print $2}')
   else
     timeout 10  bash -c "while [ ! -e $(dev_part ${OSD_DEVICE} 1) ]; do sleep 1; done"
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
     if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
-      ceph-disk -v --setuser ceph --setgroup disk --dmcrypt activate $(dev_part ${OSD_DEVICE} 1)
+      ceph-disk -v --setuser ceph --setgroup disk --dmcrypt activate --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
     else
-      ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
+      ceph-disk -v --setuser ceph --setgroup disk activate --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
     fi
     OSD_ID=$(ceph-disk list | grep "$(dev_part ${ACTUAL_OSD_DEVICE} 1) ceph data" | awk -F, '{print $4}' | awk -F. '{print $2}')
   fi
