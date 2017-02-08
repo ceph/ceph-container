@@ -553,37 +553,29 @@ function osd_activate {
   ACTUAL_OSD_DEVICE=$(readlink -f ${OSD_DEVICE})
   # wait till partition exists then activate it
   if [[ ! -z "${OSD_JOURNAL}" ]]; then
-    timeout 10  bash -c "while [ ! -e ${OSD_DEVICE} ]; do sleep 1; done"
+    timeout 10 bash -c "while [ ! -e ${OSD_DEVICE} ]; do sleep 1; done"
     chown ceph. ${OSD_JOURNAL}
     if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
-      ceph-disk -v --setuser ceph --setgroup --dmcrypt disk activate $(dev_part ${OSD_DEVICE} 1)
+      ceph-disk -v --setuser ceph --setgroup disk --dmcrypt disk activate --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
     else
-      ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
+      ceph-disk -v --setuser ceph --setgroup disk activate --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
     fi
-    OSD_ID=$(ceph-disk list | grep "$(dev_part ${ACTUAL_OSD_DEVICE} 1) ceph data" | awk -F, '{print $4}' | awk -F. '{print $2}')
+    OSD_ID=$(grep "$(dev_part ${ACTUAL_OSD_DEVICE} 1)" /proc/mounts | awk '{print $2}' | grep -oh '[0-9]*')
   else
-    timeout 10  bash -c "while [ ! -e $(dev_part ${OSD_DEVICE} 1) ]; do sleep 1; done"
+    timeout 10 bash -c "while [ ! -e $(dev_part ${OSD_DEVICE} 1) ]; do sleep 1; done"
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
     if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
-      ceph-disk -v --setuser ceph --setgroup disk --dmcrypt activate $(dev_part ${OSD_DEVICE} 1)
+      ceph-disk -v --setuser ceph --setgroup disk --dmcrypt activate --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
     else
-      ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEVICE} 1)
+      ceph-disk -v --setuser ceph --setgroup disk activate --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
     fi
-    OSD_ID=$(ceph-disk list | grep "$(dev_part ${ACTUAL_OSD_DEVICE} 1) ceph data" | awk -F, '{print $4}' | awk -F. '{print $2}')
+    OSD_ID=$(grep "$(dev_part ${ACTUAL_OSD_DEVICE} 1)" /proc/mounts | awk '{print $2}' | grep -oh '[0-9]*')
   fi
   OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
   ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
 
-  # ceph-disk activiate has exec'ed /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID}
-  # wait till docker stop or ceph-osd is killed
-  OSD_PID=$(pgrep -U ceph -f "^/usr/bin/ceph-osd \-\-cluster ${CLUSTER}.*\-i ${OSD_ID} \-\-setuser") || true
-  if [ -n "${OSD_PID}" ]; then
-      log "OSD (PID ${OSD_PID}) is running, waiting till it exits"
-      while [ -e /proc/${OSD_PID} ]; do sleep 1;done
-  else
-      log "SUCCESS"
-      exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID} --setuser ceph --setgroup disk
-  fi
+  log "SUCCESS"
+  exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID} --setuser ceph --setgroup disk
 }
 
 
