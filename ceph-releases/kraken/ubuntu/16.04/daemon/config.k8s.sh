@@ -33,4 +33,3 @@ function get_config {
    # No-op for static
    log "k8s: config is stored as k8s secrets."
 }
-
