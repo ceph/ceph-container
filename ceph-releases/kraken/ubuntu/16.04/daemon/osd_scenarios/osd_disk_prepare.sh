@@ -38,6 +38,10 @@ function osd_disk_prepare {
       # the admin key must be present on the node
       # in order to store the encrypted key in the monitor's k/v store
       ceph-disk -v prepare ${CEPH_OPTS} --journal-uuid ${OSD_JOURNAL_UUID} --lockbox-uuid ${OSD_LOCKBOX_UUID} --dmcrypt ${OSD_DEVICE} ${OSD_JOURNAL}
+      echo "Unmounting LOCKBOX directory"
+      # NOTE(leseb): adding || true so when this bug will be fixed the entrypoint will not fail
+      # Ceph bug tracker: http://tracker.ceph.com/issues/18944
+      umount /var/lib/ceph/osd-lockbox/$(blkid -o value -s PARTUUID ${OSD_DEVICE}1) || true
     else
       ceph-disk -v prepare ${CEPH_OPTS} --journal-uuid ${OSD_JOURNAL_UUID} ${OSD_DEVICE} ${OSD_JOURNAL}
     fi
@@ -51,6 +55,10 @@ function osd_disk_prepare {
       # the admin key must be present on the node
       # in order to store the encrypted key in the monitor's k/v store
       ceph-disk -v prepare ${CEPH_OPTS} --journal-uuid ${OSD_JOURNAL_UUID} --lockbox-uuid ${OSD_LOCKBOX_UUID} --dmcrypt ${OSD_DEVICE}
+      echo "Unmounting LOCKBOX directory"
+      # NOTE(leseb): adding || true so when this bug will be fixed the entrypoint will not fail
+      # Ceph bug tracker: http://tracker.ceph.com/issues/18944
+      umount /var/lib/ceph/osd-lockbox/$(blkid -o value -s PARTUUID ${OSD_DEVICE}1) || true
     else
       ceph-disk -v prepare ${CEPH_OPTS} --journal-uuid ${OSD_JOURNAL_UUID} ${OSD_DEVICE}
     fi
