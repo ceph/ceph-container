@@ -187,6 +187,12 @@ function bootstrap_rgw {
     mkdir -p /var/lib/ceph/radosgw/${RGW_NAME}
     ceph ${CEPH_OPTS} auth get-or-create client.radosgw.gateway osd 'allow rwx' mon 'allow rw' -o /var/lib/ceph/radosgw/${RGW_NAME}/keyring
     chown -R ceph. /var/lib/ceph/radosgw/${RGW_NAME}
+
+    #configure rgw dns name
+    cat <<ENDHERE >>/etc/ceph/${CLUSTER}.conf
+[client.radosgw.gateway]
+  rgw dns name = ${RGW_NAME}
+ENDHERE
   fi
 
   # start RGW
