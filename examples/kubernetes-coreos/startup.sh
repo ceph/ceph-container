@@ -7,11 +7,13 @@ checksum()
 	md5sum $1 | awk '{print $1}'
 }
 
+mkdir -p /opt/bin/
+
 for UTIL in ceph rbd ceph-rbdnamer rados ceph-disk; do
 
     if [ ! -e /opt/bin/$UTIL ] || [ "$(checksum /opt/bin/$UTIL)" != "$(checksum /$UTIL)" ]; then
     	echo "Installing $UTIL to /opt/bin"
-    	cp -pf /$UTIL /opt/bin
+    	cp -pf /$UTIL /opt/bin/
     fi
 
 done
