@@ -4,6 +4,7 @@ set -e
 : ${CLUSTER:=ceph}
 : ${RGW_NAME:=$(hostname -s)}
 : ${MON_NAME:=$(hostname -s)}
+: ${MON_DATA_DIR:=/var/lib/ceph/mon/${CLUSTER}-${MON_NAME}}
 : ${RGW_CIVETWEB_PORT:=80}
 : ${NETWORK_AUTO_DETECT:=0}
 : ${RESTAPI_IP:=0.0.0.0}
@@ -117,7 +118,7 @@ ENDHERE
   fi
 
   # If we don't have a monitor keyring, this is a new monitor
-  if [ ! -e /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}/keyring ]; then
+  if [ ! -e "$MON_DATA_DIR/keyring" ]; then
 
     if [ ! -e /etc/ceph/${CLUSTER}.client.admin.keyring ]; then
       log "ERROR- /etc/ceph/${CLUSTER}.client.admin.keyring must exist; get it from your existing mon"
@@ -139,7 +140,7 @@ ENDHERE
     ceph-authtool /tmp/${CLUSTER}.mon.keyring --import-keyring /etc/ceph/${CLUSTER}.mon.keyring
 
     # Make the monitor directory
-    mkdir -p /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
+    mkdir -p "$MON_DATA_DIR"
 
     # Make user 'ceph' the owner of all the tree
     chown ceph. /var/lib/ceph/bootstrap-{osd,mds,rgw}
@@ -147,7 +148,7 @@ ENDHERE
     # Prepare the monitor daemon's directory with the map and keyring
     chown -R ceph. /var/lib/ceph/mon
     ceph-mon ${CEPH_OPTS} --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring
-    ceph-mon ${CEPH_OPTS} --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring --mon-data /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
+    ceph-mon ${CEPH_OPTS} --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring --mon-data "$MON_DATA_DIR"
 
     # Clean up the temporary key
     rm /tmp/${CLUSTER}.mon.keyring

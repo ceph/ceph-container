@@ -45,7 +45,7 @@ function start_mon {
   fi
 
   # If we don't have a monitor keyring, this is a new monitor
-  if [ ! -e /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}/keyring ]; then
+  if [ ! -e "$MON_DATA_DIR/keyring" ]; then
 
     get_mon_config
     create_socket_dir
@@ -69,11 +69,11 @@ function start_mon {
     chown ceph. /tmp/${CLUSTER}.mon.keyring
 
     # Make the monitor directory
-    mkdir -p /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
-    chown ceph. /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
+    mkdir -p "$MON_DATA_DIR"
+    chown ceph. "$MON_DATA_DIR"
 
     # Prepare the monitor daemon's directory with the map and keyring
-    ceph-mon --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring --mon-data /var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
+    ceph-mon --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring --mon-data "$MON_DATA_DIR"
 
     # Clean up the temporary key
     rm /tmp/${CLUSTER}.mon.keyring
