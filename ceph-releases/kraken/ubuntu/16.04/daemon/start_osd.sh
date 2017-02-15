@@ -46,6 +46,8 @@ function start_osd {
 }
 
 function osd_disk {
+  source osd_disk_prepare.sh
+  source osd_disk_activate.sh
   osd_disk_prepare
   osd_activate
 }
