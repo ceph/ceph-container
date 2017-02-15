@@ -16,7 +16,7 @@ function osd_activate {
     timeout 10 bash -c "while [ ! -e ${OSD_DEVICE} ]; do sleep 1; done"
     chown ceph. ${OSD_JOURNAL}
     if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
-      ceph-disk -v --setuser ceph --setgroup disk --dmcrypt disk activate --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
+      ceph-disk -v --setuser ceph --setgroup disk activate --dmcrypt --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
     else
       ceph-disk -v --setuser ceph --setgroup disk activate --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
     fi
@@ -25,7 +25,7 @@ function osd_activate {
     timeout 10 bash -c "while [ ! -e $(dev_part ${OSD_DEVICE} 1) ]; do sleep 1; done"
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
     if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
-      ceph-disk -v --setuser ceph --setgroup disk --dmcrypt activate --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
+      ceph-disk -v --setuser ceph --setgroup disk activate --dmcrypt --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
     else
       ceph-disk -v --setuser ceph --setgroup disk activate --no-start-daemon $(dev_part ${OSD_DEVICE} 1)
     fi
