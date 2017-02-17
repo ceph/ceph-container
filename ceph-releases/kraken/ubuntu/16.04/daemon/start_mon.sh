@@ -44,10 +44,10 @@ function start_mon {
     exit 1
   fi
 
+  get_mon_config
   # If we don't have a monitor keyring, this is a new monitor
   if [ ! -e "$MON_DATA_DIR/keyring" ]; then
 
-    get_mon_config
     create_socket_dir
 
     if [ ! -e /etc/ceph/${CLUSTER}.mon.keyring ]; then
@@ -77,10 +77,15 @@ function start_mon {
 
     # Clean up the temporary key
     rm /tmp/${CLUSTER}.mon.keyring
+  else
+    ceph-mon --setuser ceph --setgroup ceph -i ${MON_NAME} --inject-monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring --mon-data "$MON_DATA_DIR"
+    # Ignore when we timeout in most cases that means the cluster has no qorum or
+    # no mons are up and running
+    timeout 7 ceph mon add ${MON_NAME} "${MON_IP}:6789" || true
   fi
 
   log "SUCCESS"
 
   # start MON
-  exec /usr/bin/ceph-mon ${CEPH_OPTS} -d -i ${MON_NAME} --public-addr "${MON_IP}:6789" --setuser ceph --setgroup ceph
+  exec /usr/bin/ceph-mon ${CEPH_OPTS} -d -i ${MON_NAME} --public-addr "${MON_IP}:6789" --setuser ceph --setgroup ceph --mon-data "$MON_DATA_DIR"
 }
