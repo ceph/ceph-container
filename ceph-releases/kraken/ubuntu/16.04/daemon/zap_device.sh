@@ -23,6 +23,15 @@ function zap_device {
     fi
   done
 
+  # look for Ceph encrypted partitions
+  ceph_dm=$(blkid -t TYPE="crypto_LUKS" ${OSD_DEVICE}* -o value -s PARTUUID || true)
+  if [[ ! -z $ceph_dm ]]; then
+    for dm_uuid in $ceph_dm; do
+      dmsetup --verbose --force wipe_table $dm_uuid || true
+      dmsetup --verbose --force remove $dm_uuid || true
+    done
+  fi
+
   for device in $(echo ${OSD_DEVICE} | tr "," " "); do
     raw_device=$(echo $device | egrep -o '/dev/([hsv]d[a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}')
     if echo $device | egrep -sq '/dev/([hsv]d[a-z]{1,2}|cciss/c[0-9]d[0-9]p|nvme[0-9]n[0-9]p){1,2}$'; then

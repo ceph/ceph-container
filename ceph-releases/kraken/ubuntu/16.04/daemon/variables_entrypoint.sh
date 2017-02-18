@@ -11,6 +11,8 @@
 : ${OSD_JOURNAL_SIZE:=100}
 : ${OSD_BLUESTORE:=0}
 : ${OSD_DMCRYPT:=0}
+: ${OSD_JOURNAL_UUID:=$(uuidgen)}
+: ${OSD_LOCKBOX_UUID:=$(uuidgen)}
 : ${CRUSH_LOCATION:=root=default host=${HOSTNAME}}
 : ${CEPHFS_CREATE:=0}
 : ${CEPHFS_NAME:=cephfs}

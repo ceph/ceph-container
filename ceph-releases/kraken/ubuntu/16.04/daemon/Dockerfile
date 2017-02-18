@@ -29,7 +29,7 @@ ADD https://bin.equinox.io/c/ekMN3bCZFUn/forego-stable-linux-amd64.tgz /forego.t
 
 
 # install prerequisites
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget unzip uuid-runtime python-setuptools udev runit sharutils python3 && \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget unzip uuid-runtime python-setuptools udev runit sharutils python3 dmsetup && \
 \
 # install ceph and ganesha
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3FE869A9 && \
