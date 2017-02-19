@@ -1,0 +1,29 @@
+language: python
+python:
+  - 2.7
+
+branches:
+  only:
+    - master
+
+services:
+  - docker
+
+
+before_install:
+  - docker --version
+  - sudo apt-get install -y --force-yes xfsprogs
+  - sudo ./travis-builds/purge_cluster.sh
+  - sudo ./travis-builds/build_imgs.sh
+
+install:
+  - sudo ./travis-builds/prepare_osd_fs.sh
+  - docker run -d --name ceph-demo --net=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph:/var/lib/ceph -e MON_IP=$(ip -4 -o a | awk '/eth|ens|eno|enp/ { sub ("/..", "", $4); print $4 }') -e CEPH_PUBLIC_NETWORK=$(grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/[0-9]\{1,2\}' /proc/net/fib_trie | grep -vE "^127|0$" | head -1) demo
+  - sudo ./travis-builds/validate_demo_cluster.sh
+
+after_failure:
+  - docker images
+  - docker ps
+  - docker ps -a
+  - docker logs ceph-demo
+  - docker exec ceph-demo ceph -s
