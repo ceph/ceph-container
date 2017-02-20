@@ -45,8 +45,7 @@ ENDHERE
   fi
 
   # Create bootstrap key directories
-  mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
-  chown ceph. /var/lib/ceph/bootstrap-{osd,mds,rgw}
+  create_bootstrap_directories
 
   if [ ! -e /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring ]; then
     # Generate the OSD bootstrap key

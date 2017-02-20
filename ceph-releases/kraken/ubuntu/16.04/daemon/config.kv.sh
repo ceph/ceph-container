@@ -52,7 +52,7 @@ function get_mon_config {
     done
 
     # Check/Create bootstrap key directories
-    mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
+    create_bootstrap_directories
 
     log "Adding Keyrings"
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/monKeyring > /etc/ceph/${CLUSTER}.mon.keyring
@@ -92,7 +92,7 @@ function get_mon_config {
     ceph-authtool /etc/ceph/${CLUSTER}.mon.keyring --create-keyring --gen-key -n mon. --cap mon 'allow *'
 
     # Create bootstrap key directories
-    mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
+    create_bootstrap_directories
 
     # Generate the OSD bootstrap key
     ceph-authtool /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring --create-keyring --gen-key -n client.bootstrap-osd --cap mon 'allow profile bootstrap-osd'
@@ -141,7 +141,7 @@ function get_config {
   done
 
   # Check/Create bootstrap key directories
-  mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
+  create_bootstrap_directories
 
   log "Adding bootstrap keyrings"
   kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/bootstrapOsdKeyring > /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring

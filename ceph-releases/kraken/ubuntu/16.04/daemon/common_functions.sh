@@ -45,6 +45,15 @@ function create_socket_dir {
   chown ceph. /var/run/ceph
 }
 
+# create the bootstrap directories
+function create_bootstrap_directories{
+  for directory in osd mds rgw; do
+    mkdir -p /var/lib/ceph/bootstrap-$directory
+    chown ceph. /var/lib/ceph/bootstrap-$directory
+  done
+}
+
+
 # Calculate proper device names, given a device and partition number
 function dev_part {
   local osd_device=${1}
