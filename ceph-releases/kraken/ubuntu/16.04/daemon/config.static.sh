@@ -8,7 +8,7 @@ function get_admin_key {
 
 function get_mon_config {
   if [ ! -e /etc/ceph/${CLUSTER}.conf ]; then
-    fsid=$(uuidgen)
+    local fsid=$(uuidgen)
     cat <<ENDHERE >/etc/ceph/${CLUSTER}.conf
 [global]
 fsid = $fsid

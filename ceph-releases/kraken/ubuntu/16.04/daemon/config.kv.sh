@@ -65,8 +65,8 @@ function get_mon_config {
     # Create initial Mon, keyring
     log "No configuration found for cluster ${CLUSTER}. Generating."
 
-    FSID=$(uuidgen)
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} put ${CLUSTER_PATH}/auth/fsid ${FSID}
+    local fsid=$(uuidgen)
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} put ${CLUSTER_PATH}/auth/fsid ${fsid}
 
     until confd -onetime -backend ${KV_TYPE} -node ${CONFD_NODE_SCHEMA}${KV_IP}:${KV_PORT} ${CONFD_KV_TLS} -prefix="/${CLUSTER_PATH}/" ; do
       log "Waiting for confd to write initial templates..."
@@ -91,7 +91,7 @@ function get_mon_config {
 
 
     log "Creating Monmap"
-    monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${FSID} /etc/ceph/monmap-${CLUSTER}
+    monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} /etc/ceph/monmap-${CLUSTER}
 
     log "Importing Keyrings and Monmap to KV"
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} put ${CLUSTER_PATH}/monKeyring - < /etc/ceph/${CLUSTER}.mon.keyring
