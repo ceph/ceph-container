@@ -14,6 +14,7 @@ function start_osd {
   case "$OSD_TYPE" in
     directory)
       source osd_directory.sh
+      source osd_common.sh
       osd_directory
       ;;
     directory_single)
@@ -33,10 +34,12 @@ function start_osd {
       ;;
     devices)
       source osd_disks.sh
+      source osd_common.sh
       osd_disks
       ;;
     activate_journal)
       source osd_activate_journal.sh
+      source osd_common.sh
       osd_activate_journal
       ;;
     *)

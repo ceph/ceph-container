@@ -57,20 +57,11 @@ function osd_disks {
 
     ceph-disk -v prepare ${CEPH_OPTS} ${OSD_DEV} ${OSD_JOURNAL}
 
-    OSD_ID=$(cat /var/lib/ceph/osd/$(ls -ltr /var/lib/ceph/osd/ | tail -n1 | awk -v pattern="$CLUSTER" '$0 ~ pattern {print $9}')/whoami)
-    OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
-    ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
-
-    # ceph-disk activiate has exec'ed /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID}
-    # wait till docker stop or ceph-osd is killed
-    OSD_PID=$(ps -ef |grep ceph-osd |grep osd.${OSD_ID} |awk '{print $2}')
-    if [ -n "${OSD_PID}" ]; then
-        log "OSD (PID ${OSD_PID}) is running, waiting till it exits"
-        while [ -e /proc/${OSD_PID} ]; do sleep 1;done
-    fi
-    echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID} --setuser ceph --setgroup disk" | tee -a /etc/forego/${CLUSTER}/Procfile
+    # prepare the OSDs configuration and start them later
+    start_osd forego
   done
 
   log "SUCCESS"
-  exec /usr/local/bin/forego start -f /etc/forego/${CLUSTER}/Procfile
+  # Actually, starting them as per forego configuration
+  start_forego
 }

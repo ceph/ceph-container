@@ -70,5 +70,5 @@ function osd_directory {
     echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID} --osd-journal ${OSD_J} -k /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring" | tee -a /etc/forego/${CLUSTER}/Procfile
   done
   log "SUCCESS"
-  exec /usr/local/bin/forego start -f /etc/forego/${CLUSTER}/Procfile
+  start_forego
 }
