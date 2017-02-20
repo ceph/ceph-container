@@ -8,6 +8,11 @@ function osd_directory {
     exit 1
   fi
 
+  if [ -z "${HOSTNAME}" ]; then
+    log "HOSTNAME not set; This will prevent to add an OSD into the CRUSH map"
+    exit 1
+  fi
+
   # make sure ceph owns the directory
   chown ceph. /var/lib/ceph/osd
 
@@ -59,10 +64,6 @@ function osd_directory {
       chown ceph. /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
       chmod 0600 /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
       # add the osd to the crush map
-      if [ ! -n "${HOSTNAME}" ]; then
-        log "HOSTNAME not set; cannot add OSD to CRUSH map"
-        exit 1
-      fi
       OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
       ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
     fi
