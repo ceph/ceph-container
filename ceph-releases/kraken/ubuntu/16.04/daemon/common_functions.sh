@@ -47,19 +47,22 @@ function create_socket_dir {
 
 # Calculate proper device names, given a device and partition number
 function dev_part {
-  if [[ -L ${1} ]]; then
+  local osd_device=${1}
+  local osd_partition=${2}
+
+  if [[ -L ${osd_device} ]]; then
     # This device is a symlink. Work out it's actual device
-    local actual_device=$(readlink -f ${1})
-    local bn=$(basename $1)
+    local actual_device=$(readlink -f ${osd_device})
+    local bn=$(basename ${osd_device})
     if [[ "${ACTUAL_DEVICE:0-1:1}" == [0-9] ]]; then
-      local desired_partition="${actual_device}p${2}"
+      local desired_partition="${actual_device}p${osd_partition}"
     else
-      local desired_partition="${actual_device}${2}"
+      local desired_partition="${actual_device}${osd_partition}"
     fi
-    # Now search for a symlink in the directory of $1
+    # Now search for a symlink in the directory of $osd_device
     # that has the correct desired partition, and the longest
     # shared prefix with the original symlink
-    local symdir=$(dirname $1)
+    local symdir=$(dirname ${osd_device})
     local link=""
     local pfxlen=0
     for option in $(ls $symdir); do
@@ -72,14 +75,14 @@ function dev_part {
     fi
     done
     if [[ $pfxlen -eq 0 ]]; then
-      >&2 log "Could not locate appropriate symlink for partition $2 of $1"
+      >&2 log "Could not locate appropriate symlink for partition ${osd_partition} of ${osd_device}"
       exit 1
     fi
     echo "$link"
-  elif [[ "${1:0-1:1}" == [0-9] ]]; then
-    echo "${1}p${2}"
+  elif [[ "${osd_device:0-1:1}" == [0-9] ]]; then
+    echo "${osd_device}p${osd_partition}"
   else
-    echo "${1}${2}"
+    echo "${osd_device}${osd_partition}"
   fi
 }
 
