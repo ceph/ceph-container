@@ -46,7 +46,7 @@ function get_mon_config {
 
     log "Adding mon/admin Keyrings"
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/monKeyring > /etc/ceph/${CLUSTER}.mon.keyring
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/${CLUSTER}.client.admin.keyring
+    get_admin_key
 
     if [ ! -f /etc/ceph/monmap-${CLUSTER} ]; then
       log "Monmap is missing. Adding initial monmap..."
