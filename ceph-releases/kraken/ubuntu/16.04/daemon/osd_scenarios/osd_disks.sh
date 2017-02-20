@@ -38,39 +38,39 @@ function osd_disks {
       echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID} --setuser ceph --setgroup disk" | tee -a /etc/forego/${CLUSTER}/Procfile
     done
     exec /usr/local/bin/forego start -f /etc/forego/${CLUSTER}/Procfile
-  else
-    for i in ${OSD_DISKS}; do
-      OSD_ID=$(echo ${i}|sed 's/\(.*\):\(.*\)/\1/')
-      OSD_DEV="/dev/$(echo ${i}|sed 's/\(.*\):\(.*\)/\2/')"
-      if [[ "$(parted --script ${OSD_DEV} print | egrep '^ 1.*ceph data')" && ${OSD_FORCE_ZAP} -ne "1" ]]; then
-        log "ERROR- It looks like this device is an OSD, set OSD_FORCE_ZAP=1 to use this device anyway and zap its content"
-        exit 1
-      elif [[ "$(parted --script ${OSD_DEV} print | egrep '^ 1.*ceph data')" && ${OSD_FORCE_ZAP} -eq "1" ]]; then
-        ceph-disk -v zap ${OSD_DEV}
-      fi
-      if [[ ! -z "${OSD_JOURNAL}" ]]; then
-        ceph-disk -v prepare ${CEPH_OPTS} ${OSD_DEV} ${OSD_JOURNAL}
-#        chown ceph. ${OSD_JOURNAL}
-        ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEV} 1)
-      else
-        ceph-disk -v prepare ${CEPH_OPTS} ${OSD_DEV}
-#        chown ceph. $(dev_part ${OSD_DEV} 2)
-        ceph-disk -v --setuser ceph --setgroup disk activate $(dev_part ${OSD_DEV} 1)
-      fi
-      OSD_ID=$(cat /var/lib/ceph/osd/$(ls -ltr /var/lib/ceph/osd/ | tail -n1 | awk -v pattern="$CLUSTER" '$0 ~ pattern {print $9}')/whoami)
-      OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
-      ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
-
-      # ceph-disk activiate has exec'ed /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID}
-      # wait till docker stop or ceph-osd is killed
-      OSD_PID=$(ps -ef |grep ceph-osd |grep osd.${OSD_ID} |awk '{print $2}')
-      if [ -n "${OSD_PID}" ]; then
-          log "OSD (PID ${OSD_PID}) is running, waiting till it exits"
-          while [ -e /proc/${OSD_PID} ]; do sleep 1;done
-      fi
-      echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID} --setuser ceph --setgroup disk" | tee -a /etc/forego/${CLUSTER}/Procfile
-    done
-    log "SUCCESS"
-    exec /usr/local/bin/forego start -f /etc/forego/${CLUSTER}/Procfile
   fi
+
+  #
+  # As per the exec in the first statement, we only reach here if there is some OSDs
+  #
+  for OSD_DISK in ${OSD_DISKS}; do
+    OSD_DEV="/dev/$(echo ${OSD_DISK}|sed 's/\(.*\):\(.*\)/\2/')"
+
+    if [[ "$(parted --script ${OSD_DEV} print | egrep '^ 1.*ceph data')" ]]; then
+      if [[ ${OSD_FORCE_ZAP} -eq "1" ]]; then
+        ceph-disk -v zap ${OSD_DEV}
+      else
+        log "ERROR- It looks like the device ($OSD_DEV) is an OSD, set OSD_FORCE_ZAP=1 to use this device anyway and zap its content"
+        exit 1
+      fi
+    fi
+
+    ceph-disk -v prepare ${CEPH_OPTS} ${OSD_DEV} ${OSD_JOURNAL}
+
+    OSD_ID=$(cat /var/lib/ceph/osd/$(ls -ltr /var/lib/ceph/osd/ | tail -n1 | awk -v pattern="$CLUSTER" '$0 ~ pattern {print $9}')/whoami)
+    OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
+    ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
+
+    # ceph-disk activiate has exec'ed /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID}
+    # wait till docker stop or ceph-osd is killed
+    OSD_PID=$(ps -ef |grep ceph-osd |grep osd.${OSD_ID} |awk '{print $2}')
+    if [ -n "${OSD_PID}" ]; then
+        log "OSD (PID ${OSD_PID}) is running, waiting till it exits"
+        while [ -e /proc/${OSD_PID} ]; do sleep 1;done
+    fi
+    echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID} --setuser ceph --setgroup disk" | tee -a /etc/forego/${CLUSTER}/Procfile
+  done
+
+  log "SUCCESS"
+  exec /usr/local/bin/forego start -f /etc/forego/${CLUSTER}/Procfile
 }
