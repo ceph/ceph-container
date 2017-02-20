@@ -24,12 +24,9 @@ function get_mon_config {
 
   # making sure the root dirs are present for the confd to work with etcd
   if [[ "$KV_TYPE" == "etcd" ]]; then
-    etcdctl mkdir ${CLUSTER_PATH}/auth > /dev/null 2>&1  || log "key already exists"
-    etcdctl mkdir ${CLUSTER_PATH}/global > /dev/null 2>&1  || log "key already exists"
-    etcdctl mkdir ${CLUSTER_PATH}/mon > /dev/null 2>&1  || log "key already exists"
-    etcdctl mkdir ${CLUSTER_PATH}/mds > /dev/null 2>&1  || log "key already exists"
-    etcdctl mkdir ${CLUSTER_PATH}/osd > /dev/null 2>&1  || log "key already exists"
-    etcdctl mkdir ${CLUSTER_PATH}/client > /dev/null 2>&1  || log "key already exists"
+    for dir in auth global mon mds osd client; do
+      etcdctl mkdir ${CLUSTER_PATH}/$dir > /dev/null 2>&1  || log "'$dir' key already exists"
+    done
   fi
 
   log "Adding Mon Host - ${MON_NAME}"
