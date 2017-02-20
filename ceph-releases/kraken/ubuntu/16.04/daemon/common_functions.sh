@@ -54,7 +54,7 @@ function dev_part {
     # This device is a symlink. Work out it's actual device
     local actual_device=$(readlink -f ${osd_device})
     local bn=$(basename ${osd_device})
-    if [[ "${ACTUAL_DEVICE:0-1:1}" == [0-9] ]]; then
+    if [[ "${actual_device:0-1:1}" == [0-9] ]]; then
       local desired_partition="${actual_device}p${osd_partition}"
     else
       local desired_partition="${actual_device}${osd_partition}"
