@@ -17,7 +17,6 @@ case "$KV_TYPE" in
    k8s|kubernetes)
       source /config.k8s.sh
       ;;
-
    *)
       source /config.static.sh
       ;;

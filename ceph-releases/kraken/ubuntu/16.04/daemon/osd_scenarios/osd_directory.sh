@@ -21,7 +21,7 @@ function osd_directory {
     log "Creating osd with ceph --cluster ${CLUSTER} osd create"
     OSD_ID=$(ceph --cluster ${CLUSTER} osd create)
     if [ "$OSD_ID" -eq "$OSD_ID" ] 2>/dev/null; then
-        log "OSD created with ID: ${OSD_ID}"
+      log "OSD created with ID: ${OSD_ID}"
     else
       log "OSD creation failed: ${OSD_ID}"
       exit 1
