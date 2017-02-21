@@ -39,7 +39,6 @@ function prefix_length {
   done
 }
 
-
 # create the mandatory directories
 function create_mandatory_directories {
   # Let's create the bootstrap directories
@@ -144,4 +143,9 @@ function is_integer {
   # We use $@ here to consider everything given as parameter and not only the
   # first one : that's mainly for splited strings like "10 10"
   [[ $@ =~ ^-?[0-9]+$ ]]
+}
+
+# Transform any set of strings to lowercase
+function to_lowercase {
+  echo "${@,,}"
 }

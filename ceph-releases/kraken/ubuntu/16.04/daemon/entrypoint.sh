@@ -11,8 +11,8 @@ source common_functions.sh
 # Load in the bootstrapping routines
 # based on the data store
 case "$KV_TYPE" in
-   etcd|consul)
-      source /config.kv.sh
+   etcd)
+      source /config.kv.etcd.sh
       ;;
    k8s|kubernetes)
       source /config.k8s.sh
