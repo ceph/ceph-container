@@ -6,6 +6,12 @@ function osd_disk_prepare {
     log "ERROR- You must provide a device to build your OSD ie: /dev/sdb"
     exit 1
   fi
+
+  if [[ ! -e "${OSD_DEVICE}" ]]; then
+    log "ERROR- The device pointed by OSD_DEVICE ($OSD_DEVICE) doesn't exist !"
+    exit 1
+  fi
+
   if [ ! -e /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring ]; then
     log "ERROR- /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-osd -o /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring'"
     exit 1
@@ -14,15 +20,22 @@ function osd_disk_prepare {
   mkdir -p /var/lib/ceph/osd
   chown ceph. /var/lib/ceph/osd
 
-  # TODO:
-  # -  add device format check (make sure only one device is passed
   # check device status first
   if ! parted --script ${OSD_DEVICE} print > /dev/null 2>&1; then
-    ceph-disk -v zap ${OSD_DEVICE}
+    if [[ ${OSD_FORCE_ZAP} -eq 1 ]]; then
+      log "It looks like ${OSD_DEVICE} isn't consistent, however OSD_FORCE_ZAP is enabled so we are zapping the device anyway"
+      ceph-disk -v zap ${OSD_DEVICE}
+    else
+      log "Regarding parted, device ${OSD_DEVICE} is inconsistent/broken/weird."
+      log "It would be too dangerous to destroy it without any notification."
+      log "Please set OSD_FORCE_ZAP to '1' if you really want to zap this disk."
+      exit 1
+    fi
   fi
 
+  # then search for some ceph metadata on the disk
   if [[ "$(parted --script ${OSD_DEVICE} print | egrep '^ 1.*ceph data')" ]]; then
-    if [[ ${OSD_FORCE_ZAP} -eq "1" ]]; then
+    if [[ ${OSD_FORCE_ZAP} -eq 1 ]]; then
       log "It looks like ${OSD_DEVICE} is an OSD, however OSD_FORCE_ZAP is enabled so we are zapping the device anyway"
       ceph-disk -v zap ${OSD_DEVICE}
     else
