@@ -77,9 +77,6 @@ function get_mon_config {
     ceph-authtool /etc/ceph/${CLUSTER}.client.admin.keyring --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
     ceph-authtool /etc/ceph/${CLUSTER}.mon.keyring --create-keyring --gen-key -n mon. --cap mon 'allow *'
 
-    # Create bootstrap key directories
-    create_bootstrap_directories
-
     # Generate the OSD bootstrap key
     ceph-authtool /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring --create-keyring --gen-key -n client.bootstrap-osd --cap mon 'allow profile bootstrap-osd'
 
@@ -125,9 +122,6 @@ function get_config {
     log "Waiting for confd to update templates..."
     sleep 1
   done
-
-  # Check/Create bootstrap key directories
-  create_bootstrap_directories
 
   log "Adding bootstrap keyrings"
   kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/bootstrapOsdKeyring > /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring

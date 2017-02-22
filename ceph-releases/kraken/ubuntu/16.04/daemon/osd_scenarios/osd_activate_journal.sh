@@ -10,8 +10,6 @@ function osd_activate_journal {
   # wait till partition exists
   timeout 10  bash -c "while [ ! -e ${OSD_JOURNAL} ]; do sleep 1; done"
 
-  mkdir -p /var/lib/ceph/osd
-  chown ceph. /var/lib/ceph/osd
   chown ceph. ${OSD_JOURNAL}
   ceph-disk -v --setuser ceph --setgroup disk activate-journal ${OSD_JOURNAL}
 

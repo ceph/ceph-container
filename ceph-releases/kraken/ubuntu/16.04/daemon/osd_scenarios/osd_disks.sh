@@ -13,9 +13,6 @@ function osd_disks {
     exit 1
   fi
 
-  # make sure ceph owns the directory
-  chown ceph. /var/lib/ceph/osd
-
   # Create the directory and an empty Procfile
   mkdir -p /etc/forego/${CLUSTER}
   echo "" > /etc/forego/${CLUSTER}/Procfile

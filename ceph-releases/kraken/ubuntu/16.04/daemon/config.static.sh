@@ -44,9 +44,6 @@ ENDHERE
     ceph-authtool /etc/ceph/${CLUSTER}.mon.keyring --create-keyring --gen-key -n mon. --cap mon 'allow *'
   fi
 
-  # Create bootstrap key directories
-  create_bootstrap_directories
-
   if [ ! -e /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring ]; then
     # Generate the OSD bootstrap key
     ceph-authtool /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring --create-keyring --gen-key -n client.bootstrap-osd --cap mon 'allow profile bootstrap-osd'

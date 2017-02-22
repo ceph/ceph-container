@@ -48,8 +48,6 @@ function start_mon {
   # If we don't have a monitor keyring, this is a new monitor
   if [ ! -e "$MON_DATA_DIR/keyring" ]; then
 
-    create_socket_dir
-
     if [ ! -e /etc/ceph/${CLUSTER}.mon.keyring ]; then
       log "ERROR- /etc/ceph/${CLUSTER}.mon.keyring must exist.  You can extract it from your current monitor by running 'ceph auth get mon. -o /etc/ceph/${CLUSTER}.mon.keyring' or use a KV Store"
       exit 1

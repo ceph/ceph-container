@@ -4,7 +4,6 @@ set -e
 function start_rbd_mirror {
   get_config
   check_config
-  create_socket_dir
 
   # ensure we have the admin key
   get_admin_key

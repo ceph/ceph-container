@@ -39,18 +39,24 @@ function prefix_length {
   done
 }
 
-# create socket directory
-function create_socket_dir {
-  mkdir -p /var/run/ceph
-  chown ceph. /var/run/ceph
-}
 
-# create the bootstrap directories
-function create_bootstrap_directories{
+# create the mandatory directories
+function create_mandatory_directories {
+  # Let's create the bootstrap directories
   for directory in osd mds rgw; do
     mkdir -p /var/lib/ceph/bootstrap-$directory
-    chown ceph. /var/lib/ceph/bootstrap-$directory
   done
+
+  # Let's create the ceph directories
+  for directory in mon osd mds radosgw tmp; do
+    mkdir -p /var/lib/ceph/$directory
+  done
+
+  # Create socket directory
+  mkdir -p /var/run/ceph
+
+  # Adjust the owner of all those directories
+  chown -R ceph. /var/run/ceph/ /var/lib/ceph/*
 }
 
 

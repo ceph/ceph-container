@@ -8,9 +8,6 @@ function osd_directory_single {
     exit 1
   fi
 
-  # make sure ceph owns the directory
-  chown -R ceph. /var/lib/ceph/osd
-
   # pick one osd and make sure no lock is held
   for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }'); do
     if [[ -n "$(find /var/lib/ceph/osd/${CLUSTER}-${OSD_ID} -prune -empty)" ]]; then

@@ -17,8 +17,6 @@ function osd_disk_prepare {
     exit 1
   fi
   timeout 10 ceph ${CEPH_OPTS} --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring health || exit 1
-  mkdir -p /var/lib/ceph/osd
-  chown ceph. /var/lib/ceph/osd
 
   # check device status first
   if ! parted --script ${OSD_DEVICE} print > /dev/null 2>&1; then

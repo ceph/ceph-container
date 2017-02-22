@@ -4,13 +4,12 @@ set -e
 function start_mds {
   get_config
   check_config
-  create_socket_dir
 
   # Check to see if we are a new MDS
   if [ ! -e /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring ]; then
 
-     mkdir -p /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}
-     chown ceph. /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}
+    mkdir -p /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}
+    chown ceph. /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}
 
     if [ -e /etc/ceph/${CLUSTER}.client.admin.keyring ]; then
        KEYRING_OPT="--name client.admin --keyring /etc/ceph/${CLUSTER}.client.admin.keyring"
