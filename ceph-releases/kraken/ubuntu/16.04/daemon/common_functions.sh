@@ -86,9 +86,11 @@ function dev_part {
 function osd_trying_to_determine_scenario {
   if [ -z "${OSD_DEVICE}" ]; then
     log "Bootstrapped OSD(s) found; using OSD directory"
+    source osd_directory.sh
     osd_directory
   elif $(parted --script ${OSD_DEVICE} print | egrep -sq '^ 1.*ceph data'); then
     log "Bootstrapped OSD found; activating ${OSD_DEVICE}"
+    source osd_disk_activate.sh
     osd_activate
   else
     log "Device detected, assuming ceph-disk scenario is desired"
