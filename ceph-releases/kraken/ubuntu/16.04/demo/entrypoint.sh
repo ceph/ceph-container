@@ -16,7 +16,10 @@ set -e
 CEPH_OPTS="--cluster ${CLUSTER}"
 
 
-# FUNCTIONS
+#############
+# FUNCTIONS #
+#############
+
 # Log arguments with timestamp
 function log {
   if [ -z "$*" ]; then
@@ -28,10 +31,24 @@ function log {
   return 0
 }
 
-function create_socket_dir {
+function create_mandatory_directories {
+  # Let's create the bootstrap directories
+  for directory in osd mds rgw; do
+    mkdir -p /var/lib/ceph/bootstrap-$directory
+  done
+
+  # Let's create the ceph directories
+  for directory in mon osd mds radosgw tmp; do
+    mkdir -p /var/lib/ceph/$directory
+  done
+
+  # Create socket directory
   mkdir -p /var/run/ceph
-  chown ceph. /var/run/ceph
+
+  # Adjust the owner of all those directories
+  chown -R ceph. /var/run/ceph/ /var/lib/ceph/*
 }
+
 
 #######
 # MON #
@@ -142,11 +159,7 @@ ENDHERE
     # Make the monitor directory
     mkdir -p "$MON_DATA_DIR"
 
-    # Make user 'ceph' the owner of all the tree
-    chown ceph. /var/lib/ceph/bootstrap-{osd,mds,rgw}
-
     # Prepare the monitor daemon's directory with the map and keyring
-    chown -R ceph. /var/lib/ceph/mon
     ceph-mon ${CEPH_OPTS} --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring --mon-data "$MON_DATA_DIR"
     ceph-mon ${CEPH_OPTS} --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring --mon-data "$MON_DATA_DIR"
 
@@ -155,7 +168,6 @@ ENDHERE
   fi
 
   # start MON
-  create_socket_dir
   chown -R ceph. /var/lib/ceph/mon
   ceph-mon ${CEPH_OPTS} -i ${MON_NAME} --public-addr "${MON_IP}:6789" --setuser ceph --setgroup ceph
 
@@ -206,6 +218,7 @@ function bootstrap_mds {
   ceph-mds ${CEPH_OPTS} -i 0 --setuser ceph --setgroup ceph
 }
 
+
 #######
 # RGW #
 #######
@@ -249,6 +262,7 @@ function bootstrap_demo_user {
   fi
 }
 
+
 #######
 # NFS #
 #######
@@ -262,6 +276,7 @@ function bootstrap_nfs {
   # start ganesha
   exec /usr/bin/ganesha.nfsd -F ${GANESHA_OPTIONS} ${GANESHA_EPOCH}
 }
+
 
 #######
 # API #
@@ -282,6 +297,7 @@ ENDHERE
   ceph-rest-api ${CEPH_OPTS} -n client.admin &
 }
 
+
 ##############
 # RBD MIRROR #
 ##############
@@ -291,11 +307,12 @@ function bootstrap_rbd_mirror {
   rbd-mirror ${CEPH_OPTS} -d --setuser ceph --setgroup ceph
 }
 
+
 #########
 # WATCH #
 #########
 
-mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
+create_mandatory_directories
 bootstrap_mon
 bootstrap_osd
 bootstrap_mds
