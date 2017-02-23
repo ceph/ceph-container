@@ -13,10 +13,13 @@ set -e
 : ${RESTAPI_LOG_LEVEL:=warning}
 : ${RESTAPI_LOG_FILE:=/var/log/ceph/ceph-restapi.log}
 
-CEPH_OPTS="--cluster ${CLUSTER}"
+CEPH_OPTS="--cluster ${CLUSTER} --setuser ceph --setgroup ceph"
 
 
-# FUNCTIONS
+#############
+# FUNCTIONS #
+#############
+
 # Log arguments with timestamp
 function log {
   if [ -z "$*" ]; then
@@ -28,10 +31,24 @@ function log {
   return 0
 }
 
-function create_socket_dir {
+function create_mandatory_directories {
+  # Let's create the bootstrap directories
+  for directory in osd mds rgw; do
+    mkdir -p /var/lib/ceph/bootstrap-$directory
+  done
+
+  # Let's create the ceph directories
+  for directory in mon osd mds radosgw tmp; do
+    mkdir -p /var/lib/ceph/$directory
+  done
+
+  # Create socket directory
   mkdir -p /var/run/ceph
-  chown ceph. /var/run/ceph
+
+  # Adjust the owner of all those directories
+  chown -R ceph. /var/run/ceph/ /var/lib/ceph/*
 }
+
 
 #######
 # MON #
@@ -142,22 +159,17 @@ ENDHERE
     # Make the monitor directory
     mkdir -p "$MON_DATA_DIR"
 
-    # Make user 'ceph' the owner of all the tree
-    chown ceph. /var/lib/ceph/bootstrap-{osd,mds,rgw}
-
     # Prepare the monitor daemon's directory with the map and keyring
-    chown -R ceph. /var/lib/ceph/mon
+    chown -R ceph. /var/lib/ceph/mon /tmp/${CLUSTER}.mon.keyring
     ceph-mon ${CEPH_OPTS} --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring --mon-data "$MON_DATA_DIR"
-    ceph-mon ${CEPH_OPTS} --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring --mon-data "$MON_DATA_DIR"
 
     # Clean up the temporary key
     rm /tmp/${CLUSTER}.mon.keyring
   fi
 
   # start MON
-  create_socket_dir
-  chown -R ceph. /var/lib/ceph/mon
-  ceph-mon ${CEPH_OPTS} -i ${MON_NAME} --public-addr "${MON_IP}:6789" --setuser ceph --setgroup ceph
+  chown -R ceph. /var/lib/ceph/mon /etc/ceph/
+  ceph-mon ${CEPH_OPTS} -i ${MON_NAME} --public-addr "${MON_IP}:6789"
 
   # change replica size
   ceph ${CEPH_OPTS} osd pool set rbd size 1
@@ -181,7 +193,7 @@ function bootstrap_osd {
 
   # start OSD
   chown -R ceph. /var/lib/ceph/osd/${CLUSTER}-0
-  ceph-osd ${CEPH_OPTS} -i 0 --setuser ceph --setgroup ceph
+  ceph-osd ${CEPH_OPTS} -i 0
 }
 
 
@@ -203,8 +215,9 @@ function bootstrap_mds {
   fi
 
   # start MDS
-  ceph-mds ${CEPH_OPTS} -i 0 --setuser ceph --setgroup ceph
+  ceph-mds ${CEPH_OPTS} -i 0
 }
+
 
 #######
 # RGW #
@@ -225,7 +238,7 @@ ENDHERE
   fi
 
   # start RGW
-  radosgw ${CEPH_OPTS} -c /etc/ceph/${CLUSTER}.conf -n client.radosgw.gateway -k /var/lib/ceph/radosgw/${RGW_NAME}/keyring --rgw-socket-path="" --rgw-frontends="civetweb port=${RGW_CIVETWEB_PORT}" --setuser ceph --setgroup ceph
+  radosgw ${CEPH_OPTS} -c /etc/ceph/${CLUSTER}.conf -n client.radosgw.gateway -k /var/lib/ceph/radosgw/${RGW_NAME}/keyring --rgw-socket-path="" --rgw-frontends="civetweb port=${RGW_CIVETWEB_PORT}"
 }
 
 function bootstrap_demo_user {
@@ -249,6 +262,7 @@ function bootstrap_demo_user {
   fi
 }
 
+
 #######
 # NFS #
 #######
@@ -260,8 +274,9 @@ function bootstrap_nfs {
   rpc.idmapd || return 0
 
   # start ganesha
-  exec /usr/bin/ganesha.nfsd -F ${GANESHA_OPTIONS} ${GANESHA_EPOCH}
+  ganesha.nfsd -F ${GANESHA_OPTIONS} ${GANESHA_EPOCH}
 }
+
 
 #######
 # API #
@@ -279,14 +294,25 @@ ENDHERE
 		fi
 
   # start ceph-rest-api
-  ceph-rest-api ${CEPH_OPTS} -n client.admin &
+  ceph-rest-api ${CEPH_OPTS} -c /etc/ceph/{{ cluster }}.conf -n client.admin &
 }
+
+
+##############
+# RBD MIRROR #
+##############
+
+function bootstrap_rbd_mirror {
+  # start rbd-mirror
+  rbd-mirror ${CEPH_OPTS}
+}
+
 
 #########
 # WATCH #
 #########
 
-mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
+create_mandatory_directories
 bootstrap_mon
 bootstrap_osd
 bootstrap_mds
@@ -294,5 +320,6 @@ bootstrap_rgw
 bootstrap_demo_user
 bootstrap_rest_api
 bootstrap_nfs
+bootstrap_rbd_mirror
 log "SUCCESS"
 exec ceph ${CEPH_OPTS} -w
