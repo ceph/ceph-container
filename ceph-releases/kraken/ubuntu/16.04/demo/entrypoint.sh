@@ -282,6 +282,15 @@ ENDHERE
   ceph-rest-api ${CEPH_OPTS} -n client.admin &
 }
 
+##############
+# RBD MIRROR #
+##############
+
+function bootstrap_rbd_mirror {
+  # start rbd-mirror
+  rbd-mirror ${CEPH_OPTS} -d --setuser ceph --setgroup ceph
+}
+
 #########
 # WATCH #
 #########
@@ -294,5 +303,6 @@ bootstrap_rgw
 bootstrap_demo_user
 bootstrap_rest_api
 bootstrap_nfs
+bootstrap_rbd_mirror
 log "SUCCESS"
 exec ceph ${CEPH_OPTS} -w
