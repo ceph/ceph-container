@@ -274,7 +274,7 @@ function bootstrap_nfs {
   rpc.idmapd || return 0
 
   # start ganesha
-  exec /usr/bin/ganesha.nfsd -F ${GANESHA_OPTIONS} ${GANESHA_EPOCH}
+  ganesha.nfsd -F ${GANESHA_OPTIONS} ${GANESHA_EPOCH}
 }
 
 
