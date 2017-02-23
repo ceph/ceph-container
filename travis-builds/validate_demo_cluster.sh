@@ -41,12 +41,17 @@ function test_demo_mds {
   return $(wait_for_daemon "docker exec ceph-demo ceph osd dump | grep -sq cephfs && docker exec ceph-demo ceph -s | grep -sq 'up:active'")
 }
 
+function test_demo_rbd_mirror {
+  return $(ps aux | grep -sq [r]bd-mirror)
+}
+
 # MAIN
 ceph_status # wait for the cluster to stabilize
 test_demo_mon
 test_demo_osd
 test_demo_rgw
 test_demo_mds
+test_demo_rbd_mirror
 ceph_status # wait again for the cluster to stabilize (mds pools)
 
 if ! docker ps | grep ceph-demo; then
