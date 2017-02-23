@@ -17,7 +17,6 @@ case "$KV_TYPE" in
    k8s|kubernetes)
       source /config.k8s.sh
       ;;
-
    *)
       source /config.static.sh
       ;;
@@ -30,6 +29,8 @@ esac
 
 # Normalize DAEMON to lowercase
 CEPH_DAEMON=$(echo ${CEPH_DAEMON} |tr '[:upper:]' '[:lower:]')
+
+create_mandatory_directories
 
 # If we are given a valid first argument, set the
 # CEPH_DAEMON variable from it

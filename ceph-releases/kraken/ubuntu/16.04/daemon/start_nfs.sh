@@ -11,7 +11,6 @@ function start_rpc {
 function start_nfs {
   get_config
   check_config
-  create_socket_dir
 
   # Init RPC
   start_rpc

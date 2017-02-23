@@ -4,7 +4,6 @@ set -e
 function start_rgw {
   get_config
   check_config
-  create_socket_dir
 
   if [ ${CEPH_GET_ADMIN_KEY} -eq "1" ]; then
     get_admin_key

@@ -46,3 +46,5 @@ fi
 
 CEPH_OPTS="--cluster ${CLUSTER}"
 MOUNT_OPTS="-t xfs -o noatime,inode64"
+
+export LC_ALL=C

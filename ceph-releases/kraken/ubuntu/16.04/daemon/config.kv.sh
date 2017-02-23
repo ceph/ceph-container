@@ -24,12 +24,9 @@ function get_mon_config {
 
   # making sure the root dirs are present for the confd to work with etcd
   if [[ "$KV_TYPE" == "etcd" ]]; then
-    etcdctl mkdir ${CLUSTER_PATH}/auth > /dev/null 2>&1  || log "key already exists"
-    etcdctl mkdir ${CLUSTER_PATH}/global > /dev/null 2>&1  || log "key already exists"
-    etcdctl mkdir ${CLUSTER_PATH}/mon > /dev/null 2>&1  || log "key already exists"
-    etcdctl mkdir ${CLUSTER_PATH}/mds > /dev/null 2>&1  || log "key already exists"
-    etcdctl mkdir ${CLUSTER_PATH}/osd > /dev/null 2>&1  || log "key already exists"
-    etcdctl mkdir ${CLUSTER_PATH}/client > /dev/null 2>&1  || log "key already exists"
+    for dir in auth global mon mds osd client; do
+      etcdctl mkdir ${CLUSTER_PATH}/$dir > /dev/null 2>&1  || log "'$dir' key already exists"
+    done
   fi
 
   log "Adding Mon Host - ${MON_NAME}"
@@ -45,22 +42,11 @@ function get_mon_config {
   if kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/monSetupComplete > /dev/null 2>&1 ; then
     log "Configuration found for cluster ${CLUSTER}. Writing to disk."
 
+    get_config
 
-    until confd -onetime -backend ${KV_TYPE} -node ${CONFD_NODE_SCHEMA}${KV_IP}:${KV_PORT} ${CONFD_KV_TLS} -prefix="/${CLUSTER_PATH}/" ; do
-      log "Waiting for confd to update templates..."
-      sleep 1
-    done
-
-    # Check/Create bootstrap key directories
-    mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
-
-    log "Adding Keyrings"
+    log "Adding mon/admin Keyrings"
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/monKeyring > /etc/ceph/${CLUSTER}.mon.keyring
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/${CLUSTER}.client.admin.keyring
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/bootstrapOsdKeyring > /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/bootstrapMdsKeyring > /var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/bootstrapRgwKeyring > /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
-
+    get_admin_key
 
     if [ ! -f /etc/ceph/monmap-${CLUSTER} ]; then
       log "Monmap is missing. Adding initial monmap..."
@@ -79,8 +65,8 @@ function get_mon_config {
     # Create initial Mon, keyring
     log "No configuration found for cluster ${CLUSTER}. Generating."
 
-    FSID=$(uuidgen)
-    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} put ${CLUSTER_PATH}/auth/fsid ${FSID}
+    local fsid=$(uuidgen)
+    kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} put ${CLUSTER_PATH}/auth/fsid ${fsid}
 
     until confd -onetime -backend ${KV_TYPE} -node ${CONFD_NODE_SCHEMA}${KV_IP}:${KV_PORT} ${CONFD_KV_TLS} -prefix="/${CLUSTER_PATH}/" ; do
       log "Waiting for confd to write initial templates..."
@@ -90,9 +76,6 @@ function get_mon_config {
     log "Creating Keyrings"
     ceph-authtool /etc/ceph/${CLUSTER}.client.admin.keyring --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
     ceph-authtool /etc/ceph/${CLUSTER}.mon.keyring --create-keyring --gen-key -n mon. --cap mon 'allow *'
-
-    # Create bootstrap key directories
-    mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
 
     # Generate the OSD bootstrap key
     ceph-authtool /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring --create-keyring --gen-key -n client.bootstrap-osd --cap mon 'allow profile bootstrap-osd'
@@ -105,7 +88,7 @@ function get_mon_config {
 
 
     log "Creating Monmap"
-    monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${FSID} /etc/ceph/monmap-${CLUSTER}
+    monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} /etc/ceph/monmap-${CLUSTER}
 
     log "Importing Keyrings and Monmap to KV"
     kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} put ${CLUSTER_PATH}/monKeyring - < /etc/ceph/${CLUSTER}.mon.keyring
@@ -140,12 +123,8 @@ function get_config {
     sleep 1
   done
 
-  # Check/Create bootstrap key directories
-  mkdir -p /var/lib/ceph/bootstrap-{osd,mds,rgw}
-
   log "Adding bootstrap keyrings"
   kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/bootstrapOsdKeyring > /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring
   kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/bootstrapMdsKeyring > /var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring
   kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} get ${CLUSTER_PATH}/bootstrapRgwKeyring > /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
-
 }

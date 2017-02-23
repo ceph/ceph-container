@@ -14,9 +14,6 @@ function osd_activate {
 
   JOURNAL_PART=$(dev_part ${OSD_DEVICE} 2)
 
-  mkdir -p /var/lib/ceph/osd
-  chown ceph. /var/lib/ceph/osd
-
   # resolve /dev/disk/by-* names
   ACTUAL_OSD_DEVICE=$(readlink -f ${OSD_DEVICE})
 

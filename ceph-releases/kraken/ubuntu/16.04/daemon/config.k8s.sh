@@ -7,8 +7,8 @@ function get_admin_key {
 }
 
 function get_mon_config {
-  # Get FSID from ceph.conf
-  FSID=$(ceph-conf --lookup fsid -c /etc/ceph/ceph.conf)
+  # Get fsid from ceph.conf
+  local fsid=$(ceph-conf --lookup fsid -c /etc/ceph/ceph.conf)
 
   timeout=10
   MONMAP_ADD=""
@@ -25,7 +25,7 @@ function get_mon_config {
   fi
 
   # Create a monmap with the Pod Names and IP
-  monmaptool --create ${MONMAP_ADD} --fsid ${FSID} /etc/ceph/monmap-${CLUSTER}
+  monmaptool --create ${MONMAP_ADD} --fsid ${fsid} /etc/ceph/monmap-${CLUSTER}
 
 }
 

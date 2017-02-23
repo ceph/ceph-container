@@ -8,15 +8,17 @@ function osd_directory {
     exit 1
   fi
 
-  # make sure ceph owns the directory
-  chown ceph. /var/lib/ceph/osd
+  if [ -z "${HOSTNAME}" ]; then
+    log "HOSTNAME not set; This will prevent to add an OSD into the CRUSH map"
+    exit 1
+  fi
 
   # check if anything is present, if not, create an osd and its directory
   if [[ -n "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
     log "Creating osd with ceph --cluster ${CLUSTER} osd create"
     OSD_ID=$(ceph --cluster ${CLUSTER} osd create)
     if [ "$OSD_ID" -eq "$OSD_ID" ] 2>/dev/null; then
-        log "OSD created with ID: ${OSD_ID}"
+      log "OSD created with ID: ${OSD_ID}"
     else
       log "OSD creation failed: ${OSD_ID}"
       exit 1
@@ -59,15 +61,11 @@ function osd_directory {
       chown ceph. /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
       chmod 0600 /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
       # add the osd to the crush map
-      if [ ! -n "${HOSTNAME}" ]; then
-        log "HOSTNAME not set; cannot add OSD to CRUSH map"
-        exit 1
-      fi
       OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
       ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
     fi
     echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID} --osd-journal ${OSD_J} -k /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring" | tee -a /etc/forego/${CLUSTER}/Procfile
   done
   log "SUCCESS"
-  exec /usr/local/bin/forego start -f /etc/forego/${CLUSTER}/Procfile
+  start_forego
 }

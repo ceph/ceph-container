@@ -2,17 +2,17 @@
 set -e
 
 function start_mon {
-  if [[ ! -n "$CEPH_PUBLIC_NETWORK" && ${NETWORK_AUTO_DETECT} -eq 0 ]]; then
-    log "ERROR- CEPH_PUBLIC_NETWORK must be defined as the name of the network for the OSDs"
-    exit 1
-  fi
+  if [[ ${NETWORK_AUTO_DETECT} -eq 0 ]]; then
+      if [[ ! -n "$CEPH_PUBLIC_NETWORK" ]]; then
+        log "ERROR- CEPH_PUBLIC_NETWORK must be defined as the name of the network for the OSDs"
+        exit 1
+      fi
 
-  if [[ ! -n "$MON_IP" && ${NETWORK_AUTO_DETECT} -eq 0 ]]; then
-    log "ERROR- MON_IP must be defined as the IP address of the monitor"
-    exit 1
-  fi
-
-  if [ ${NETWORK_AUTO_DETECT} -ne 0 ]; then
+      if [[ ! -n "$MON_IP" ]]; then
+        log "ERROR- MON_IP must be defined as the IP address of the monitor"
+        exit 1
+      fi
+  else
     NIC_MORE_TRAFFIC=$(grep -vE "lo:|face|Inter" /proc/net/dev | sort -n -k 2 | tail -1 | awk '{ sub (":", "", $1); print $1 }')
     if command -v ip; then
       if [ ${NETWORK_AUTO_DETECT} -eq 1 ]; then
@@ -47,8 +47,6 @@ function start_mon {
   get_mon_config
   # If we don't have a monitor keyring, this is a new monitor
   if [ ! -e "$MON_DATA_DIR/keyring" ]; then
-
-    create_socket_dir
 
     if [ ! -e /etc/ceph/${CLUSTER}.mon.keyring ]; then
       log "ERROR- /etc/ceph/${CLUSTER}.mon.keyring must exist.  You can extract it from your current monitor by running 'ceph auth get mon. -o /etc/ceph/${CLUSTER}.mon.keyring' or use a KV Store"
