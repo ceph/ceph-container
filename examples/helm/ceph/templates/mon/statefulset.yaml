@@ -1,0 +1,123 @@
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  labels:
+    version: v0.1.0
+    app: ceph
+    daemon: mon
+    release: {{ .Release.Name }}
+  name: ceph-mon
+spec:
+  serviceName: {{ .Values.service.mon.name | quote }}
+  replicas: {{ .Values.resources.mon.replicas }}
+  template:
+    metadata:
+      name: ceph-mon
+      labels:
+        version: v0.1.0
+        app: ceph
+        daemon: mon
+        release: {{ .Release.Name }}
+      annotations:
+        scheduler.alpha.kubernetes.io/affinity: >
+          {
+            "podAntiAffinity": {
+              "RequiredDuringSchedulingIgnoredDuringExecution": [{
+                "labelSelector": {
+                  "matchExpressions": [{
+                    "key": "daemon",
+                    "operator": "In",
+                    "values":["mon"]
+                  }]
+                },
+              "topologyKey": "kubernetes.io/hostname"
+              }]
+            }
+          }
+    spec:
+      serviceAccount: default
+      containers:
+        - name: main
+          image: {{ .Values.images.daemon }}
+          imagePullPolicy: {{ .Values.image_policy.pull }}
+          lifecycle:
+            preStop:
+                exec:
+                  command:
+                    - /remove-mon.sh
+          ports:
+            - containerPort: {{ .Values.service.mon.port }}
+          env:
+            - name: CEPH_DAEMON
+              value: MON
+            - name: KV_TYPE
+              value: k8s
+            - name: NETWORK_AUTO_DETECT
+              value: "0"
+            - name: MON_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: CLUSTER
+              value: {{ .Values.ceph.cluster }}
+          volumeMounts:
+            - name: ceph-conf
+              mountPath: /etc/ceph/ceph.conf
+              subPath: ceph.conf
+              readOnly: true
+            - name: ceph-client-admin-keyring
+              mountPath: /etc/ceph/ceph.client.admin.keyring
+              subPath: ceph.client.admin.keyring
+              readOnly: true
+            - name: ceph-mon-keyring
+              mountPath: /etc/ceph/ceph.mon.keyring
+              subPath: ceph.mon.keyring
+              readOnly: true
+            - name: ceph-bootstrap-osd-keyring
+              mountPath: /var/lib/ceph/bootstrap-osd/ceph.keyring
+              subPath: ceph.keyring
+              readOnly: true
+            - name: ceph-bootstrap-mds-keyring
+              mountPath: /var/lib/ceph/bootstrap-mds/ceph.keyring
+              subPath: ceph.keyring
+              readOnly: true
+            - name: ceph-bootstrap-rgw-keyring
+              mountPath: /var/lib/ceph/bootstrap-rgw/ceph.keyring
+              subPath: ceph.keyring
+              readOnly: true
+          livenessProbe:
+              tcpSocket:
+                port: {{ .Values.service.mon.port }}
+              initialDelaySeconds: 60
+              timeoutSeconds: 5
+          readinessProbe:
+              tcpSocket:
+                port: {{ .Values.service.mon.port }}
+              timeoutSeconds: 5
+          resources:
+            requests:
+              memory: {{ .Values.resources.mon.requests.memory | quote }}
+              cpu: {{ .Values.resources.mon.requests.cpu | quote }}
+            limits:
+              memory: {{ .Values.resources.mon.limits.memory | quote }}
+              cpu: {{ .Values.resources.mon.limits.cpu | quote }}
+      volumes:
+        - name: ceph-conf
+          configMap:
+            name: ceph-conf
+        - name: ceph-client-admin-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.admin }}
+        - name: ceph-mon-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.mon }}
+        - name: ceph-bootstrap-osd-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.osd }}
+        - name: ceph-bootstrap-mds-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.mds }}
+        - name: ceph-bootstrap-rgw-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.rgw }}

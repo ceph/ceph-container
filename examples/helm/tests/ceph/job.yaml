@@ -1,0 +1,33 @@
+---
+apiVersion: extensions/v1beta1
+kind: Job
+metadata:
+  labels:
+    version: v0.1.0
+    test: ceph
+  name: ceph-test-job
+spec:
+  template:
+    metadata:
+      labels:
+        version: v0.1.0
+        test: ceph
+      name: ceph-test-job
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: test
+          image: docker.io/alpine:latest
+          imagePullPolicy: Always
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              echo "Ceph PVC Mount Test Passed"
+          volumeMounts:
+            - name: ceph-mount
+              mountPath: /mnt/ceph
+      volumes:
+        - name: ceph-mount
+          persistentVolumeClaim:
+            claimName: ceph-test

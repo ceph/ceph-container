@@ -1,0 +1,88 @@
+---
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  labels:
+    version: v0.1.0
+    app: ceph
+    daemon: moncheck
+    release: {{ .Release.Name }}
+  name: ceph-mon-check
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: ceph-mon
+      labels:
+        version: v0.1.0
+        app: ceph
+        daemon: moncheck
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccount: default
+      containers:
+        - name: main
+          image: {{ .Values.images.daemon }}
+          imagePullPolicy: {{ .Values.image_policy.pull }}
+          ports:
+            - containerPort: {{ .Values.service.mon.port }}
+          env:
+            - name: CEPH_DAEMON
+              value: MON_HEALTH
+            - name: KV_TYPE
+              value: k8s
+            - name: MON_IP_AUTO_DETECT
+              value: "1"
+            - name: CLUSTER
+              value: {{ .Values.ceph.cluster }}
+          volumeMounts:
+            - name: ceph-conf
+              mountPath: /etc/ceph/ceph.conf
+              subPath: ceph.conf
+              readOnly: true
+            - name: ceph-client-admin-keyring
+              mountPath: /etc/ceph/ceph.client.admin.keyring
+              subPath: ceph.client.admin.keyring
+              readOnly: true
+            - name: ceph-mon-keyring
+              mountPath: /etc/ceph/ceph.mon.keyring
+              subPath: ceph.mon.keyring
+              readOnly: true
+            - name: ceph-bootstrap-osd-keyring
+              mountPath: /var/lib/ceph/bootstrap-osd/ceph.keyring
+              subPath: ceph.keyring
+              readOnly: true
+            - name: ceph-bootstrap-mds-keyring
+              mountPath: /var/lib/ceph/bootstrap-mds/ceph.keyring
+              subPath: ceph.keyring
+              readOnly: true
+            - name: ceph-bootstrap-rgw-keyring
+              mountPath: /var/lib/ceph/bootstrap-rgw/ceph.keyring
+              subPath: ceph.keyring
+              readOnly: true
+          resources:
+            requests:
+              memory: {{ .Values.resources.mon_check.requests.memory | quote }}
+              cpu: {{ .Values.resources.mon_check.requests.cpu | quote }}
+            limits:
+              memory: {{ .Values.resources.mon_check.limits.memory | quote }}
+              cpu: {{ .Values.resources.mon_check.limits.cpu | quote }}
+      volumes:
+        - name: ceph-conf
+          configMap:
+            name: ceph-conf
+        - name: ceph-client-admin-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.admin }}
+        - name: ceph-mon-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.mon }}
+        - name: ceph-bootstrap-osd-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.osd }}
+        - name: ceph-bootstrap-mds-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.mds }}
+        - name: ceph-bootstrap-rgw-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.rgw }}
