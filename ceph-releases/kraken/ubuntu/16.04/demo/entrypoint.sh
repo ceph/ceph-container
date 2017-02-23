@@ -13,7 +13,7 @@ set -e
 : ${RESTAPI_LOG_LEVEL:=warning}
 : ${RESTAPI_LOG_FILE:=/var/log/ceph/ceph-restapi.log}
 
-CEPH_OPTS="--cluster ${CLUSTER}"
+CEPH_OPTS="--cluster ${CLUSTER} --setuser ceph --setgroup ceph"
 
 
 #############
@@ -169,7 +169,7 @@ ENDHERE
 
   # start MON
   chown -R ceph. /var/lib/ceph/mon /etc/ceph/
-  ceph-mon ${CEPH_OPTS} -i ${MON_NAME} --public-addr "${MON_IP}:6789" --setuser ceph --setgroup ceph
+  ceph-mon ${CEPH_OPTS} -i ${MON_NAME} --public-addr "${MON_IP}:6789"
 
   # change replica size
   ceph ${CEPH_OPTS} osd pool set rbd size 1
@@ -193,7 +193,7 @@ function bootstrap_osd {
 
   # start OSD
   chown -R ceph. /var/lib/ceph/osd/${CLUSTER}-0
-  ceph-osd ${CEPH_OPTS} -i 0 --setuser ceph --setgroup ceph
+  ceph-osd ${CEPH_OPTS} -i 0
 }
 
 
@@ -215,7 +215,7 @@ function bootstrap_mds {
   fi
 
   # start MDS
-  ceph-mds ${CEPH_OPTS} -i 0 --setuser ceph --setgroup ceph
+  ceph-mds ${CEPH_OPTS} -i 0
 }
 
 
@@ -238,7 +238,7 @@ ENDHERE
   fi
 
   # start RGW
-  radosgw ${CEPH_OPTS} -c /etc/ceph/${CLUSTER}.conf -n client.radosgw.gateway -k /var/lib/ceph/radosgw/${RGW_NAME}/keyring --rgw-socket-path="" --rgw-frontends="civetweb port=${RGW_CIVETWEB_PORT}" --setuser ceph --setgroup ceph
+  radosgw ${CEPH_OPTS} -c /etc/ceph/${CLUSTER}.conf -n client.radosgw.gateway -k /var/lib/ceph/radosgw/${RGW_NAME}/keyring --rgw-socket-path="" --rgw-frontends="civetweb port=${RGW_CIVETWEB_PORT}"
 }
 
 function bootstrap_demo_user {
@@ -304,7 +304,7 @@ ENDHERE
 
 function bootstrap_rbd_mirror {
   # start rbd-mirror
-  rbd-mirror ${CEPH_OPTS} -d --setuser ceph --setgroup ceph
+  rbd-mirror ${CEPH_OPTS}
 }
 
 
