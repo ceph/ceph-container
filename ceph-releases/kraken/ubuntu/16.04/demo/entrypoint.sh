@@ -160,15 +160,15 @@ ENDHERE
     mkdir -p "$MON_DATA_DIR"
 
     # Prepare the monitor daemon's directory with the map and keyring
+    chown -R ceph. /var/lib/ceph/mon /tmp/${CLUSTER}.mon.keyring
     ceph-mon ${CEPH_OPTS} --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring --mon-data "$MON_DATA_DIR"
-    ceph-mon ${CEPH_OPTS} --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring --mon-data "$MON_DATA_DIR"
 
     # Clean up the temporary key
     rm /tmp/${CLUSTER}.mon.keyring
   fi
 
   # start MON
-  chown -R ceph. /var/lib/ceph/mon
+  chown -R ceph. /var/lib/ceph/mon /etc/ceph/
   ceph-mon ${CEPH_OPTS} -i ${MON_NAME} --public-addr "${MON_IP}:6789" --setuser ceph --setgroup ceph
 
   # change replica size
