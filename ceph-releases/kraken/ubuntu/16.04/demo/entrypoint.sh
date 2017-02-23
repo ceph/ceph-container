@@ -294,7 +294,7 @@ ENDHERE
 		fi
 
   # start ceph-rest-api
-  ceph-rest-api ${CEPH_OPTS} -n client.admin &
+  ceph-rest-api ${CEPH_OPTS} -c /etc/ceph/{{ cluster }}.conf -n client.admin &
 }
 
 
