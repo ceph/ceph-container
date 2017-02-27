@@ -31,6 +31,11 @@ function zap_device {
     for dm_uuid in $ceph_dm; do
       dmsetup --verbose --force wipe_table $dm_uuid || true
       dmsetup --verbose --force remove $dm_uuid || true
+      # erase all keyslots (remove encryption key)
+      crypsetup --verbose --batch-mode erase /dev/disk/by-partuuid/$dm_uuid
+      payload_offset=$(crypsetup luksDump /dev/disk/by-partuuid/$dm_uuid | awk '/Payload offset:/ { print $3 }')
+      # remove LUKS header
+      dd if=/dev/zero of=/dev/disk/by-partuuid/$dm_uuid bs=512 count=$payload_offset oflag=direct
     done
   fi
 
