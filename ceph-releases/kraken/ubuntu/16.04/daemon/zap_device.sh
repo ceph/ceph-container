@@ -34,8 +34,13 @@ function zap_device {
       # erase all keyslots (remove encryption key)
       cryptsetup --verbose --batch-mode erase /dev/disk/by-partuuid/$dm_uuid
       payload_offset=$(cryptsetup luksDump /dev/disk/by-partuuid/$dm_uuid | awk '/Payload offset:/ { print $3 }')
+      phys_sector_size=$(blockdev --getpbsz /dev/disk/by-partuuid/$dm_uuid)
+      if ! is_integer "$phys_sector_size"; then
+        # If the sector size isn't a number, let's default to 512
+        phys_sector_size=512
+      fi
       # remove LUKS header
-      dd if=/dev/zero of=/dev/disk/by-partuuid/$dm_uuid bs=512 count=$payload_offset oflag=direct
+      dd if=/dev/zero of=/dev/disk/by-partuuid/$dm_uuid bs=$phys_sector_size count=$payload_offset oflag=direct
     done
   fi
 
