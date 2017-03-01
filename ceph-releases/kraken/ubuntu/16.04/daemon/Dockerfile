@@ -37,7 +37,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget unz
     echo "deb http://ppa.launchpad.net/gluster/libntirpc/ubuntu xenial main" | tee /etc/apt/sources.list.d/libntirpc.list && \
     wget -q -O- 'https://download.ceph.com/keys/release.asc' | apt-key add - && \
     echo "deb http://download.ceph.com/debian-$CEPH_VERSION/ xenial main" | tee /etc/apt/sources.list.d/ceph-$CEPH_VERSION.list && \
-    apt-get update && apt-get install -y --force-yes ceph radosgw rbd-mirror nfs-ganesha nfs-ganesha-fsal && \
+    apt-get update && apt-get install -y --force-yes ceph radosgw rbd-mirror nfs-ganesha nfs-ganesha-fsal sharutils && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
 \
 # Install etcdctl
