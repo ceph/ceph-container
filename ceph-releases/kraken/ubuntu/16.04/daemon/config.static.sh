@@ -23,7 +23,7 @@ osd journal size = ${OSD_JOURNAL_SIZE}
 ENDHERE
 
     if command -v ip; then
-      if [[ ! -z "$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)" ]]; then
+      if [[ -n "$(ip -6 -o a | grep scope.global | awk '/eth/ { sub ("/..", "", $4); print $4 }' | head -n1)" ]]; then
         echo "ms_bind_ipv6 = true" >> /etc/ceph/${CLUSTER}.conf
         sed -i '/mon host/d' /etc/ceph/${CLUSTER}.conf
         echo "mon host = ${MON_IP}" >> /etc/ceph/${CLUSTER}.conf

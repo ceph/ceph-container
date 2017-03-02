@@ -3,12 +3,12 @@ set -e
 
 function start_mon {
   if [[ ${NETWORK_AUTO_DETECT} -eq 0 ]]; then
-      if [[ ! -n "$CEPH_PUBLIC_NETWORK" ]]; then
+      if [[ -z "$CEPH_PUBLIC_NETWORK" ]]; then
         log "ERROR- CEPH_PUBLIC_NETWORK must be defined as the name of the network for the OSDs"
         exit 1
       fi
 
-      if [[ ! -n "$MON_IP" ]]; then
+      if [[ -z "$MON_IP" ]]; then
         log "ERROR- MON_IP must be defined as the IP address of the monitor"
         exit 1
       fi
