@@ -17,7 +17,7 @@ function osd_directory {
   if [[ -n "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
     log "Creating osd with ceph --cluster ${CLUSTER} osd create"
     OSD_ID=$(ceph --cluster ${CLUSTER} osd create)
-    if [ "$OSD_ID" -eq "$OSD_ID" ] 2>/dev/null; then
+    if is_integer "$OSD_ID"; then
       log "OSD created with ID: ${OSD_ID}"
     else
       log "OSD creation failed: ${OSD_ID}"
