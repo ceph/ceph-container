@@ -44,7 +44,7 @@ function osd_disks {
     OSD_DEV="/dev/$(echo ${OSD_DISK}|sed 's/\(.*\):\(.*\)/\2/')"
 
     if [[ "$(parted --script ${OSD_DEV} print | egrep '^ 1.*ceph data')" ]]; then
-      if [[ ${OSD_FORCE_ZAP} -eq "1" ]]; then
+      if [[ ${OSD_FORCE_ZAP} -eq 1 ]]; then
         ceph-disk -v zap ${OSD_DEV}
       else
         log "ERROR- It looks like the device ($OSD_DEV) is an OSD, set OSD_FORCE_ZAP=1 to use this device anyway and zap its content"
