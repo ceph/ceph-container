@@ -39,7 +39,7 @@
 : ${GANESHA_OPTIONS:=""}
 : ${GANESHA_EPOCH:=""} # For restarting
 
-if [ ! -z "${KV_CA_CERT}" ]; then
+if [ -n "${KV_CA_CERT}" ]; then
   KV_TLS="--ca-cert=${KV_CA_CERT} --client-cert=${KV_CLIENT_CERT} --client-key=${KV_CLIENT_KEY}"
   CONFD_KV_TLS="-scheme=https -client-ca-keys=${KV_CA_CERT} -client-cert=${KV_CLIENT_CERT} -client-key=${KV_CLIENT_KEY}"
 fi

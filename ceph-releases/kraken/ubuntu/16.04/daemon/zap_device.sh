@@ -27,7 +27,7 @@ function zap_device {
 
   # look for Ceph encrypted partitions
   ceph_dm=$(blkid -t TYPE="crypto_LUKS" ${OSD_DEVICE}* -o value -s PARTUUID || true)
-  if [[ ! -z $ceph_dm ]]; then
+  if [[ -n $ceph_dm ]]; then
     for dm_uuid in $ceph_dm; do
       dmsetup --verbose --force wipe_table $dm_uuid || true
       dmsetup --verbose --force remove $dm_uuid || true

@@ -6,7 +6,7 @@ sed -r "s/@CLUSTER@/${CLUSTER:-ceph}/g" \
 
 # make sure etcd uses http or https as a prefix
 if [[ "$KV_TYPE" == "etcd" ]]; then
-  if [ ! -z "${KV_CA_CERT}" ]; then
+  if [ -n "${KV_CA_CERT}" ]; then
   	CONFD_NODE_SCHEMA="https://"
   else
     CONFD_NODE_SCHEMA="http://"
