@@ -1,6 +1,74 @@
 #!/bin/bash
 set -e
 
+IPV4_REGEXP='[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'
+IPV4_NETWORK_REGEXP="$IPV4_REGEXP/[0-9]\{1,2\}"
+
+function flat_to_ipv6 {
+  # Get a flat input like fe800000000000000042acfffe110003 and output fe80::0042:acff:fe11:0003
+  # This input usually comes from the ipv6_route or if_inet6 files from /proc
+
+  # First, split the string in set of 4 bytes with ":" as separator
+  value=$(echo "$@" | sed -e 's/.\{4\}/&:/g' -e '$s/\:$//')
+
+  # Let's remove the useless 0000 and "::"
+  value=${value//0000/:};
+  while $(echo $value | grep -q ":::"); do
+    value=${value//::/:};
+  done
+  echo $value
+}
+
+function get_ip {
+  NIC=$1
+  # IPv4 is the default unless we specify it
+  IP_VERSION=${2:-4}
+  # We should avoid reporting any IPv6 "scope local" interface that would make the ceph bind() call to fail
+  if is_available ip; then
+    ip -$IP_VERSION -o a s $NIC | grep "scope global" | awk '{ sub ("/..", "", $4); print $4 }' || true
+  else
+    case "$IP_VERSION" in
+      6)
+        # We don't want local scope, so let's remove field 4 if not 00
+        ip=$(flat_to_ipv6 $(grep $NIC /proc/net/if_inet6 | awk '$4==00 {print $1}'))
+        # IPv6 IPs should be surrounded by brackets to let ceph-monmap being happy
+        echo "[$ip]"
+        ;;
+      *)
+        grep -o "$IPV4_REGEXP" /proc/net/fib_trie | grep -vEw "^127|255$|0$" | head -1
+        ;;
+    esac
+  fi
+}
+
+function get_network {
+  NIC=$1
+  # IPv4 is the default unless we specify it
+  IP_VERSION=${2:-4}
+
+  case "$IP_VERSION" in
+    6)
+      if is_available ip; then
+        ip -$IP_VERSION route show dev $NIC | grep proto | awk '{ print $1 }' | grep -v default | grep -vi ^fe80 || true
+      else
+        # We don't want the link local routes
+        line=$(grep $NIC /proc/1/task/1/net/ipv6_route | awk '$2==40' | grep -v ^fe80 || true)
+        base=$(echo $line | awk '{ print $1 }')
+        base=$(flat_to_ipv6 $base)
+        mask=$(echo $line | awk '{ print $2 }')
+        echo "$base/$((16#$mask))"
+      fi
+      ;;
+    *)
+      if is_available ip; then
+        ip -$IP_VERSION route show dev $NIC | grep proto | awk '{ print $1 }' | grep -v default | grep "/" || true
+      else
+        grep -o "$IPV4_NETWORK_REGEXP" /proc/net/fib_trie | grep -vE "^127|^0" | head -1
+      fi
+      ;;
+  esac
+}
+
 function start_mon {
   if [[ ${NETWORK_AUTO_DETECT} -eq 0 ]]; then
       if [[ -z "$CEPH_PUBLIC_NETWORK" ]]; then
@@ -14,28 +82,20 @@ function start_mon {
       fi
   else
     NIC_MORE_TRAFFIC=$(grep -vE "lo:|face|Inter" /proc/net/dev | sort -n -k 2 | tail -1 | awk '{ sub (":", "", $1); print $1 }')
-    if command -v ip; then
-      if [ ${NETWORK_AUTO_DETECT} -eq 1 ]; then
-        MON_IP=$(ip -6 -o a s $NIC_MORE_TRAFFIC | awk '{ sub ("/..", "", $4); print $4 }')
-        CEPH_PUBLIC_NETWORK=$(ip -6 r | grep $NIC_MORE_TRAFFIC | awk '{ print $1 }')
-        if [ -z "$MON_IP" ]; then
-          MON_IP=$(ip -4 -o a s $NIC_MORE_TRAFFIC | awk '{ sub ("/..", "", $4); print $4 }')
-          CEPH_PUBLIC_NETWORK=$(ip r | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/[0-9]\{1,2\}' | head -1)
-        fi
-      elif [ ${NETWORK_AUTO_DETECT} -eq 4 ]; then
-        MON_IP=$(ip -4 -o a s $NIC_MORE_TRAFFIC | awk '{ sub ("/..", "", $4); print $4 }')
-        CEPH_PUBLIC_NETWORK=$(ip r | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/[0-9]\{1,2\}' | head -1)
-      elif [ ${NETWORK_AUTO_DETECT} -eq 6 ]; then
-        MON_IP=$(ip -6 -o a s $NIC_MORE_TRAFFIC | awk '{ sub ("/..", "", $4); print $4 }')
-        CEPH_PUBLIC_NETWORK=$(ip r | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/[0-9]\{1,2\}' | head -1)
+    IP_VERSION=4
+    if [ ${NETWORK_AUTO_DETECT} -gt 1 ]; then
+      MON_IP=$(get_ip ${NIC_MORE_TRAFFIC} ${NETWORK_AUTO_DETECT})
+      CEPH_PUBLIC_NETWORK=$(get_network ${NIC_MORE_TRAFFIC} ${NETWORK_AUTO_DETECT})
+      IP_VERSION=${NETWORK_AUTO_DETECT}
+    else # Means -eq 1
+      MON_IP=$(get_ip ${NIC_MORE_TRAFFIC} 6)
+      CEPH_PUBLIC_NETWORK=$(get_network ${NIC_MORE_TRAFFIC} 6)
+      IP_VERSION=6
+      if [ -z "$MON_IP" ]; then
+        MON_IP=$(get_ip ${NIC_MORE_TRAFFIC})
+        CEPH_PUBLIC_NETWORK=$(get_network ${NIC_MORE_TRAFFIC})
+        IP_VERSION=4
       fi
-    # best effort, only works with ipv4
-    # it is tough to find the ip from the nic only using /proc
-    # so we just take on of the addresses available
-    # which is fairely safe given that containers usually have a single nic
-    else
-      MON_IP=$(grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}' /proc/net/fib_trie | grep -vEw "^127|255$|0$" | head -1)
-      CEPH_PUBLIC_NETWORK=$(grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/[0-9]\{1,2\}' /proc/net/fib_trie | grep -vE "^127|^0" | head -1)
     fi
   fi
 
@@ -44,10 +104,10 @@ function start_mon {
     exit 1
   fi
 
-  get_mon_config
+  get_mon_config $IP_VERSION
+
   # If we don't have a monitor keyring, this is a new monitor
   if [ ! -e "$MON_DATA_DIR/keyring" ]; then
-
     if [ ! -e /etc/ceph/${CLUSTER}.mon.keyring ]; then
       log "ERROR- /etc/ceph/${CLUSTER}.mon.keyring must exist.  You can extract it from your current monitor by running 'ceph auth get mon. -o /etc/ceph/${CLUSTER}.mon.keyring' or use a KV Store"
       exit 1
