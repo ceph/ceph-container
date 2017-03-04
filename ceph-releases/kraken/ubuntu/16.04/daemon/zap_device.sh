@@ -29,13 +29,20 @@ function zap_device {
   ceph_dm=$(blkid -t TYPE="crypto_LUKS" ${OSD_DEVICE}* -o value -s PARTUUID || true)
   if [[ -n $ceph_dm ]]; then
     for dm_uuid in $ceph_dm; do
+      dm_path="/dev/disk/by-partuuid/$dm_uuid"
       dmsetup --verbose --force wipe_table $dm_uuid || true
       dmsetup --verbose --force remove $dm_uuid || true
+
       # erase all keyslots (remove encryption key)
-      cryptsetup --verbose --batch-mode erase /dev/disk/by-partuuid/$dm_uuid
-      payload_offset=$(cryptsetup luksDump /dev/disk/by-partuuid/$dm_uuid | awk '/Payload offset:/ { print $3 }')
+      cryptsetup --verbose --batch-mode erase $dm_path
+      payload_offset=$(cryptsetup luksDump $dm_path | awk '/Payload offset:/ { print $3 }')
+      phys_sector_size=$(blockdev --getpbsz $dm_path)
+      if ! is_integer "$phys_sector_size"; then
+        # If the sector size isn't a number, let's default to 512
+        phys_sector_size=512
+      fi
       # remove LUKS header
-      dd if=/dev/zero of=/dev/disk/by-partuuid/$dm_uuid bs=512 count=$payload_offset oflag=direct
+      dd if=/dev/zero of=$dm_path bs=$phys_sector_size count=$payload_offset oflag=direct
     done
   fi
 
