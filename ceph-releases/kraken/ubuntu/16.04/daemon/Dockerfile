@@ -1,10 +1,4 @@
-# DOCKER-VERSION 1.0.0
-#
-# Ceph Daemon
-#
-# VERSION 0.0.1
-
-# CEPH BASE IMAGE
+# CEPH DAEMON IMAGE
 # CEPH VERSION: Kraken
 # CEPH VERSION DETAIL: 11.1.x
 
@@ -24,7 +18,7 @@ ADD https://bin.equinox.io/c/ekMN3bCZFUn/forego-stable-linux-amd64.tgz /forego.t
 # install prerequisites
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget unzip uuid-runtime python-setuptools udev dmsetup && \
 \
-# install ceph and ganesha
+# Install ceph, ganesha and etcd
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3FE869A9 && \
     echo "deb http://ppa.launchpad.net/gluster/nfs-ganesha/ubuntu xenial main" | tee /etc/apt/sources.list.d/nfs-ganesha.list && \
     echo "deb http://ppa.launchpad.net/gluster/libntirpc/ubuntu xenial main" | tee /etc/apt/sources.list.d/libntirpc.list && \
