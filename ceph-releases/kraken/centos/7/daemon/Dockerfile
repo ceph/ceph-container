@@ -7,7 +7,6 @@ MAINTAINER Sébastien Han "seb@redhat.com"
 
 ENV CEPH_VERSION kraken
 ENV CONFD_VERSION 0.10.0
-ENV KUBECTL_VERSION v1.4.0
 
 # Install prerequisites
 RUN yum install -y unzip
@@ -16,15 +15,11 @@ RUN yum install -y unzip
 RUN rpm --import 'https://download.ceph.com/keys/release.asc'
 RUN rpm -Uvh http://download.ceph.com/rpm-${CEPH_VERSION}/el7/noarch/ceph-release-1-1.el7.noarch.rpm
 RUN yum install -y epel-release && yum clean all
-RUN yum install -y ceph ceph-radosgw rbd-mirror nfs-ganesha-rgw nfs-ganesha-vfs nfs-ganesha-ceph device-mapper sharutils etcd && yum clean all
+RUN yum install -y ceph ceph-radosgw rbd-mirror nfs-ganesha-rgw nfs-ganesha-vfs nfs-ganesha-ceph device-mapper sharutils etcd kubernetes-client && yum clean all
 
 # Install confd
 ADD https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-linux-amd64 /usr/local/bin/confd
 RUN chmod +x /usr/local/bin/confd && mkdir -p /etc/confd/conf.d && mkdir -p /etc/confd/templates
-
-# Install kubectl
-ADD https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl /usr/local/bin/kubectl
-RUN chmod +x /usr/local/bin/kubectl
 
 ADD https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 /usr/local/bin/jq
 RUN chmod +x /usr/local/bin/jq
