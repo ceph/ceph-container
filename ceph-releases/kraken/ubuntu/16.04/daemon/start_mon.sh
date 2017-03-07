@@ -145,5 +145,5 @@ function start_mon {
   log "SUCCESS"
 
   # start MON
-  exec /usr/bin/ceph-mon ${CEPH_OPTS} -d -i ${MON_NAME} --public-addr "${MON_IP}:6789" --setuser ceph --setgroup ceph --mon-data "$MON_DATA_DIR"
+  exec /usr/bin/ceph-mon ${CEPH_OPTS} -d -i ${MON_NAME} --setuser ceph --setgroup ceph --mon-data "$MON_DATA_DIR"
 }
