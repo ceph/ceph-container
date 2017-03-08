@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.mon.name | quote }}
+  labels:
+    app: ceph
+    daemon: mon
+    release: {{ .Release.Name }}
+spec:
+  ports:
+  - port: {{ .Values.service.mon.port }}
+    protocol: TCP
+    targetPort: {{ .Values.service.mon.port }}
+  selector:
+    app: ceph
+    daemon: mon
+    release: {{ .Release.Name }}
+  clusterIP: None

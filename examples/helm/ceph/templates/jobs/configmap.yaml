@@ -1,0 +1,113 @@
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "ceph-key-gen"
+data:
+  template.admin.keyring: |
+    [client.admin]
+      key = {{"{{"}} key {{"}}"}}
+      auid = 0
+      caps mds = "allow"
+      caps mon = "allow *"
+      caps osd = "allow *"
+  template.mon.keyring: |
+    [mon.]
+      key = {{"{{"}} key {{"}}"}}
+      caps mon = "allow *"
+  template.bootstrap.keyring.mds: |
+    [client.bootstrap-mds]
+      key = {{"{{"}} key {{"}}"}}
+      caps mon = "allow profile bootstrap-mds"
+  template.bootstrap.keyring.rgw: |
+    [client.bootstrap-rgw]
+      key = {{"{{"}} key {{"}}"}}
+      caps mon = "allow profile bootstrap-rgw"
+  template.bootstrap.keyring.osd: |
+    [client.bootstrap-osd]
+      key = {{"{{"}} key {{"}}"}}
+      caps mon = "allow profile bootstrap-osd"
+  ceph-key.py: |
+    #!/bin/python
+    import os
+    import struct
+    import time
+    import base64
+
+    key = os.urandom(16)
+    header = struct.pack(
+        '<hiih',
+        1,                 # le16 type: CEPH_CRYPTO_AES
+        int(time.time()),  # le32 created: seconds
+        0,                 # le32 created: nanoseconds,
+        len(key),          # le16: len(key)
+    )
+    print(base64.b64encode(header + key).decode('ascii'))
+  ceph-keys.sh: |
+    #!/bin/bash
+    set -e
+    function ceph_gen_key () {
+      python ${CEPH_GEN_DIR}/ceph-key.py
+    }
+    function kube_ceph_keyring_gen () {
+      CEPH_KEY=$1
+      CEPH_KEY_TEMPLATE=$2
+      sed "s|{{"{{"}} key {{"}}"}}|${CEPH_KEY}|" ${CEPH_TEMPLATES_DIR}/${CEPH_KEY_TEMPLATE} | base64 | tr -d '\n'
+    }
+
+    CEPH_CLIENT_KEY=$(ceph_gen_key)
+
+
+    function create_kube_key () {
+      CEPH_KEYRING=$1
+      CEPH_KEYRING_NAME=$2
+      CEPH_KEYRING_TEMPLATE=$3
+      KUBE_SECRET_NAME=$4
+
+      if ! kubectl get --namespace {{ .Release.Namespace }} secrets ${KUBE_SECRET_NAME}; then
+        {
+          cat <<EOF
+    ---
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${KUBE_SECRET_NAME}
+    type: Opaque
+    data:
+      ${CEPH_KEYRING_NAME}: |
+        $( kube_ceph_keyring_gen ${CEPH_KEYRING} ${CEPH_KEYRING_TEMPLATE} )
+    EOF
+        } | kubectl create --namespace {{ .Release.Namespace }} -f -
+      fi
+    }
+    #create_kube_key <ceph_key> <ceph_keyring_name> <ceph_keyring_template> <kube_secret_name>
+    create_kube_key ${CEPH_CLIENT_KEY} ceph.client.admin.keyring admin.keyring {{ .Values.secrets.keyrings.admin }}
+    create_kube_key $(ceph_gen_key) ceph.mon.keyring mon.keyring {{ .Values.secrets.keyrings.mon }}
+    create_kube_key $(ceph_gen_key) ceph.keyring bootstrap.keyring.osd {{ .Values.secrets.keyrings.osd }}
+    create_kube_key $(ceph_gen_key) ceph.keyring bootstrap.keyring.mds {{ .Values.secrets.keyrings.mds }}
+    create_kube_key $(ceph_gen_key) ceph.keyring bootstrap.keyring.rgw {{ .Values.secrets.keyrings.rgw }}
+
+
+    function create_kube_storage_key () {
+      CEPH_KEYRING=$1
+      KUBE_SECRET_NAME=$2
+
+      if ! kubectl get --namespace {{ .Release.Namespace }} secrets ${KUBE_SECRET_NAME}; then
+        {
+          cat <<EOF
+    ---
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${KUBE_SECRET_NAME}
+    type: kubernetes.io/rbd
+    data:
+      key: |
+        $( echo ${CEPH_KEYRING} | base64 | tr -d '\n' )
+    EOF
+        } | kubectl create --namespace {{ .Release.Namespace }} -f -
+      fi
+    }
+    #create_kube_storage_key <ceph_key> <kube_secret_name>
+    create_kube_storage_key ${CEPH_CLIENT_KEY} {{ .Values.storageclass.admin_secret_name }}

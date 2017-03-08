@@ -1,0 +1,81 @@
+apiVersion: extensions/v1beta1
+kind: Job
+metadata:
+  labels:
+    version: v0.1.0
+    app: ceph
+    release: {{ .Release.Name }}
+    daemon: secret-generator
+  name: ceph-secret-generator
+spec:
+  template:
+    metadata:
+      labels:
+        version: v0.1.0
+        app: ceph
+        release: {{ .Release.Name }}
+        daemon: secret-generator
+      name: ceph-secret-generator
+    spec:
+      serviceAccount: default
+      restartPolicy: OnFailure
+      containers:
+        - name: main
+          image: docker.io/kollakube/centos-binary-ceph-init-k8s:4.0.0
+          imagePullPolicy: Always
+          env:
+            - name: CEPH_GEN_DIR
+              value: /opt/ceph
+            - name: CEPH_TEMPLATES_DIR
+              value: /opt/ceph/templates
+          command:
+            - bash
+            - /opt/ceph/ceph-keys.sh
+          volumeMounts:
+            - name: ceph-key-gen
+              mountPath: /opt/ceph/ceph-keys.sh
+              subPath: ceph-keys.sh
+              readOnly: true
+            - name: ceph-key-gen
+              mountPath: /opt/ceph/ceph-key.py
+              subPath: ceph-key.py
+              readOnly: true
+            - name: ceph-key-gen
+              mountPath: /opt/ceph/templates/admin.keyring
+              subPath: admin.keyring
+              readOnly: true
+            - name: ceph-key-gen
+              mountPath: /opt/ceph/templates/mon.keyring
+              subPath: mon.keyring
+              readOnly: true
+            - name: ceph-key-gen
+              mountPath: /opt/ceph/templates/bootstrap.keyring.mds
+              subPath: bootstrap.keyring.mds
+              readOnly: true
+            - name: ceph-key-gen
+              mountPath: /opt/ceph/templates/bootstrap.keyring.rgw
+              subPath: bootstrap.keyring.rgw
+              readOnly: true
+            - name: ceph-key-gen
+              mountPath: /opt/ceph/templates/bootstrap.keyring.osd
+              subPath: bootstrap.keyring.osd
+              readOnly: true
+      volumes:
+        - name: ceph-key-gen
+          configMap:
+            name: ceph-key-gen
+            items:
+              - key: ceph-key.py
+                path: ceph-key.py
+              - key: ceph-keys.sh
+                path: ceph-keys.sh
+              - key: template.admin.keyring
+                path: admin.keyring
+              - key: template.mon.keyring
+                path: mon.keyring
+              - key: template.bootstrap.keyring.mds
+                path: bootstrap.keyring.mds
+              - key: template.bootstrap.keyring.rgw
+                path: bootstrap.keyring.rgw
+              - key: template.bootstrap.keyring.osd
+                path: bootstrap.keyring.osd

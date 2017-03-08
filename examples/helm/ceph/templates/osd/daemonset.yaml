@@ -1,0 +1,116 @@
+---
+kind: DaemonSet
+apiVersion: extensions/v1beta1
+metadata:
+  name: ceph-osd
+  labels:
+    version: v0.1.0
+    app: ceph
+    daemon: osd
+    release: {{ .Release.Name }}
+spec:
+  template:
+    metadata:
+      labels:
+        version: v0.1.0
+        app: ceph
+        daemon: osd
+        release: {{ .Release.Name }}
+    spec:
+      nodeSelector:
+        {{ .Values.labels.node_selector_key }}: {{ .Values.labels.node_selector_value }}
+      containers:
+        - name: main
+          image: {{ .Values.images.daemon }}
+          imagePullPolicy: {{ .Values.image_policy.pull }}
+          volumeMounts:
+            - name: devices
+              mountPath: /dev
+              readOnly: false
+            - name: ceph
+              mountPath: /var/lib/ceph
+              readOnly: false
+            - name: osd-directory
+              mountPath: /var/lib/ceph/osd
+              readOnly: false
+            - name: ceph-conf
+              mountPath: /etc/ceph/ceph.conf
+              subPath: ceph.conf
+              readOnly: true
+            - name: ceph-client-admin-keyring
+              mountPath: /etc/ceph/ceph.client.admin.keyring
+              subPath: ceph.client.admin.keyring
+              readOnly: true
+            - name: ceph-mon-keyring
+              mountPath: /etc/ceph/ceph.mon.keyring
+              subPath: ceph.mon.keyring
+              readOnly: true
+            - name: ceph-bootstrap-osd-keyring
+              mountPath: /var/lib/ceph/bootstrap-osd/ceph.keyring
+              subPath: ceph.keyring
+              readOnly: true
+            - name: ceph-bootstrap-mds-keyring
+              mountPath: /var/lib/ceph/bootstrap-mds/ceph.keyring
+              subPath: ceph.keyring
+              readOnly: true
+            - name: ceph-bootstrap-rgw-keyring
+              mountPath: /var/lib/ceph/bootstrap-rgw/ceph.keyring
+              subPath: ceph.keyring
+              readOnly: true
+          securityContext:
+            privileged: true
+          env:
+            - name: CEPH_DAEMON
+              value: osd_directory
+            - name: KV_TYPE
+              value: k8s
+            - name: CLUSTER
+              value: {{ .Values.ceph.cluster }}
+            - name: CEPH_GET_ADMIN_KEY
+              value: "1"
+          livenessProbe:
+              tcpSocket:
+                port: 6800
+              initialDelaySeconds: 60
+              timeoutSeconds: 5
+          readinessProbe:
+              tcpSocket:
+                port: 6800
+              timeoutSeconds: 5
+          resources:
+            requests:
+              memory: {{ .Values.resources.osd.requests.memory | quote }}
+              cpu: {{ .Values.resources.osd.requests.cpu | quote }}
+            limits:
+              memory: {{ .Values.resources.osd.limits.memory | quote }}
+              cpu: {{ .Values.resources.osd.limits.cpu | quote }}
+      volumes:
+        - name: devices
+          hostPath:
+            path: /dev
+        - name: ceph
+          # emptyDir: {}
+          hostPath:
+            path: {{ .Values.ceph.storage.var_directory }}
+        - name: osd-directory
+          # emptyDir: {}
+          hostPath:
+            path: {{ .Values.ceph.storage.osd_directory }}
+        - name: ceph-conf
+          configMap:
+            name: ceph-conf
+        - name: ceph-client-admin-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.admin }}
+        - name: ceph-mon-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.mon }}
+        - name: ceph-bootstrap-osd-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.osd }}
+        - name: ceph-bootstrap-mds-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.mds }}
+        - name: ceph-bootstrap-rgw-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.rgw }}
