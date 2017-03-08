@@ -39,6 +39,11 @@ function prefix_length {
   done
 }
 
+# Test if a command line tool is available
+function is_available {
+  command -v $@ &>/dev/null
+}
+
 # create the mandatory directories
 function create_mandatory_directories {
   # Let's create the bootstrap directories
