@@ -1,4 +1,5 @@
 : ${CLUSTER:=ceph}
+: ${CLUSTER_PATH:=ceph-config/${CLUSTER}} # For KV config
 : ${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}
 : ${CEPH_DAEMON:=${1}} # default daemon to first argument
 : ${CEPH_GET_ADMIN_KEY:=0}
@@ -39,12 +40,19 @@
 : ${GANESHA_OPTIONS:=""}
 : ${GANESHA_EPOCH:=""} # For restarting
 
-if [ -n "${KV_CA_CERT}" ]; then
-  KV_TLS="--ca-cert=${KV_CA_CERT} --client-cert=${KV_CLIENT_CERT} --client-key=${KV_CLIENT_KEY}"
-  CONFD_KV_TLS="-scheme=https -client-ca-keys=${KV_CA_CERT} -client-cert=${KV_CLIENT_CERT} -client-key=${KV_CLIENT_KEY}"
-fi
-
 CEPH_OPTS="--cluster ${CLUSTER}"
 MOUNT_OPTS="-t xfs -o noatime,inode64"
+ETCDCTL_OPT="--peers ${KV_IP}:${KV_PORT}"
+
+# make sure etcd uses http or https as a prefix
+if [[ "$KV_TYPE" == "etcd" ]]; then
+  if [ -n "${KV_CA_CERT}" ]; then
+  	CONFD_NODE_SCHEMA="https://"
+    KV_TLS="--ca-file=${KV_CA_CERT} --cert-file=${KV_CLIENT_CERT} --key-file=${KV_CLIENT_KEY}"
+    CONFD_KV_TLS="-scheme=https -client-ca-keys=${KV_CA_CERT} -client-cert=${KV_CLIENT_CERT} -client-key=${KV_CLIENT_KEY}"
+  else
+    CONFD_NODE_SCHEMA="http://"
+  fi
+fi
 
 export LC_ALL=C

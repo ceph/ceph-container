@@ -7,11 +7,10 @@ function kv {
   shift
   VALUE="$*"
   log "adding key ${KEY} with value ${VALUE} to KV store"
-  kviator --kvstore=${KV_TYPE} --client=${KV_IP}:${KV_PORT} ${KV_TLS} cas ${CLUSTER_PATH}"${KEY}" "${VALUE}" || log "value is already set"
+  etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}"${KEY}" "${VALUE}" || log "value is already set"
 }
 
 function populate_kv {
-    CLUSTER_PATH=ceph-config/${CLUSTER}
     case "$KV_TYPE" in
        etcd|consul)
           # if ceph.defaults found in /etc/ceph/ use that
