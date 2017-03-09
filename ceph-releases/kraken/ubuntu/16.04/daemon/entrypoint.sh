@@ -28,7 +28,7 @@ esac
 ###############
 
 # Normalize DAEMON to lowercase
-CEPH_DAEMON=$(echo ${CEPH_DAEMON} |tr '[:upper:]' '[:lower:]')
+CEPH_DAEMON=$(to_lowercase ${CEPH_DAEMON})
 
 create_mandatory_directories
 
