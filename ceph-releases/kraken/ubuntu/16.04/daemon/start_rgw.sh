@@ -13,9 +13,6 @@ function start_rgw {
   # Check to see if our RGW has been initialized
   if [ ! -e /var/lib/ceph/radosgw/${RGW_NAME}/keyring ]; then
 
-    mkdir -p /var/lib/ceph/radosgw/${RGW_NAME}
-    chown ceph. /var/lib/ceph/radosgw/${RGW_NAME}
-
     if [ ! -e /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring ]; then
       log "ERROR- /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-rgw -o /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring'"
       exit 1
@@ -47,7 +44,6 @@ function create_rgw_user {
     exit 1
   fi
 
-  mkdir -p "/var/lib/ceph/radosgw/${RGW_NAME}"
   mv /var/lib/ceph/radosgw/keyring /var/lib/ceph/radosgw/${RGW_NAME}/keyring
 
   USER_KEY=""
