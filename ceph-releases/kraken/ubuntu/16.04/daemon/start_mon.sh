@@ -126,10 +126,6 @@ function start_mon {
     ceph-authtool /tmp/${CLUSTER}.mon.keyring --import-keyring /etc/ceph/${CLUSTER}.mon.keyring
     chown ceph. /tmp/${CLUSTER}.mon.keyring
 
-    # Make the monitor directory
-    mkdir -p "$MON_DATA_DIR"
-    chown ceph. "$MON_DATA_DIR"
-
     # Prepare the monitor daemon's directory with the map and keyring
     ceph-mon --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring --mon-data "$MON_DATA_DIR"
 

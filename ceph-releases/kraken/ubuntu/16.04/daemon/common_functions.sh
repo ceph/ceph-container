@@ -56,6 +56,9 @@ function create_mandatory_directories {
     mkdir -p /var/lib/ceph/$directory
   done
 
+  # Make the monitor directory
+  mkdir -p "$MON_DATA_DIR"
+
   # Create socket directory
   mkdir -p /var/run/ceph
 
