@@ -31,11 +31,12 @@ function start_rgw {
 
   log "SUCCESS"
 
+  RGW_FRONTENDS="civetweb port=$RGW_CIVETWEB_PORT"
   if [ "$RGW_REMOTE_CGI" -eq 1 ]; then
-    /usr/bin/radosgw -d ${CEPH_OPTS} -n client.rgw.${RGW_NAME} -k /var/lib/ceph/radosgw/$RGW_NAME/keyring --rgw-socket-path="" --rgw-zonegroup="$RGW_ZONEGROUP" --rgw-zone="$RGW_ZONE" --rgw-frontends="fastcgi socket_port=$RGW_REMOTE_CGI_PORT socket_host=$RGW_REMOTE_CGI_HOST" --setuser ceph --setgroup ceph
-  else
-    /usr/bin/radosgw -d ${CEPH_OPTS} -n client.rgw.${RGW_NAME} -k /var/lib/ceph/radosgw/$RGW_NAME/keyring --rgw-socket-path="" --rgw-zonegroup="$RGW_ZONEGROUP" --rgw-zone="$RGW_ZONE" --rgw-frontends="civetweb port=$RGW_CIVETWEB_PORT" --setuser ceph --setgroup ceph
+    RGW_FRONTENDS="fastcgi socket_port=$RGW_REMOTE_CGI_PORT socket_host=$RGW_REMOTE_CGI_HOST"
   fi
+
+  exec /usr/bin/radosgw -d ${CEPH_OPTS} -n client.rgw.${RGW_NAME} -k /var/lib/ceph/radosgw/$RGW_NAME/keyring --rgw-socket-path="" --rgw-zonegroup="$RGW_ZONEGROUP" --rgw-zone="$RGW_ZONE" --rgw-frontends="$RGW_FRONTENDS" --setuser ceph --setgroup ceph
 }
 
 function create_rgw_user {
@@ -49,9 +50,10 @@ function create_rgw_user {
   mkdir -p "/var/lib/ceph/radosgw/${RGW_NAME}"
   mv /var/lib/ceph/radosgw/keyring /var/lib/ceph/radosgw/${RGW_NAME}/keyring
 
-  if [ -z "${RGW_USER_SECRET_KEY}" ]; then
-    radosgw-admin user create --uid=${RGW_USER} --display-name="RGW ${RGW_USER} User" -c /etc/ceph/${CLUSTER}.conf
-  else
-    radosgw-admin user create --uid=${RGW_USER} --access-key=${RGW_USER_ACCESS_KEY} --secret=${RGW_USER_SECRET_KEY} --display-name="RGW ${RGW_USER} User" -c /etc/ceph/${CLUSTER}.conf
+  USER_KEY=""
+  if [ -n "${RGW_USER_SECRET_KEY}" ]; then
+    USER_KEY="--access-key=${RGW_USER_USER_KEY} --secret=${RGW_USER_SECRET_KEY}"
   fi
+
+  exec radosgw-admin user create --uid=${RGW_USER} ${USER_KEY} --display-name="RGW ${RGW_USER} User" -c /etc/ceph/${CLUSTER}.conf
 }
