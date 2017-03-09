@@ -21,7 +21,7 @@ function populate_kv {
             DEFAULTS_PATH="/ceph.defaults"
           fi
           # read defaults file, grab line with key<space>value without comment #
-          cat "$DEFAULTS_PATH" | grep '^.* .*' | grep -v '#' | while read line; do
+          grep '^.* .*' "$DEFAULTS_PATH" | grep -v '#' | while read line; do
             kv `echo $line`
           done
           ;;
