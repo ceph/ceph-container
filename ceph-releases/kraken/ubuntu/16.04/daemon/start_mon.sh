@@ -119,7 +119,7 @@ function start_mon {
     fi
 
     # Testing if it's not the first monitor, if one key doesn't exist we assume none of them exist
-    ceph-authtool /tmp/${CLUSTER}.mon.keyring --create-keyring --import-keyring /etc/ceph/${CLUSTER}.client.admin.keyring
+    ceph-authtool /tmp/${CLUSTER}.mon.keyring --create-keyring --import-keyring $ADMIN_KEYRING
     for name in osd mds rgw; do
       ceph-authtool /tmp/${CLUSTER}.mon.keyring --import-keyring /var/lib/ceph/bootstrap-$name/${CLUSTER}.keyring
     done

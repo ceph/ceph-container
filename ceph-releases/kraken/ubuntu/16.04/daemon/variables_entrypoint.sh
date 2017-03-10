@@ -58,5 +58,6 @@ fi
 # Internal variables
 MDS_BOOTSTRAP_KEYRING=/var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring
 MDS_KEYRING=/var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring
+ADMIN_KEYRING=/etc/ceph/${CLUSTER}.client.admin.keyring
 
 export LC_ALL=C

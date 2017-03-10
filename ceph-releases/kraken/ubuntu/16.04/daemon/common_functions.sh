@@ -22,8 +22,8 @@ function check_config {
 
 # ceph admin key exists or die
 function check_admin_key {
-  if [[ ! -e /etc/ceph/${CLUSTER}.client.admin.keyring ]]; then
-      log "ERROR- /etc/ceph/${CLUSTER}.client.admin.keyring must exist; get it from your existing mon"
+  if [[ ! -e $ADMIN_KEYRING ]]; then
+      log "ERROR- $ADMIN_KEYRING must exist; get it from your existing mon"
       exit 1
   fi
 }

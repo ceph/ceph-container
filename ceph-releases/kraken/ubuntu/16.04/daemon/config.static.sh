@@ -32,9 +32,9 @@ ENDHERE
     fsid=`grep "fsid" /etc/ceph/${CLUSTER}.conf |awk '{print $NF}'`
   fi
 
-  if [ ! -e /etc/ceph/${CLUSTER}.client.admin.keyring ]; then
+  if [ ! -e $ADMIN_KEYRING ]; then
     # Generate administrator key
-    ceph-authtool /etc/ceph/${CLUSTER}.client.admin.keyring --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
+    ceph-authtool $ADMIN_KEYRING --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
   fi
 
   if [ ! -e /etc/ceph/${CLUSTER}.mon.keyring ]; then
