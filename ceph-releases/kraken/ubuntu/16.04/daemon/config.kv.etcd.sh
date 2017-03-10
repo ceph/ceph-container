@@ -29,15 +29,15 @@ function get_mon_config {
     etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/adminKeyring > $ADMIN_KEYRING
     etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/monKeyring > $MON_KEYRING
 
-    if [ ! -f /etc/ceph/monmap-${CLUSTER} ]; then
+    if [ ! -f $MONMAP ]; then
       log "Monmap is missing. Adding initial monmap..."
-      etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/monmap | uudecode -o /etc/ceph/monmap-${CLUSTER}
+      etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/monmap | uudecode -o $MONMAP
     fi
 
     log "Trying to get the most recent monmap..."
-    if timeout 5 ceph ${CEPH_OPTS} mon getmap -o /etc/ceph/monmap-${CLUSTER}; then
+    if timeout 5 ceph ${CEPH_OPTS} mon getmap -o $MONMAP; then
       log "Monmap successfully retrieved. Updating KV store."
-      uuencode /etc/ceph/monmap-${CLUSTER} | etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/monmap
+      uuencode $MONMAP | etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/monmap
     else
       log "Peers not found, using initial monmap."
     fi
@@ -62,7 +62,7 @@ function get_mon_config {
     done
 
     log "Creating Monmap."
-    monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} /etc/ceph/monmap-${CLUSTER}
+    monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} $MONMAP
 
     log "Importing Keyrings and Monmap to KV."
     etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/monKeyring < $MON_KEYRING
@@ -70,7 +70,7 @@ function get_mon_config {
     for bootstrap in Osd Mds Rgw; do
       etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/bootstrap${bootstrap}Keyring < /var/lib/ceph/bootstrap-$(to_lowercase $bootstrap)/${CLUSTER}.keyring
     done
-    uuencode /etc/ceph/monmap-${CLUSTER} - | etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/monmap
+    uuencode $MONMAP - | etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/monmap
 
     log "Completed initialization for ${MON_NAME}."
     etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/monSetupComplete true

@@ -60,15 +60,15 @@ ENDHERE
     # Apply proper permissions to the keys
     chown ceph. $MON_KEYRING $OSD_BOOTSTRAP_KEYRING $MDS_BOOTSTRAP_KEYRING $RGW_BOOTSTRAP_KEYRING
 
-  if [ ! -e /etc/ceph/monmap-${CLUSTER} ]; then
+  if [ ! -e $MONMAP ]; then
     if [ -e /etc/ceph/monmap ]; then
       # Rename old monmap
-      mv /etc/ceph/monmap /etc/ceph/monmap-${CLUSTER}
+      mv /etc/ceph/monmap $MONMAP
     else
       # Generate initial monitor map
-      monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} /etc/ceph/monmap-${CLUSTER}
+      monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} $MONMAP
     fi
-    chown ceph. /etc/ceph/monmap-${CLUSTER}
+    chown ceph. $MONMAP
   fi
 
 }

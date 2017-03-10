@@ -25,7 +25,7 @@ function get_mon_config {
   fi
 
   # Create a monmap with the Pod Names and IP
-  monmaptool --create ${MONMAP_ADD} --fsid ${fsid} /etc/ceph/monmap-${CLUSTER}
+  monmaptool --create ${MONMAP_ADD} --fsid ${fsid} $MONMAP
 
 }
 
