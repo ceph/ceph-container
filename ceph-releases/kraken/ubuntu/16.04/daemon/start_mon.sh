@@ -119,8 +119,8 @@ function start_mon {
     fi
 
     # Testing if it's not the first monitor, if one key doesn't exist we assume none of them exist
-    for name in osd mds rgw; do
-      ceph-authtool $MON_KEYRING --import-keyring /var/lib/ceph/bootstrap-$name/${CLUSTER}.keyring
+    for keyring in $OSD_BOOTSTRAP_KEYRING $MDS_BOOTSTRAP_KEYRING $RGW_BOOTSTRAP_KEYRING; do
+      ceph-authtool $MON_KEYRING --import-keyring $keyring
     done
 
     # Prepare the monitor daemon's directory with the map and keyring

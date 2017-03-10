@@ -57,8 +57,12 @@ function get_mon_config {
     log "Creating Keyrings."
     ceph-authtool $ADMIN_KEYRING --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
     ceph-authtool $MON_KEYRING --create-keyring --gen-key -n mon. --cap mon 'allow *'
-    for daemon in osd mds rgw; do
-      ceph-authtool /var/lib/ceph/bootstrap-$daemon/${CLUSTER}.keyring --create-keyring --gen-key -n client.bootstrap-$daemon --cap mon "allow profile bootstrap-$daemon"
+
+    for item in ${OSD_BOOTSTRAP_KEYRING}:osd ${MDS_BOOTSTRAP_KEYRING}:mds ${RGW_BOOTSTRAP_KEYRING}:rgw; do
+      array=(${item//:/ })
+      keyring=${array[0]}
+      bootstrap="bootstrap-${array[1]}"
+      ceph-authtool $keyring --create-keyring --gen-key -n client.$bootstrap --cap mon "allow profile $bootstrap"
     done
 
     log "Creating Monmap."
@@ -67,9 +71,8 @@ function get_mon_config {
     log "Importing Keyrings and Monmap to KV."
     etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/monKeyring < $MON_KEYRING
     etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/adminKeyring < $ADMIN_KEYRING
-    for bootstrap in Osd Mds Rgw; do
-      etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/bootstrap${bootstrap}Keyring < /var/lib/ceph/bootstrap-$(to_lowercase $bootstrap)/${CLUSTER}.keyring
-    done
+    import_bootstrap_keyrings
+
     uuencode $MONMAP - | etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/monmap
 
     log "Completed initialization for ${MON_NAME}."
@@ -79,6 +82,15 @@ function get_mon_config {
   # Remove lock for other clients to install
   log "Removing lock for ${MON_NAME}."
   etcdctl $ETCDCTL_OPT ${KV_TLS} rm ${CLUSTER_PATH}/lock
+}
+
+function import_bootstrap_keyrings {
+  for item in ${OSD_BOOTSTRAP_KEYRING}:Osd ${MDS_BOOTSTRAP_KEYRING}:Mds ${RGW_BOOTSTRAP_KEYRING}:Rgw; do
+    array=(${item//:/ })
+    keyring=${array[0]}
+    bootstrap_keyring="bootstrap${array[1]}Keyring"
+    etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/${bootstrap_keyring} < $keyring
+  done
 }
 
 function get_config {
@@ -93,7 +105,5 @@ function get_config {
   done
 
   log "Adding bootstrap keyrings."
-  for bootstrap in Osd Mds Rgw; do
-    etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/bootstrap${bootstrap}Keyring < /var/lib/ceph/bootstrap-$(to_lowercase $bootstrap)/${CLUSTER}.keyring
-  done
+  import_bootstrap_keyrings
 }
