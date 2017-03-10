@@ -27,7 +27,7 @@ function get_mon_config {
 
     log "Adding mon/admin Keyrings."
     etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/adminKeyring > $ADMIN_KEYRING
-    etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/monKeyring > /etc/ceph/${CLUSTER}.mon.keyring
+    etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/monKeyring > $MON_KEYRING
 
     if [ ! -f /etc/ceph/monmap-${CLUSTER} ]; then
       log "Monmap is missing. Adding initial monmap..."
@@ -56,7 +56,7 @@ function get_mon_config {
 
     log "Creating Keyrings."
     ceph-authtool $ADMIN_KEYRING --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
-    ceph-authtool /etc/ceph/${CLUSTER}.mon.keyring --create-keyring --gen-key -n mon. --cap mon 'allow *'
+    ceph-authtool $MON_KEYRING --create-keyring --gen-key -n mon. --cap mon 'allow *'
     for daemon in osd mds rgw; do
       ceph-authtool /var/lib/ceph/bootstrap-$daemon/${CLUSTER}.keyring --create-keyring --gen-key -n client.bootstrap-$daemon --cap mon "allow profile bootstrap-$daemon"
     done
@@ -65,7 +65,7 @@ function get_mon_config {
     monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} /etc/ceph/monmap-${CLUSTER}
 
     log "Importing Keyrings and Monmap to KV."
-    etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/monKeyring < /etc/ceph/${CLUSTER}.mon.keyring
+    etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/monKeyring < $MON_KEYRING
     etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/adminKeyring < $ADMIN_KEYRING
     for bootstrap in Osd Mds Rgw; do
       etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/bootstrap${bootstrap}Keyring < /var/lib/ceph/bootstrap-$(to_lowercase $bootstrap)/${CLUSTER}.keyring

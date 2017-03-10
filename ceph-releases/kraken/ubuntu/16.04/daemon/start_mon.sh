@@ -108,8 +108,8 @@ function start_mon {
 
   # If we don't have a monitor keyring, this is a new monitor
   if [ ! -e "$MON_DATA_DIR/keyring" ]; then
-    if [ ! -e /etc/ceph/${CLUSTER}.mon.keyring ]; then
-      log "ERROR- /etc/ceph/${CLUSTER}.mon.keyring must exist.  You can extract it from your current monitor by running 'ceph auth get mon. -o /etc/ceph/${CLUSTER}.mon.keyring' or use a KV Store"
+    if [ ! -e $MON_KEYRING ]; then
+      log "ERROR- $MON_KEYRING must exist.  You can extract it from your current monitor by running 'ceph auth get mon. -o $MON_KEYRING' or use a KV Store"
       exit 1
     fi
 
@@ -119,20 +119,14 @@ function start_mon {
     fi
 
     # Testing if it's not the first monitor, if one key doesn't exist we assume none of them exist
-    ceph-authtool /tmp/${CLUSTER}.mon.keyring --create-keyring --import-keyring $ADMIN_KEYRING
     for name in osd mds rgw; do
-      ceph-authtool /tmp/${CLUSTER}.mon.keyring --import-keyring /var/lib/ceph/bootstrap-$name/${CLUSTER}.keyring
+      ceph-authtool $MON_KEYRING --import-keyring /var/lib/ceph/bootstrap-$name/${CLUSTER}.keyring
     done
-    ceph-authtool /tmp/${CLUSTER}.mon.keyring --import-keyring /etc/ceph/${CLUSTER}.mon.keyring
-    chown ceph. /tmp/${CLUSTER}.mon.keyring
 
     # Prepare the monitor daemon's directory with the map and keyring
-    ceph-mon --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring --mon-data "$MON_DATA_DIR"
-
-    # Clean up the temporary key
-    rm /tmp/${CLUSTER}.mon.keyring
+    ceph-mon --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --inject-monmap /etc/ceph/monmap-${CLUSTER} --keyring $MON_KEYRING --mon-data "$MON_DATA_DIR"
   else
-    ceph-mon --setuser ceph --setgroup ceph -i ${MON_NAME} --inject-monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring --mon-data "$MON_DATA_DIR"
+    ceph-mon --setuser ceph --setgroup ceph -i ${MON_NAME} --inject-monmap /etc/ceph/monmap-${CLUSTER} --keyring $MON_KEYRING --mon-data "$MON_DATA_DIR"
     # Ignore when we timeout in most cases that means the cluster has no qorum or
     # no mons are up and running
     timeout 7 ceph mon add ${MON_NAME} "${MON_IP}:6789" || true

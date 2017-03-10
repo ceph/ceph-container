@@ -37,9 +37,9 @@ ENDHERE
     ceph-authtool $ADMIN_KEYRING --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
   fi
 
-  if [ ! -e /etc/ceph/${CLUSTER}.mon.keyring ]; then
+  if [ ! -e $MON_KEYRING ]; then
     # Generate the mon. key
-    ceph-authtool /etc/ceph/${CLUSTER}.mon.keyring --create-keyring --gen-key -n mon. --cap mon 'allow *'
+    ceph-authtool $MON_KEYRING --create-keyring --gen-key -n mon. --cap mon 'allow *'
   fi
 
   if [ ! -e /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring ]; then
@@ -58,7 +58,7 @@ ENDHERE
   fi
 
     # Apply proper permissions to the keys
-    chown ceph. /etc/ceph/${CLUSTER}.mon.keyring /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring $MDS_BOOTSTRAP_KEYRING /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
+    chown ceph. $MON_KEYRING /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring $MDS_BOOTSTRAP_KEYRING /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
 
   if [ ! -e /etc/ceph/monmap-${CLUSTER} ]; then
     if [ -e /etc/ceph/monmap ]; then
