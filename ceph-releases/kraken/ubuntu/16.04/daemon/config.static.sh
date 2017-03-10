@@ -52,13 +52,13 @@ ENDHERE
     ceph-authtool $MDS_BOOTSTRAP_KEYRING --create-keyring --gen-key -n client.bootstrap-mds --cap mon 'allow profile bootstrap-mds'
   fi
 
-  if [ ! -e /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring ]; then
+  if [ ! -e $RGW_BOOTSTRAP_KEYRING ]; then
     # Generate the RGW bootstrap key
-    ceph-authtool /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring --create-keyring --gen-key -n client.bootstrap-rgw --cap mon 'allow profile bootstrap-rgw'
+    ceph-authtool $RGW_BOOTSTRAP_KEYRING --create-keyring --gen-key -n client.bootstrap-rgw --cap mon 'allow profile bootstrap-rgw'
   fi
 
     # Apply proper permissions to the keys
-    chown ceph. $MON_KEYRING /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring $MDS_BOOTSTRAP_KEYRING /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
+    chown ceph. $MON_KEYRING /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring $MDS_BOOTSTRAP_KEYRING $RGW_BOOTSTRAP_KEYRING
 
   if [ ! -e /etc/ceph/monmap-${CLUSTER} ]; then
     if [ -e /etc/ceph/monmap ]; then
