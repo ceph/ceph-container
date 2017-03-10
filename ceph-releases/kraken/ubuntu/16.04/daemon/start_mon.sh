@@ -120,15 +120,11 @@ function start_mon {
 
     # Testing if it's not the first monitor, if one key doesn't exist we assume none of them exist
     ceph-authtool /tmp/${CLUSTER}.mon.keyring --create-keyring --import-keyring /etc/ceph/${CLUSTER}.client.admin.keyring
-    ceph-authtool /tmp/${CLUSTER}.mon.keyring --import-keyring /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring
-    ceph-authtool /tmp/${CLUSTER}.mon.keyring --import-keyring /var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring
-    ceph-authtool /tmp/${CLUSTER}.mon.keyring --import-keyring /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
+    for name in osd mds rgw; do
+      ceph-authtool /tmp/${CLUSTER}.mon.keyring --import-keyring /var/lib/ceph/bootstrap-$name/${CLUSTER}.keyring
+    done
     ceph-authtool /tmp/${CLUSTER}.mon.keyring --import-keyring /etc/ceph/${CLUSTER}.mon.keyring
     chown ceph. /tmp/${CLUSTER}.mon.keyring
-
-    # Make the monitor directory
-    mkdir -p "$MON_DATA_DIR"
-    chown ceph. "$MON_DATA_DIR"
 
     # Prepare the monitor daemon's directory with the map and keyring
     ceph-mon --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --monmap /etc/ceph/monmap-${CLUSTER} --keyring /tmp/${CLUSTER}.mon.keyring --mon-data "$MON_DATA_DIR"
