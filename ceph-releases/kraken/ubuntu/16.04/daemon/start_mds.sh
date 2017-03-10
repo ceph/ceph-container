@@ -6,26 +6,23 @@ function start_mds {
   check_config
 
   # Check to see if we are a new MDS
-  if [ ! -e /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring ]; then
-
-    mkdir -p /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}
-    chown ceph. /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}
+  if [ ! -e $MDS_KEYRING ]; then
 
     if [ -e /etc/ceph/${CLUSTER}.client.admin.keyring ]; then
        KEYRING_OPT="--name client.admin --keyring /etc/ceph/${CLUSTER}.client.admin.keyring"
-    elif [ -e /var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring ]; then
-       KEYRING_OPT="--name client.bootstrap-mds --keyring /var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring"
+    elif [ -e $MDS_BOOTSTRAP_KEYRING ]; then
+       KEYRING_OPT="--name client.bootstrap-mds --keyring $MDS_BOOTSTRAP_KEYRING"
     else
-      log "ERROR- Failed to bootstrap MDS: could not find admin or bootstrap-mds keyring.  You can extract it from your current monitor by running 'ceph auth get client.bootstrap-mds -o /var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring'"
+      log "ERROR- Failed to bootstrap MDS: could not find admin or bootstrap-mds keyring.  You can extract it from your current monitor by running 'ceph auth get client.bootstrap-mds -o $MDS_BOOTSTRAP_KEYRING"
       exit 1
     fi
 
     timeout 10 ceph ${CEPH_OPTS} $KEYRING_OPT health || exit 1
 
     # Generate the MDS key
-    ceph ${CEPH_OPTS} $KEYRING_OPT auth get-or-create mds.$MDS_NAME osd 'allow rwx' mds 'allow' mon 'allow profile mds' -o /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring
-    chown ceph. /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring
-    chmod 600 /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring
+    ceph ${CEPH_OPTS} $KEYRING_OPT auth get-or-create mds.$MDS_NAME osd 'allow rwx' mds 'allow' mon 'allow profile mds' -o $MDS_KEYRING
+    chown ceph. $MDS_KEYRING
+    chmod 600 $MDS_KEYRING
 
   fi
 
