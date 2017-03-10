@@ -59,6 +59,9 @@ function create_mandatory_directories {
   # Create socket directory
   mkdir -p /var/run/ceph
 
+  # Creating rados directories
+  mkdir -p /var/lib/ceph/radosgw/${RGW_NAME}
+
   # Adjust the owner of all those directories
   chown -R ceph. /var/run/ceph/ /var/lib/ceph/*
 }
