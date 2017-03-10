@@ -34,7 +34,7 @@
 : ${RESTAPI_BASE_URL:=/api/v0.1}
 : ${RESTAPI_LOG_LEVEL:=warning}
 : ${RESTAPI_LOG_FILE:=/var/log/ceph/ceph-restapi.log}
-: ${KV_TYPE:=none} # valid options: consul, etcd or none
+: ${KV_TYPE:=none} # valid options: etcd, k8s|kubernetes or none
 : ${KV_IP:=127.0.0.1}
 : ${KV_PORT:=4001} # PORT 8500 for Consul
 : ${GANESHA_OPTIONS:=""}
