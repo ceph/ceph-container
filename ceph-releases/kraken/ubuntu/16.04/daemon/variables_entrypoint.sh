@@ -63,5 +63,10 @@ RGW_KEYRING=/var/lib/ceph/radosgw/${RGW_NAME}/keyring
 MDS_BOOTSTRAP_KEYRING=/var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring
 RGW_BOOTSTRAP_KEYRING=/var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
 OSD_BOOTSTRAP_KEYRING=/var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring
+OSD_PATH_BASE=/var/lib/ceph/osd/${CLUSTER}
+
+function get_OSD_path {
+  echo "$OSD_PATH_BASE-$1/"
+}
 
 export LC_ALL=C

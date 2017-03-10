@@ -21,15 +21,17 @@ function osd_disks {
   if [[ -z "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
     log "Mount existing and prepared OSD disks for ceph-cluster ${CLUSTER}"
     for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }'); do
+      OSD_PATH=$(get_OSD_path $OSD_ID)
+      OSD_KEYRING="$OSD_PATH/keyring"
       OSD_DEV=$(get_osd_dev ${OSD_ID})
       if [[ -z ${OSD_DEV} ]]; then
         log "No device mapping for ${CLUSTER}-${OSD_ID} for ceph-cluster ${CLUSTER}"
         exit 1
       fi
-      mount ${MOUNT_OPTS} $(dev_part ${OSD_DEV} 1) /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/
-      xOSD_ID=$(cat /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/whoami)
+      mount ${MOUNT_OPTS} $(dev_part ${OSD_DEV} 1) $OSD_PATH
+      xOSD_ID=$(cat $OSD_PATH/whoami)
       if [[ "${OSD_ID}" != "${xOSD_ID}" ]]; then
-        log "Device ${OSD_DEV} is corrupt for /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}"
+        log "Device ${OSD_DEV} is corrupt for $OSD_PATH"
         exit 1
       fi
       echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID} --setuser ceph --setgroup disk" | tee -a /etc/forego/${CLUSTER}/Procfile
