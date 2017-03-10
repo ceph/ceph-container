@@ -42,9 +42,9 @@ ENDHERE
     ceph-authtool $MON_KEYRING --create-keyring --gen-key -n mon. --cap mon 'allow *'
   fi
 
-  if [ ! -e /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring ]; then
+  if [ ! -e $OSD_BOOTSTRAP_KEYRING ]; then
     # Generate the OSD bootstrap key
-    ceph-authtool /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring --create-keyring --gen-key -n client.bootstrap-osd --cap mon 'allow profile bootstrap-osd'
+    ceph-authtool $OSD_BOOTSTRAP_KEYRING --create-keyring --gen-key -n client.bootstrap-osd --cap mon 'allow profile bootstrap-osd'
   fi
 
   if [ ! -e $MDS_BOOTSTRAP_KEYRING ]; then
@@ -58,7 +58,7 @@ ENDHERE
   fi
 
     # Apply proper permissions to the keys
-    chown ceph. $MON_KEYRING /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring $MDS_BOOTSTRAP_KEYRING $RGW_BOOTSTRAP_KEYRING
+    chown ceph. $MON_KEYRING $OSD_BOOTSTRAP_KEYRING $MDS_BOOTSTRAP_KEYRING $RGW_BOOTSTRAP_KEYRING
 
   if [ ! -e /etc/ceph/monmap-${CLUSTER} ]; then
     if [ -e /etc/ceph/monmap ]; then
