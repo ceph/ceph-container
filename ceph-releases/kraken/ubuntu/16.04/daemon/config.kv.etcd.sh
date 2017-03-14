@@ -58,11 +58,13 @@ function get_mon_config {
     ceph-authtool $ADMIN_KEYRING --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
     ceph-authtool $MON_KEYRING --create-keyring --gen-key -n mon. --cap mon 'allow *'
 
-    for item in ${OSD_BOOTSTRAP_KEYRING}:osd ${MDS_BOOTSTRAP_KEYRING}:mds ${RGW_BOOTSTRAP_KEYRING}:rgw; do
+    for item in ${OSD_BOOTSTRAP_KEYRING}:Osd ${MDS_BOOTSTRAP_KEYRING}:Mds ${RGW_BOOTSTRAP_KEYRING}:Rgw; do
       array=(${item//:/ })
       keyring=${array[0]}
       bootstrap="bootstrap-${array[1]}"
-      ceph-authtool $keyring --create-keyring --gen-key -n client.$bootstrap --cap mon "allow profile $bootstrap"
+      ceph-authtool $keyring --create-keyring --gen-key -n client.$(to_lowercase $bootstrap) --cap mon "allow profile $(to_lowercase $bootstrap)"
+      bootstrap="bootstrap${array[1]}Keyring"
+      etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/${bootstrap} < $keyring
     done
 
     log "Creating Monmap."
