@@ -32,19 +32,19 @@ ENDHERE
     fsid=`grep "fsid" /etc/ceph/${CLUSTER}.conf |awk '{print $NF}'`
   fi
 
-  if [ ! -e /etc/ceph/${CLUSTER}.client.admin.keyring ]; then
+  if [ ! -e $ADMIN_KEYRING ]; then
     # Generate administrator key
-    ceph-authtool /etc/ceph/${CLUSTER}.client.admin.keyring --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
+    ceph-authtool $ADMIN_KEYRING --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
   fi
 
-  if [ ! -e /etc/ceph/${CLUSTER}.mon.keyring ]; then
+  if [ ! -e $MON_KEYRING ]; then
     # Generate the mon. key
-    ceph-authtool /etc/ceph/${CLUSTER}.mon.keyring --create-keyring --gen-key -n mon. --cap mon 'allow *'
+    ceph-authtool $MON_KEYRING --create-keyring --gen-key -n mon. --cap mon 'allow *'
   fi
 
-  if [ ! -e /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring ]; then
+  if [ ! -e $OSD_BOOTSTRAP_KEYRING ]; then
     # Generate the OSD bootstrap key
-    ceph-authtool /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring --create-keyring --gen-key -n client.bootstrap-osd --cap mon 'allow profile bootstrap-osd'
+    ceph-authtool $OSD_BOOTSTRAP_KEYRING --create-keyring --gen-key -n client.bootstrap-osd --cap mon 'allow profile bootstrap-osd'
   fi
 
   if [ ! -e $MDS_BOOTSTRAP_KEYRING ]; then
@@ -52,23 +52,23 @@ ENDHERE
     ceph-authtool $MDS_BOOTSTRAP_KEYRING --create-keyring --gen-key -n client.bootstrap-mds --cap mon 'allow profile bootstrap-mds'
   fi
 
-  if [ ! -e /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring ]; then
+  if [ ! -e $RGW_BOOTSTRAP_KEYRING ]; then
     # Generate the RGW bootstrap key
-    ceph-authtool /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring --create-keyring --gen-key -n client.bootstrap-rgw --cap mon 'allow profile bootstrap-rgw'
+    ceph-authtool $RGW_BOOTSTRAP_KEYRING --create-keyring --gen-key -n client.bootstrap-rgw --cap mon 'allow profile bootstrap-rgw'
   fi
 
     # Apply proper permissions to the keys
-    chown ceph. /etc/ceph/${CLUSTER}.mon.keyring /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring $MDS_BOOTSTRAP_KEYRING /var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
+    chown ceph. $MON_KEYRING $OSD_BOOTSTRAP_KEYRING $MDS_BOOTSTRAP_KEYRING $RGW_BOOTSTRAP_KEYRING
 
-  if [ ! -e /etc/ceph/monmap-${CLUSTER} ]; then
+  if [ ! -e $MONMAP ]; then
     if [ -e /etc/ceph/monmap ]; then
       # Rename old monmap
-      mv /etc/ceph/monmap /etc/ceph/monmap-${CLUSTER}
+      mv /etc/ceph/monmap $MONMAP
     else
       # Generate initial monitor map
-      monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} /etc/ceph/monmap-${CLUSTER}
+      monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} $MONMAP
     fi
-    chown ceph. /etc/ceph/monmap-${CLUSTER}
+    chown ceph. $MONMAP
   fi
 
 }

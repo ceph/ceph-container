@@ -14,7 +14,7 @@ function get_mon_config {
   etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/mon_host/${MON_NAME} ${MON_IP}
 
   # Acquire lock to not run into race conditions with parallel bootstraps
-  until etcdctl $ETCDCTL_OPT ${KV_TLS} mk ${CLUSTER_PATH}/lock $MON_NAME; do
+  until etcdctl $ETCDCTL_OPT ${KV_TLS} mk ${CLUSTER_PATH}/lock $MON_NAME --ttl 60; do
     log "Configuration is locked by another host. Waiting..."
     sleep 1
   done
@@ -26,18 +26,18 @@ function get_mon_config {
     get_config
 
     log "Adding mon/admin Keyrings."
-    etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/${CLUSTER}.client.admin.keyring
-    etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/monKeyring > /etc/ceph/${CLUSTER}.mon.keyring
+    etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/adminKeyring > $ADMIN_KEYRING
+    etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/monKeyring > $MON_KEYRING
 
-    if [ ! -f /etc/ceph/monmap-${CLUSTER} ]; then
+    if [ ! -f $MONMAP ]; then
       log "Monmap is missing. Adding initial monmap..."
-      etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/monmap | uudecode -o /etc/ceph/monmap-${CLUSTER}
+      etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/monmap | uudecode -o $MONMAP
     fi
 
     log "Trying to get the most recent monmap..."
-    if timeout 5 ceph ${CEPH_OPTS} mon getmap -o /etc/ceph/monmap-${CLUSTER}; then
+    if timeout 5 ceph ${CEPH_OPTS} mon getmap -o $MONMAP; then
       log "Monmap successfully retrieved. Updating KV store."
-      uuencode /etc/ceph/monmap-${CLUSTER} | etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/monmap
+      uuencode $MONMAP | etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/monmap
     else
       log "Peers not found, using initial monmap."
     fi
@@ -55,22 +55,27 @@ function get_mon_config {
     done
 
     log "Creating Keyrings."
-    ceph-authtool /etc/ceph/${CLUSTER}.client.admin.keyring --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
-    ceph-authtool /etc/ceph/${CLUSTER}.mon.keyring --create-keyring --gen-key -n mon. --cap mon 'allow *'
-    for daemon in osd mds rgw; do
-      ceph-authtool /var/lib/ceph/bootstrap-$daemon/${CLUSTER}.keyring --create-keyring --gen-key -n client.bootstrap-$daemon --cap mon "allow profile bootstrap-$daemon"
+    ceph-authtool $ADMIN_KEYRING --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
+    ceph-authtool $MON_KEYRING --create-keyring --gen-key -n mon. --cap mon 'allow *'
+
+    for item in ${OSD_BOOTSTRAP_KEYRING}:Osd ${MDS_BOOTSTRAP_KEYRING}:Mds ${RGW_BOOTSTRAP_KEYRING}:Rgw; do
+      array=(${item//:/ })
+      keyring=${array[0]}
+      bootstrap="bootstrap-${array[1]}"
+      ceph-authtool $keyring --create-keyring --gen-key -n client.$(to_lowercase $bootstrap) --cap mon "allow profile $(to_lowercase $bootstrap)"
+      bootstrap="bootstrap${array[1]}Keyring"
+      etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/${bootstrap} < $keyring
     done
 
     log "Creating Monmap."
-    monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} /etc/ceph/monmap-${CLUSTER}
+    monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} $MONMAP
 
     log "Importing Keyrings and Monmap to KV."
-    etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/monKeyring < /etc/ceph/${CLUSTER}.mon.keyring
-    etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/adminKeyring < /etc/ceph/${CLUSTER}.client.admin.keyring
-    for bootstrap in Osd Mds Rgw; do
-      etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/bootstrap${bootstrap}Keyring < /var/lib/ceph/bootstrap-$(to_lowercase $bootstrap)/${CLUSTER}.keyring
-    done
-    uuencode /etc/ceph/monmap-${CLUSTER} - | etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/monmap
+    etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/monKeyring < $MON_KEYRING
+    etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/adminKeyring < $ADMIN_KEYRING
+    chown ceph. $MON_KEYRING $ADMIN_KEYRING
+
+    uuencode $MONMAP - | etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/monmap
 
     log "Completed initialization for ${MON_NAME}."
     etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/monSetupComplete true
@@ -79,6 +84,16 @@ function get_mon_config {
   # Remove lock for other clients to install
   log "Removing lock for ${MON_NAME}."
   etcdctl $ETCDCTL_OPT ${KV_TLS} rm ${CLUSTER_PATH}/lock
+}
+
+function import_bootstrap_keyrings {
+  for item in ${OSD_BOOTSTRAP_KEYRING}:Osd ${MDS_BOOTSTRAP_KEYRING}:Mds ${RGW_BOOTSTRAP_KEYRING}:Rgw; do
+    array=(${item//:/ })
+    keyring=${array[0]}
+    bootstrap_keyring="bootstrap${array[1]}Keyring"
+    etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/${bootstrap_keyring} > $keyring
+    chown ceph. $keyring
+  done
 }
 
 function get_config {
@@ -93,7 +108,5 @@ function get_config {
   done
 
   log "Adding bootstrap keyrings."
-  for bootstrap in Osd Mds Rgw; do
-    etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/bootstrap${bootstrap}Keyring < /var/lib/ceph/bootstrap-$(to_lowercase $bootstrap)/${CLUSTER}.keyring
-  done
+  import_bootstrap_keyrings
 }

@@ -22,8 +22,8 @@ function check_config {
 
 # ceph admin key exists or die
 function check_admin_key {
-  if [[ ! -e /etc/ceph/${CLUSTER}.client.admin.keyring ]]; then
-      log "ERROR- /etc/ceph/${CLUSTER}.client.admin.keyring must exist; get it from your existing mon"
+  if [[ ! -e $ADMIN_KEYRING ]]; then
+      log "ERROR- $ADMIN_KEYRING must exist; get it from your existing mon"
       exit 1
   fi
 }
@@ -47,8 +47,8 @@ function is_available {
 # create the mandatory directories
 function create_mandatory_directories {
   # Let's create the bootstrap directories
-  for directory in osd mds rgw; do
-    mkdir -p /var/lib/ceph/bootstrap-$directory
+  for keyring in $OSD_BOOTSTRAP_KEYRING $MDS_BOOTSTRAP_KEYRING $RGW_BOOTSTRAP_KEYRING; do
+    mkdir -p $(dirname $keyring)
   done
 
   # Let's create the ceph directories

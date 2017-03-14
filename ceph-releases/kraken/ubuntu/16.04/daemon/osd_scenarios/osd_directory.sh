@@ -23,10 +23,13 @@ function osd_directory {
       log "OSD creation failed: ${OSD_ID}"
       exit 1
     fi
+
+    OSD_PATH=$(get_OSD_path $OSD_ID)
+
     # create the folder and own it
-    mkdir -p /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}
-    chown ceph. /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}
-    log "created folder /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}"
+    mkdir -p $OSD_PATH
+    chown ceph. $OSD_PATH
+    log "created folder $OSD_PATH"
   fi
 
   # create the directory and an empty Procfile
@@ -34,6 +37,9 @@ function osd_directory {
   echo "" > /etc/forego/${CLUSTER}/Procfile
 
   for OSD_ID in $(ls /var/lib/ceph/osd | awk 'BEGIN { FS = "-" } ; { print $2 }'); do
+    OSD_PATH=$(get_OSD_path $OSD_ID)
+    OSD_KEYRING="$OSD_PATH/keyring"
+
     if [ -n "${JOURNAL_DIR}" ]; then
        OSD_J="${JOURNAL_DIR}/journal.${OSD_ID}"
        chown -R ceph. ${JOURNAL_DIR}
@@ -42,29 +48,29 @@ function osd_directory {
           OSD_J=${JOURNAL}
           chown -R ceph. $(dirname ${JOURNAL_DIR})
        else
-          OSD_J=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/journal
+          OSD_J=${OSD_PATH}/journal
        fi
     fi
     # check to see if our osd has been initialized
-    if [ ! -e /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring ]; then
-      chown ceph. /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}
+    if [ ! -e ${OSD_PATH}/keyring ]; then
+      chown ceph. $OSD_PATH
       # create osd key and file structure
       ceph-osd ${CEPH_OPTS} -i $OSD_ID --mkfs --mkkey --mkjournal --osd-journal ${OSD_J} --setuser ceph --setgroup ceph
-      if [ ! -e /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring ]; then
-        log "ERROR- /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-osd -o /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring'"
+      if [ ! -e $OSD_BOOTSTRAP_KEYRING  ]; then
+        log "ERROR- $OSD_BOOTSTRAP_KEYRING must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-osd -o $OSD_BOOTSTRAP_KEYRING '"
         exit 1
       fi
-      timeout 10 ceph ${CEPH_OPTS} --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring health || exit 1
+      timeout 10 ceph ${CEPH_OPTS} --name client.bootstrap-osd --keyring $OSD_BOOTSTRAP_KEYRING health || exit 1
       # add the osd key
-      ceph ${CEPH_OPTS} --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring auth add osd.${OSD_ID} -i /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd 'allow *' mon 'allow profile osd'  || log $1
+      ceph ${CEPH_OPTS} --name client.bootstrap-osd --keyring $OSD_BOOTSTRAP_KEYRING auth add osd.${OSD_ID} -i ${OSD_KEYRING} osd 'allow *' mon 'allow profile osd'  || log $1
       log "done adding key"
-      chown ceph. /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
-      chmod 0600 /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring
+      chown ceph. ${OSD_KEYRING}
+      chmod 0600 ${OSD_KEYRING}
       # add the osd to the crush map
-      OSD_WEIGHT=$(df -P -k /var/lib/ceph/osd/${CLUSTER}-$OSD_ID/ | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
-      ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
+      OSD_WEIGHT=$(df -P -k $OSD_PATH | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
+      ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=${OSD_KEYRING} osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
     fi
-    echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID} --osd-journal ${OSD_J} -k /var/lib/ceph/osd/${CLUSTER}-${OSD_ID}/keyring" | tee -a /etc/forego/${CLUSTER}/Procfile
+    echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID} --osd-journal ${OSD_J} -k $OSD_KEYRING" | tee -a /etc/forego/${CLUSTER}/Procfile
   done
   log "SUCCESS"
   start_forego

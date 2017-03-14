@@ -56,7 +56,18 @@ if [[ "$KV_TYPE" == "etcd" ]]; then
 fi
 
 # Internal variables
-MDS_BOOTSTRAP_KEYRING=/var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring
 MDS_KEYRING=/var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring
+ADMIN_KEYRING=/etc/ceph/${CLUSTER}.client.admin.keyring
+MON_KEYRING=/etc/ceph/${CLUSTER}.mon.keyring
+RGW_KEYRING=/var/lib/ceph/radosgw/${RGW_NAME}/keyring
+MDS_BOOTSTRAP_KEYRING=/var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring
+RGW_BOOTSTRAP_KEYRING=/var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
+OSD_BOOTSTRAP_KEYRING=/var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring
+OSD_PATH_BASE=/var/lib/ceph/osd/${CLUSTER}
+MONMAP=/etc/ceph/monmap-${CLUSTER}
+
+function get_OSD_path {
+  echo "$OSD_PATH_BASE-$1/"
+}
 
 export LC_ALL=C

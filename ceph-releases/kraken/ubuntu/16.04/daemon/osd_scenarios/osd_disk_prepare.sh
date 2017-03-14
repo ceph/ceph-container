@@ -12,11 +12,11 @@ function osd_disk_prepare {
     exit 1
   fi
 
-  if [ ! -e /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring ]; then
-    log "ERROR- /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-osd -o /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring'"
+  if [ ! -e $OSD_BOOTSTRAP_KEYRING ]; then
+    log "ERROR- $OSD_BOOTSTRAP_KEYRING must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-osd -o $OSD_BOOTSTRAP_KEYRING'"
     exit 1
   fi
-  timeout 10 ceph ${CEPH_OPTS} --name client.bootstrap-osd --keyring /var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring health || exit 1
+  timeout 10 ceph ${CEPH_OPTS} --name client.bootstrap-osd --keyring $OSD_BOOTSTRAP_KEYRING health || exit 1
 
   # check device status first
   if ! parted --script ${OSD_DEVICE} print > /dev/null 2>&1; then

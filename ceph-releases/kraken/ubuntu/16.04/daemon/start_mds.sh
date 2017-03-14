@@ -8,8 +8,8 @@ function start_mds {
   # Check to see if we are a new MDS
   if [ ! -e $MDS_KEYRING ]; then
 
-    if [ -e /etc/ceph/${CLUSTER}.client.admin.keyring ]; then
-       KEYRING_OPT="--name client.admin --keyring /etc/ceph/${CLUSTER}.client.admin.keyring"
+    if [ -e $ADMIN_KEYRING ]; then
+       KEYRING_OPT="--name client.admin --keyring $ADMIN_KEYRING"
     elif [ -e $MDS_BOOTSTRAP_KEYRING ]; then
        KEYRING_OPT="--name client.bootstrap-mds --keyring $MDS_BOOTSTRAP_KEYRING"
     else
