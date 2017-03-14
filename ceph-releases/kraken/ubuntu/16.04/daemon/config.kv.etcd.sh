@@ -91,7 +91,8 @@ function import_bootstrap_keyrings {
     array=(${item//:/ })
     keyring=${array[0]}
     bootstrap_keyring="bootstrap${array[1]}Keyring"
-    etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/${bootstrap_keyring} < $keyring
+    etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/${bootstrap_keyring} > $keyring
+    chown ceph. $keyring
   done
 }
 
