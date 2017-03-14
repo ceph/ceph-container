@@ -110,3 +110,8 @@ function get_config {
   log "Adding bootstrap keyrings."
   import_bootstrap_keyrings
 }
+
+function get_admin_key {
+  log "Retrieving Admin key."
+  etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/${CLUSTER}.client.admin.keyring
+}
