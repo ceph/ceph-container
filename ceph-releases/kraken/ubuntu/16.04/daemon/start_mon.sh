@@ -119,7 +119,7 @@ function start_mon {
     fi
 
     # Testing if it's not the first monitor, if one key doesn't exist we assume none of them exist
-    for keyring in $OSD_BOOTSTRAP_KEYRING $MDS_BOOTSTRAP_KEYRING $RGW_BOOTSTRAP_KEYRING; do
+    for keyring in $OSD_BOOTSTRAP_KEYRING $MDS_BOOTSTRAP_KEYRING $RGW_BOOTSTRAP_KEYRING $ADMIN_KEYRING; do
       ceph-authtool $MON_KEYRING --import-keyring $keyring
     done
 
