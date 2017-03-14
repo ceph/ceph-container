@@ -14,7 +14,7 @@ function get_mon_config {
   etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/mon_host/${MON_NAME} ${MON_IP}
 
   # Acquire lock to not run into race conditions with parallel bootstraps
-  until etcdctl $ETCDCTL_OPT ${KV_TLS} mk ${CLUSTER_PATH}/lock $MON_NAME; do
+  until etcdctl $ETCDCTL_OPT ${KV_TLS} mk ${CLUSTER_PATH}/lock $MON_NAME --ttl 60; do
     log "Configuration is locked by another host. Waiting..."
     sleep 1
   done
