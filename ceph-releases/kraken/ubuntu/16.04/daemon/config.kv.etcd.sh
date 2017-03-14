@@ -97,3 +97,8 @@ function get_config {
     etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}/bootstrap${bootstrap}Keyring < /var/lib/ceph/bootstrap-$(to_lowercase $bootstrap)/${CLUSTER}.keyring
   done
 }
+
+function get_admin_key {
+  log "Retrieving Admin key."
+  etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/${CLUSTER}.client.admin.keyring
+}
