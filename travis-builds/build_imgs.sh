@@ -6,7 +6,7 @@ set -xe
 # NOTE (leseb): how to choose between directory for multiple change?
 # using "head" as a temporary solution
 function copy_dirs {
-  # if base, daemon and demo exit we are testing a pushed branch and not a PR
+  # if base, daemon and demo exist we are testing a pushed branch and not a PR
   if [[ (! -d daemon || ! -d base) && ! -d demo ]]; then
     dir_to_test=$(git diff --name-only HEAD~1 | tr " " "\n" | awk -F '/' '/ceph-releases/ {print $1,"/",$2,"/",$3,"/",$4}' | tr -d " " | sort -u | uniq)
     if [[ "$(echo $dir_to_test | tr " " "\n" | wc -l)" -ne 1 ]]; then
