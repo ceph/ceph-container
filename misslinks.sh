@@ -10,6 +10,9 @@ function all_distro_but_me {
   echo $1 | sed -e "s|$2||g"
 }
 
+# Go to ceph-releases directory
+pushd ceph-releases &>/dev/null
+
 # By default, we check all ceph releases
 all_releases=$(find . -maxdepth 1 -type d | grep -v "^.$")
 
