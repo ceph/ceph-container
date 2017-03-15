@@ -123,6 +123,10 @@ case "$CEPH_DAEMON" in
     source watch_mon_health.sh
     watch_mon_health
     ;;
+  mgr)
+    source start_mgr.sh
+    start_mgr
+    ;;
   *)
   if [ -z "$CEPH_DAEMON" ]; then
     log "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name "
