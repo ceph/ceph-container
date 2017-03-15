@@ -4,6 +4,7 @@ set -e
 : ${CLUSTER:=ceph}
 : ${RGW_NAME:=$(hostname -s)}
 : ${MON_NAME:=$(hostname -s)}
+: ${MGR_NAME:=$(hostname -s)}
 : ${MON_DATA_DIR:=/var/lib/ceph/mon/${CLUSTER}-${MON_NAME}}
 : ${RGW_CIVETWEB_PORT:=80}
 : ${NETWORK_AUTO_DETECT:=0}
@@ -38,7 +39,7 @@ function create_mandatory_directories {
   done
 
   # Let's create the ceph directories
-  for directory in mon osd mds radosgw tmp; do
+  for directory in mon osd mds radosgw tmp mgr; do
     mkdir -p /var/lib/ceph/$directory
   done
 
@@ -308,6 +309,20 @@ function bootstrap_rbd_mirror {
 }
 
 
+#######
+# MGR #
+#######
+
+function bootstrap_mgr {
+  mkdir -p /var/lib/ceph/mgr/${CLUSTER}-$MGR_NAME
+  ceph ${CEPH_OPTS} auth get-or-create mgr.$MGR_NAME mon 'allow *' -o /var/lib/ceph/mgr/${CLUSTER}-$MGR_NAME/keyring
+  chown -R ceph. /var/lib/ceph/mgr
+
+  # start ceph-mgr
+  ceph-mgr ${CEPH_OPTS} -i $MGR_NAME
+}
+
+
 #########
 # WATCH #
 #########
@@ -321,5 +336,6 @@ bootstrap_demo_user
 bootstrap_rest_api
 bootstrap_nfs
 bootstrap_rbd_mirror
+bootstrap_mgr
 log "SUCCESS"
 exec ceph ${CEPH_OPTS} -w
