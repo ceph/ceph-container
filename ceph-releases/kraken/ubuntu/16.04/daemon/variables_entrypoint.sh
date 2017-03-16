@@ -42,6 +42,7 @@
 : ${MGR_NAME:=${HOSTNAME}}
 
 CEPH_OPTS="--cluster ${CLUSTER}"
+DAEMON_OPTS="$CEPH_OPTS --setuser ceph --setgroup ceph -d"
 MOUNT_OPTS="-t xfs -o noatime,inode64"
 ETCDCTL_OPT="--peers ${KV_IP}:${KV_PORT}"
 
