@@ -3,7 +3,11 @@ set -e
 
 function get_admin_key {
    # No-op for static
-   log "static: does not generate admin key"
+   log "static: does not generate the admin key, so we can not get it."
+   log "static: make it available with the help of your configuration management system."
+   log "static: ceph-ansible is a good candidate to deploy a containerized version of Ceph."
+   log "static: ceph-ansible will help you fetching the keys and push them on the right nodes."
+   log "static: if you're interested, please visit: https://github.com/ceph/ceph-ansible"
 }
 
 function get_mon_config {

@@ -3,7 +3,7 @@ set -e
 
 function get_admin_key {
    # No-op for static
-   log "k8s: does not generate admin key. Use secrets instead."
+   log "k8s: does not generate the admin key. Use Kubernetes secrets instead."
 }
 
 function get_mon_config {
