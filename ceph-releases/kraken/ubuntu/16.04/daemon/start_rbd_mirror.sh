@@ -11,5 +11,5 @@ function start_rbd_mirror {
 
   log "SUCCESS"
   # start rbd-mirror
-  exec /usr/bin/rbd-mirror ${CEPH_OPTS} -d --setuser ceph --setgroup ceph
+  exec /usr/bin/rbd-mirror $DAEMON_OPTS
 }

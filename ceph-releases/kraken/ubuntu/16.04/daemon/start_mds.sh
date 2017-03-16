@@ -54,5 +54,5 @@ function start_mds {
 
   log "SUCCESS"
   # NOTE: prefixing this with exec causes it to die (commit suicide)
-  /usr/bin/ceph-mds ${CEPH_OPTS} -d -i ${MDS_NAME} --setuser ceph --setgroup ceph
+  /usr/bin/ceph-mds $DAEMON_OPTS -i ${MDS_NAME}
 }
