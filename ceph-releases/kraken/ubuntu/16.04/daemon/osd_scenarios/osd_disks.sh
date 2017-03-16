@@ -34,7 +34,7 @@ function osd_disks {
         log "Device ${OSD_DEV} is corrupt for $OSD_PATH"
         exit 1
       fi
-      echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID} --setuser ceph --setgroup disk" | tee -a /etc/forego/${CLUSTER}/Procfile
+      echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CLI_OPTS} -f -i ${OSD_ID} --setuser ceph --setgroup disk" | tee -a /etc/forego/${CLUSTER}/Procfile
     done
     exec /usr/local/bin/forego start -f /etc/forego/${CLUSTER}/Procfile
   fi
@@ -54,7 +54,7 @@ function osd_disks {
       fi
     fi
 
-    ceph-disk -v prepare ${CEPH_OPTS} ${OSD_DEV} ${OSD_JOURNAL}
+    ceph-disk -v prepare ${CLI_OPTS} ${OSD_DEV} ${OSD_JOURNAL}
 
     # prepare the OSDs configuration and start them later
     start_osd forego

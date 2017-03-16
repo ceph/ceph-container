@@ -17,10 +17,10 @@ function start_mds {
       exit 1
     fi
 
-    timeout 10 ceph ${CEPH_OPTS} $KEYRING_OPT health || exit 1
+    timeout 10 ceph ${CLI_OPTS} $KEYRING_OPT health || exit 1
 
     # Generate the MDS key
-    ceph ${CEPH_OPTS} $KEYRING_OPT auth get-or-create mds.$MDS_NAME osd 'allow rwx' mds 'allow' mon 'allow profile mds' -o $MDS_KEYRING
+    ceph ${CLI_OPTS} $KEYRING_OPT auth get-or-create mds.$MDS_NAME osd 'allow rwx' mds 'allow' mon 'allow profile mds' -o $MDS_KEYRING
     chown ceph. $MDS_KEYRING
     chmod 600 $MDS_KEYRING
 
@@ -39,16 +39,16 @@ function start_mds {
 
     if [[ "$(ceph fs ls | grep -c name:.${CEPHFS_NAME},)" -eq 0 ]]; then
        # Make sure the specified data pool exists
-       if ! ceph ${CEPH_OPTS} osd pool stats ${CEPHFS_DATA_POOL} > /dev/null 2>&1; then
-          ceph ${CEPH_OPTS} osd pool create ${CEPHFS_DATA_POOL} ${CEPHFS_DATA_POOL_PG}
+       if ! ceph ${CLI_OPTS} osd pool stats ${CEPHFS_DATA_POOL} > /dev/null 2>&1; then
+          ceph ${CLI_OPTS} osd pool create ${CEPHFS_DATA_POOL} ${CEPHFS_DATA_POOL_PG}
        fi
 
        # Make sure the specified metadata pool exists
-       if ! ceph ${CEPH_OPTS} osd pool stats ${CEPHFS_METADATA_POOL} > /dev/null 2>&1; then
-          ceph ${CEPH_OPTS} osd pool create ${CEPHFS_METADATA_POOL} ${CEPHFS_METADATA_POOL_PG}
+       if ! ceph ${CLI_OPTS} osd pool stats ${CEPHFS_METADATA_POOL} > /dev/null 2>&1; then
+          ceph ${CLI_OPTS} osd pool create ${CEPHFS_METADATA_POOL} ${CEPHFS_METADATA_POOL_PG}
        fi
 
-       ceph ${CEPH_OPTS} fs new ${CEPHFS_NAME} ${CEPHFS_METADATA_POOL} ${CEPHFS_DATA_POOL}
+       ceph ${CLI_OPTS} fs new ${CEPHFS_NAME} ${CEPHFS_METADATA_POOL} ${CEPHFS_DATA_POOL}
     fi
   fi
 

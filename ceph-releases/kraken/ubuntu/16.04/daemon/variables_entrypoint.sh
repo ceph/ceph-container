@@ -41,8 +41,8 @@
 : ${GANESHA_EPOCH:=""} # For restarting
 : ${MGR_NAME:=${HOSTNAME}}
 
-# This is ONLY used for the CLI calls, e.g: ceph $CEPH_OPTS health
-CEPH_OPTS="--cluster ${CLUSTER}"
+# This is ONLY used for the CLI calls, e.g: ceph $CLI_OPTS health
+CLI_OPTS="--cluster ${CLUSTER}"
 
 # This is ONLY used for the daemon's startup, e.g: ceph-osd $DAEMON_OPTS
 DAEMON_OPTS="--cluster ${CLUSTER} --setuser ceph --setgroup ceph -d"

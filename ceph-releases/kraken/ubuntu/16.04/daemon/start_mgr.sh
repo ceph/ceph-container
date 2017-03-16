@@ -11,7 +11,7 @@ function start_mgr {
     check_admin_key
 
     # Create ceph-mgr key
-    ceph ${CEPH_OPTS} auth get-or-create mgr.$MGR_NAME mon 'allow *' -o $MGR_KEYRING
+    ceph ${CLI_OPTS} auth get-or-create mgr.$MGR_NAME mon 'allow *' -o $MGR_KEYRING
     chown ceph. $MGR_KEYRING
     chmod 600 $MGR_KEYRING
   fi
