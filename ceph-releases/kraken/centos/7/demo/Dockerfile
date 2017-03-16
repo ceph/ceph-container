@@ -13,7 +13,7 @@ RUN yum install -y unzip
 RUN rpm --import 'https://download.ceph.com/keys/release.asc'
 RUN rpm -Uvh http://download.ceph.com/rpm-${CEPH_VERSION}/el7/noarch/ceph-release-1-1.el7.noarch.rpm
 RUN yum install -y epel-release && yum clean all
-RUN yum install -y ceph ceph-radosgw rbd-mirror sharutils python34 nfs-ganesha-rgw nfs-ganesha-vfs nfs-ganesha-ceph s3cmd && yum clean all
+RUN yum install -y ceph-mon ceph-osd ceph-mds ceph-mgr ceph-base ceph-common ceph-radosgw rbd-mirror sharutils python34 nfs-ganesha-rgw nfs-ganesha-vfs nfs-ganesha-ceph s3cmd && yum clean all
 
 # Add entrypoint
 ADD entrypoint.sh /entrypoint.sh
