@@ -887,7 +887,7 @@ ENDHERE
   log "SUCCESS"
 
   # start ceph-rest-api
-  exec /usr/bin/ceph-rest-api ${CEPH_OPTS} -n client.admin
+  exec /usr/bin/ceph-rest-api ${CEPH_OPTS}
 
 }
 
