@@ -18,10 +18,10 @@ function start_rgw {
       exit 1
     fi
 
-    timeout 10 ceph ${CEPH_OPTS} --name client.bootstrap-rgw --keyring $RGW_BOOTSTRAP_KEYRING health || exit 1
+    timeout 10 ceph ${CLI_OPTS} --name client.bootstrap-rgw --keyring $RGW_BOOTSTRAP_KEYRING health || exit 1
 
     # Generate the RGW key
-    ceph ${CEPH_OPTS} --name client.bootstrap-rgw --keyring $RGW_BOOTSTRAP_KEYRING auth get-or-create client.rgw.${RGW_NAME} osd 'allow rwx' mon 'allow rw' -o $RGW_KEYRING
+    ceph ${CLI_OPTS} --name client.bootstrap-rgw --keyring $RGW_BOOTSTRAP_KEYRING auth get-or-create client.rgw.${RGW_NAME} osd 'allow rwx' mon 'allow rw' -o $RGW_KEYRING
     chown ceph. $RGW_KEYRING
     chmod 0600 $RGW_KEYRING
   fi
@@ -33,7 +33,7 @@ function start_rgw {
     RGW_FRONTENDS="fastcgi socket_port=$RGW_REMOTE_CGI_PORT socket_host=$RGW_REMOTE_CGI_HOST"
   fi
 
-  exec /usr/bin/radosgw -d ${CEPH_OPTS} -n client.rgw.${RGW_NAME} -k $RGW_KEYRING --rgw-socket-path="" --rgw-zonegroup="$RGW_ZONEGROUP" --rgw-zone="$RGW_ZONE" --rgw-frontends="$RGW_FRONTENDS" --setuser ceph --setgroup ceph
+  exec /usr/bin/radosgw $DAEMON_OPTS -n client.rgw.${RGW_NAME} -k $RGW_KEYRING --rgw-socket-path="" --rgw-zonegroup="$RGW_ZONEGROUP" --rgw-zone="$RGW_ZONE" --rgw-frontends="$RGW_FRONTENDS"
 }
 
 function create_rgw_user {

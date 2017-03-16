@@ -41,9 +41,14 @@
 : ${GANESHA_EPOCH:=""} # For restarting
 : ${MGR_NAME:=${HOSTNAME}}
 
-CEPH_OPTS="--cluster ${CLUSTER}"
+# This is ONLY used for the CLI calls, e.g: ceph $CLI_OPTS health
+CLI_OPTS="--cluster ${CLUSTER}"
+
+# This is ONLY used for the daemon's startup, e.g: ceph-osd $DAEMON_OPTS
+DAEMON_OPTS="--cluster ${CLUSTER} --setuser ceph --setgroup ceph -d"
+
 MOUNT_OPTS="-t xfs -o noatime,inode64"
-ETCDCTL_OPT="--peers ${KV_IP}:${KV_PORT}"
+ETCDCTL_OPTS="--peers ${KV_IP}:${KV_PORT}"
 
 # make sure etcd uses http or https as a prefix
 if [[ "$KV_TYPE" == "etcd" ]]; then

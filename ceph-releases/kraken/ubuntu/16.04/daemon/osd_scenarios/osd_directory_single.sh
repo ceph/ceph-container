@@ -21,7 +21,7 @@ function osd_directory_single {
       if python -c "import sys, fcntl, struct; l = fcntl.fcntl(open('${OSD_PATH}/fsid', 'a'), fcntl.F_GETLK, struct.pack('hhllhh', fcntl.F_WRLCK, 0, 0, 0, 0, 0)); l_type, l_whence, l_start, l_len, l_pid, l_sysid = struct.unpack('hhllhh', l); sys.exit(0 if l_type == fcntl.F_UNLCK else 1)"; then
         log "Looks like OSD: ${OSD_ID} is not started, starting it..."
         log "SUCCESS"
-        exec ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID} -k $OSD_KEYRING
+        exec ceph-osd $DAEMON_OPTS -i ${OSD_ID} -k $OSD_KEYRING
         break
       fi
     fi

@@ -55,22 +55,22 @@ function osd_directory {
     if [ ! -e ${OSD_PATH}/keyring ]; then
       chown ceph. $OSD_PATH
       # create osd key and file structure
-      ceph-osd ${CEPH_OPTS} -i $OSD_ID --mkfs --mkkey --mkjournal --osd-journal ${OSD_J} --setuser ceph --setgroup ceph
+      ceph-osd ${CLI_OPTS} -i $OSD_ID --mkfs --mkkey --mkjournal --osd-journal ${OSD_J} --setuser ceph --setgroup ceph
       if [ ! -e $OSD_BOOTSTRAP_KEYRING  ]; then
         log "ERROR- $OSD_BOOTSTRAP_KEYRING must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-osd -o $OSD_BOOTSTRAP_KEYRING '"
         exit 1
       fi
-      timeout 10 ceph ${CEPH_OPTS} --name client.bootstrap-osd --keyring $OSD_BOOTSTRAP_KEYRING health || exit 1
+      timeout 10 ceph ${CLI_OPTS} --name client.bootstrap-osd --keyring $OSD_BOOTSTRAP_KEYRING health || exit 1
       # add the osd key
-      ceph ${CEPH_OPTS} --name client.bootstrap-osd --keyring $OSD_BOOTSTRAP_KEYRING auth add osd.${OSD_ID} -i ${OSD_KEYRING} osd 'allow *' mon 'allow profile osd'  || log $1
+      ceph ${CLI_OPTS} --name client.bootstrap-osd --keyring $OSD_BOOTSTRAP_KEYRING auth add osd.${OSD_ID} -i ${OSD_KEYRING} osd 'allow *' mon 'allow profile osd'  || log $1
       log "done adding key"
       chown ceph. ${OSD_KEYRING}
       chmod 0600 ${OSD_KEYRING}
       # add the osd to the crush map
       OSD_WEIGHT=$(df -P -k $OSD_PATH | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
-      ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=${OSD_KEYRING} osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
+      ceph ${CLI_OPTS} --name=osd.${OSD_ID} --keyring=${OSD_KEYRING} osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
     fi
-    echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID} --osd-journal ${OSD_J} -k $OSD_KEYRING" | tee -a /etc/forego/${CLUSTER}/Procfile
+    echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CLI_OPTS} -f -i ${OSD_ID} --osd-journal ${OSD_J} -k $OSD_KEYRING" | tee -a /etc/forego/${CLUSTER}/Procfile
   done
   log "SUCCESS"
   start_forego

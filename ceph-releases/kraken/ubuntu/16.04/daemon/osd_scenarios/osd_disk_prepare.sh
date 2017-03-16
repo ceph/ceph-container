@@ -16,7 +16,7 @@ function osd_disk_prepare {
     log "ERROR- $OSD_BOOTSTRAP_KEYRING must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-osd -o $OSD_BOOTSTRAP_KEYRING'"
     exit 1
   fi
-  timeout 10 ceph ${CEPH_OPTS} --name client.bootstrap-osd --keyring $OSD_BOOTSTRAP_KEYRING health || exit 1
+  timeout 10 ceph ${CLI_OPTS} --name client.bootstrap-osd --keyring $OSD_BOOTSTRAP_KEYRING health || exit 1
 
   # check device status first
   if ! parted --script ${OSD_DEVICE} print > /dev/null 2>&1; then
@@ -44,20 +44,20 @@ function osd_disk_prepare {
   fi
 
   if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
-    ceph-disk -v prepare ${CEPH_OPTS} --bluestore ${OSD_DEVICE}
+    ceph-disk -v prepare ${CLI_OPTS} --bluestore ${OSD_DEVICE}
   elif [[ ${OSD_DMCRYPT} -eq 1 ]]; then
     get_admin_key
     check_admin_key
     # the admin key must be present on the node
     # in order to store the encrypted key in the monitor's k/v store
-    ceph-disk -v prepare ${CEPH_OPTS} --journal-uuid ${OSD_JOURNAL_UUID} --lockbox-uuid ${OSD_LOCKBOX_UUID} --dmcrypt ${OSD_DEVICE} ${OSD_JOURNAL}
+    ceph-disk -v prepare ${CLI_OPTS} --journal-uuid ${OSD_JOURNAL_UUID} --lockbox-uuid ${OSD_LOCKBOX_UUID} --dmcrypt ${OSD_DEVICE} ${OSD_JOURNAL}
     echo "Unmounting LOCKBOX directory"
     # NOTE(leseb): adding || true so when this bug will be fixed the entrypoint will not fail
     # Ceph bug tracker: http://tracker.ceph.com/issues/18944
     DATA_UUID=$(blkid -o value -s PARTUUID ${OSD_DEVICE}1)
     umount /var/lib/ceph/osd-lockbox/${DATA_UUID} || true
   else
-    ceph-disk -v prepare ${CEPH_OPTS} --journal-uuid ${OSD_JOURNAL_UUID} ${OSD_DEVICE} ${OSD_JOURNAL}
+    ceph-disk -v prepare ${CLI_OPTS} --journal-uuid ${OSD_JOURNAL_UUID} ${OSD_DEVICE} ${OSD_JOURNAL}
   fi
 
   if [[ -n "${OSD_JOURNAL}" ]]; then

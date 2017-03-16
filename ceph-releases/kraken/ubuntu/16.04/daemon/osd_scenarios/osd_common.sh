@@ -7,9 +7,9 @@ function start_osd() {
   OSD_PATH=$(get_OSD_path $OSD_ID)
   OSD_KEYRING="$OSD_PATH/keyring"
   OSD_WEIGHT=$(df -P -k $OSD_PATH | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
-  ceph ${CEPH_OPTS} --name=osd.${OSD_ID} --keyring=$OSD_KEYRING osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
+  ceph ${CLI_OPTS} --name=osd.${OSD_ID} --keyring=$OSD_KEYRING osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
 
-  # ceph-disk activiate has exec'ed /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID}
+  # ceph-disk activiate has exec'ed /usr/bin/ceph-osd ${CLI_OPTS} -f -i ${OSD_ID}
   # wait till docker stop or ceph-osd is killed
   OSD_PID=$(ps -ef |grep ceph-osd |grep osd.${OSD_ID} |awk '{print $2}')
   if [ -n "${OSD_PID}" ]; then
@@ -18,10 +18,10 @@ function start_osd() {
   fi
 
   if [[ "$mode" == "forego" ]]; then
-   echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID} --setuser ceph --setgroup disk" | tee -a /etc/forego/${CLUSTER}/Procfile
+   echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CLI_OPTS} -f -i ${OSD_ID} --setuser ceph --setgroup disk" | tee -a /etc/forego/${CLUSTER}/Procfile
   else
    log "SUCCESS"
-   exec /usr/bin/ceph-osd ${CEPH_OPTS} -f -i ${OSD_ID} --setuser ceph --setgroup disk
+   exec /usr/bin/ceph-osd ${CLI_OPTS} -f -i ${OSD_ID} --setuser ceph --setgroup disk
   fi
 }
 
