@@ -39,6 +39,7 @@
 : ${KV_PORT:=4001} # PORT 8500 for Consul
 : ${GANESHA_OPTIONS:=""}
 : ${GANESHA_EPOCH:=""} # For restarting
+: ${MGR_NAME:=${HOSTNAME}}
 
 CEPH_OPTS="--cluster ${CLUSTER}"
 MOUNT_OPTS="-t xfs -o noatime,inode64"
@@ -65,6 +66,7 @@ RGW_BOOTSTRAP_KEYRING=/var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
 OSD_BOOTSTRAP_KEYRING=/var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring
 OSD_PATH_BASE=/var/lib/ceph/osd/${CLUSTER}
 MONMAP=/etc/ceph/monmap-${CLUSTER}
+MGR_KEYRING=/var/lib/ceph/mgr/${CLUSTER}-${MGR_NAME}/keyring
 
 function get_OSD_path {
   echo "$OSD_PATH_BASE-$1/"

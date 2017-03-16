@@ -50,6 +50,10 @@ function test_demo_rbd_mirror {
   return $(ps aux | grep -sq [r]bd-mirror)
 }
 
+function test_demo_mgr {
+  return $(wait_for_daemon "$DOCKER_COMMAND -s | grep -sq 'mgr active:'")
+}
+
 # MAIN
 get_cluster_name
 ceph_status # wait for the cluster to stabilize
@@ -58,6 +62,7 @@ test_demo_osd
 test_demo_rgw
 test_demo_mds
 test_demo_rbd_mirror
+test_demo_mgr
 ceph_status # wait again for the cluster to stabilize (mds pools)
 
 if ! docker ps | grep ceph-demo; then

@@ -52,7 +52,7 @@ function create_mandatory_directories {
   done
 
   # Let's create the ceph directories
-  for directory in mon osd mds radosgw tmp; do
+  for directory in mon osd mds radosgw tmp mgr; do
     mkdir -p /var/lib/ceph/$directory
   done
 
@@ -67,6 +67,9 @@ function create_mandatory_directories {
 
   # Create the MDS directory
   mkdir -p /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}
+
+  # Create the MGR directory
+  mkdir -p /var/lib/ceph/mgr/${CLUSTER}-$MGR_NAME
 
   # Adjust the owner of all those directories
   chown -R ceph. /var/run/ceph/ /var/lib/ceph/*
