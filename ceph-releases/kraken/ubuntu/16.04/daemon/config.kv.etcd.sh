@@ -112,6 +112,6 @@ function get_config {
 }
 
 function get_admin_key {
-  log "Retrieving Admin key."
+  log "Retrieving the admin key."
   etcdctl $ETCDCTL_OPT ${KV_TLS} get ${CLUSTER_PATH}/adminKeyring > /etc/ceph/${CLUSTER}.client.admin.keyring
 }
