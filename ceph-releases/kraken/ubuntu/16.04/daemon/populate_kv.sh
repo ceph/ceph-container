@@ -7,7 +7,7 @@ function kv {
   shift
   VALUE="$*"
   log "Adding key ${KEY} with value ${VALUE} to KV store."
-  etcdctl $ETCDCTL_OPT ${KV_TLS} set ${CLUSTER_PATH}"${KEY}" "${VALUE}" || log "Value is already set"
+  etcdctl $ETCDCTL_OPTS ${KV_TLS} set ${CLUSTER_PATH}"${KEY}" "${VALUE}" || log "Value is already set"
 }
 
 function populate_kv {

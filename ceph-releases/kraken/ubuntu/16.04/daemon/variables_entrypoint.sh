@@ -48,7 +48,7 @@ CLI_OPTS="--cluster ${CLUSTER}"
 DAEMON_OPTS="--cluster ${CLUSTER} --setuser ceph --setgroup ceph -d"
 
 MOUNT_OPTS="-t xfs -o noatime,inode64"
-ETCDCTL_OPT="--peers ${KV_IP}:${KV_PORT}"
+ETCDCTL_OPTS="--peers ${KV_IP}:${KV_PORT}"
 
 # make sure etcd uses http or https as a prefix
 if [[ "$KV_TYPE" == "etcd" ]]; then
