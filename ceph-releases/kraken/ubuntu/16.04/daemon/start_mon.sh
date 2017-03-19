@@ -129,7 +129,7 @@ function start_mon {
     ceph-mon --setuser ceph --setgroup ceph -i ${MON_NAME} --inject-monmap $MONMAP --keyring $MON_KEYRING --mon-data "$MON_DATA_DIR"
     # Ignore when we timeout in most cases that means the cluster has no qorum or
     # no mons are up and running
-    timeout 7 ceph mon add "${MON_NAME}" "${MON_IP}:6789" || true
+    timeout 7 ceph ${CLI_OPTS} mon add "${MON_NAME}" "${MON_IP}:6789" || true
   fi
 
   log "SUCCESS"
