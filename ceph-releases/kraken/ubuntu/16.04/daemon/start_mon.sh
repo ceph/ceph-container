@@ -88,7 +88,7 @@ function start_mon {
       CEPH_PUBLIC_NETWORK=$(get_network ${NIC_MORE_TRAFFIC} ${NETWORK_AUTO_DETECT})
       IP_VERSION=${NETWORK_AUTO_DETECT}
     else # Means -eq 1
-      MON_IP=$(get_ip ${NIC_MORE_TRAFFIC} 6)
+      MON_IP="[$(get_ip ${NIC_MORE_TRAFFIC} 6)]"
       CEPH_PUBLIC_NETWORK=$(get_network ${NIC_MORE_TRAFFIC} 6)
       IP_VERSION=6
       if [ -z "$MON_IP" ]; then
@@ -129,7 +129,7 @@ function start_mon {
     ceph-mon --setuser ceph --setgroup ceph -i ${MON_NAME} --inject-monmap $MONMAP --keyring $MON_KEYRING --mon-data "$MON_DATA_DIR"
     # Ignore when we timeout in most cases that means the cluster has no qorum or
     # no mons are up and running
-    timeout 7 ceph mon add ${MON_NAME} "${MON_IP}:6789" || true
+    timeout 7 ceph ${CLI_OPTS} mon add "${MON_NAME}" "${MON_IP}:6789" || true
   fi
 
   log "SUCCESS"
