@@ -27,6 +27,8 @@ secrets:
 
 ceph:
   cluster: ceph
+  enabled:
+    mds: true
   storage:
     osd_directory: /var/lib/ceph-helm/ceph/osd
     var_directory: /var/lib/ceph-helm/ceph/ceph

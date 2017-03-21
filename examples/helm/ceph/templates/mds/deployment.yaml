@@ -1,3 +1,4 @@
+{{- if .Values.ceph.enabled.mds }}
 ---
 kind: Deployment
 apiVersion: extensions/v1beta1
@@ -97,3 +98,4 @@ spec:
         - name: ceph-bootstrap-rgw-keyring
           secret:
             secretName: {{ .Values.secrets.keyrings.rgw }}
+{{ end }}
