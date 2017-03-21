@@ -1,0 +1,55 @@
+{{- if .Values.ceph.enabled.exporter }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ceph-exporter
+  labels:
+    version: {{ .Chart.Version }}
+    app: ceph
+    daemon: exporter
+    release: {{ .Release.Name }}
+  annotations:
+    prometheus.io/scrape: 'true'
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        version: {{ .Chart.Version }}
+        app: ceph
+        daemon: exporter
+        release: {{ .Release.Name }}
+    spec:
+      nodeSelector:
+        {{ .Values.labels.node_selector_key }}: {{ .Values.labels.node_selector_value | quote }}
+      containers:
+      - name: ceph-exporter
+        image: {{ .Values.images.exporter }}
+        imagePullPolicy: {{ .Values.image_policy.pull }}
+        ports:
+          - name: ceph-exporter
+            containerPort: {{ .Values.service.exporter.port }}
+        volumeMounts:
+          - name: ceph-conf
+            mountPath: /etc/ceph/ceph.conf
+            subPath: ceph.conf
+            readOnly: true
+          - name: ceph-client-admin-keyring
+            mountPath: /etc/ceph/ceph.client.admin.keyring
+            subPath: ceph.client.admin.keyring
+            readOnly: true
+        resources:
+          requests:
+            memory: {{ .Values.resources.exporter.requests.memory | quote }}
+            cpu: {{ .Values.resources.exporter.requests.cpu | quote }}
+          limits:
+            memory: {{ .Values.resources.exporter.limits.memory | quote }}
+            cpu: {{ .Values.resources.exporter.limits.cpu | quote }}
+      volumes:
+      - name: ceph-conf
+        configMap:
+          name: ceph-conf
+      - name: ceph-client-admin-keyring
+        secret:
+          secretName: {{ .Values.secrets.keyrings.admin }}
+{{ end }}

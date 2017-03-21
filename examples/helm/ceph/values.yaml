@@ -1,5 +1,6 @@
 images:
   daemon: docker.io/ceph/daemon:latest
+  exporter: digitalocean/ceph_exporter:1.0.0
 
 image_policy:
   pull: Always
@@ -12,6 +13,9 @@ service:
   mon:
     name: ceph-mon
     port: 6789
+  exporter:
+    name: ceph-exporter
+    port: 9128
 
 network:
   cluster: 10.192.0.0/10
@@ -29,6 +33,7 @@ ceph:
   cluster: ceph
   enabled:
     mds: true
+    exporter: true
   storage:
     osd_directory: /var/lib/ceph-helm/ceph/osd
     var_directory: /var/lib/ceph-helm/ceph/ceph
@@ -119,6 +124,13 @@ resources:
     limits:
       memory: "50Mi"
       cpu: "500m"
+  exporter:
+    requests:
+      memory: "100Mi"
+      cpu: "200m"
+    limits:
+      memory: "100Mi"
+      cpu: "200m"
 
 storageclass:
   name: general
