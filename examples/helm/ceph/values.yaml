@@ -12,6 +12,9 @@ service:
   mon:
     name: ceph-mon
     port: 6789
+  rgw:
+    name: ceph-rgw
+    port: 8080
 
 network:
   cluster: 10.192.0.0/10
@@ -29,6 +32,7 @@ ceph:
   cluster: ceph
   enabled:
     mds: true
+    rgw: true
   storage:
     osd_directory: /var/lib/ceph-helm/ceph/osd
     var_directory: /var/lib/ceph-helm/ceph/ceph
@@ -119,6 +123,14 @@ resources:
     limits:
       memory: "50Mi"
       cpu: "500m"
+  rgw:
+    replicas: 1
+    requests:
+      memory: "50Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
 
 storageclass:
   name: general
