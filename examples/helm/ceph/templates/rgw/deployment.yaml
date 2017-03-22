@@ -1,0 +1,85 @@
+{{- if .Values.ceph.enabled.rgw }}
+---
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: ceph-rgw
+  labels:
+    version: {{ .Chart.Version }}
+    app: ceph
+    daemon: rgw
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.resources.rgw.replicas }}
+  template:
+    metadata:
+      labels:
+        version: {{ .Chart.Version }}
+        app: ceph
+        daemon: rgw
+        release: {{ .Release.Name }}
+    spec:
+      nodeSelector:
+        {{ .Values.labels.node_selector_key }}: {{ .Values.labels.node_selector_value | quote }}
+      serviceAccount: default
+      containers:
+        - name: ceph-rgw
+          image: {{ .Values.images.daemon }}
+          imagePullPolicy: {{ .Values.image_policy.pull }}
+          ports:
+            - name: {{ .Values.service.rgw.name }}
+              containerPort: {{ .Values.service.rgw.port }}
+          env:
+            - name: CEPH_DAEMON
+              value: RGW
+            - name: KV_TYPE
+              value: k8s
+            - name: CLUSTER
+              value: ceph
+          volumeMounts:
+            - name: ceph-conf
+              mountPath: /etc/ceph/ceph.conf
+              subPath: ceph.conf
+              readOnly: true
+            - name: ceph-client-admin-keyring
+              mountPath: /etc/ceph/ceph.client.admin.keyring
+              subPath: ceph.client.admin.keyring
+              readOnly: true
+            - name: ceph-mon-keyring
+              mountPath: /etc/ceph/ceph.mon.keyring
+              subPath: ceph.mon.keyring
+              readOnly: true
+            - name: ceph-bootstrap-rgw-keyring
+              mountPath: /var/lib/ceph/bootstrap-rgw/ceph.keyring
+              subPath: ceph.keyring
+              readOnly: true
+          livenessProbe:
+              tcpSocket:
+                port: {{ .Values.service.rgw.port }}
+              initialDelaySeconds: 60
+              timeoutSeconds: 5
+          readinessProbe:
+              tcpSocket:
+                port: {{ .Values.service.rgw.port }}
+              timeoutSeconds: 5
+          resources:
+            requests:
+              memory: {{ .Values.resources.rgw.requests.memory | quote }}
+              cpu: {{ .Values.resources.rgw.requests.cpu | quote }}
+            limits:
+              memory: {{ .Values.resources.rgw.limits.memory | quote }}
+              cpu: {{ .Values.resources.rgw.limits.cpu | quote }}
+      volumes:
+        - name: ceph-conf
+          configMap:
+            name: ceph-conf
+        - name: ceph-client-admin-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.admin }}
+        - name: ceph-mon-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.mon }}
+        - name: ceph-bootstrap-rgw-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.rgw }}
+{{ end }}
