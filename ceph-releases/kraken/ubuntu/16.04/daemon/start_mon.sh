@@ -124,9 +124,9 @@ function start_mon {
     done
 
     # Prepare the monitor daemon's directory with the map and keyring
-    ceph-mon --setuser ceph --setgroup ceph --mkfs -i ${MON_NAME} --inject-monmap $MONMAP --keyring $MON_KEYRING --mon-data "$MON_DATA_DIR"
+    ceph-mon --setuser ceph --setgroup ceph --cluster ${CLUSTER} --mkfs -i ${MON_NAME} --inject-monmap $MONMAP --keyring $MON_KEYRING --mon-data "$MON_DATA_DIR"
   else
-    ceph-mon --setuser ceph --setgroup ceph -i ${MON_NAME} --inject-monmap $MONMAP --keyring $MON_KEYRING --mon-data "$MON_DATA_DIR"
+    ceph-mon --setuser ceph --setgroup ceph --cluster ${CLUSTER} -i ${MON_NAME} --inject-monmap $MONMAP --keyring $MON_KEYRING --mon-data "$MON_DATA_DIR"
     # Ignore when we timeout in most cases that means the cluster has no qorum or
     # no mons are up and running
     timeout 7 ceph ${CLI_OPTS} mon add "${MON_NAME}" "${MON_IP}:6789" || true
