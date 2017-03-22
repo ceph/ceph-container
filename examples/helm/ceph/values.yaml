@@ -1,5 +1,6 @@
 images:
   daemon: docker.io/ceph/daemon:latest
+  exporter: digitalocean/ceph_exporter:1.0.0
 
 image_policy:
   pull: Always
@@ -15,6 +16,9 @@ service:
   rgw:
     name: ceph-rgw
     port: 8080
+  exporter:
+    name: ceph-exporter
+    port: 9128
 
 network:
   cluster: 10.192.0.0/10
@@ -33,6 +37,7 @@ ceph:
   enabled:
     mds: true
     rgw: true
+    exporter: true
   storage:
     osd_directory: /var/lib/ceph-helm/ceph/osd
     var_directory: /var/lib/ceph-helm/ceph/ceph
