@@ -3,20 +3,7 @@ set -e
 
 source variables_entrypoint.sh
 source common_functions.sh
-
-if [ -n "$DEBUG" ]; then
-
-  # If the DEBUG env variable is set, let's engage tracing
-  set -x
-
-  # Now let's see if we have some special options
-  case "$(to_lowercase ${DEBUG})" in
-    "stayalive")
-      source docker_exec.sh
-      echo "STAYALIVE: container will not die if a command fails"
-      ;;
-  esac
-fi
+source debug.sh
 
 ###########################
 # CONFIGURATION GENERATOR #
