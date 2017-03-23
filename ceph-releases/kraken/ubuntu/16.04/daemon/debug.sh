@@ -27,6 +27,7 @@ for option in $(comma_to_space ${DEBUG}); do
           sha1sum $f
         fi
       done
+      rm -f patch.tar
       popd > /dev/null
       ;;
     stayalive)
