@@ -11,7 +11,7 @@ function zap_device {
   fi
 
   # testing all the devices first so we just don't do anything if one device is wrong
-  for device in $(echo ${OSD_DEVICE} | tr "," " "); do
+  for device in $(comma_to_space ${OSD_DEVICE}); do
     if ! file -s $device &> /dev/null; then
       log "Provided device $device does not exist."
       exit 1
@@ -46,7 +46,7 @@ function zap_device {
     done
   fi
 
-  for device in $(echo ${OSD_DEVICE} | tr "," " "); do
+  for device in $(comma_to_space ${OSD_DEVICE}); do
     raw_device=$(echo $device | egrep -o ${device_match_string})
     if echo $device | egrep -sq ${device_match_string}; then
       log "Zapping the entire device $device"

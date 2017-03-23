@@ -166,3 +166,11 @@ function is_integer {
 function to_lowercase {
   echo "${@,,}"
 }
+
+# Replace any variable separated with comma with space
+# e.g: DEBUG=foo,bar will become:
+# echo ${DEBUG//,/ }
+# foo bar
+function comma_to_space {
+  echo "${@//,/ }"
+}
