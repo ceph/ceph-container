@@ -1058,6 +1058,9 @@ case "$CEPH_DAEMON" in
     start_rbd_mirror
     ;;
   nfs)
+    echo "Temporarily disabled due to broken package dependencies with nfs-ganesha"
+    echo "For more info see: https://github.com/ceph/ceph-docker/pull/564"
+    exit 1
     start_nfs
     ;;
   zap_device)

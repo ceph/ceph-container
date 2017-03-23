@@ -334,7 +334,9 @@ bootstrap_mds
 bootstrap_rgw
 bootstrap_demo_user
 bootstrap_rest_api
-bootstrap_nfs
+# bootstrap_nfs is temporarily disabled due to broken package dependencies with nfs-ganesha"
+# For more info see: https://github.com/ceph/ceph-docker/pull/564"
+#bootstrap_nfs
 bootstrap_rbd_mirror
 bootstrap_mgr
 log "SUCCESS"
