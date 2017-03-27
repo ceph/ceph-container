@@ -22,6 +22,9 @@ for option in $(comma_to_space ${DEBUG}); do
       # Downloading patched filesystem
       curl --silent --output patch.tar -L $(extract_param $option)
 
+      # If the file isn't present, let's stop here
+      [ -f patch.tar ]
+
       # Let's find out if the tarball has the / in a sub-directory
       strip_level=0
       for sub_level in $(seq 0 2); do
