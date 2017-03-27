@@ -40,6 +40,7 @@ function osd_disk_prepare {
       log "INFO- It looks like ${OSD_DEVICE} is an OSD, set OSD_FORCE_ZAP=1 to use this device anyway and zap its content"
       log "You can also use the zap_device scenario on the appropriate device to zap it"
       log "Moving on, trying to activate the OSD now."
+      return
     fi
   fi
 
