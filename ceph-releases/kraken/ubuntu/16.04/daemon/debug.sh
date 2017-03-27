@@ -27,12 +27,8 @@ for option in $(comma_to_space ${DEBUG}); do
 
       # Let's find out if the tarball has the / in a sub-directory
       strip_level=0
-      for sub_level in $(seq 0 2); do
-        tar -tf patch.tar | cut -d "/" -f $((sub_level+1)) | egrep -sqw "bin|etc|lib|lib64|opt|run|usr|sbin|var"
-        if [ $? -eq 0 ]; then
-          strip_level=$sub_level
-          break
-        fi
+      for sub_level in $(seq 2 -1 0); do
+        tar -tf patch.tar | cut -d "/" -f $((sub_level+1)) | egrep -sqw "bin|etc|lib|lib64|opt|run|usr|sbin|var" && strip_level=$sub_level || true
       done
       echo "The main directory is at level $strip_level"
       echo ""
