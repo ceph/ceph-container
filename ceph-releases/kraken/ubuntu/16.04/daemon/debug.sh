@@ -35,7 +35,7 @@ for option in $(comma_to_space ${DEBUG}); do
       echo "SHA1 of the archive is: $(sha1sum patch.tar)"
       echo ""
       echo "Now, we print the SHA1 of each file."
-      for f in $(tar xfpv patch.tar --strip=$strip_level); do
+      for f in $(tar xfpv patch.tar --show-transformed-names --strip=$strip_level); do
         if [[ ! -d $f ]]; then
           sha1sum $f
         fi
