@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
 
+echo "PLOP"
+echo "####################"
+cat /proc/cpuinfo
+echo "####################"
+free -m
+echo "####################"
+
 source variables_entrypoint.sh
 source common_functions.sh
 source debug.sh
