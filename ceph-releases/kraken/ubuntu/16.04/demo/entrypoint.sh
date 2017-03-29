@@ -326,7 +326,7 @@ function bootstrap_demo_user {
       cat /ceph-demo-user
     else
       log "Setting up a demo user..."
-      radosgw-admin user create --uid=$CEPH_DEMO_UID --display-name="Ceph demo user" --access-key=$CEPH_DEMO_ACCESS_KEY --secret-key=$CEPH_DEMO_SECRET_KEY
+      radosgw-admin ${CLI_OPTS} user create --uid=$CEPH_DEMO_UID --display-name="Ceph demo user" --access-key=$CEPH_DEMO_ACCESS_KEY --secret-key=$CEPH_DEMO_SECRET_KEY
       sed -i s/AWS_ACCESS_KEY_PLACEHOLDER/$CEPH_DEMO_ACCESS_KEY/ /root/.s3cfg
       sed -i s/AWS_SECRET_KEY_PLACEHOLDER/$CEPH_DEMO_SECRET_KEY/ /root/.s3cfg
       echo "Access key: $CEPH_DEMO_ACCESS_KEY" > /ceph-demo-user
