@@ -30,6 +30,9 @@ IPV4_NETWORK_REGEXP="$IPV4_REGEXP/[0-9]\{1,2\}"
 CLI_OPTS="--cluster ${CLUSTER}"
 DAEMON_OPTS="--cluster ${CLUSTER} --setuser ceph --setgroup ceph"
 
+if [[ -n $DEBUG ]]; then
+  set -x
+fi
 
 #############
 # FUNCTIONS #
