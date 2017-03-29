@@ -336,8 +336,8 @@ function bootstrap_demo_user {
       echo "Secret key: $CEPH_DEMO_SECRET_KEY" >> /ceph-demo-user
 
       # Use rgw port
-      sed -i "s/host_base = localhost/host_base = localhost:${RGW_CIVETWEB_PORT}/" /root/.s3cfg
-      sed -i "s/host_bucket = localhost/host_bucket = localhost:${RGW_CIVETWEB_PORT}/" /root/.s3cfg
+      sed -i "s/host_base = localhost/host_base = ${RGW_NAME}:${RGW_CIVETWEB_PORT}/" /root/.s3cfg
+      sed -i "s/host_bucket = localhost/host_bucket = ${RGW_NAME}:${RGW_CIVETWEB_PORT}/" /root/.s3cfg
 
       if [ -n "$CEPH_DEMO_BUCKET" ]; then
         log "Creating bucket..."
