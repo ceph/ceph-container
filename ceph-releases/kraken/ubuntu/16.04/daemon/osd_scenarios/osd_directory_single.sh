@@ -9,7 +9,7 @@ function osd_directory_single {
   fi
 
   # pick one osd and make sure no lock is held
-  for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }'); do
+  for OSD_ID in $(ls /var/lib/ceph/osd | sed 's/.*-//'); do
     OSD_PATH=$(get_OSD_path $OSD_ID)
     OSD_KEYRING="$OSD_PATH/keyring"
 

@@ -350,7 +350,7 @@ function osd_directory_single {
   chown -R ceph. /var/lib/ceph/osd
 
   # pick one osd and make sure no lock is held
-  for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }'); do
+  for OSD_ID in $(ls /var/lib/ceph/osd | sed 's/.*-//'); do
     if [[ -n "$(find /var/lib/ceph/osd/${CLUSTER}-${OSD_ID} -prune -empty)" ]]; then
       log "Looks like OSD: ${OSD_ID} has not been bootstrapped yet, doing nothing, moving on to the next discoverable OSD"
     else
@@ -407,7 +407,7 @@ function osd_directory {
   mkdir -p /etc/forego/${CLUSTER}
   echo "" > /etc/forego/${CLUSTER}/Procfile
 
-  for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }'); do
+  for OSD_ID in $(ls /var/lib/ceph/osd | sed 's/.*-//'); do
     if [ -n "${JOURNAL_DIR}" ]; then
        OSD_J="${JOURNAL_DIR}/journal.${OSD_ID}"
        chown -R ceph. ${JOURNAL_DIR}
@@ -636,7 +636,7 @@ function osd_disks {
   # check if anything is there, if not create an osd with directory
   if [[ -z "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
     log "Mount existing and prepared OSD disks for ceph-cluster ${CLUSTER}"
-    for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }'); do
+    for OSD_ID in $(ls /var/lib/ceph/osd | sed 's/.*-//'); do
       OSD_DEV=$(get_osd_dev ${OSD_ID})
       if [[ -z ${OSD_DEV} ]]; then
         log "No device mapping for ${CLUSTER}-${OSD_ID} for ceph-cluster ${CLUSTER}"
