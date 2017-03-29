@@ -9,7 +9,7 @@ ENV ETCDCTL_VERSION v2.2.4
 ENV ETCDCTL_ARCH linux-amd64
 ENV KVIATOR_VERSION 0.0.7
 ENV CONFD_VERSION 0.10.0
-ENV KUBECTL_VERSION v1.4.0
+ENV KUBECTL_VERSION v1.6.0
 
 # Download kviator
 ADD https://github.com/AcalephStorage/kviator/releases/download/v${KVIATOR_VERSION}/kviator-${KVIATOR_VERSION}-linux-amd64.zip /kviator.zip

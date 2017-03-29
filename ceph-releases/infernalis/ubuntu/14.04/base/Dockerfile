@@ -10,7 +10,7 @@ ENV ETCDCTL_ARCH linux-amd64
 ENV CEPH_VERSION infernalis
 ENV KVIATOR_VERSION 0.0.7
 ENV CONFD_VERSION 0.10.0
-ENV KUBECTL_VERSION v1.4.0
+ENV KUBECTL_VERSION v1.6.0
 
 # Install prerequisites
 RUN apt-get update && apt-get install -y wget unzip uuid-runtime runit

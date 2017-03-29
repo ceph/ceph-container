@@ -7,7 +7,7 @@ MAINTAINER Sébastien Han "seb@redhat.com"
 
 ENV CEPH_VERSION kraken
 ENV CONFD_VERSION 0.10.0
-ENV KUBECTL_VERSION v1.4.0
+ENV KUBECTL_VERSION v1.6.0
 
 # Download confd
 ADD https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-linux-amd64 /usr/local/bin/confd
