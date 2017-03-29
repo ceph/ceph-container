@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -xe
 
 : ${CLUSTER:=ceph}
 : ${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}
