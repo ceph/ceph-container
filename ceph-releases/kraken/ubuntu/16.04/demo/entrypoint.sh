@@ -38,6 +38,11 @@ fi
 # FUNCTIONS #
 #############
 
+# Transform any set of strings to uppercase
+function to_uppercase {
+  echo "${@^^}"
+}
+
 # Test if a command line tool is available
 function is_available {
   command -v $@ &>/dev/null
@@ -341,7 +346,9 @@ function bootstrap_demo_user {
 
       if [ -n "$CEPH_DEMO_BUCKET" ]; then
         log "Creating bucket..."
-        s3cmd mb s3://$CEPH_DEMO_BUCKET
+        log "Transforming your bucket name to uppercase."
+        log "It appears there is a bug in s3cmd 1.6.1 with lowercase bucket names."
+        s3cmd mb s3://$(to_uppercase $CEPH_DEMO_BUCKET)
       fi
     fi
   fi
