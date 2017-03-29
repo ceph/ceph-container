@@ -15,6 +15,9 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget unz
     apt-get update && apt-get install -y --force-yes ceph-mon ceph-osd ceph-mds ceph-mgr ceph-base ceph-common radosgw rbd-mirror && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Add s3cfg file
+ADD s3cfg /root/.s3cfg
+
 # Add entrypoint
 ADD entrypoint.sh /entrypoint.sh
 

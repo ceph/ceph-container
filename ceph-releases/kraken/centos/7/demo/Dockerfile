@@ -15,6 +15,9 @@ RUN rpm -Uvh http://download.ceph.com/rpm-${CEPH_VERSION}/el7/noarch/ceph-releas
 RUN yum install -y epel-release && yum clean all
 RUN yum install -y ceph-mon ceph-osd ceph-mds ceph-mgr ceph-base ceph-common ceph-radosgw rbd-mirror sharutils python34 nfs-ganesha-rgw nfs-ganesha-vfs nfs-ganesha-ceph s3cmd && yum clean all
 
+# Add s3cfg file
+ADD s3cfg /root/.s3cfg
+
 # Add entrypoint
 ADD entrypoint.sh /entrypoint.sh
 
