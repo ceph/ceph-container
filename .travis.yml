@@ -19,7 +19,7 @@ before_install:
 
 install:
   - sudo ./travis-builds/prepare_osd_fs.sh
-  - docker run -d --name ceph-demo --net=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph:/var/lib/ceph -e MON_IP=$(ip -4 -o a | awk '/eth|ens|eno|enp/ { sub ("/..", "", $4); print $4 }') -e CEPH_PUBLIC_NETWORK=$(grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/[0-9]\{1,2\}' /proc/net/fib_trie | grep -vE "^127|0$" | head -1) ceph/demo
+  - docker run -d --name ceph-demo -e CLUSTER=test -e NETWORK_AUTO_DETECT=4 -e CEPH_DEMO_ACCESS_KEY=G1EZ5R4K6IJ7XUQKMAED -e CEPH_DEMO_SECRET_KEY=cNmUrqpBKjCMzcfqG8fg4Qk07Xkoyau52OmvnSsz -e CEPH_DEMO_BUCKET=foobar ceph/demo
 
 script:
   - sudo ./travis-builds/validate_demo_cluster.sh
