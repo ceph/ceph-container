@@ -11,7 +11,7 @@ if int(os.getenv('K8S_HOST_NETWORK', 0)) > 0:
 else:
     kubectl_command = 'kubectl get pods --namespace=${CLUSTER} -l daemon=mon -o template --template="{ {{range  \$i, \$v  := .items}} {{ if \$i}} , {{ end }} \\"{{\$v.metadata.name}}\\": \\"{{\$v.status.podIP}}\\" {{end}} }"'
 
-monmap_command = "ceph mon getmap > /tmp/monmap && monmaptool -f /tmp/monmap --print"
+monmap_command = "ceph --cluster=${CLUSTER} mon getmap > /tmp/monmap && monmaptool -f /tmp/monmap --print"
 
 
 def extract_mons_from_monmap():
@@ -22,7 +22,6 @@ def extract_mons_from_monmap():
         if m is not None:
             mons[m.group(2)] = m.group(1)
     return mons
-
 
 def extract_mons_from_kubeapi():
     kubemap = subprocess.check_output(kubectl_command, shell=True)
@@ -36,13 +35,13 @@ print "expected mons:", expected_mons
 
 for mon in current_mons:
     removed_mon = False
-    if mon not in expected_mons:
-        print "print removing zombie mon ", mon
-        subprocess.call(["ceph", "mon", "remove", mon])
+    if not mon in expected_mons:
+        print "removing zombie mon ", mon
+        subprocess.call(["ceph", "--cluster", os.environ["CLUSTER"], "mon", "remove", mon])
         removed_mon = True
-    elif current_mons[mon] != expected_mons[mon]:  # check if for some reason the ip of the mon changed
+    elif current_mons[mon] != expected_mons[mon]: # check if for some reason the ip of the mon changed
         print "ip change dedected for pod ", mon
-        subprocess.call(["kubectl", "--namespace=ceph", "delete", "pod", mon])
+        subprocess.call(["kubectl", "--namespace", os.environ["CLUSTER"], "delete", "pod", mon])
         removed_mon = True
         print "deleted mon %s via the kubernetes api" % mon
 

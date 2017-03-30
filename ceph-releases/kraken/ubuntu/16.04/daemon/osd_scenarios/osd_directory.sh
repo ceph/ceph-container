@@ -36,7 +36,7 @@ function osd_directory {
   mkdir -p /etc/forego/${CLUSTER}
   echo "" > /etc/forego/${CLUSTER}/Procfile
 
-  for OSD_ID in $(ls /var/lib/ceph/osd | awk 'BEGIN { FS = "-" } ; { print $2 }'); do
+  for OSD_ID in $(ls /var/lib/ceph/osd | sed 's/.*-//'); do
     OSD_PATH=$(get_OSD_path $OSD_ID)
     OSD_KEYRING="$OSD_PATH/keyring"
 

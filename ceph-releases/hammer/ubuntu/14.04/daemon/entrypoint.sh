@@ -190,7 +190,7 @@ function osd_directory {
     exit 1
   fi
 
-  for OSD_ID in $(ls /var/lib/ceph/osd |  awk 'BEGIN { FS = "-" } ; { print $2 }'); do
+  for OSD_ID in $(ls /var/lib/ceph/osd | sed 's/.*-//'); do
     if [ -n "${JOURNAL_DIR}" ]; then
        OSD_J="${JOURNAL_DIR}/journal.${OSD_ID}"
     else
