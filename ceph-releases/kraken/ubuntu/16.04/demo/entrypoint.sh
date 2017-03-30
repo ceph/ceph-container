@@ -30,10 +30,18 @@ IPV4_NETWORK_REGEXP="$IPV4_REGEXP/[0-9]\{1,2\}"
 CLI_OPTS="--cluster ${CLUSTER}"
 DAEMON_OPTS="--cluster ${CLUSTER} --setuser ceph --setgroup ceph"
 
+if [[ -n $DEBUG ]]; then
+  set -x
+fi
 
 #############
 # FUNCTIONS #
 #############
+
+# Transform any set of strings to uppercase
+function to_uppercase {
+  echo "${@^^}"
+}
 
 # Test if a command line tool is available
 function is_available {
@@ -326,15 +334,21 @@ function bootstrap_demo_user {
       cat /ceph-demo-user
     else
       log "Setting up a demo user..."
-      radosgw-admin user create --uid=$CEPH_DEMO_UID --display-name="Ceph demo user" --access-key=$CEPH_DEMO_ACCESS_KEY --secret-key=$CEPH_DEMO_SECRET_KEY
+      radosgw-admin ${CLI_OPTS} user create --uid=$CEPH_DEMO_UID --display-name="Ceph demo user" --access-key=$CEPH_DEMO_ACCESS_KEY --secret-key=$CEPH_DEMO_SECRET_KEY
       sed -i s/AWS_ACCESS_KEY_PLACEHOLDER/$CEPH_DEMO_ACCESS_KEY/ /root/.s3cfg
       sed -i s/AWS_SECRET_KEY_PLACEHOLDER/$CEPH_DEMO_SECRET_KEY/ /root/.s3cfg
       echo "Access key: $CEPH_DEMO_ACCESS_KEY" > /ceph-demo-user
       echo "Secret key: $CEPH_DEMO_SECRET_KEY" >> /ceph-demo-user
 
+      # Use rgw port
+      sed -i "s/host_base = localhost/host_base = ${RGW_NAME}:${RGW_CIVETWEB_PORT}/" /root/.s3cfg
+      sed -i "s/host_bucket = localhost/host_bucket = ${RGW_NAME}:${RGW_CIVETWEB_PORT}/" /root/.s3cfg
+
       if [ -n "$CEPH_DEMO_BUCKET" ]; then
         log "Creating bucket..."
-        s3cmd mb s3://$CEPH_DEMO_BUCKET
+        log "Transforming your bucket name to uppercase."
+        log "It appears there is a bug in s3cmd 1.6.1 with lowercase bucket names."
+        s3cmd mb s3://$(to_uppercase $CEPH_DEMO_BUCKET)
       fi
     fi
   fi
