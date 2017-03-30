@@ -469,7 +469,6 @@ ENDHERE
 ###################
 
 function watch_mon_health {
-echo "checking for zombie mons"
 
 while [ true ]
 do

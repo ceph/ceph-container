@@ -987,7 +987,6 @@ function zap_device {
 ####################
 
 function watch_mon_health {
-  log "checking for zombie mons"
 
   while [ true ]
   do
