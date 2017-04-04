@@ -21,15 +21,17 @@ ADD https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}
 # Download forego
 ADD https://bin.equinox.io/c/ekMN3bCZFUn/forego-stable-linux-amd64.tgz /forego.tgz
 
+# Packages list
+ARG PACKAGES="ceph radosgw rbd-mirror"
+
 # install prerequisites
 RUN DEBIAN_FRONTEND=noninteractive apt-get update &&  apt-get install -y wget unzip uuid-runtime python-setuptools udev sharutils && \
 \
 # install ceph and ganesha
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3FE869A9 && \
-    echo "deb http://ppa.launchpad.net/gluster/libntirpc/ubuntu trusty main" | tee /etc/apt/sources.list.d/libntirpc.list && \
     wget -q -O- 'https://download.ceph.com/keys/release.asc' | apt-key add - && \
     echo "deb http://download.ceph.com/debian-$CEPH_VERSION/ trusty main" | tee /etc/apt/sources.list.d/ceph-$CEPH_VERSION.list && \
-    apt-get update && apt-get install -y --force-yes ceph radosgw rbd-mirror && \
+    apt-get update && apt-get install -y --force-yes $PACKAGES && \
+    dpkg -s $PACKAGES && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
 \
 # Install etcdctl

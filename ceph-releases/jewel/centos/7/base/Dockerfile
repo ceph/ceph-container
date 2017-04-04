@@ -19,7 +19,8 @@ RUN yum install -y unzip
 RUN rpm --import 'https://download.ceph.com/keys/release.asc'
 RUN rpm -Uvh http://download.ceph.com/rpm-${CEPH_VERSION}/el7/noarch/ceph-release-1-1.el7.noarch.rpm
 RUN yum install -y epel-release && yum clean all
-RUN yum install -y ceph ceph-radosgw rbd-mirror sharutils python34 nfs-ganesha-rgw nfs-ganesha-vfs nfs-ganesha-ceph && yum clean all
+ARG PACKAGES="ceph ceph-radosgw rbd-mirror sharutils python34"
+RUN yum install -y $PACKAGES && rpm -q $PACKAGES && yum clean all
 
 # Install etcdctl
 RUN curl -L --remote-name https://github.com/coreos/etcd/releases/download/${ETCDCTL_VERSION}/etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}.tar.gz && tar xfz etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}.tar.gz -C /tmp/ etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}/etcdctl
