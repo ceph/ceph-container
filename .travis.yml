@@ -30,4 +30,4 @@ after_failure:
   - docker ps
   - docker ps -a
   - docker logs ceph-demo
-  - docker exec ceph-demo ceph -s
+  - docker exec ceph-demo ceph --cluster test -s
