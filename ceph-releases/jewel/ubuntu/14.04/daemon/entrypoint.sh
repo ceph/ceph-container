@@ -7,6 +7,7 @@ set -e
 : ${CEPH_GET_ADMIN_KEY:=0}
 : ${HOSTNAME:=$(hostname -s)}
 : ${MON_NAME:=${HOSTNAME}}
+: ${MON_PORT:=$PORT0} ${MON_PORT:=6789}
 : ${NETWORK_AUTO_DETECT:=0}
 : ${MDS_NAME:=mds-${HOSTNAME}}
 : ${OSD_FORCE_ZAP:=0}
@@ -29,7 +30,7 @@ set -e
 : ${RGW_REMOTE_CGI_HOST:=0.0.0.0}
 : ${RGW_USER:="cephnfs"}
 : ${RESTAPI_IP:=0.0.0.0}
-: ${RESTAPI_PORT:=5000}
+: ${RESTAPI_PORT:=$PORT0} ${RESTAPI_PORT:=5000}
 : ${RESTAPI_BASE_URL:=/api/v0.1}
 : ${RESTAPI_LOG_LEVEL:=warning}
 : ${RESTAPI_LOG_FILE:=/var/log/ceph/ceph-restapi.log}
@@ -288,7 +289,7 @@ function start_mon {
   log "SUCCESS"
 
   # start MON
-  exec /usr/bin/ceph-mon ${CEPH_OPTS} -d -i ${MON_NAME} --public-addr "${MON_IP}:6789" --setuser ceph --setgroup ceph
+  exec /usr/bin/ceph-mon ${CEPH_OPTS} -d -i ${MON_NAME} --public-addr "${MON_IP}:${MON_PORT}" --setuser ceph --setgroup ceph
 }
 
 
@@ -887,7 +888,7 @@ ENDHERE
   log "SUCCESS"
 
   # start ceph-rest-api
-  exec /usr/bin/ceph-rest-api ${CEPH_OPTS} -n client.admin
+  exec /usr/bin/ceph-rest-api ${CEPH_OPTS}
 
 }
 
