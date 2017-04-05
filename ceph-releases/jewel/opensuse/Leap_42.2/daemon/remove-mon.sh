@@ -1,1 +1,1 @@
-../../../ubuntu/14.04/daemon/./remove-mon.sh
+../../../ubuntu/14.04/daemon/remove-mon.sh

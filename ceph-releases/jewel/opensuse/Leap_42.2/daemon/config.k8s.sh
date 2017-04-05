@@ -1,1 +1,1 @@
-../../../ubuntu/14.04/daemon/./config.k8s.sh
+../../../ubuntu/14.04/daemon/config.k8s.sh
