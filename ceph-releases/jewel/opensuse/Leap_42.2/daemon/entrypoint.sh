@@ -1,1 +1,1 @@
-../../../ubuntu/14.04/daemon/./entrypoint.sh
+../../../ubuntu/14.04/daemon/entrypoint.sh

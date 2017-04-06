@@ -1,1 +1,1 @@
-../../../ubuntu/14.04/demo/README.md
+../../14.04/demo/README.md

@@ -1,1 +1,1 @@
-../../../ubuntu/14.04/daemon/./config.static.sh
+../../../ubuntu/14.04/daemon/config.static.sh

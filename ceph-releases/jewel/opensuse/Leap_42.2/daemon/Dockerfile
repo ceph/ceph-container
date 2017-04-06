@@ -1,7 +1,8 @@
 FROM ceph/base:tag-build-master-jewel-opensuse-Leap_42.2
 MAINTAINER Ricardo Dias "rdias@suse.com"
 
-ADD entrypoint.sh config.*.sh check_zombie_mons.py remove-mon.sh ceph.defaults /
+# Add bootstrap script, ceph defaults key/values for KV store
+ADD *.sh ceph.defaults check_zombie_mons.py ./osd_scenarios/* /
 
 # Add templates for confd
 ADD ./confd/templates/* /etc/confd/templates/

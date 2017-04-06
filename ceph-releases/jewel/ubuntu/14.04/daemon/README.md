@@ -28,10 +28,7 @@ sudo chcon -Rt svirt_sandbox_file_t /var/lib/ceph
 
 ## KV backends
 
-We currently support 2 KV backends to store our configuration flags, keys and maps:
-
-- etcd
-- consul
+We currently support one KV backend to store our configuration flags, keys and maps: etcd.
 
 There is a `ceph.defaults` config file in the image that is used for defaults to bootstrap daemons. It will add the keys if they are not already present. You can either pre-populate the KV store with your own settings, or provide a ceph.defaults config file. To supply your own defaults, make sure to mount the /etc/ceph/ volume and place your ceph.defaults file there.
 

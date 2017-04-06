@@ -8,7 +8,7 @@ FROM ceph/base:tag-build-master-jewel-centos-7
 MAINTAINER Sébastien Han "seb@redhat.com"
 
 # Add bootstrap script, ceph defaults key/values for KV store
-ADD entrypoint.sh config.*.sh check_zombie_mons.py remove-mon.sh ceph.defaults / 
+ADD *.sh ceph.defaults check_zombie_mons.py ./osd_scenarios/* /
 
 # Add templates for confd
 ADD ./confd/templates/* /etc/confd/templates/
