@@ -7,8 +7,11 @@ function osd_activate_journal {
     exit 1
   fi
 
+  # watch the udev event queue, and exit if all current events are handled
+  udevadm settle --timeout=600
+
   # wait till partition exists
-  timeout 10  bash -c "while [ ! -e ${OSD_JOURNAL} ]; do sleep 1; done"
+  wait_for ${OSD_JOURNAL}
 
   chown ceph. ${OSD_JOURNAL}
   ceph-disk -v --setuser ceph --setgroup disk activate-journal ${OSD_JOURNAL}
