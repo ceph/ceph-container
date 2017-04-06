@@ -47,7 +47,7 @@ function test_demo_mds {
 }
 
 function test_demo_rbd_mirror {
-  return $(ps aux | grep -sq [r]bd-mirror)
+  docker exec ceph-demo ps aux | grep -sq [r]bd-mirror
 }
 
 function test_demo_mgr {
