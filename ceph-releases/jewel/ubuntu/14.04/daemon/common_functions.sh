@@ -195,3 +195,8 @@ function is_redhat {
   get_package_manager
   [[ "$OS_VENDOR" == "redhat" ]]
 }
+
+# Wait for a file to exist, regardless of the type
+function wait_for_file {
+  timeout 10 bash -c "while [ ! -e ${1} ]; do echo 'Waiting for ${1} to show up' && sleep 1 ; done"
+}
