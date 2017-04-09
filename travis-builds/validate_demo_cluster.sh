@@ -21,6 +21,10 @@ function wait_for_daemon () {
   return 1
 }
 
+function get_ceph_version {
+  echo $($DOCKER_COMMAND --version | grep -Eo '[0-9][0-9]\.[0-9]')
+}
+
 function ceph_status {
   echo "Waiting for Ceph to be ready"
   return $(wait_for_daemon "$DOCKER_COMMAND health | grep -sq HEALTH_OK")
@@ -62,7 +66,10 @@ test_demo_osd
 test_demo_rgw
 test_demo_mds
 test_demo_rbd_mirror
-test_demo_mgr
+ceph_version=$(get_ceph_version)
+if [[ $(echo $ceph_version '>' 10.2 | bc -l) == 1 ]] ; then
+  test_demo_mgr
+fi
 ceph_status # wait again for the cluster to stabilize (mds pools)
 
 if ! docker ps | grep ceph-demo; then

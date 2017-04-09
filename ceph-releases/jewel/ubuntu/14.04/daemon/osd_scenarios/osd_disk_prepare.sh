@@ -61,9 +61,14 @@ function osd_disk_prepare {
     ceph-disk -v prepare ${CLI_OPTS} --journal-uuid ${OSD_JOURNAL_UUID} ${OSD_DEVICE} ${OSD_JOURNAL}
   fi
 
+  # watch the udev event queue, and exit if all current events are handled
+  udevadm settle --timeout=600
+
   if [[ -n "${OSD_JOURNAL}" ]]; then
+    wait_for_file ${OSD_JOURNAL}
     chown ceph. ${OSD_JOURNAL}
   else
+    wait_for_file $(dev_part ${OSD_DEVICE} 2)
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
   fi
 }
