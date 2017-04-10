@@ -37,7 +37,7 @@ function get_mon_config {
     log "Trying to get the most recent monmap..."
     if timeout 5 ceph ${CLI_OPTS} mon getmap -o $MONMAP; then
       log "Monmap successfully retrieved. Updating KV store."
-      uuencode $MONMAP | etcdctl $ETCDCTL_OPTS ${KV_TLS} set ${CLUSTER_PATH}/monmap
+      uuencode $MONMAP - | etcdctl $ETCDCTL_OPTS ${KV_TLS} set ${CLUSTER_PATH}/monmap
     else
       log "Peers not found, using initial monmap."
     fi
