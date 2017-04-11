@@ -144,14 +144,10 @@ function get_osd_dev {
   done
 }
 
-function non_supported_scenario_on_redhat {
-  if [[ -f /etc/redhat-release ]]; then
-    if grep -sq "Red Hat Enterprise Linux Server" /etc/redhat-release; then
-      echo "ERROR: scenario not supported by this distribution"
-      echo "Valid scenarios for RHEL are: ... ... ..."
-      exit 1
-    fi
-  fi
+function unsupported_scenario {
+  echo "ERROR: '${CEPH_DAEMON}' scenario or key/value store '${KV_TYPE}' is not supported by this distribution."
+  echo "ERROR: for the list of supported scenarios, please refer to your vendor."
+  exit 1
 }
 
 function is_integer {
@@ -165,6 +161,11 @@ function is_integer {
 # Transform any set of strings to lowercase
 function to_lowercase {
   echo "${@,,}"
+}
+
+# Transform any set of strings to uppercase
+function to_uppercase {
+  echo "${@^^}"
 }
 
 # Replace any variable separated with comma with space
@@ -199,4 +200,24 @@ function is_redhat {
 # Wait for a file to exist, regardless of the type
 function wait_for_file {
   timeout 10 bash -c "while [ ! -e ${1} ]; do echo 'Waiting for ${1} to show up' && sleep 1 ; done"
+}
+
+function valid_scenarios {
+  log "Valid values for CEPH_DAEMON are $(to_uppercase $ALL_SCENARIOS)."
+  log "Valid values for the daemon parameter are $ALL_SCENARIOS"
+}
+
+function invalid_ceph_daemon {
+  if [ -z "$CEPH_DAEMON" ]; then
+    log "ERROR- One of CEPH_DAEMON or a daemon parameter must be defined as the name of the daemon you want to deploy."
+    valid_scenarios
+    exit 1
+  else
+    log "ERROR- unrecognized scenario."
+    valid_scenarios
+  fi
+}
+
+function get_osd_path {
+  echo "$OSD_PATH_BASE-$1/"
 }

@@ -21,7 +21,7 @@ function osd_disks {
   if [[ -z "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
     log "Mount existing and prepared OSD disks for ceph-cluster ${CLUSTER}"
     for OSD_ID in $(ls /var/lib/ceph/osd | sed 's/.*-//'); do
-      OSD_PATH=$(get_OSD_path $OSD_ID)
+      OSD_PATH=$(get_osd_path $OSD_ID)
       OSD_KEYRING="$OSD_PATH/keyring"
       OSD_DEV=$(get_osd_dev ${OSD_ID})
       if [[ -z ${OSD_DEV} ]]; then

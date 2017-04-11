@@ -24,7 +24,7 @@ function osd_directory {
       exit 1
     fi
 
-    OSD_PATH=$(get_OSD_path $OSD_ID)
+    OSD_PATH=$(get_osd_path $OSD_ID)
 
     # create the folder and own it
     mkdir -p $OSD_PATH
@@ -37,7 +37,7 @@ function osd_directory {
   echo "" > /etc/forego/${CLUSTER}/Procfile
 
   for OSD_ID in $(ls /var/lib/ceph/osd | sed 's/.*-//'); do
-    OSD_PATH=$(get_OSD_path $OSD_ID)
+    OSD_PATH=$(get_osd_path $OSD_ID)
     OSD_KEYRING="$OSD_PATH/keyring"
 
     if [ -n "${JOURNAL_DIR}" ]; then

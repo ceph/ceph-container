@@ -38,11 +38,13 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget unz
 ADD https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl /usr/local/bin/kubectl
 RUN chmod +x /usr/local/bin/kubectl
 
-ADD https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 /usr/local/bin/jq
-RUN chmod +x /usr/local/bin/jq
-
 # Add bootstrap script, ceph defaults key/values for KV store
-ADD *.sh ceph.defaults check_zombie_mons.py ./osd_scenarios/* /
+ADD *.sh ceph.defaults check_zombie_mons.py ./osd_scenarios/* entrypoint.sh.in disabled_scenario /
+
+# Modify the entrypoint
+RUN chmod +x /generate_entrypoint.sh && \
+  bash -c "/generate_entrypoint.sh" && \
+  rm -f /generate_entrypoint.sh
 
 # Add templates for confd
 ADD ./confd/templates/* /etc/confd/templates/

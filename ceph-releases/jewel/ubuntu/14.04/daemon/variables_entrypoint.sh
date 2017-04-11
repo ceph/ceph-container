@@ -1,3 +1,14 @@
+##########################################
+# LIST OF ALL DAEMON SCENARIOS AVAILABLE #
+##########################################
+
+ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_ceph_disk osd_ceph_disk_prepare osd_ceph_disk_activate osd_ceph_activate_journal mds rgw rgw_user restapi nfs zap_device mon_health"
+
+
+#########################
+# LIST OF ALL VARIABLES #
+#########################
+
 : ${CLUSTER:=ceph}
 : ${CLUSTER_PATH:=ceph-config/${CLUSTER}} # For KV config
 : ${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}
@@ -37,10 +48,9 @@
 : ${RESTAPI_LOG_FILE:=/var/log/ceph/ceph-restapi.log}
 : ${KV_TYPE:=none} # valid options: etcd, k8s|kubernetes or none
 : ${KV_IP:=127.0.0.1}
-: ${KV_PORT:=4001} # PORT 8500 for Consul
+: ${KV_PORT:=4001}
 : ${GANESHA_OPTIONS:=""}
 : ${GANESHA_EPOCH:=""} # For restarting
-: ${MGR_NAME:=${HOSTNAME}}
 
 # This is ONLY used for the CLI calls, e.g: ceph $CLI_OPTS health
 CLI_OPTS="--cluster ${CLUSTER}"
@@ -72,10 +82,3 @@ RGW_BOOTSTRAP_KEYRING=/var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
 OSD_BOOTSTRAP_KEYRING=/var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring
 OSD_PATH_BASE=/var/lib/ceph/osd/${CLUSTER}
 MONMAP=/etc/ceph/monmap-${CLUSTER}
-MGR_KEYRING=/var/lib/ceph/mgr/${CLUSTER}-${MGR_NAME}/keyring
-
-function get_OSD_path {
-  echo "$OSD_PATH_BASE-$1/"
-}
-
-export LC_ALL=C

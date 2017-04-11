@@ -5,15 +5,9 @@
 FROM ubuntu:16.04
 MAINTAINER Sébastien Han "seb@redhat.com"
 
-ENV ETCDCTL_VERSION v2.2.4
-ENV ETCDCTL_ARCH linux-amd64
 ENV CEPH_VERSION jewel
-ENV KVIATOR_VERSION 0.0.7
 ENV CONFD_VERSION 0.10.0
 ENV KUBECTL_VERSION v1.6.0
-
-# Download kviator
-ADD https://github.com/AcalephStorage/kviator/releases/download/v${KVIATOR_VERSION}/kviator-${KVIATOR_VERSION}-linux-amd64.zip /kviator.zip
 
 # Download confd
 ADD https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-linux-amd64 /usr/local/bin/confd
@@ -21,25 +15,18 @@ ADD https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}
 # Download forego
 ADD https://bin.equinox.io/c/ekMN3bCZFUn/forego-stable-linux-amd64.tgz /forego.tgz
 
+# Packages list
+ARG PACKAGES="ceph radosgw rbd-mirror sharutils etcd"
 
 # install prerequisites
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget unzip uuid-runtime python-setuptools udev runit sharutils python3 && \
 \
 # install ceph and ganesha
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3FE869A9 && \
-    echo "deb http://ppa.launchpad.net/gluster/libntirpc/ubuntu xenial main" | tee /etc/apt/sources.list.d/libntirpc.list && \
     wget -q -O- 'https://download.ceph.com/keys/release.asc' | apt-key add - && \
     echo "deb http://download.ceph.com/debian-$CEPH_VERSION/ xenial main" | tee /etc/apt/sources.list.d/ceph-$CEPH_VERSION.list && \
-    apt-get update && apt-get install -y --force-yes ceph radosgw rbd-mirror && \
+    apt-get update && apt-get install -y --force-yes $PACKAGES && \
+    dpkg -s $PACKAGES && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-\
-# Install etcdctl
-    wget -q -O- "https://github.com/coreos/etcd/releases/download/${ETCDCTL_VERSION}/etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}.tar.gz" |tar xfz - -C/tmp/ etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}/etcdctl && \
-    mv /tmp/etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}/etcdctl /usr/local/bin/etcdctl && \
-\
-# Install kviator
-    cd /usr/local/bin && unzip /kviator.zip && chmod +x /usr/local/bin/kviator && rm /kviator.zip && \
-\
 # Install confd
     chmod +x /usr/local/bin/confd && mkdir -p /etc/confd/conf.d && mkdir -p /etc/confd/templates && \
 \
@@ -49,9 +36,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget unz
 # Install kubectl
 ADD https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl /usr/local/bin/kubectl
 RUN chmod +x /usr/local/bin/kubectl
-
-ADD https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 /usr/local/bin/jq
-RUN chmod +x /usr/local/bin/jq
 
 ADD entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
