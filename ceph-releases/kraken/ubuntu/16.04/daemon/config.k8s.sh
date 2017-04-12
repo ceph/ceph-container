@@ -8,7 +8,7 @@ function get_admin_key {
 
 function get_mon_config {
   # Get fsid from ceph.conf
-  local fsid=$(ceph-conf --lookup fsid -c /etc/ceph/ceph.conf)
+  local fsid=$(ceph-conf --lookup fsid -c /etc/ceph/${CLUSTER}.conf)
 
   timeout=10
   MONMAP_ADD=""
