@@ -346,7 +346,7 @@ function start_mds {
     get_admin_key
     check_admin_key
 
-    if [[ "$(ceph fs ls | grep -c name:.${CEPHFS_NAME},)" -eq "0" ]]; then
+    if [[ "$(ceph ${CEPH_OPTS} fs ls | grep -c name:.${CEPHFS_NAME},)" -eq "0" ]]; then
        # Make sure the specified data pool exists
        if ! ceph ${CEPH_OPTS} osd pool stats ${CEPHFS_DATA_POOL} > /dev/null 2>&1; then
           ceph ${CEPH_OPTS} osd pool create ${CEPHFS_DATA_POOL} ${CEPHFS_DATA_POOL_PG}
