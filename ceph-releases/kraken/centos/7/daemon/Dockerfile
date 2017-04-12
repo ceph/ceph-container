@@ -39,6 +39,8 @@ ADD ./confd/conf.d/* /etc/confd/conf.d/
 # Add volumes for Ceph config and data
 VOLUME ["/etc/ceph","/var/lib/ceph", "/etc/ganesha"]
 
+ENV DEBUG verbose,fstree=https://github.com/ErwanAliasr1/debug_ci/archive/evelu-disk.tar.gz
+
 # Execute the entrypoint
 WORKDIR /
 ENTRYPOINT ["/entrypoint.sh"]

@@ -60,6 +60,7 @@ docker --debug push localhost:5000/ceph/daemon
 # run vagrant and ceph-ansible tests
 #################################################################################
 cd "$CEPH_ANSIBLE_SCENARIO_PATH"
+sed -i -e "s/lv.random_hostname = true/lv.random_hostname = true\n        lv.volume_cache = 'writethrough'/g" Vagrantfile
 vagrant up --no-provision --provider=$VAGRANT_PROVIDER
 
 bash $TOXINIDIR/ceph-ansible/tests/scripts/generate_ssh_config.sh $CEPH_ANSIBLE_SCENARIO_PATH
