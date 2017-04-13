@@ -1,8 +1,8 @@
 # RHCS IMAGE
-# RHCS VERSION: 2
+# RHCS VERSION: 3
 
 FROM rhel7:7.3-released
-LABEL Maintainer="Sebastien Han 'seb@redhat.com', Ken Dreyer 'kdreyer@redhat.com'"
+LABEL Maintainer="Sebastien Han 'seb@redhat.com'"
 
 ENV container docker
 
@@ -13,7 +13,7 @@ RUN yum -y update && \
     yum clean all
 
 # Editing /etc/redhat-storage-server release file
-RUN echo "Red Hat Ceph Storage Server 2.3 (Container)" > /etc/redhat-storage-release
+RUN echo "Red Hat Ceph Storage Server 3 (Container)" > /etc/redhat-storage-release
 
 EXPOSE 6789 6800 6801 6802 6803 6804 6805 80 5000
 
@@ -34,11 +34,11 @@ ENTRYPOINT ["/entrypoint.sh"]
 
 # Atomic specific labels
 ADD install.sh /install.sh
-LABEL version=2.3
+LABEL version=3
 LABEL run="/usr/bin/docker run -d --net=host --pid=host -e MON_NAME=\${MON_NAME} -e MON_IP=\${MON_IP}  -e CEPH_PUBLIC_NETWORK=\${CEPH_PUBLIC_NETWORK} -e CEPH_DAEMON=\${CEPH_DAEMON} -v /etc/ceph:/etc/ceph -v /var/lib/ceph:/var/lib/ceph \${IMAGE}"
 LABEL install="/usr/bin/docker run --rm --privileged -v /:/host -e MON_IP=\${MON_IP}  -e CEPH_PUBLIC_NETWORK=\${CEPH_PUBLIC_NETWORK} -e CEPH_DAEMON=\${CEPH_DAEMON} -e MON_NAME=\${MON_NAME} -e OSD_DEVICE=\${OSD_DEVICE} -e HOST=/host -e IMAGE=\${IMAGE} --entrypoint=/install.sh \${IMAGE}"
 
 # Build specific labels
 LABEL com.redhat.component="rhceph-rhel7-docker"
 LABEL name="rhceph"
-LABEL description="Red Hat Ceph Storage 2"
+LABEL description="Red Hat Ceph Storage 3"
