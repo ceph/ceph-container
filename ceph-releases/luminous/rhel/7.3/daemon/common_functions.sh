@@ -1,1 +1,1 @@
-../../../ubuntu/14.04/daemon/common_functions.sh
+../../../ubuntu/16.04/daemon/common_functions.sh

@@ -1,1 +1,1 @@
-../../../ubuntu/14.04/daemon/variables_entrypoint.sh
+../../../ubuntu/16.04/daemon/variables_entrypoint.sh
