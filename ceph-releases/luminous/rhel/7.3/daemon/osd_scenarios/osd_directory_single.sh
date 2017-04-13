@@ -1,1 +1,1 @@
-../../../../ubuntu/14.04/daemon/osd_scenarios/osd_directory_single.sh
+../../../../ubuntu/16.04/daemon/osd_scenarios/osd_directory_single.sh
