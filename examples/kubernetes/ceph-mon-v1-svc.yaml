@@ -4,6 +4,8 @@ kind: Service
 metadata:
   name: ceph-mon
   namespace: ceph
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
   labels:
     app: ceph
     daemon: mon
