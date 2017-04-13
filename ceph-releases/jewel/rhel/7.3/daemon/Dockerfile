@@ -15,6 +15,8 @@ RUN yum -y update && \
 # Editing /etc/redhat-storage-server release file
 RUN echo "Red Hat Ceph Storage Server 2.3 (Container)" > /etc/redhat-storage-release
 
+EXPOSE 6789 6800 6801 6802 6803 6804 6805 80 5000
+
 # Add volumes for Ceph config and data
 VOLUME ["/etc/ceph","/var/lib/ceph","/etc/ganesha"]
 
