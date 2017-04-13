@@ -4,7 +4,7 @@ function start_osd() {
   mode=$1 #forego or empty
 
   OSD_ID=$(cat /var/lib/ceph/osd/$(ls -ltr /var/lib/ceph/osd/ | tail -n1 | awk -v pattern="$CLUSTER" '$0 ~ pattern {print $9}')/whoami)
-  OSD_PATH=$(get_OSD_path $OSD_ID)
+  OSD_PATH=$(get_osd_path $OSD_ID)
   OSD_KEYRING="$OSD_PATH/keyring"
   OSD_WEIGHT=$(df -P -k $OSD_PATH | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
   ceph ${CLI_OPTS} --name=osd.${OSD_ID} --keyring=$OSD_KEYRING osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}

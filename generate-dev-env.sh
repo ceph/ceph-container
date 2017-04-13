@@ -65,7 +65,7 @@ test_args $@
 case "$1" in
   hammer|infernalis|jewel|kraken)
     case "$2" in
-      centos|ubuntu|fedora|opensuse)
+      centos|ubuntu|fedora|opensuse|rhel)
           test_combination $@
           copy_files $@
         ;;

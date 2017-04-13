@@ -10,7 +10,7 @@ function osd_directory_single {
 
   # pick one osd and make sure no lock is held
   for OSD_ID in $(ls /var/lib/ceph/osd | sed 's/.*-//'); do
-    OSD_PATH=$(get_OSD_path $OSD_ID)
+    OSD_PATH=$(get_osd_path $OSD_ID)
     OSD_KEYRING="$OSD_PATH/keyring"
 
     if [[ -n "$(find $OSD_PATH -prune -empty)" ]]; then
