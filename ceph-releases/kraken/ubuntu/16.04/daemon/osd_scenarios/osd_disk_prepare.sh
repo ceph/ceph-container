@@ -45,7 +45,13 @@ function osd_disk_prepare {
   fi
 
   if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
-    ceph-disk -v prepare ${CLI_OPTS} --bluestore ${OSD_DEVICE}
+    ceph-disk -v prepare ${CLI_OPTS} --bluestore \
+    --block.wal ${OSD_BLUESTORE_BLOCK_WAL} \
+    --block.wal-uuid ${OSD_BLUESTORE_BLOCK_WAL_UUID} \
+    --block.db ${OSD_BLUESTORE_BLOCK_DB} \
+    --block.db-uuid ${OSD_BLUESTORE_BLOCK_DB_UUID} \
+    --block-uuid ${OSD_BLUESTORE_BLOCK_UUID} \
+    ${OSD_DEVICE}
   elif [[ ${OSD_DMCRYPT} -eq 1 ]]; then
     get_admin_key
     check_admin_key
@@ -67,6 +73,11 @@ function osd_disk_prepare {
   if [[ -n "${OSD_JOURNAL}" ]]; then
     wait_for_file ${OSD_JOURNAL}
     chown ceph. ${OSD_JOURNAL}
+  elif [[ ${OSD_BLUESTORE} -eq 1 ]]; then
+    for part in $(seq 1 4); do
+      wait_for_file $(dev_part ${OSD_DEVICE} $part)
+      chown ceph. $(dev_part ${OSD_DEVICE} $part)
+    done
   else
     wait_for_file $(dev_part ${OSD_DEVICE} 2)
     chown ceph. $(dev_part ${OSD_DEVICE} 2)
