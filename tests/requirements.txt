@@ -1,3 +1,8 @@
-# These are Python requirements needed to run the functional tests
-pytest
+contextlib2
 docker-py==1.10.3
+mock
+pytest
+testresources
+testscenarios
+virtualenv
+wheel
