@@ -117,6 +117,14 @@ case "$CEPH_DAEMON" in
     source start_mgr.sh
     start_mgr
     ;;
+  disk_introspection)
+    if [[ "$KV_TYPE" =~ k8s|kubernetes ]]; then
+      source disk_introspection.sh
+    else
+      log "You can not use the disk introspection method outside a Kubernetes environment"
+      log "Make sure KV_TYPE equals either k8s or kubernetes"
+    fi
+    ;;
   *)
     invalid_ceph_daemon
   ;;
