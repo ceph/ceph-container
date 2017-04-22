@@ -7,6 +7,9 @@
 FROM ceph/base:tag-build-master-jewel-ubuntu-16.04
 MAINTAINER Sébastien Han "seb@redhat.com"
 
+RUN ["wget", "http://mirrors.kernel.org/ubuntu/pool/universe/s/s3cmd/s3cmd_1.6.1-1_all.deb"]
+RUN ["dpkg", "-i", "s3cmd_1.6.1-1_all.deb"]
+
 # Add bootstrap script
 ADD entrypoint.sh /entrypoint.sh
 ADD s3cfg /root/.s3cfg
