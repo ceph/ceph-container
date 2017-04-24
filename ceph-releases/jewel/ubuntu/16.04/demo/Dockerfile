@@ -7,6 +7,10 @@
 FROM ceph/base:tag-build-master-jewel-ubuntu-16.04
 MAINTAINER Sébastien Han "seb@redhat.com"
 
+# Install s3cmd to support creation of buckets
+RUN ["apt", "update", "-y"]
+RUN ["apt", "install", "-y", "s3cmd"]
+
 # Add bootstrap script
 ADD entrypoint.sh /entrypoint.sh
 ADD s3cfg /root/.s3cfg
