@@ -226,3 +226,28 @@ function invalid_ceph_daemon {
 function get_osd_path {
   echo "$OSD_PATH_BASE-$1/"
 }
+
+# List all the partitions on a block device
+function list_dev_partitions {
+  # We need to remove the /dev/ part of the device name
+  # since /proc/partitions has entries like sda only.
+  # However we return a complete device name e.g: /dev/sda
+  for args in ${@}; do
+    for p in $(egrep -o ${args#/dev/}[0-9] /proc/partitions); do
+      echo "/dev/$p"
+    done
+  done
+}
+
+
+# Print resolved symbolic links of a device
+function resolve_symlink {
+  readlink -f ${@}
+}
+
+# Find the typecode of a partition
+function get_part_typecode {
+  for part in ${@}; do
+    sgdisk --info=${part: -1} ${part%?} | awk '/Partition GUID code/ {print tolower($4)}'
+  done
+}

@@ -74,9 +74,17 @@ function osd_disk_prepare {
     wait_for_file ${OSD_JOURNAL}
     chown ceph. ${OSD_JOURNAL}
   elif [[ ${OSD_BLUESTORE} -eq 1 ]]; then
-    for part in $(seq 1 4); do
-      wait_for_file $(dev_part ${OSD_DEVICE} $part)
-      chown ceph. $(dev_part ${OSD_DEVICE} $part)
+    dev_real_path=$(resolve_symlink $OSD_BLUESTORE_BLOCK_WAL $OSD_BLUESTORE_BLOCK_DB $OSD_DEVICE)
+    for partition in $(list_dev_partitions $dev_real_path); do
+      if [[ "$(get_part_typecode $partition)" == "5ce17fce-4087-4169-b7ff-056cc58472be" ]]; then
+        chown --verbose ceph. $partition
+      fi
+      if [[ "$(get_part_typecode $partition)" == "30cd0809-c2b2-499c-8879-2d6b785292be" ]]; then
+        chown --verbose ceph. $partition
+      fi
+      if [[ "$(get_part_typecode $partition)" == "89c57f98-2fe5-4dc0-89c1-f3ad0ceff2be" || "$(get_part_typecode $partition)" == "cafecafe-9b03-4f30-b4c6-b4b80ceff106" ]]; then
+        chown --verbose ceph. $partition
+      fi
     done
   else
     wait_for_file $(dev_part ${OSD_DEVICE} 2)
