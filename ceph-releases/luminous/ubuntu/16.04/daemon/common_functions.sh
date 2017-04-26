@@ -75,6 +75,10 @@ function create_mandatory_directories {
   chown --verbose -R ceph. /var/run/ceph/ /var/lib/ceph/*
 }
 
+# Print resolved symbolic links of a device
+function resolve_symlink {
+  readlink -f ${@}
+}
 
 # Calculate proper device names, given a device and partition number
 function dev_part {
@@ -83,7 +87,7 @@ function dev_part {
 
   if [[ -L ${osd_device} ]]; then
     # This device is a symlink. Work out it's actual device
-    local actual_device=$(readlink -f ${osd_device})
+    local actual_device=$(resolve_symlink ${osd_device})
     local bn=$(basename ${osd_device})
     if [[ "${actual_device:0-1:1}" == [0-9] ]]; then
       local desired_partition="${actual_device}p${osd_partition}"
@@ -97,7 +101,7 @@ function dev_part {
     local link=""
     local pfxlen=0
     for option in $(ls $symdir); do
-    if [[ $(readlink -f $symdir/$option) == $desired_partition ]]; then
+    if [[ $(resolve_symlink $symdir/$option) == $desired_partition ]]; then
       local optprefixlen=$(prefix_length $option $bn)
       if [[ $optprefixlen > $pfxlen ]]; then
         link=$symdir/$option
@@ -237,12 +241,6 @@ function list_dev_partitions {
       echo "/dev/$p"
     done
   done
-}
-
-
-# Print resolved symbolic links of a device
-function resolve_symlink {
-  readlink -f ${@}
 }
 
 # Find the typecode of a partition
