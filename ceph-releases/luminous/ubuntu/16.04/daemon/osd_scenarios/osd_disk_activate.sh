@@ -10,20 +10,12 @@ function osd_activate {
   CEPH_DISK_OPTIONS=""
   DATA_UUID=$(blkid -o value -s PARTUUID ${OSD_DEVICE}1)
   LOCKBOX_UUID=$(blkid -o value -s PARTUUID ${OSD_DEVICE}3 || true)
-  JOURNAL_PART=$(dev_part ${OSD_DEVICE} 2)
   ACTUAL_OSD_DEVICE=$(readlink -f ${OSD_DEVICE}) # resolve /dev/disk/by-* names
 
   # watch the udev event queue, and exit if all current events are handled
   udevadm settle --timeout=600
 
-  # wait till partition exists then activate it
-  if [[ -n "${OSD_JOURNAL}" ]]; then
-    wait_for_file ${OSD_DEVICE}
-    chown --verbose ceph. ${OSD_JOURNAL}
-  else
-    wait_for_file $(dev_part ${OSD_DEVICE} 1)
-    chown --verbose ceph. $JOURNAL_PART
-  fi
+  apply_ceph_ownership_to_disks
 
   DATA_PART=$(dev_part ${OSD_DEVICE} 1)
   MOUNTED_PART=${DATA_PART}
