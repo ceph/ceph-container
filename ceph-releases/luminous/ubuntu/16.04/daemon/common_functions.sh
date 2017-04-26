@@ -272,3 +272,8 @@ function apply_ceph_ownership_to_disks {
     chown --verbose ceph. $(dev_part ${OSD_DEVICE} 2)
   fi
 }
+
+# Get partition uuid of a given partition
+function get_part_uuid {
+  blkid -o value -s PARTUUID ${1}
+}
