@@ -6,7 +6,11 @@ function start_osd() {
   OSD_ID=$(cat /var/lib/ceph/osd/$(ls -ltr /var/lib/ceph/osd/ | tail -n1 | awk -v pattern="$CLUSTER" '$0 ~ pattern {print $9}')/whoami)
   OSD_PATH=$(get_osd_path $OSD_ID)
   OSD_KEYRING="$OSD_PATH/keyring"
-  OSD_WEIGHT=$(df -P -k $OSD_PATH | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
+  if [[ ${OSD_BLUESTORE} -eq 1 ]] && [ -e "${OSD_PATH}block" ]; then
+    OSD_WEIGHT=$(awk "BEGIN { d= $(blockdev --getsize64 ${OSD_PATH}block)/1099511627776 ; r = sprintf(\"%.2f\", d); print r }")
+  else
+    OSD_WEIGHT=$(df -P -k $OSD_PATH | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
+  fi
   ceph ${CLI_OPTS} --name=osd.${OSD_ID} --keyring=$OSD_KEYRING osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
 
   # ceph-disk activiate has exec'ed /usr/bin/ceph-osd ${CLI_OPTS} -f -i ${OSD_ID}
