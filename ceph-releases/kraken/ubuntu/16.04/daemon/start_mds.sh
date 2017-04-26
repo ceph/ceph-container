@@ -21,7 +21,7 @@ function start_mds {
 
     # Generate the MDS key
     ceph ${CLI_OPTS} $KEYRING_OPT auth get-or-create mds.$MDS_NAME osd 'allow rwx' mds 'allow' mon 'allow profile mds' -o $MDS_KEYRING
-    chown ceph. $MDS_KEYRING
+    chown --verbose ceph. $MDS_KEYRING
     chmod 600 $MDS_KEYRING
 
   fi

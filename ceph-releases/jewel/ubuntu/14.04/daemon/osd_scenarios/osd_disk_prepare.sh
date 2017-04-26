@@ -66,9 +66,9 @@ function osd_disk_prepare {
 
   if [[ -n "${OSD_JOURNAL}" ]]; then
     wait_for_file ${OSD_JOURNAL}
-    chown ceph. ${OSD_JOURNAL}
+    chown --verbose ceph. ${OSD_JOURNAL}
   else
     wait_for_file $(dev_part ${OSD_DEVICE} 2)
-    chown ceph. $(dev_part ${OSD_DEVICE} 2)
+    chown --verbose ceph. $(dev_part ${OSD_DEVICE} 2)
   fi
 }

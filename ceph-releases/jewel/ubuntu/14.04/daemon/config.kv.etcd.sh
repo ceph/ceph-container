@@ -73,7 +73,7 @@ function get_mon_config {
     log "Importing Keyrings and Monmap to KV."
     etcdctl $ETCDCTL_OPTS ${KV_TLS} set ${CLUSTER_PATH}/monKeyring < $MON_KEYRING
     etcdctl $ETCDCTL_OPTS ${KV_TLS} set ${CLUSTER_PATH}/adminKeyring < $ADMIN_KEYRING
-    chown ceph. $MON_KEYRING $ADMIN_KEYRING
+    chown --verbose ceph. $MON_KEYRING $ADMIN_KEYRING
 
     uuencode $MONMAP - | etcdctl $ETCDCTL_OPTS ${KV_TLS} set ${CLUSTER_PATH}/monmap
 
@@ -92,7 +92,7 @@ function import_bootstrap_keyrings {
     keyring=${array[0]}
     bootstrap_keyring="bootstrap${array[1]}Keyring"
     etcdctl $ETCDCTL_OPTS ${KV_TLS} get ${CLUSTER_PATH}/${bootstrap_keyring} > $keyring
-    chown ceph. $keyring
+    chown --verbose ceph. $keyring
   done
 }
 

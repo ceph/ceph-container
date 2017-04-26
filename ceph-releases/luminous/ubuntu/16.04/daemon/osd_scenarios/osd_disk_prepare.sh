@@ -72,7 +72,7 @@ function osd_disk_prepare {
 
   if [[ -n "${OSD_JOURNAL}" ]]; then
     wait_for_file ${OSD_JOURNAL}
-    chown ceph. ${OSD_JOURNAL}
+    chown --verbose ceph. ${OSD_JOURNAL}
   elif [[ ${OSD_BLUESTORE} -eq 1 ]]; then
     dev_real_path=$(resolve_symlink $OSD_BLUESTORE_BLOCK_WAL $OSD_BLUESTORE_BLOCK_DB $OSD_DEVICE)
     for partition in $(list_dev_partitions $dev_real_path); do
@@ -88,6 +88,6 @@ function osd_disk_prepare {
     done
   else
     wait_for_file $(dev_part ${OSD_DEVICE} 2)
-    chown ceph. $(dev_part ${OSD_DEVICE} 2)
+    chown --verbose ceph. $(dev_part ${OSD_DEVICE} 2)
   fi
 }

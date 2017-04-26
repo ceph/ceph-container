@@ -19,10 +19,10 @@ function osd_activate {
   # wait till partition exists then activate it
   if [[ -n "${OSD_JOURNAL}" ]]; then
     wait_for_file ${OSD_DEVICE}
-    chown ceph. ${OSD_JOURNAL}
+    chown --verbose ceph. ${OSD_JOURNAL}
   else
     wait_for_file $(dev_part ${OSD_DEVICE} 1)
-    chown ceph. $JOURNAL_PART
+    chown --verbose ceph. $JOURNAL_PART
   fi
 
   DATA_PART=$(dev_part ${OSD_DEVICE} 1)

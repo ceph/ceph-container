@@ -13,7 +13,7 @@ function osd_activate_journal {
   # wait till partition exists
   wait_for ${OSD_JOURNAL}
 
-  chown ceph. ${OSD_JOURNAL}
+  chown --verbose ceph. ${OSD_JOURNAL}
   ceph-disk -v --setuser ceph --setgroup disk activate-journal ${OSD_JOURNAL}
 
   start_osd

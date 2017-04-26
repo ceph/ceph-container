@@ -139,7 +139,7 @@ function create_mandatory_directories {
   mkdir -p /var/run/ceph
 
   # Adjust the owner of all those directories
-  chown -R ceph. /var/run/ceph/ /var/lib/ceph/*
+  chown --verbose -R ceph. /var/run/ceph/ /var/lib/ceph/*
 }
 
 
@@ -246,7 +246,7 @@ ENDHERE
     mkdir -p "$MON_DATA_DIR"
 
     # Prepare the monitor daemon's directory with the map and keyring
-    chown -R ceph. $CEPH_PATH_BASE/mon /tmp/${CLUSTER}.mon.keyring
+    chown --verbose -R ceph. $CEPH_PATH_BASE/mon /tmp/${CLUSTER}.mon.keyring
     ceph-mon ${CLI_OPTS} --mkfs -i ${MON_NAME} --monmap $MONMAP --keyring /tmp/${CLUSTER}.mon.keyring --mon-data "$MON_DATA_DIR"
 
     # Clean up the temporary key
@@ -254,7 +254,7 @@ ENDHERE
   fi
 
   # start MON
-  chown -R ceph. $CEPH_PATH_BASE/mon /etc/ceph/
+  chown --verbose -R ceph. $CEPH_PATH_BASE/mon /etc/ceph/
   ceph-mon ${DAEMON_OPTS} -i ${MON_NAME} --public-addr "${MON_IP}:6789"
 
   # change replica size
@@ -271,14 +271,14 @@ function bootstrap_osd {
     # bootstrap OSD
     mkdir -p $CEPH_PATH_BASE/osd/${CLUSTER}-0
     ceph ${CLI_OPTS} osd create
-    chown -R ceph. $CEPH_PATH_BASE/osd/${CLUSTER}-0
+    chown --verbose -R ceph. $CEPH_PATH_BASE/osd/${CLUSTER}-0
     ceph-osd ${CLI_OPTS} -i 0 --mkfs --setuser ceph --setgroup ceph
     ceph ${CLI_OPTS} auth get-or-create osd.0 osd 'allow *' mon 'allow profile osd' -o $OSD_KEYRING
     ceph ${CLI_OPTS} osd crush add 0 1 root=default host=localhost
   fi
 
   # start OSD
-  chown -R ceph. $CEPH_PATH_BASE/osd/${CLUSTER}-0
+  chown --verbose -R ceph. $CEPH_PATH_BASE/osd/${CLUSTER}-0
   ceph-osd ${DAEMON_OPTS} -i 0
 }
 
@@ -297,7 +297,7 @@ function bootstrap_mds {
     # bootstrap MDS
     mkdir -p $CEPH_PATH_BASE/mds/${CLUSTER}-0
     ceph ${CLI_OPTS} auth get-or-create mds.0 mds 'allow' osd 'allow *' mon 'allow profile mds' -o $MDS_KEYRING
-    chown -R ceph. $CEPH_PATH_BASE/mds/${CLUSTER}-0
+    chown --verbose -R ceph. $CEPH_PATH_BASE/mds/${CLUSTER}-0
   fi
 
   # start MDS
@@ -314,7 +314,7 @@ function bootstrap_rgw {
     # bootstrap RGW
     mkdir -p $CEPH_PATH_BASE/radosgw/${RGW_NAME}
     ceph ${CLI_OPTS} auth get-or-create client.radosgw.gateway osd 'allow rwx' mon 'allow rw' -o $RGW_KEYRING
-    chown -R ceph. $CEPH_PATH_BASE/radosgw/${RGW_NAME}
+    chown --verbose -R ceph. $CEPH_PATH_BASE/radosgw/${RGW_NAME}
 
     #configure rgw dns name
     cat <<ENDHERE >>/etc/ceph/${CLUSTER}.conf
@@ -407,7 +407,7 @@ function bootstrap_rbd_mirror {
 function bootstrap_mgr {
   mkdir -p $CEPH_PATH_BASE/mgr/${CLUSTER}-$MGR_NAME
   ceph ${CLI_OPTS} auth get-or-create mgr.$MGR_NAME mon 'allow *' -o $MGR_KEYRING
-  chown -R ceph. $CEPH_PATH_BASE/mgr
+  chown --verbose -R ceph. $CEPH_PATH_BASE/mgr
 
   # start ceph-mgr
   ceph-mgr ${DAEMON_OPTS} -i $MGR_NAME

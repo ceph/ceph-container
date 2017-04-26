@@ -12,7 +12,7 @@ function start_mgr {
 
     # Create ceph-mgr key
     ceph ${CLI_OPTS} auth get-or-create mgr.$MGR_NAME mon 'allow *' -o $MGR_KEYRING
-    chown ceph. $MGR_KEYRING
+    chown --verbose ceph. $MGR_KEYRING
     chmod 600 $MGR_KEYRING
   fi
 

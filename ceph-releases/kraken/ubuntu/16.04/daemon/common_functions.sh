@@ -72,7 +72,7 @@ function create_mandatory_directories {
   mkdir -p /var/lib/ceph/mgr/${CLUSTER}-$MGR_NAME
 
   # Adjust the owner of all those directories
-  chown -R ceph. /var/run/ceph/ /var/lib/ceph/*
+  chown --verbose -R ceph. /var/run/ceph/ /var/lib/ceph/*
 }
 
 
