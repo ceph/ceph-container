@@ -17,9 +17,12 @@ spec:
       nodeSelector:
         node-type: storage
       volumes:
-        - name: devices
-          hostPath:
-            path: /dev
+# Comment back in to use direct device access.
+# Note that this will also require enabling privileged access and
+# the appropriate volumeMount below.
+#        - name: devices
+#          hostPath:
+#            path: /dev
         - name: ceph
           emptyDir: {}
 #          hostPath:
@@ -46,8 +49,8 @@ spec:
           #image: ceph/daemon:tag-build-master-kraken-centos-7
           imagePullPolicy: Always
           volumeMounts:
-            - name: devices
-              mountPath: /dev
+#            - name: devices
+#              mountPath: /dev
             - name: ceph
               mountPath: /var/lib/ceph
             - name: ceph-conf
@@ -60,8 +63,10 @@ spec:
               mountPath: /var/lib/ceph/bootstrap-rgw
             - name: osd-directory
               mountPath: /var/lib/ceph/osd
-          securityContext:
-            privileged: true
+# Privileged access is required if you operate on raw devices.
+# Remember to add the /dev volume and mount above.
+#         securityContext:
+#           privileged: true
           env:
             - name: CEPH_DAEMON
               value: osd_directory
