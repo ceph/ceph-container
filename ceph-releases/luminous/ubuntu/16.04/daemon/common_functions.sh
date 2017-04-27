@@ -254,16 +254,20 @@ function apply_ceph_ownership_to_disks {
   if [[ -n "${OSD_JOURNAL}" ]]; then
     wait_for_file ${OSD_JOURNAL}
     chown --verbose ceph. ${OSD_JOURNAL}
+  elif [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+    # apply permission on the lockbox partition
+    wait_for_file $(dev_part ${OSD_DEVICE} 3)
+    chown --verbose ceph. $(dev_part ${OSD_DEVICE} 3)
   elif [[ ${OSD_BLUESTORE} -eq 1 ]]; then
-    dev_real_path=$(resolve_symlink $OSD_BLUESTORE_BLOCK_WAL $OSD_BLUESTORE_BLOCK_DB $OSD_DEVICE)
-    for partition in $(list_dev_partitions $dev_real_path); do
-      if [[ "$(get_part_typecode $partition)" == "5ce17fce-4087-4169-b7ff-056cc58473f9" ]]; then
-        chown --verbose ceph. $partition
-      fi
-      if [[ "$(get_part_typecode $partition)" == "30cd0809-c2b2-499c-8879-2d6b78529876" ]]; then
-        chown --verbose ceph. $partition
-      fi
-      if [[ "$(get_part_typecode $partition)" == "4fbd7e29-9d25-41b8-afd0-062c0ceff05d" || "$(get_part_typecode $partition)" == "cafecafe-9b03-4f30-b4c6-b4b80ceff106" ]]; then
+    dev_real_path=$(resolve_symlink $OSD_BLUESTORE_BLOCK_WAL $OSD_BLUESTORE_BLOCK_DB)
+    for partition in $(list_dev_partitions $OSD_DEVICE $dev_real_path); do
+      part_code="$(get_part_typecode $partition)"
+      if [[ "$part_code" == "5ce17fce-4087-4169-b7ff-056cc58472be" ||
+            "$part_code" == "5ce17fce-4087-4169-b7ff-056cc58473f9" ||
+            "$part_code" == "30cd0809-c2b2-499c-8879-2d6b785292be" ||
+            "$part_code" == "30cd0809-c2b2-499c-8879-2d6b78529876" ||
+            "$part_code" == "89c57f98-2fe5-4dc0-89c1-f3ad0ceff2be" ||
+            "$part_code" == "cafecafe-9b03-4f30-b4c6-b4b80ceff106" ]]; then
         chown --verbose ceph. $partition
       fi
     done
@@ -271,6 +275,7 @@ function apply_ceph_ownership_to_disks {
     wait_for_file $(dev_part ${OSD_DEVICE} 2)
     chown --verbose ceph. $(dev_part ${OSD_DEVICE} 2)
   fi
+  chown --verbose ceph. $(dev_part ${OSD_DEVICE} 1)
 }
 
 # Get partition uuid of a given partition

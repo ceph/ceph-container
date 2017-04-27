@@ -15,8 +15,6 @@ function osd_activate {
   # watch the udev event queue, and exit if all current events are handled
   udevadm settle --timeout=600
 
-  apply_ceph_ownership_to_disks
-
   DATA_PART=$(dev_part ${OSD_DEVICE} 1)
   MOUNTED_PART=${DATA_PART}
 
@@ -40,6 +38,16 @@ function osd_activate {
   else
     OSD_WEIGHT=$(df -P -k $OSD_PATH | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
   fi
+
+  if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
+    # Get the device used for block db and wal otherwise apply_ceph_ownership_to_disks will fail
+    OSD_BLUESTORE_BLOCK_DB_TMP=$(resolve_symlink "${OSD_PATH}block.db")
+    OSD_BLUESTORE_BLOCK_DB=${OSD_BLUESTORE_BLOCK_DB_TMP%?}
+    OSD_BLUESTORE_BLOCK_WAL_TMP=$(resolve_symlink "${OSD_PATH}block.wal")
+    OSD_BLUESTORE_BLOCK_WAL=${OSD_BLUESTORE_BLOCK_WAL_TMP%?}
+  fi
+  apply_ceph_ownership_to_disks
+
   ceph ${CLI_OPTS} --name=osd.${OSD_ID} --keyring=$OSD_KEYRING osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
 
   log "SUCCESS"
