@@ -34,6 +34,7 @@ spec:
       containers:
         - name: ceph-mon
           image: ceph/daemon:latest
+          #image: ceph/daemon:tag-build-master-kraken-centos-7
           imagePullPolicy: Always
           ports:
             - containerPort: 6789

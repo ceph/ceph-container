@@ -36,6 +36,7 @@ spec:
       containers:
         - name: ceph-mds
           image: ceph/daemon:latest
+          #image: ceph/daemon:tag-build-master-kraken-centos-7
           ports:
             - containerPort: 6800
           env:

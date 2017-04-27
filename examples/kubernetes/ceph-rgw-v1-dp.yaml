@@ -36,6 +36,8 @@ spec:
       containers:
         - name: ceph-rgw
           image: ceph/daemon:latest
+          #image: ceph/daemon:tag-build-master-kraken-centos-7
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:

@@ -43,6 +43,7 @@ spec:
       containers:
         - name: osd-pod
           image: ceph/daemon:latest
+          #image: ceph/daemon:tag-build-master-kraken-centos-7
           imagePullPolicy: Always
           volumeMounts:
             - name: devices
