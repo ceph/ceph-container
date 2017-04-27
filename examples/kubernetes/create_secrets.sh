@@ -2,7 +2,7 @@
 set -ex
 
 cd generator
-./generate_secrets.sh all `./generate_secrets.sh fsid`
+./generate_secrets.sh all `./generate_secrets.sh fsid` "$@"
 
 kubectl create namespace ceph
 kubectl create secret generic ceph-conf-combined --from-file=ceph.conf --from-file=ceph.client.admin.keyring --from-file=ceph.mon.keyring --namespace=ceph
