@@ -95,7 +95,7 @@ worker6      us-west1-a  n1-standard-2               10.240.0.26  104.196.245.24
 worker7      us-west1-a  n1-standard-2               10.240.0.27  104.198.14.100   RUNNING
 worker8      us-west1-a  n1-standard-2               10.240.0.28  104.196.224.87   RUNNING
 worker9      us-west1-a  n1-standard-2               10.240.0.29  104.198.7.157    RUNNING
-08:08:44 ifont@ifont scripts ±|scripts ✗|→ kubectl get nodes
+→ kubectl get nodes
 NAME      STATUS    AGE
 worker0   Ready     39m
 worker1   Ready     38m
