@@ -44,7 +44,8 @@ ADD *.sh ceph.defaults check_zombie_mons.py ./osd_scenarios/* entrypoint.sh.in d
 # Modify the entrypoint
 RUN chmod +x /generate_entrypoint.sh && \
   bash -c "/generate_entrypoint.sh" && \
-  rm -f /generate_entrypoint.sh
+  rm -f /generate_entrypoint.sh && \
+  bash -n /*.sh
 
 # Add templates for confd
 ADD ./confd/templates/* /etc/confd/templates/
