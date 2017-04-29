@@ -1,3 +1,5 @@
+#!/bin/bash
+
 function set_trap_err {
   # Let's propagate traps to all functions
   set -E
@@ -46,9 +48,9 @@ function exec {
   # as per docker requirement, forward the SIGTERM to it.
   trap _term SIGTERM
 
-  $@ &
+  "$@" &
   child_for_exec=$!
-  echo "exec: PID $child_for_exec: spawning $@"
+  echo "exec: PID $child_for_exec: spawning $*"
   wait "$child_for_exec"
   return_code=$?
   echo "exec: PID $child_for_exec: exit $return_code"

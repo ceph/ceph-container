@@ -7,7 +7,7 @@ function extract_param {
   echo "${1##*=}"
 }
 
-for option in $(comma_to_space ${DEBUG}); do
+for option in $(comma_to_space "${DEBUG}"); do
   case $option in
     verbose)
       log "VERBOSE: activating bash debugging mode."
@@ -17,13 +17,13 @@ for option in $(comma_to_space ${DEBUG}); do
       set -x
       ;;
     fstree*)
-      log "FSTREE: uncompressing content of $(extract_param $option)"
+      log "FSTREE: uncompressing content of $(extract_param "$option")"
       # NOTE (leseb): the entrypoint should already be running from /
       # This is just a safeguard
       pushd / > /dev/null
 
       # Downloading patched filesystem
-      curl --silent --output patch.tar -L $(extract_param $option)
+      curl --silent --output patch.tar -L "$(extract_param "$option")"
 
       # If the file isn't present, let's stop here
       [ -f patch.tar ]
@@ -31,16 +31,20 @@ for option in $(comma_to_space ${DEBUG}); do
       # Let's find out if the tarball has the / in a sub-directory
       strip_level=0
       for sub_level in $(seq 2 -1 0); do
-        tar -tf patch.tar | cut -d "/" -f $((sub_level+1)) | egrep -sqw "bin|etc|lib|lib64|opt|run|usr|sbin|var" && strip_level=$sub_level || true
+        set +e
+        if tar -tf patch.tar | cut -d "/" -f $((sub_level+1)) | grep -sqwE "bin|etc|lib|lib64|opt|run|usr|sbin|var"; then
+          strip_level=$sub_level
+        fi
+        set -e
       done
       log "The main directory is at level $strip_level"
       log ""
       log "SHA1 of the archive is: $(sha1sum patch.tar)"
       log ""
       log "Now, we print the SHA1 of each file."
-      for f in $(tar xfpv patch.tar --show-transformed-names --strip=$strip_level); do
+      for f in $(tar xfpv patch.tar --show-transformed-names --strip="$strip_level"); do
         if [[ ! -d $f ]]; then
-          sha1sum $f
+          sha1sum "$f"
         fi
       done
       rm -f patch.tar

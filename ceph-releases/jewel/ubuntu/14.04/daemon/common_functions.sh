@@ -7,8 +7,9 @@ function log {
     return 1
   fi
 
-  TIMESTAMP=$(date '+%F %T')
-  echo "${TIMESTAMP}  $0: $*"
+  local timestamp
+  timestamp=$(date '+%F %T')
+  echo "$timestamp  $0: $*"
   return 0
 }
 
@@ -23,14 +24,15 @@ function check_config {
 # ceph admin key exists or die
 function check_admin_key {
   if [[ ! -e $ADMIN_KEYRING ]]; then
-      log "ERROR- $ADMIN_KEYRING must exist; get it from your existing mon"
-      exit 1
+    log "ERROR- $ADMIN_KEYRING must exist; get it from your existing mon"
+    exit 1
   fi
 }
 
 # Given two strings, return the length of the shared prefix
 function prefix_length {
-  local maxlen=${#1}
+  local maxlen
+  maxlen=${#1}
   for ((i=maxlen-1;i>=0;i--)); do
     if [[ "${1:0:i}" == "${2:0:i}" ]]; then
       echo $i
@@ -41,18 +43,18 @@ function prefix_length {
 
 # Test if a command line tool is available
 function is_available {
-  command -v $@ &>/dev/null
+  command -v "$@" &>/dev/null
 }
 
 # create the mandatory directories
 function create_mandatory_directories {
   # Let's create the bootstrap directories
   for keyring in $OSD_BOOTSTRAP_KEYRING $MDS_BOOTSTRAP_KEYRING $RGW_BOOTSTRAP_KEYRING; do
-    mkdir -p $(dirname $keyring)
+    mkdir -p "$(dirname "$keyring")"
   done
 
   # Let's create the ceph directories
-  for directory in mon osd mds radosgw tmp mgr; do
+  for directory in mon osd mds radosgw tmp; do
     mkdir -p /var/lib/ceph/$directory
   done
 
@@ -63,13 +65,10 @@ function create_mandatory_directories {
   mkdir -p /var/run/ceph
 
   # Creating rados directories
-  mkdir -p /var/lib/ceph/radosgw/${RGW_NAME}
+  mkdir -p /var/lib/ceph/radosgw/"${RGW_NAME}"
 
   # Create the MDS directory
-  mkdir -p /var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}
-
-  # Create the MGR directory
-  mkdir -p /var/lib/ceph/mgr/${CLUSTER}-$MGR_NAME
+  mkdir -p /var/lib/ceph/mds/"${CLUSTER}-${MDS_NAME}"
 
   # Adjust the owner of all those directories
   chown --verbose -R ceph. /var/run/ceph/ /var/lib/ceph/*
@@ -83,8 +82,10 @@ function dev_part {
 
   if [[ -L ${osd_device} ]]; then
     # This device is a symlink. Work out it's actual device
-    local actual_device=$(readlink -f ${osd_device})
-    local bn=$(basename ${osd_device})
+    local actual_device
+    actual_device=$(readlink -f "${osd_device}")
+    local bn
+    bn=$(basename "${osd_device}")
     if [[ "${actual_device:0-1:1}" == [0-9] ]]; then
       local desired_partition="${actual_device}p${osd_partition}"
     else
@@ -93,17 +94,20 @@ function dev_part {
     # Now search for a symlink in the directory of $osd_device
     # that has the correct desired partition, and the longest
     # shared prefix with the original symlink
-    local symdir=$(dirname ${osd_device})
+    local symdir
+    symdir=$(dirname "${osd_device}")
     local link=""
     local pfxlen=0
-    for option in $(ls $symdir); do
-    if [[ $(readlink -f $symdir/$option) == $desired_partition ]]; then
-      local optprefixlen=$(prefix_length $option $bn)
-      if [[ $optprefixlen > $pfxlen ]]; then
-        link=$symdir/$option
-        pfxlen=$optprefixlen
+    for option in ${symdir}*; do
+      [[ -e $option ]] || break
+      if [[ $(readlink -f "$symdir"/"$option") == "$desired_partition" ]]; then
+        local optprefixlen
+        optprefixlen=$(prefix_length "$option" "$bn")
+        if [[ $optprefixlen > $pfxlen ]]; then
+          link=$symdir/$option
+          pfxlen=$optprefixlen
+        fi
       fi
-    fi
     done
     if [[ $pfxlen -eq 0 ]]; then
       >&2 log "Could not locate appropriate symlink for partition ${osd_partition} of ${osd_device}"
@@ -118,11 +122,12 @@ function dev_part {
 }
 
 function osd_trying_to_determine_scenario {
-  if [ -z "${OSD_DEVICE}" ]; then
+  ${OSD_DEVICE:-none}
+  if [[ ${OSD_DEVICE} == "none" ]]; then
     log "Bootstrapped OSD(s) found; using OSD directory"
     source osd_directory.sh
     osd_directory
-  elif $(parted --script ${OSD_DEVICE} print | egrep -sq '^ 1.*ceph data'); then
+  elif parted --script "${OSD_DEVICE}" print | grep -sqE '^ 1.*ceph data'; then
     log "Bootstrapped OSD found; activating ${OSD_DEVICE}"
     source osd_disk_activate.sh
     osd_activate
@@ -134,11 +139,12 @@ function osd_trying_to_determine_scenario {
 }
 
 function get_osd_dev {
-  for i in ${OSD_DISKS}
-   do
-    osd_id=$(echo ${i}|sed 's/\(.*\):\(.*\)/\1/')
-    osd_dev="/dev/$(echo ${i}|sed 's/\(.*\):\(.*\)/\2/')"
-    if [ ${osd_id} = ${1} ]; then
+  for i in ${OSD_DISKS}; do
+    local osd_id
+    osd_id=$(echo "${i}"|sed 's/\(.*\):\(.*\)/\1/')
+    local osd_dev
+    osd_dev="/dev/$(echo "${i}"|sed 's/\(.*\):\(.*\)/\2/')"
+    if [[ "${osd_id}" == "${1}" ]]; then
       echo -n "${osd_dev}"
     fi
   done
@@ -155,7 +161,9 @@ function is_integer {
   # Supports also negative integers
   # We use $@ here to consider everything given as parameter and not only the
   # first one : that's mainly for splited strings like "10 10"
-  [[ $@ =~ ^-?[0-9]+$ ]]
+  for arg in "$@"; do
+    [[ $arg =~ ^-?[0-9]+$ ]]
+  done
 }
 
 # Transform any set of strings to lowercase
@@ -203,7 +211,12 @@ function wait_for_file {
 }
 
 function valid_scenarios {
-  log "Valid values for CEPH_DAEMON are $(to_uppercase $ALL_SCENARIOS)."
+  if [ -n "$EXCLUDED_TAGS" ]; then
+    for tag in $EXCLUDED_TAGS; do
+      ALL_SCENARIOS=${ALL_SCENARIOS/$tag /}
+    done
+  fi
+  log "Valid values for CEPH_DAEMON are $(to_uppercase "$ALL_SCENARIOS")."
   log "Valid values for the daemon parameter are $ALL_SCENARIOS"
 }
 
@@ -224,24 +237,24 @@ function get_osd_path {
 
 function apply_ceph_ownership_to_disks {
   if [[ -n "${OSD_JOURNAL}" ]]; then
-    wait_for_file ${OSD_JOURNAL}
-    chown --verbose ceph. ${OSD_JOURNAL}
+    wait_for_file "${OSD_JOURNAL}"
+    chown --verbose ceph. "${OSD_JOURNAL}"
   elif [[ ${OSD_DMCRYPT} -eq 1 ]]; then
     # apply permission on the lockbox partition
-    wait_for_file $(dev_part ${OSD_DEVICE} 3)
-    chown --verbose ceph. $(dev_part ${OSD_DEVICE} 3)
+    wait_for_file "$(dev_part "${OSD_DEVICE}" 3)"
+    chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 3)"
   else
-    wait_for_file $(dev_part ${OSD_DEVICE} 2)
-    chown --verbose ceph. $(dev_part ${OSD_DEVICE} 2)
+    wait_for_file "$(dev_part "${OSD_DEVICE}" 2)"
+    chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 2)"
   fi
-  chown --verbose ceph. $(dev_part ${OSD_DEVICE} 1)
+  chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 1)"
 }
 
 function ceph_health {
   local bootstrap_user=$1
   local bootstrap_key=$2
 
-  if ! timeout 10 ceph ${CLI_OPTS} --name $bootstrap_user --keyring $bootstrap_key health; then
+  if ! timeout 10 ceph "${CLI_OPTS[@]}" --name "$bootstrap_user" --keyring "$bootstrap_key" health; then
     log "Timed out while trying to reach out to the Ceph Monitor(s)."
     log "Make sure your Ceph monitors are up and running in quorum."
     log "Also verify the validity of client.bootstrap-osd keyring."

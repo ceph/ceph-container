@@ -32,7 +32,7 @@ esac
 ###############
 
 # Normalize DAEMON to lowercase
-CEPH_DAEMON=$(to_lowercase ${CEPH_DAEMON})
+CEPH_DAEMON=$(to_lowercase "${CEPH_DAEMON}")
 
 create_mandatory_directories
 
@@ -139,6 +139,7 @@ case "$CEPH_DAEMON" in
     start_mgr
     ;;
   disk_introspection)
+    # TAG: disk_introspection
     if [[ "$KV_TYPE" =~ k8s|kubernetes ]]; then
       source disk_introspection.sh
     else
@@ -147,6 +148,7 @@ case "$CEPH_DAEMON" in
     fi
     ;;
   demo)
+    # TAG: demo
     source demo.sh
     ;;
   *)

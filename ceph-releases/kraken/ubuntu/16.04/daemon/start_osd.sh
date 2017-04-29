@@ -11,7 +11,7 @@ function start_osd {
   get_config
   check_config
 
-  if [ ${CEPH_GET_ADMIN_KEY} -eq 1 ]; then
+  if [ "${CEPH_GET_ADMIN_KEY}" -eq 1 ]; then
     get_admin_key
     check_admin_key
   fi
