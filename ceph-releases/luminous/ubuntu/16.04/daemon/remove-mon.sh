@@ -1,3 +1,3 @@
 #!/bin/bash
 
-ceph mon remove $(hostname -s)
+ceph --cluster ${CLUSTER} mon remove $(hostname -s)
