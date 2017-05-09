@@ -3,7 +3,7 @@ set -e
 
 # Concept from https://github.com/ceph/ceph-docker/issues/247
 # The default structure remains identical
-# The file you will find in base and daemon are for Ubuntu
+# The files you will find in base and daemon are for Ubuntu
 
 # VARIABLES
 PREFIX=build
