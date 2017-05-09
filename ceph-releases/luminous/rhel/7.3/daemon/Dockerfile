@@ -43,3 +43,6 @@ LABEL install="/usr/bin/docker run --rm --privileged -v /:/host -e MON_IP=\${MON
 LABEL com.redhat.component="rhceph-rhel7-docker"
 LABEL name="rhceph"
 LABEL description="Red Hat Ceph Storage 3"
+LABEL summary="Provides the latest Red Hat Ceph Storage 3 on RHEL 7 in a fully featured and supported base image."
+LABEL io.k8s.display-name="Red Hat Ceph Storage 3 on RHEL 7"
+LABEL io.openshift.tags="rhceph ceph"
