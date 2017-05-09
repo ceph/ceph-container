@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ex
 
-./create_secrets.sh
+./create_secrets.sh "$@"
 
 kubectl create \
 -f ceph-mds-v1-dp.yaml \

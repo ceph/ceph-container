@@ -1,5 +1,23 @@
 #!/bin/bash
 
+TEMPLATE_ENGINE=jinja
+
+proc-template() {
+  FILE=$1
+  shift
+  if [ "$TEMPLATE_ENGINE" == "sigil" ]; then
+    echo $(sigil -p -f ${FILE}.tmpl "$@")
+  else
+    TMPFILE=$(mktemp)
+    for a in $@; do
+      echo ${a/=/: !!str } >> $TMPFILE
+    done
+    conf=$(jinja2 --format=yaml ${FILE}.jinja $TMPFILE)
+    rm $TMPFILE
+    echo "${conf}"
+  fi
+}
+
 gen-fsid() {
   uuidgen
 }
@@ -7,49 +25,49 @@ gen-fsid() {
 gen-ceph-conf-raw() {
   fsid=${1:?}
   shift
-  conf=$(sigil -p -f templates/ceph/ceph.conf.tmpl "fsid=${fsid}" $@)
+  conf=$(proc-template templates/ceph/ceph.conf "fsid=${fsid}" "$@")
   echo "${conf}"
 }
 
 gen-ceph-conf() {
   fsid=${1:?}
   shift
-  conf=$(sigil -p -f templates/ceph/ceph.conf.tmpl "fsid=${fsid}" $@)
+  conf=$(proc-template templates/ceph/ceph.conf "fsid=${fsid}" "$@")
   echo "${conf}"
 }
 
 gen-admin-keyring() {
   key=$(python ceph-key.py)
-  keyring=$(sigil -f templates/ceph/admin.keyring.tmpl "key=${key}")
+  keyring=$(proc-template templates/ceph/admin.keyring "key=${key}")
   echo "${keyring}"
 }
 
 gen-mon-keyring() {
   key=$(python ceph-key.py)
-  keyring=$(sigil -f templates/ceph/mon.keyring.tmpl "key=${key}")
+  keyring=$(proc-template templates/ceph/mon.keyring "key=${key}")
   echo "${keyring}"
 }
 
 gen-combined-conf() {
   fsid=${1:?}
   shift
-  conf=$(sigil -p -f templates/ceph/ceph.conf.tmpl "fsid=${fsid}" $@)
+  conf=$(proc-template templates/ceph/ceph.conf "fsid=${fsid}" $@)
   echo "${conf}" > ceph.conf
 
   key=$(python ceph-key.py)
-  keyring=$(sigil -f templates/ceph/admin.keyring.tmpl "key=${key}")
+  keyring=$(proc-template templates/ceph/admin.keyring "key=${key}")
   echo "${key}" > ceph-client-key
   echo "${keyring}" > ceph.client.admin.keyring
 
   key=$(python ceph-key.py)
-  keyring=$(sigil -f templates/ceph/mon.keyring.tmpl "key=${key}")
+  keyring=$(proc-template templates/ceph/mon.keyring "key=${key}")
   echo "${keyring}" > ceph.mon.keyring
 }
 
 gen-bootstrap-keyring() {
   service="${1:-osd}"
   key=$(python ceph-key.py)
-  bootstrap=$(sigil -f templates/ceph/bootstrap.keyring.tmpl "key=${key}" "service=${service}")
+  bootstrap=$(proc-template templates/ceph/bootstrap.keyring "key=${key}" "service=${service}")
   echo "${bootstrap}"
 }
 
@@ -60,23 +78,26 @@ gen-all-bootstrap-keyrings() {
 }
 
 gen-all() {
-  gen-combined-conf $@
+  gen-combined-conf "$@"
   gen-all-bootstrap-keyrings
 }
 
 
 main() {
   set -eo pipefail
-  case "$1" in
-  fsid)            shift; gen-fsid $@;;
-  ceph-conf-raw)            shift; gen-ceph-conf-raw $@;;
-  ceph-conf)            shift; gen-ceph-conf $@;;
-  admin-keyring)            shift; gen-admin-keyring $@;;
-  mon-keyring)            shift; gen-mon-keyring $@;;
-  bootstrap-keyring)            shift; gen-bootstrap-keyring $@;;
-  combined-conf)               shift; gen-combined-conf $@;;
-  all)                         shift; gen-all $@;;
+  OP=$1
+  shift
+  case "$OP" in
+  fsid)              gen-fsid "$@";;
+  ceph-conf-raw)     gen-ceph-conf-raw "$@";;
+  ceph-conf)         gen-ceph-conf "$@";;
+  admin-keyring)     gen-admin-keyring "$@";;
+  mon-keyring)       gen-mon-keyring "$@";;
+  bootstrap-keyring) gen-bootstrap-keyring "$@";;
+  combined-conf)     gen-combined-conf "$@";;
+  all)               gen-all "$@";;
   esac
 }
 
 main "$@"
+
