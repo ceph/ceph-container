@@ -1,7 +1,7 @@
 #!/bin/bash
 
 gen-fsid() {
-  echo "$(uuidgen)"
+  uuidgen
 }
 
 gen-ceph-conf-raw() {
