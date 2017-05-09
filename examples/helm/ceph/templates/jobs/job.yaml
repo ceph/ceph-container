@@ -1,8 +1,12 @@
+{{- if .Capabilities.APIVersions.Has "batch/v1"}}
+apiVersion: batch/v1
+{{- else }}
 apiVersion: extensions/v1beta1
+{{- end }}
 kind: Job
 metadata:
   labels:
-    version: v0.1.0
+    version: {{ .Chart.Version }}
     app: ceph
     release: {{ .Release.Name }}
     daemon: secret-generator
@@ -11,7 +15,7 @@ spec:
   template:
     metadata:
       labels:
-        version: v0.1.0
+        version: {{ .Chart.Version }}
         app: ceph
         release: {{ .Release.Name }}
         daemon: secret-generator
@@ -21,8 +25,8 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: main
-          image: docker.io/kollakube/centos-binary-ceph-init-k8s:4.0.0
-          imagePullPolicy: Always
+          image: {{ .Values.images.ceph_init }}
+          imagePullPolicy: {{ .Values.image_policy.pull }}
           env:
             - name: CEPH_GEN_DIR
               value: /opt/ceph

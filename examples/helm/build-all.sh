@@ -8,7 +8,9 @@ function build_charts () {
   list_dirs | while read CHART; do
     if [ -f ${CHART}/Makefile ]; then make -C ${CHART}; fi
     if [ -f ${CHART}/requirements.yaml ]; then helm dep up ${CHART}; fi
-    helm package ./${CHART}
+    if [ -f ${CHART}/Chart.yaml ]; then 
+      helm package ./${CHART};
+    fi
   done
 }
 

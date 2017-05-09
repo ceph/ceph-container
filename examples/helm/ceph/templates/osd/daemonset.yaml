@@ -4,7 +4,7 @@ apiVersion: extensions/v1beta1
 metadata:
   name: ceph-osd
   labels:
-    version: v0.1.0
+    version: {{ .Chart.Version }}
     app: ceph
     daemon: osd
     release: {{ .Release.Name }}
@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       labels:
-        version: v0.1.0
+        version: {{ .Chart.Version }}
         app: ceph
         daemon: osd
         release: {{ .Release.Name }}
@@ -48,15 +48,15 @@ spec:
             - name: ceph-bootstrap-osd-keyring
               mountPath: /var/lib/ceph/bootstrap-osd/ceph.keyring
               subPath: ceph.keyring
-              readOnly: true
+              readOnly: false
             - name: ceph-bootstrap-mds-keyring
               mountPath: /var/lib/ceph/bootstrap-mds/ceph.keyring
               subPath: ceph.keyring
-              readOnly: true
+              readOnly: false
             - name: ceph-bootstrap-rgw-keyring
               mountPath: /var/lib/ceph/bootstrap-rgw/ceph.keyring
               subPath: ceph.keyring
-              readOnly: true
+              readOnly: false
           securityContext:
             privileged: true
           env:
@@ -68,6 +68,10 @@ spec:
               value: {{ .Values.ceph.cluster }}
             - name: CEPH_GET_ADMIN_KEY
               value: "1"
+          {{- if .Values.debug_level }}
+            - name: DEBUG
+              value: {{ .Values.debug_level }}
+          {{- end }}
           livenessProbe:
               tcpSocket:
                 port: 6800
