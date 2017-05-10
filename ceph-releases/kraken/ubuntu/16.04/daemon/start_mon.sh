@@ -77,8 +77,12 @@ function start_mon {
       fi
 
       if [[ -z "$MON_IP" ]]; then
-        log "ERROR- MON_IP must be defined as the IP address of the monitor"
-        exit 1
+        if [[ -z "$LIBPROCESS_IP" ]]; then
+            log "ERROR- MON_IP must be defined as the IP address of the monitor"
+            exit 1
+        else
+            MON_IP=$LIBPROCESS_IP
+        fi
       fi
   else
     NIC_MORE_TRAFFIC=$(grep -vE "lo:|face|Inter" /proc/net/dev | sort -n -k 2 | tail -1 | awk '{ sub (":", "", $1); print $1 }')
