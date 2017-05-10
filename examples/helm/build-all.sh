@@ -9,7 +9,7 @@ function build_charts () {
     if [ -f ${CHART}/Makefile ]; then make -C ${CHART}; fi
     if [ -f ${CHART}/requirements.yaml ]; then helm dep up ${CHART}; fi
     if [ -f ${CHART}/Chart.yaml ]; then 
-      helm package ./${CHART};
+      helm package ./${CHART}
     fi
   done
 }
