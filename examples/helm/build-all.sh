@@ -6,10 +6,10 @@ function list_dirs () {
 function build_charts () {
   echo "Building Charts"
   list_dirs | while read CHART; do
-    if [ -f ${CHART}/Makefile ]; then make -C ${CHART}; fi
-    if [ -f ${CHART}/requirements.yaml ]; then helm dep up ${CHART}; fi
-    if [ -f ${CHART}/Chart.yaml ]; then 
-      helm package ./${CHART}
+    if [ -f "${CHART}/Makefile" ]; then make -C ${CHART}; fi
+    if [ -f "${CHART}/requirements.yaml" ]; then helm dep up ${CHART}; fi
+    if [ -f "${CHART}/Chart.yaml" ]; then 
+      helm package "./${CHART}"
     fi
   done
 }
