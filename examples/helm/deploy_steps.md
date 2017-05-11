@@ -26,7 +26,7 @@ echo "cleaning up ceph folder on the nodes (rm -rf /var/lib/ceph-helm ). If you 
 sleep 2 #give user a chance to cancel it :)
 for node in $(kubectl get nodes | grep Ready | cut -f1 -d" ") 
 do 
-  echo "Running: ssh root@$x rm -rf /var/lib/ceph-helm"
+  echo "Running: ssh root@$node rm -rf /var/lib/ceph-helm"
   ssh root@$node 'hostname; rm -rf /var/lib/ceph-helm'
 done
 set -e
