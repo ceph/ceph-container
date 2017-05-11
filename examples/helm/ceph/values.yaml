@@ -144,3 +144,31 @@ storageclass:
   admin_secret_name: pvc-ceph-conf-combined-storageclass
   user_id: admin
   user_secret_name: pvc-ceph-client-key
+
+## osd_devices defines the osd layout for each node. Each
+## item will create a DaemonSet for the given configuration
+## but will not activate the OSDs yet. To activate the OSD,
+## the node should be labeled with `device_{device}={type}`,
+## eg. `device_sdb=hdd`. This will activate `/dev/sdb` to
+## become an OSD daemon.
+##
+## Devices need to have a GPT partition or activation may fail
+##
+## the format for an OSD item is:
+##   device: {the block storage. eg. `/dev/sdb` should just be `sdb`}
+##   type: {osd classification. typically `hdd` and `ssd` but can be anything}
+##   crush_location: {optional. updates the crush location of the osd}
+##   journal: {optional. if specified, will not prepare the disk and will not collocate the journal}
+##
+osd_directory:
+  enabled: true
+osd_devices:
+  - device: sdb
+    type: hdd
+    # crush_location: "root=standard host=$(HOSTNAME)-standard"
+  - device: sdc
+    type: hdd
+  - device: sdd1
+    type: hdd
+    # crush_location: "root=default host=$(HOSTNAME)"
+    # journal: sdx1
