@@ -1,9 +1,15 @@
 images:
   daemon: docker.io/ceph/daemon:latest
   exporter: digitalocean/ceph_exporter:1.0.0
+  ceph_init: docker.io/kollakube/centos-binary-ceph-init-k8s:4.0.0
 
 image_policy:
   pull: Always
+
+# As per: https://github.com/ceph/ceph-docker/blob/master/ceph-releases/luminous/ubuntu/16.04/daemon/debug.sh
+# Available options are: verbose,fstree and stayalive.
+# They can be used altogether like this: DEBUG=verbose,fstree=http://myfstree,stayalive
+debug_level: verbose
 
 labels:
   node_selector_key: ceph-storage
@@ -20,6 +26,7 @@ service:
     name: ceph-exporter
     port: 9128
 
+#When undefined here, it both networks default to: 10.244.0.0/16 (flannel)
 network:
   cluster: 10.192.0.0/10
   public: 10.192.0.0/10
@@ -136,6 +143,13 @@ resources:
     limits:
       memory: "1Gi"
       cpu: "1000m"
+  exporter:
+    requests:
+      memory: "10Mi"
+      cpu: "250m"
+    limits:
+      memory: "50Mi"
+      cpu: "500m"
 
 storageclass:
   name: general

@@ -3,7 +3,7 @@ apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
   labels:
-    version: v0.1.0
+    version: {{ .Chart.Version }}
     app: ceph
     daemon: mon
     release: {{ .Release.Name }}
@@ -15,7 +15,7 @@ spec:
     metadata:
       name: ceph-mon
       labels:
-        version: v0.1.0
+        version: {{ .Chart.Version }}
         app: ceph
         daemon: mon
         release: {{ .Release.Name }}
@@ -54,13 +54,17 @@ spec:
             - name: KV_TYPE
               value: k8s
             - name: NETWORK_AUTO_DETECT
-              value: "0"
+              value: "4"
             - name: MON_IP
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
             - name: CLUSTER
               value: {{ .Values.ceph.cluster }}
+          {{- if .Values.debug_level }}
+            - name: DEBUG
+              value: {{ .Values.debug_level }}
+          {{- end }}
           volumeMounts:
             - name: ceph-conf
               mountPath: /etc/ceph/ceph.conf
@@ -73,19 +77,19 @@ spec:
             - name: ceph-mon-keyring
               mountPath: /etc/ceph/ceph.mon.keyring
               subPath: ceph.mon.keyring
-              readOnly: true
+              readOnly: false
             - name: ceph-bootstrap-osd-keyring
               mountPath: /var/lib/ceph/bootstrap-osd/ceph.keyring
               subPath: ceph.keyring
-              readOnly: true
+              readOnly: false
             - name: ceph-bootstrap-mds-keyring
               mountPath: /var/lib/ceph/bootstrap-mds/ceph.keyring
               subPath: ceph.keyring
-              readOnly: true
+              readOnly: false
             - name: ceph-bootstrap-rgw-keyring
               mountPath: /var/lib/ceph/bootstrap-rgw/ceph.keyring
               subPath: ceph.keyring
-              readOnly: true
+              readOnly: false
           livenessProbe:
               tcpSocket:
                 port: {{ .Values.service.mon.port }}

@@ -36,6 +36,10 @@ spec:
               value: k8s
             - name: CLUSTER
               value: ceph
+          {{- if .Values.debug_level }}
+            - name: DEBUG
+              value: {{ .Values.debug_level }}
+          {{- end }}
           volumeMounts:
             - name: ceph-conf
               mountPath: /etc/ceph/ceph.conf
@@ -52,7 +56,7 @@ spec:
             - name: ceph-bootstrap-rgw-keyring
               mountPath: /var/lib/ceph/bootstrap-rgw/ceph.keyring
               subPath: ceph.keyring
-              readOnly: true
+              readOnly: false
           livenessProbe:
               tcpSocket:
                 port: {{ .Values.service.rgw.port }}
