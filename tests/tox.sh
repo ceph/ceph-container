@@ -11,10 +11,21 @@ set -ex
 
 # setup
 #################################################################################
-# XXX this should probably not install system dependencies like this, since now
-# it means we are tied to an apt-get distro
-sudo apt-get install -y --force-yes docker.io
-sudo apt-get install -y --force-yes xfsprogs
+# Check distro and install deps
+if command -v apt-get &>/dev/null; then
+    sudo apt-get install -y --force-yes docker.io
+    sudo apt-get install -y --force-yes xfsprogs
+  else
+    sudo yum install -y docker
+    sudo yum install -y xfsprogs
+    if ! systemctl status docker >/dev/null; then
+      # daemon doesn't start automatically after being installed
+      sudo systemctl restart docker
+    fi
+    # Allow running `docker` without sudo
+    sudo chgrp "$(whoami)" /var/run/docker.sock
+fi
+
 rm -rf "$WORKSPACE"/ceph-ansible || true
 git clone -b $CEPH_ANSIBLE_BRANCH --single-branch https://github.com/ceph/ceph-ansible.git ceph-ansible
 pip install -r $TOXINIDIR/ceph-ansible/tests/requirements.txt
