@@ -31,7 +31,7 @@ function osd_activate {
     MOUNTED_PART="/dev/mapper/${DATA_UUID}"
   fi
 
-  ceph-disk -v --setuser ceph --setgroup disk activate ${CEPH_DISK_OPTIONS} --no-start-daemon ${DATA_PART}
+  ceph-disk -v --setuser ceph --setgroup ceph activate ${CEPH_DISK_OPTIONS} --no-start-daemon ${DATA_PART}
 
   OSD_ID=$(grep "${MOUNTED_PART}" /proc/mounts | awk '{print $2}' | sed -r 's/^.*-([0-9]+)$/\1/')
   OSD_PATH=$(get_osd_path $OSD_ID)
@@ -40,5 +40,5 @@ function osd_activate {
   ceph ${CLI_OPTS} --name=osd.${OSD_ID} --keyring=$OSD_KEYRING osd crush create-or-move -- ${OSD_ID} ${OSD_WEIGHT} ${CRUSH_LOCATION}
 
   log "SUCCESS"
-  exec /usr/bin/ceph-osd ${CLI_OPTS} -f -i ${OSD_ID} --setuser ceph --setgroup disk
+  exec /usr/bin/ceph-osd ${DAEMON_OPTS} -i ${OSD_ID}
 }
