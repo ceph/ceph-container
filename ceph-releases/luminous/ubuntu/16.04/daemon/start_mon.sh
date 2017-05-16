@@ -141,6 +141,8 @@ function start_mon {
     timeout 7 ceph ${CLI_OPTS} mon add "${MON_NAME}" "${MON_IP}:6789" || true
   fi
 
+  chown -v ceph. /etc/ceph/*
+
   log "SUCCESS"
 
   # start MON
