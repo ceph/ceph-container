@@ -30,7 +30,7 @@ search <EXISTING_DOMAIN>
 
 search svc.cluster.local #Your kubernetes cluster ip domain
 
-nameserver 10.0.0.10     #The cluster IP of skyDNS
+nameserver 10.96.0.10     #The cluster IP of skyDNS
 nameserver <EXISTING_RESOLVER_IP>
 ```
 
@@ -80,14 +80,14 @@ We will be working on making this setup more agnostic, especially in regards to 
 
 ### Override the default network settings
 
-By default, `10.244.0.0/16` is used for the `cluster_network` and `public_network` in ceph.conf. To change these defaults, set the following environment variables according to your network requirements. These IPs should be set according to the range of your Pod IPs in your kubernetes cluster:
+By default, `10.244.0.0/16` (flannel) is used for the `cluster_network` and `public_network` in ceph.conf. To change these defaults, set the following environment variables according to your network requirements. These IPs should be set according to the range of your Pod IPs in your kubernetes cluster:
 
 ```
 export osd_cluster_network=192.168.0.0/16
 export osd_public_network=192.168.0.0/16
 ```
 
-These will be picked up by sigil when generating the kubernetes secrets in the next section.
+These will be picked up by jinja2 or sigil when generating the kubernetes secrets in the next section.
 
 ### Generate keys and configuration
 
@@ -174,7 +174,7 @@ ceph-osd-j1gyd         1/1       Running   2          2m
 First you must add the admin client key to your current namespace (or the namespace of your pod).
 
 ```
-kubectl create secret generic ceph-client-key --from-file=./generator/ceph-client-key
+kubectl create secret generic ceph-client-key --type="kubernetes.io/rbd" --from-file=./generator/ceph-client-key
 ```
 
 Now, if skyDNS is set as a resolver for your host nodes then execute the below command as is. Otherwise modify the `ceph-mon.ceph` host to match the IP address of one of your ceph-mon pods.
@@ -222,7 +222,7 @@ By default `emptyDir` is used for everything. If you have durable storage on you
 
 #### Enabling Jewel RBD features
 
-We disable new RBD features by default since most operating systems cannot mount volumes using these features. You can override this by setting the following before running sigil or the convenience scripts.
+We disable new RBD features by default since most operating systems cannot mount volumes using these features. You can override this by setting the following before running jinja2/sigil or the convenience scripts.
 
 ```
 export client_rbd_default_features=61
