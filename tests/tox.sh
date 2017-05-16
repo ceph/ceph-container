@@ -37,20 +37,20 @@ fi
 # types of images we're going to build
 mkdir -p {base,daemon,demo}
 # starting with kraken, the base image does not exist
-cp -Lrv ceph-releases/$CEPH_RELEASE/$IMAGE_DISTRO/base/* base || true
-cp -Lrv ceph-releases/$CEPH_RELEASE/$IMAGE_DISTRO/daemon/* daemon
-cp -Lrv ceph-releases/$CEPH_RELEASE/$IMAGE_DISTRO/demo/* demo || true
+cp -Lrv ceph-releases/$CEPH_STABLE_RELEASE/$IMAGE_DISTRO/base/* base || true
+cp -Lrv ceph-releases/$CEPH_STABLE_RELEASE/$IMAGE_DISTRO/daemon/* daemon
+cp -Lrv ceph-releases/$CEPH_STABLE_RELEASE/$IMAGE_DISTRO/demo/* demo || true
 
 bash "$WORKSPACE"/travis-builds/build_imgs.sh
 
 # start a local docker registry
 docker run -d -p 5000:5000 --restart=always --name registry registry:2
 # add the image we just built to the registry
-docker tag ceph/daemon localhost:5000/ceph/daemon:$CEPH_RELEASE-latest
+docker tag ceph/daemon localhost:5000/ceph/daemon:$CEPH_STABLE_RELEASE-latest
 # this avoids a race condition between the tagging and the push
 # which causes this to sometimes fail when run by jenkins
 sleep 1
-docker --debug push localhost:5000/ceph/daemon:$CEPH_RELEASE-latest
+docker --debug push localhost:5000/ceph/daemon:$CEPH_STABLE_RELEASE-latest
 
 # test
 #################################################################################
@@ -69,7 +69,7 @@ export ANSIBLE_SSH_ARGS="-F $CEPH_ANSIBLE_SCENARIO_PATH/vagrant_ssh_config"
 
 # runs a playbook to configure nodes for testing
 ansible-playbook -vv -i $CEPH_ANSIBLE_SCENARIO_PATH/hosts $TOXINIDIR/tests/setup.yml
-ansible-playbook -vv -i $CEPH_ANSIBLE_SCENARIO_PATH/hosts $TOXINIDIR/ceph-ansible/site-docker.yml.sample --extra-vars="ceph_stable_release=$CEPH_RELEASE ceph_docker_image_tag=$CEPH_RELEASE-latest ceph_docker_registry=$REGISTRY_ADDRESS fetch_directory=$CEPH_ANSIBLE_SCENARIO_PATH/fetch"
+ansible-playbook -vv -i $CEPH_ANSIBLE_SCENARIO_PATH/hosts $TOXINIDIR/ceph-ansible/site-docker.yml.sample --extra-vars="ceph_stable_release=$CEPH_STABLE_RELEASE ceph_docker_image_tag=$CEPH_STABLE_RELEASE-latest ceph_docker_registry=$REGISTRY_ADDRESS fetch_directory=$CEPH_ANSIBLE_SCENARIO_PATH/fetch"
 
 ansible-playbook -vv -i $CEPH_ANSIBLE_SCENARIO_PATH/hosts $TOXINIDIR/ceph-ansible/tests/functional/setup.yml
 
