@@ -110,6 +110,11 @@ case "$CEPH_DAEMON" in
     source start_restapi.sh
     start_restapi
     ;;
+  rbd_mirror)
+    # TAG: rbd_mirror
+    source start_rbd_mirror.sh
+    start_rbd_mirror
+    ;;
   nfs)
     # TAG: nfs
     echo "Temporarily disabled due to broken package dependencies with nfs-ganesha"
