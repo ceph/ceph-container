@@ -17,6 +17,8 @@ Ceph-related Docker files.
 - [`ceph/rbd-unlock`](rbd-unlock/): Convenience wrapper to release an rbd lock
 - [`ceph/rbd-volume`](rbd-volume/): Convenience wrapper to mount an rbd volume
 
+See README files in subdirectories for instructions on using containers.
+
 ## Demo
 
 - [`ceph/demo`](ceph-releases/jewel/ubuntu/14.04/demo/): Demonstration cluster for testing and learning. This container runs all the major ceph and ganesha components installed, bootstrapped, and executed for you to play with. (not intended for use in building a production cluster)
