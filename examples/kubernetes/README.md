@@ -8,7 +8,8 @@ This example does not survive Kubernetes cluster restart! The Monitors need pers
 
 ## Client Requirements
 
-In addition to kubectl, Sigil is required for template handling and must be installed in your system PATH. Instructions can be found here: <https://github.com/gliderlabs/sigil>
+In addition to `kubectl`, `jinja2` or `sigil` is required for template handling and must be installed in your system PATH. Instructions can be found here
+for `jinja2` <https://github.com/mattrobenolt/jinja2-cli> or here for `sigil` <https://github.com/gliderlabs/sigil>.
 
 ## Cluster Requirements
 

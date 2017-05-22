@@ -4,7 +4,8 @@ This Guide will take you through the process of deploying a Ceph cluster on to a
 
 ## Client Requirements
 
-In addition to kubectl, Sigil is required for template handling and must be installed in your system PATH. Instructions can be found here: <https://github.com/gliderlabs/sigil>
+In addition to `kubectl`, `jinja2` or `sigil` is required for template handling and must be installed in your system PATH. Instructions can be found here
+for `jinja2` <https://github.com/mattrobenolt/jinja2-cli> or here for `sigil` <https://github.com/gliderlabs/sigil>.
 
 ## Cluster Requirements
 
@@ -99,7 +100,7 @@ cd ceph-docker/examples/kubernetes
 
 ### Override default settings
 
-These will be picked up by `sigil` when generating the Kubernetes secrets in the next section.
+These will be picked up by `jinja2` or `sigil` when generating the Kubernetes secrets in the next section.
 
 #### Override the default network settings
 
