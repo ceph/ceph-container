@@ -6,7 +6,8 @@ proc-template() {
   FILE=$1
   shift
   if [ "$TEMPLATE_ENGINE" == "sigil" ]; then
-    echo $(sigil -p -f ${FILE}.tmpl "$@")
+    conf=$(sigil -p -f ${FILE}.tmpl "$@")
+    echo "${conf}"
   else
     TMPFILE=$(mktemp)
     for a in $@; do
