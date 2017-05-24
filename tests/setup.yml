@@ -2,9 +2,34 @@
 
 - hosts: all
   gather_facts: true
+  become: yes
   tasks :
+    - name: check if it is Atomic host
+      stat: path=/run/ostree-booted
+      register: stat_ostree
+      always_run: true
+
+    - name: set fact for using Atomic host
+      set_fact:
+        is_atomic: '{{ stat_ostree.stat.exists }}'
+
+    - name: install docker on redhat systems
+      package:
+        name: docker
+        state: present
+      when:
+        - ansible_os_family == 'RedHat'
+        - not is_atomic
+
+    - name: install docker.io on debian systems
+      package:
+        name: docker.io
+        state: present
+      when:
+        - ansible_os_family == 'Debian'
+        - not is_atomic
+
     - name: allow nodes to use an insecure registry
-      become: yes
       blockinfile:
         dest: /etc/sysconfig/docker
         block: |
@@ -13,7 +38,6 @@
         marker: "# {mark} ANSIBLE MANAGED BLOCK" 
 
     - name: restart docker
-      become: yes
       service:
         name: docker
         state: restarted
