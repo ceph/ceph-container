@@ -5,15 +5,16 @@ TEMPLATE_ENGINE=jinja
 proc-template() {
   FILE=$1
   shift
-  if [ "$TEMPLATE_ENGINE" == "sigil" ]; then
-    echo $(sigil -p -f ${FILE}.tmpl "$@")
+  if [ "${TEMPLATE_ENGINE}" == "sigil" ]; then
+    conf=$(sigil -p -f "${FILE}.tmpl" "$@")
+    echo "${conf}"
   else
     TMPFILE=$(mktemp)
-    for a in $@; do
-      echo ${a/=/: !!str } >> $TMPFILE
+    for a in "$@"; do
+      echo "${a/=/: !!str }" >> "${TMPFILE}"
     done
-    conf=$(jinja2 --format=yaml ${FILE}.jinja $TMPFILE)
-    rm $TMPFILE
+    conf=$(jinja2 --format=yaml "${FILE}.jinja" "${TMPFILE}")
+    rm "${TMPFILE}"
     echo "${conf}"
   fi
 }
@@ -51,7 +52,7 @@ gen-mon-keyring() {
 gen-combined-conf() {
   fsid=${1:?}
   shift
-  conf=$(proc-template templates/ceph/ceph.conf "fsid=${fsid}" $@)
+  conf=$(proc-template templates/ceph/ceph.conf "fsid=${fsid}" "$@")
   echo "${conf}" > ceph.conf
 
   key=$(python ceph-key.py)
