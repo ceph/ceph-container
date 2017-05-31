@@ -11,6 +11,17 @@ set -ex
 
 # setup
 #################################################################################
+# If WORKSPACE is undefined, set it to $TOXINIDIR
+echo ${WORKSPACE:=$TOXINIDIR}
+
+# Write down a couple environment variables, for use in teardown
+OUR_TOX_VARS=$WORKSPACE/.tox_vars
+rm -f $OUR_TOX_VARS
+cat > $OUR_TOX_VARS << EOF
+export WORKSPACE=$WORKSPACE
+export CEPH_ANSIBLE_SCENARIO_PATH=$CEPH_ANSIBLE_SCENARIO_PATH
+EOF
+
 # Check distro and install deps
 if command -v apt-get &>/dev/null; then
     sudo apt-get install -y --force-yes docker.io
@@ -88,6 +99,4 @@ testinfra -n 4 --sudo -v --connection=ansible --ansible-inventory=$CEPH_ANSIBLE_
 
 # teardown
 #################################################################################
-cd $CEPH_ANSIBLE_SCENARIO_PATH
-vagrant destroy --force
-cd $WORKSPACE
+bash $TOXINIDIR/tests/teardown.sh
