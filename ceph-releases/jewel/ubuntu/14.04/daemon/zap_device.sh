@@ -12,7 +12,7 @@ function zap_device {
 
   # testing all the devices first so we just don't do anything if one device is wrong
   for device in $(comma_to_space ${OSD_DEVICE}); do
-    if ! file -s $device &> /dev/null; then
+    if [[ $(stat --format=%F "$device" 2> /dev/null) != "block special file" ]]; then
       log "Provided device $device does not exist."
       exit 1
     fi
