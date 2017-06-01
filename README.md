@@ -7,16 +7,6 @@ Ceph-related Docker files.
 - [`ceph/base`](ceph-releases/jewel/ubuntu/14.04/base/): Ceph base container image. This is nothing but a fresh install of the latest Ceph + Ganesha on Ubuntu LTS (14.04)
 - [`ceph/daemon`](ceph-releases/jewel/ubuntu/14.04/daemon/): All-in-one container for all core daemons.
 
-## Utilities and convenience wrappers
-
-- [`ceph/config`](config/): _DEPRECATED (not maintained anymore since the logic is now embedded in the daemon image)_ Initializes and distributes cluster configuration
-- [`ceph/docker-registry`](docker-registry/): Rados backed docker-registry images repository
-- [`ceph/rados`](rados/): Convenience wrapper to execute the `rados` CLI tool
-- [`ceph/rbd`](rbd/): Convenience wrapper to execute the `rbd` CLI tool
-- [`ceph/rbd-lock`](rbd-lock/): Convenience wrapper to block waiting for an rbd lock
-- [`ceph/rbd-unlock`](rbd-unlock/): Convenience wrapper to release an rbd lock
-- [`ceph/rbd-volume`](rbd-volume/): Convenience wrapper to mount an rbd volume
-
 See README files in subdirectories for instructions on using containers.
 
 ## Demo
