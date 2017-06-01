@@ -125,9 +125,19 @@ function start_mon {
 
     # Prepare the monitor daemon's directory with the map and keyring
     ceph-mon --setuser ceph --setgroup ceph --cluster ${CLUSTER} --mkfs -i ${MON_NAME} --inject-monmap $MONMAP --keyring $MON_KEYRING --mon-data "$MON_DATA_DIR"
+
+    # Never re-use that monmap again, otherwise we end up with partitioned Ceph monitor
+    # The initial mon **only** contains the current monitor, so this is useful for initial bootstrap
+    # Always rely on what has been populated after the other monitors joined the quorum
+    rm -f $MONMAP
   else
     log "Existing mon, trying to rejoin cluster..."
-    ceph-mon --setuser ceph --setgroup ceph --cluster ${CLUSTER} -i ${MON_NAME} -c /etc/ceph/${CLUSTER}.conf --keyring $MON_KEYRING --mon-data "$MON_DATA_DIR"
+    if [[ "$KV_TYPE" != "none" ]]; then
+      # This is needed for etcd or k8s deployments as new containers joining need to have a map of the cluster
+      # The list of monitors will not be provided by the ceph.conf since we don't have the overall knowledge of what's already deployed
+      # In this kind of environment, the monmap is the only source of truth for new monitor to attempt to join the existing quorum
+      ceph-mon --setuser ceph --setgroup ceph --cluster ${CLUSTER} -i ${MON_NAME} --inject-monmap $MONMAP --keyring $MON_KEYRING --mon-data "$MON_DATA_DIR"
+    fi
     timeout 7 ceph ${CLI_OPTS} mon add "${MON_NAME}" "${MON_IP}:6789" || true
   fi
 
