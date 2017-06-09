@@ -129,10 +129,7 @@ By default, `10.244.0.0/16` is used for the `cluster_network` and `public_networ
 
 ##### for jinja2
 
-```
-cd generator/templates/ceph/
-```
-using your text editor of choice open: ceph.conf.jinja
+using your text editor of choice open: generator/templates/ceph/ceph.conf.jinja
 
 under the [osd] heading, change the cluster_network and public_network:
 ```
@@ -159,10 +156,7 @@ Let's go ahead and reduce the default number of placement groups from 128 down t
 
 ##### for jinja2
 
-```
-cd generator/templates/ceph/
-```
-using your text editor of choice open: ceph.conf.jinja
+using your text editor of choice open: generator/templates/ceph/ceph.conf.jinja
 
 under the #auth heading, change the osd_pool_default_pg_num and osd_pool_default_pgp_num:
 ```
