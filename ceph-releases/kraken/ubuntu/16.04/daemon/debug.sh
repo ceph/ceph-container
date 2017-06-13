@@ -11,6 +11,9 @@ for option in $(comma_to_space ${DEBUG}); do
   case $option in
     verbose)
       echo "VERBOSE: activating bash debugging mode."
+      echo "To run Ceph daemons in debugging mode, pass the CEPH_ARGS variable like this:"
+      echo "-e CEPH_ARGS='--debug-ms 1 --debug-osd 10'"
+      export PS4='+${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
       set -x
       ;;
     fstree*)
@@ -51,6 +54,9 @@ for option in $(comma_to_space ${DEBUG}); do
       echo "$option is not a valid debug option."
       echo "Available options are: verbose,fstree and stayalive."
       echo "They can be used altogether like this: '-e DEBUG=verbose,fstree=http://myfstree,stayalive"
+      echo ""
+      echo "To run Ceph daemons in debugging mode, pass the CEPH_ARGS variable like this:"
+      echo "-e CEPH_ARGS='--debug-ms 1 --debug-osd 10'"
       exit 1
       ;;
   esac
