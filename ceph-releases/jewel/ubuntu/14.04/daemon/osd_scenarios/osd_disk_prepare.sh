@@ -64,11 +64,5 @@ function osd_disk_prepare {
   # watch the udev event queue, and exit if all current events are handled
   udevadm settle --timeout=600
 
-  if [[ -n "${OSD_JOURNAL}" ]]; then
-    wait_for_file ${OSD_JOURNAL}
-    chown ceph. ${OSD_JOURNAL}
-  else
-    wait_for_file $(dev_part ${OSD_DEVICE} 2)
-    chown ceph. $(dev_part ${OSD_DEVICE} 2)
-  fi
+  apply_ceph_ownership_to_disks
 }

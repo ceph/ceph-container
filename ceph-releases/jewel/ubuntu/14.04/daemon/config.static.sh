@@ -62,7 +62,7 @@ ENDHERE
   fi
 
     # Apply proper permissions to the keys
-    chown ceph. $MON_KEYRING $OSD_BOOTSTRAP_KEYRING $MDS_BOOTSTRAP_KEYRING $RGW_BOOTSTRAP_KEYRING
+    chown --verbose ceph. $MON_KEYRING $OSD_BOOTSTRAP_KEYRING $MDS_BOOTSTRAP_KEYRING $RGW_BOOTSTRAP_KEYRING
 
   if [ ! -e $MONMAP ]; then
     if [ -e /etc/ceph/monmap ]; then
@@ -72,7 +72,7 @@ ENDHERE
       # Generate initial monitor map
       monmaptool --create --add ${MON_NAME} "${MON_IP}:6789" --fsid ${fsid} $MONMAP
     fi
-    chown ceph. $MONMAP
+    chown --verbose ceph. $MONMAP
   fi
 
 }

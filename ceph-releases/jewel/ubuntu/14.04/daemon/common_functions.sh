@@ -72,7 +72,7 @@ function create_mandatory_directories {
   mkdir -p /var/lib/ceph/mgr/${CLUSTER}-$MGR_NAME
 
   # Adjust the owner of all those directories
-  chown -R ceph. /var/run/ceph/ /var/lib/ceph/*
+  chown --verbose -R ceph. /var/run/ceph/ /var/lib/ceph/*
 }
 
 
@@ -220,4 +220,19 @@ function invalid_ceph_daemon {
 
 function get_osd_path {
   echo "$OSD_PATH_BASE-$1/"
+}
+
+function apply_ceph_ownership_to_disks {
+  if [[ -n "${OSD_JOURNAL}" ]]; then
+    wait_for_file ${OSD_JOURNAL}
+    chown --verbose ceph. ${OSD_JOURNAL}
+  elif [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+    # apply permission on the lockbox partition
+    wait_for_file $(dev_part ${OSD_DEVICE} 3)
+    chown --verbose ceph. $(dev_part ${OSD_DEVICE} 3)
+  else
+    wait_for_file $(dev_part ${OSD_DEVICE} 2)
+    chown --verbose ceph. $(dev_part ${OSD_DEVICE} 2)
+  fi
+  chown --verbose ceph. $(dev_part ${OSD_DEVICE} 1)
 }

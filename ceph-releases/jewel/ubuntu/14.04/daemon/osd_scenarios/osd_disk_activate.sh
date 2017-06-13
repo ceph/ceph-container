@@ -16,14 +16,7 @@ function osd_activate {
   # watch the udev event queue, and exit if all current events are handled
   udevadm settle --timeout=600
 
-  # wait till partition exists then activate it
-  if [[ -n "${OSD_JOURNAL}" ]]; then
-    wait_for_file ${OSD_DEVICE}
-    chown ceph. ${OSD_JOURNAL}
-  else
-    wait_for_file $(dev_part ${OSD_DEVICE} 1)
-    chown ceph. $JOURNAL_PART
-  fi
+  apply_ceph_ownership_to_disks
 
   DATA_PART=$(dev_part ${OSD_DEVICE} 1)
   MOUNTED_PART=${DATA_PART}
