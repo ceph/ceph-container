@@ -250,6 +250,11 @@ function apply_ceph_ownership_to_disks {
   chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 1)"
 }
 
+# Get partition uuid of a given partition
+function get_part_uuid {
+  blkid -o value -s PARTUUID "${1}"
+}
+
 function ceph_health {
   local bootstrap_user=$1
   local bootstrap_key=$2
@@ -276,4 +281,14 @@ function add_osd_to_crush {
 function calculate_osd_weight {
   OSD_PATH=$(get_osd_path "$OSD_ID")
   OSD_WEIGHT=$(df -P -k "$OSD_PATH" | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
+}
+
+function umount_lockbox {
+  if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+    log "Unmounting LOCKBOX directory"
+    # NOTE(leseb): adding || true so when this bug will be fixed the entrypoint will not fail
+    # Ceph bug tracker: http://tracker.ceph.com/issues/18944
+    DATA_UUID=$(get_part_uuid "${OSD_DEVICE}"1)
+    umount /var/lib/ceph/osd-lockbox/"${DATA_UUID}" || true
+  fi
 }

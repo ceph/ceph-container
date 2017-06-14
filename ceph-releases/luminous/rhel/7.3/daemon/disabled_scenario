@@ -5,3 +5,7 @@
 # in the entrypoint.sh.in file.
 
 EXCLUDED_TAGS="populate_kvstore kv_type_etcd kv_type_k8s nfs restapi rgw_user osd_directory_single osd_directory osd_ceph_activate_journal mon_health"
+
+# In RHCS 3.0, Bluestore is Tech Preview
+OSD_FILESTORE=1
+OSD_BLUESTORE=0

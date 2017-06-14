@@ -261,14 +261,11 @@ function get_part_typecode {
 }
 
 function apply_ceph_ownership_to_disks {
-  if [[ -n "${OSD_JOURNAL}" ]]; then
-    wait_for_file "${OSD_JOURNAL}"
-    chown --verbose ceph. "${OSD_JOURNAL}"
-  elif [[ ${OSD_DMCRYPT} -eq 1 ]]; then
-    # apply permission on the lockbox partition
+  if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
     wait_for_file "$(dev_part "${OSD_DEVICE}" 5)"
     chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 5)"
-  elif [[ ${OSD_BLUESTORE} -eq 1 ]]; then
+  fi
+  if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
     dev_real_path=$(resolve_symlink "$OSD_BLUESTORE_BLOCK_WAL" "$OSD_BLUESTORE_BLOCK_DB")
     for partition in $(list_dev_partitions "$OSD_DEVICE" "$dev_real_path"); do
       part_code=$(get_part_typecode "$partition")
@@ -281,9 +278,14 @@ function apply_ceph_ownership_to_disks {
         chown --verbose ceph. "$partition"
       fi
     done
-  else
-    wait_for_file "$(dev_part "${OSD_DEVICE}" 2)"
-    chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 2)"
+  elif [[ ${OSD_FILESTORE} -eq 1 ]]; then
+    if [[ -n "${OSD_JOURNAL}" ]]; then
+      wait_for_file "${OSD_JOURNAL}"
+      chown --verbose ceph. "${OSD_JOURNAL}"
+    else
+      wait_for_file "$(dev_part "${OSD_DEVICE}" 2)"
+      chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 2)"
+    fi
   fi
   wait_for_file "$(dev_part "${OSD_DEVICE}" 1)"
   chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 1)"
@@ -367,5 +369,15 @@ function calculate_osd_weight {
     OSD_WEIGHT=$(awk "BEGIN { d= $(blockdev --getsize64 "${OSD_PATH}"block)/1099511627776 ; r = sprintf(\"%.2f\", d); print r }")
   else
     OSD_WEIGHT=$(df -P -k "$OSD_PATH" | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
+  fi
+}
+
+function umount_lockbox {
+  if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+    log "Unmounting LOCKBOX directory"
+    # NOTE(leseb): adding || true so when this bug will be fixed the entrypoint will not fail
+    # Ceph bug tracker: http://tracker.ceph.com/issues/18944
+    DATA_UUID=$(get_part_uuid "${OSD_DEVICE}"1)
+    umount /var/lib/ceph/osd-lockbox/"${DATA_UUID}" || true
   fi
 }
