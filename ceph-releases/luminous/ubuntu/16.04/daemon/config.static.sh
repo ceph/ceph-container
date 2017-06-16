@@ -16,7 +16,34 @@ function get_mon_config {
 
   if [ ! -e /etc/ceph/${CLUSTER}.conf ]; then
     local fsid=$(uuidgen)
-    cat <<ENDHERE >/etc/ceph/${CLUSTER}.conf
+    if [[ "$CEPH_DAEMON" == demo ]]; then
+      fsid=$(uuidgen)
+      cat <<ENDHERE >/etc/ceph/${CLUSTER}.conf
+[global]
+fsid = $fsid
+mon initial members = ${MON_NAME}
+mon host = ${MON_IP}
+auth cluster required = cephx
+auth service required = cephx
+auth client required = cephx
+osd crush chooseleaf type = 0
+osd journal size = 100
+osd pool default pg num = 8
+osd pool default pgp num = 8
+osd pool default size = 1
+public network = ${CEPH_PUBLIC_NETWORK}
+cluster network = ${CEPH_PUBLIC_NETWORK}
+ENDHERE
+
+      # For ext4
+      if [ "$(findmnt -n -o FSTYPE -T /var/lib/ceph)" = "ext4" ]; then
+      cat <<ENDHERE >> /etc/ceph/${CLUSTER}.conf
+osd max object name len = 256
+osd max object namespace len = 64
+ENDHERE
+      fi
+    else
+      cat <<ENDHERE >/etc/ceph/${CLUSTER}.conf
 [global]
 fsid = $fsid
 mon initial members = ${MON_NAME}
@@ -28,12 +55,13 @@ public network = ${CEPH_PUBLIC_NETWORK}
 cluster network = ${CEPH_CLUSTER_NETWORK}
 osd journal size = ${OSD_JOURNAL_SIZE}
 ENDHERE
+    fi
     if [ $IP_LEVEL -eq 6 ]; then
       echo "ms bind ipv6 = true" >> /etc/ceph/${CLUSTER}.conf
     fi
   else
     # extract fsid from ceph.conf
-    fsid=`grep "fsid" /etc/ceph/${CLUSTER}.conf |awk '{print $NF}'`
+    fsid=$(grep "fsid" /etc/ceph/${CLUSTER}.conf | awk '{print $NF}')
   fi
 
   if [ ! -e $ADMIN_KEYRING ]; then
@@ -61,8 +89,8 @@ ENDHERE
     ceph-authtool $RGW_BOOTSTRAP_KEYRING --create-keyring --gen-key -n client.bootstrap-rgw --cap mon 'allow profile bootstrap-rgw'
   fi
 
-    # Apply proper permissions to the keys
-    chown --verbose ceph. $MON_KEYRING $OSD_BOOTSTRAP_KEYRING $MDS_BOOTSTRAP_KEYRING $RGW_BOOTSTRAP_KEYRING
+  # Apply proper permissions to the keys
+  chown --verbose ceph. $MON_KEYRING $OSD_BOOTSTRAP_KEYRING $MDS_BOOTSTRAP_KEYRING $RGW_BOOTSTRAP_KEYRING
 
   if [ ! -e $MONMAP ]; then
     if [ -e /etc/ceph/monmap ]; then
@@ -74,7 +102,6 @@ ENDHERE
     fi
     chown --verbose ceph. $MONMAP
   fi
-
 }
 
 function get_config {

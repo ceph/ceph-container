@@ -307,3 +307,20 @@ function is_pid_ns {
   [[ $(ps --no-header x | wc -l) -gt 3 ]]
 }
 
+# This function is only used when CEPH_DAEMON=demo
+# For a 'demo' container, we must ensure there is no Ceph files
+function detect_ceph_files {
+  if [ -f /etc/ceph/I_AM_A_DEMO ] || [ -f /var/lib/ceph/I_AM_A_DEMO ]; then
+    log "Found residual files of a demo container."
+    log "This looks like a restart, processing."
+    return 0
+  fi
+  if [ -d /var/lib/ceph ] || [ -d /etc/ceph ]; then
+    if [[ "$(find /var/lib/ceph/ -mindepth 3 -maxdepth 3 -type f | wc -l)" != 0 ]] || [[ -z "$(find /etc/ceph -prune -empty)" ]]; then
+      log "I can see existing Ceph files, please remove them!"
+      log "To run the demo container, remove the content of /var/lib/ceph/ and /etc/ceph/"
+      log "Before doing this, make sure you are removing any sensitive data."
+      exit 1
+    fi
+  fi
+}
