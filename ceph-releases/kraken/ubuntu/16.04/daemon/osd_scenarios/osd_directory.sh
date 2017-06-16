@@ -60,7 +60,8 @@ function osd_directory {
         log "ERROR- $OSD_BOOTSTRAP_KEYRING must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-osd -o $OSD_BOOTSTRAP_KEYRING '"
         exit 1
       fi
-      timeout 10 ceph ${CLI_OPTS} --name client.bootstrap-osd --keyring $OSD_BOOTSTRAP_KEYRING health || exit 1
+      ceph_health client.bootstrap-osd $OSD_BOOTSTRAP_KEYRING
+
       # add the osd key
       ceph ${CLI_OPTS} --name client.bootstrap-osd --keyring $OSD_BOOTSTRAP_KEYRING auth add osd.${OSD_ID} -i ${OSD_KEYRING} osd 'allow *' mon 'allow profile osd'  || log $1
       log "done adding key"

@@ -282,3 +282,15 @@ function apply_ceph_ownership_to_disks {
 function get_part_uuid {
   blkid -o value -s PARTUUID ${1}
 }
+
+function ceph_health {
+  local bootstrap_user=$1
+  local bootstrap_key=$2
+
+  if ! timeout 10 ceph ${CLI_OPTS} --name $bootstrap_user --keyring $bootstrap_key health; then
+    log "Timed out while trying to reach out to the Ceph Monitor(s)."
+    log "Make sure your Ceph monitors are up and running in quorum."
+    log "Also verify the validity of client.bootstrap-osd keyring."
+    exit 1
+  fi
+}

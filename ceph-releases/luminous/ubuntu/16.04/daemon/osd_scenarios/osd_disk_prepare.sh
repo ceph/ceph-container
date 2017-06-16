@@ -16,7 +16,8 @@ function osd_disk_prepare {
     log "ERROR- $OSD_BOOTSTRAP_KEYRING must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-osd -o $OSD_BOOTSTRAP_KEYRING'"
     exit 1
   fi
-  timeout 10 ceph ${CLI_OPTS} --name client.bootstrap-osd --keyring $OSD_BOOTSTRAP_KEYRING health || exit 1
+
+  ceph_health client.bootstrap-osd $OSD_BOOTSTRAP_KEYRING
 
   # check device status first
   if ! parted --script ${OSD_DEVICE} print > /dev/null 2>&1; then

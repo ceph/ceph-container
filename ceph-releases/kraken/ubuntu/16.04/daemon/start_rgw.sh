@@ -18,7 +18,7 @@ function start_rgw {
       exit 1
     fi
 
-    timeout 10 ceph ${CLI_OPTS} --name client.bootstrap-rgw --keyring $RGW_BOOTSTRAP_KEYRING health || exit 1
+    ceph_health client.bootstrap-rgw $RGW_BOOTSTRAP_KEYRING
 
     # Generate the RGW key
     ceph ${CLI_OPTS} --name client.bootstrap-rgw --keyring $RGW_BOOTSTRAP_KEYRING auth get-or-create client.rgw.${RGW_NAME} osd 'allow rwx' mon 'allow rw' -o $RGW_KEYRING
