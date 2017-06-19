@@ -294,3 +294,16 @@ function ceph_health {
     exit 1
   fi
 }
+
+function is_net_ns {
+  # if we run a container with --net=host we will see all the connections
+  # if we don't, we should see the file header
+  [[ $(wc -l < /proc/net/tcp) == 1 ]]
+}
+
+function is_pid_ns {
+  # if we run a container with --pid=host we will see all the processes
+  # if we don't, we should see 3 (pid 1 and ps and the new line)
+  [[ $(ps --no-header x | wc -l) -gt 3 ]]
+}
+
