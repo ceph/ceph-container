@@ -290,7 +290,7 @@ function ceph_health {
   if ! timeout 10 ceph ${CLI_OPTS} --name $bootstrap_user --keyring $bootstrap_key health; then
     log "Timed out while trying to reach out to the Ceph Monitor(s)."
     log "Make sure your Ceph monitors are up and running in quorum."
-    log "Also verify the validity of client.bootstrap-osd keyring."
+    log "Also verify the validity of $bootstrap_user keyring."
     exit 1
   fi
 }
