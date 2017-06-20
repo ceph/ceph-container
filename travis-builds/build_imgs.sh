@@ -24,22 +24,21 @@ function copy_dirs {
     mkdir -p {base,daemon,demo}
     cp -Lrv $dir_to_test/base/* base || true
     cp -Lrv $dir_to_test/daemon/* daemon
-    cp -Lrv $dir_to_test/demo/* demo
+    cp -Lrv $dir_to_test/demo/* demo || true # on Luminous demo has merged with daemon
   else
     echo "looks like your commit did not bring any changes"
-    echo "building Kraken on Ubuntu 16.04"
+    echo "building Luminous on Ubuntu 16.04"
     mkdir -p {daemon,demo}
-    cp -Lrv ceph-releases/kraken/ubuntu/16.04/daemon/* daemon
-    cp -Lrv ceph-releases/kraken/ubuntu/16.04/demo/* demo
+    cp -Lrv ceph-releases/luminous/ubuntu/16.04/daemon/* daemon
   fi
 }
 
 function build_base_img {
-if [[ -d base && ! -n "$(find base -prune -empty)" ]]; then
+if [[ -d base ]] && [[ "$(find base -type f | wc -l)" -gt 1 ]]; then
     pushd base
     docker build -t base .
-    rm -rf base
     popd
+    rm -rf base
   fi
 }
 
@@ -49,18 +48,19 @@ function build_daemon_img {
     sed -i 's|FROM .*|FROM base|g' Dockerfile
   fi
   docker build -t ceph/daemon .
-  rm -rf daemon
   popd
+  rm -rf daemon
 }
 
 function build_demo_img {
-  pushd demo
-  if grep "FROM ceph/base" Dockerfile; then
-    sed -i 's|FROM .*|FROM base|g' Dockerfile
-  fi
-  docker build -t ceph/demo .
-  rm -rf demo
+  if [[ -d demo ]] && [[ "$(find demo -type f | wc -l)" -gt 1 ]]; then
+    pushd demo
+    if grep "FROM ceph/base" Dockerfile; then
+      sed -i 's|FROM .*|FROM base|g' Dockerfile
+    fi
   popd
+  rm -rf demo
+  fi
 }
 
 # MAIN
