@@ -286,6 +286,7 @@ function apply_ceph_ownership_to_disks {
     wait_for_file "$(dev_part "${OSD_DEVICE}" 2)"
     chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 2)"
   fi
+  wait_for_file "$(dev_part "${OSD_DEVICE}" 1)"
   chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 1)"
 }
 
