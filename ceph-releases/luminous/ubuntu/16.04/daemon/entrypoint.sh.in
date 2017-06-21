@@ -125,6 +125,9 @@ case "$CEPH_DAEMON" in
       log "Make sure KV_TYPE equals either k8s or kubernetes"
     fi
     ;;
+  demo)
+    source demo.sh
+    ;;
   *)
     invalid_ceph_daemon
   ;;

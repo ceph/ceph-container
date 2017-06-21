@@ -290,7 +290,37 @@ function ceph_health {
   if ! timeout 10 ceph ${CLI_OPTS} --name $bootstrap_user --keyring $bootstrap_key health; then
     log "Timed out while trying to reach out to the Ceph Monitor(s)."
     log "Make sure your Ceph monitors are up and running in quorum."
-    log "Also verify the validity of client.bootstrap-osd keyring."
+    log "Also verify the validity of $bootstrap_user keyring."
     exit 1
+  fi
+}
+
+function is_net_ns {
+  # if we run a container with --net=host we will see all the connections
+  # if we don't, we should see the file header
+  [[ $(wc -l < /proc/net/tcp) == 1 ]]
+}
+
+function is_pid_ns {
+  # if we run a container with --pid=host we will see all the processes
+  # if we don't, we should see 3 (pid 1 and ps and the new line)
+  [[ $(ps --no-header x | wc -l) -gt 3 ]]
+}
+
+# This function is only used when CEPH_DAEMON=demo
+# For a 'demo' container, we must ensure there is no Ceph files
+function detect_ceph_files {
+  if [ -f /etc/ceph/I_AM_A_DEMO ] || [ -f /var/lib/ceph/I_AM_A_DEMO ]; then
+    log "Found residual files of a demo container."
+    log "This looks like a restart, processing."
+    return 0
+  fi
+  if [ -d /var/lib/ceph ] || [ -d /etc/ceph ]; then
+    if [[ "$(find /var/lib/ceph/ -mindepth 3 -maxdepth 3 -type f | wc -l)" != 0 ]] || [[ -z "$(find /etc/ceph -prune -empty)" ]]; then
+      log "I can see existing Ceph files, please remove them!"
+      log "To run the demo container, remove the content of /var/lib/ceph/ and /etc/ceph/"
+      log "Before doing this, make sure you are removing any sensitive data."
+      exit 1
+    fi
   fi
 }

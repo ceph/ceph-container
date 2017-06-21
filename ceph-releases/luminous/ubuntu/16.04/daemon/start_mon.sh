@@ -141,8 +141,11 @@ function start_mon {
     timeout 7 ceph ${CLI_OPTS} mon add "${MON_NAME}" "${MON_IP}:6789" || true
   fi
 
-  log "SUCCESS"
-
   # start MON
-  exec /usr/bin/ceph-mon $DAEMON_OPTS -i ${MON_NAME} --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}:6789"
+  if [[ "$CEPH_DAEMON" == demo ]]; then
+    /usr/bin/ceph-mon $DAEMON_OPTS -i ${MON_NAME} --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}:6789"
+  else
+    log "SUCCESS"
+    exec /usr/bin/ceph-mon $DAEMON_OPTS -i ${MON_NAME} --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}:6789"
+  fi
 }
