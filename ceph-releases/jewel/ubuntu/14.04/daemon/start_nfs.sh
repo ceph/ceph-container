@@ -17,5 +17,5 @@ function start_nfs {
 
   log "SUCCESS"
   # start ganesha
-  exec /usr/bin/ganesha.nfsd -F ${GANESHA_OPTIONS} ${GANESHA_EPOCH}
+  exec /usr/bin/ganesha.nfsd -F "${GANESHA_OPTIONS[@]}" "${GANESHA_EPOCH}"
 }

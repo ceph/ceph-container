@@ -11,5 +11,5 @@ function start_rbd_mirror {
 
   log "SUCCESS"
   # start rbd-mirror
-  exec /usr/bin/rbd-mirror $DAEMON_OPTS
+  exec /usr/bin/rbd-mirror "${DAEMON_OPTS[@]}"
 }

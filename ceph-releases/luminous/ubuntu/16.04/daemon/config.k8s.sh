@@ -8,28 +8,29 @@ function get_admin_key {
 
 function get_mon_config {
   # Get fsid from ceph.conf
-  local fsid=$(ceph-conf --lookup fsid -c /etc/ceph/${CLUSTER}.conf)
+  local fsid
+  fsid=$(ceph-conf --lookup fsid -c /etc/ceph/"${CLUSTER}".conf)
 
-  timeout=10
-  MONMAP_ADD=""
+  local timeout=10
+  local monmap_add=""
 
-  while [[ -z "${MONMAP_ADD// }" && "${timeout}" -gt 0 ]]; do
+  while [[ -z "${monmap_add// }" && "${timeout}" -gt 0 ]]; do
     # Get the ceph mon pods (name and IP) from the Kubernetes API. Formatted as a set of monmap params
     if [[ ${K8S_HOST_NETWORK} -eq 0 ]]; then
-        MONMAP_ADD=$(kubectl get pods --namespace=${CLUSTER} -l daemon=mon -o template --template="{{range .items}}{{if .status.podIP}}--add {{.metadata.name}} {{.status.podIP}}:6789 {{end}} {{end}}")
+      monmap_add=$(kubectl get pods --namespace="${CLUSTER}" -l daemon=mon -o template --template="{{range .items}}{{if .status.podIP}}--add {{.metadata.name}} {{.status.podIP}}:6789 {{end}} {{end}}")
     else
-        MONMAP_ADD=$(kubectl get pods --namespace=${CLUSTER} -l daemon=mon -o template --template="{{range .items}}{{if .status.podIP}}--add {{.spec.nodeName}} {{.status.podIP}}:6789 {{end}} {{end}}")
+      monmap_add=$(kubectl get pods --namespace="${CLUSTER}" -l daemon=mon -o template --template="{{range .items}}{{if .status.podIP}}--add {{.spec.nodeName}} {{.status.podIP}}:6789 {{end}} {{end}}")
     fi
     (( timeout-- ))
     sleep 1
   done
 
-  if [[ -z "${MONMAP_ADD// }" ]]; then
-      exit 1
+  if [[ -z "${monmap_add// }" ]]; then
+    exit 1
   fi
 
   # Create a monmap with the Pod Names and IP
-  monmaptool --create ${MONMAP_ADD} --fsid ${fsid} $MONMAP
+  monmaptool --create "${monmap_add}" --fsid "${fsid}" "$MONMAP"
 
 }
 

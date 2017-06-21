@@ -3,11 +3,11 @@ set -e
 
 function kv {
   # Note the 'cas' command puts a value in the KV store if it is empty
-  KEY="$1"
+  local key="$1"
   shift
-  VALUE="$*"
-  log "Adding key ${KEY} with value ${VALUE} to KV store."
-  etcdctl $ETCDCTL_OPTS ${KV_TLS} set ${CLUSTER_PATH}"${KEY}" "${VALUE}" || log "Value is already set"
+  local value="$*"
+  log "Adding key ${key} with value ${value} to KV store."
+  etcdctl "${ETCDCTL_OPTS[@]}" "${KV_TLS[@]}" set "${CLUSTER_PATH}""${key}" "${value}" || log "Value is already set"
 }
 
 function populate_kv {
@@ -19,14 +19,14 @@ function populate_kv {
     etcd)
       # if ceph.defaults found in /etc/ceph/ use that
       if [[ -e "/etc/ceph/ceph.defaults" ]]; then
-        DEFAULTS_PATH="/etc/ceph/ceph.defaults"
+        local defaults_path="/etc/ceph/ceph.defaults"
       else
         # else use defaults
-        DEFAULTS_PATH="/ceph.defaults"
+        defaults_path="/ceph.defaults"
       fi
       # read defaults file, grab line with key<space>value without comment #
-      grep '^.* .*' "$DEFAULTS_PATH" | grep -v '#' | while read line; do
-        kv `echo $line`
+      grep '^.* .*' "$defaults_path" | grep -v '#' | while read -r line; do
+      kv "$line"
       done
       ;;
     *)

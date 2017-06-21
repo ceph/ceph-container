@@ -10,8 +10,8 @@ function start_restapi {
   check_admin_key
 
   # Check to see if we need to add a [client.restapi] section; add, if necessary
-  if [[ ! "$(egrep "\[client.restapi\]" /etc/ceph/${CLUSTER}.conf)" ]]; then
-    cat <<ENDHERE >>/etc/ceph/${CLUSTER}.conf
+  if ! grep -qE "\[client.restapi\]" /etc/ceph/"${CLUSTER}".conf; then
+    cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
 
 [client.restapi]
   public addr = ${RESTAPI_IP}:${RESTAPI_PORT}
@@ -24,5 +24,5 @@ ENDHERE
   log "SUCCESS"
 
   # start ceph-rest-api
-  exec /usr/bin/ceph-rest-api ${CLI_OPTS} -n client.admin
+  exec /usr/bin/ceph-rest-api "${CLI_OPTS[@]}" -n client.admin
 }

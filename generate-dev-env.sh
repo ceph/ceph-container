@@ -17,9 +17,9 @@ function echo_info {
 
 function goto_basedir {
   echo_info "JUMPING INTO THE BASE DIRECTORY OF THE SCRIPT"
-  TOP_LEVEL=$(cd $BASEDIR && git rev-parse --show-toplevel)
+  TOP_LEVEL=$(cd "$BASEDIR" && git rev-parse --show-toplevel)
   if [[ "$(pwd)" != "$TOP_LEVEL" ]]; then
-    pushd $TOP_LEVEL
+    pushd "$TOP_LEVEL"
   fi
 }
 
@@ -32,21 +32,21 @@ function test_args {
 
 function copy_files {
   dir=ceph-releases/$1/$2/$3/
-  rm -rf $BASEDIR/{base,daemon,demo}
-  for file in $(find -L $dir* -type f ); do
-    file_dir=$(dirname $file |sed -e "s|$dir||g")
-    orig_file=$(readlink -f $file)
+  rm -rf "$BASEDIR"/{base,daemon,demo}
+  for file in $(find -L "$dir"* -type f ); do
+    file_dir=$(dirname "$file" |sed -e "s|$dir||g")
+    orig_file=$(readlink -f "$file")
     echo "linking $orig_file in $file_dir/"
-    mkdir -p $file_dir
-    ln $orig_file $file_dir/
+    mkdir -p "$file_dir"
+    ln "$orig_file" "$file_dir"/
   done
-  echo ${dir} | tee base/SOURCE_TREE &> /dev/null || true
-  echo ${dir} > daemon/SOURCE_TREE
-  echo ${dir} > demo/SOURCE_TREE
+  echo "${dir}" | tee base/SOURCE_TREE &> /dev/null || true
+  echo "${dir}" > daemon/SOURCE_TREE
+  echo "${dir}" > demo/SOURCE_TREE
 }
 
 function test_combination {
-  stat ceph-releases/$1/$2/$3/ &> /dev/null || wrong_combination
+  stat ceph-releases/"$1"/"$2"/"$3"/ &> /dev/null || wrong_combination
 }
 
 function wrong_combination {
@@ -60,14 +60,14 @@ function wrong_combination {
 # MAIN
 
 goto_basedir
-test_args $@
+test_args "$@"
 
 case "$1" in
   hammer|infernalis|jewel|kraken|luminous)
     case "$2" in
       centos|ubuntu|fedora|opensuse|rhel)
-          test_combination $@
-          copy_files $@
+          test_combination "$@"
+          copy_files "$@"
         ;;
       *)
         wrong_combination
