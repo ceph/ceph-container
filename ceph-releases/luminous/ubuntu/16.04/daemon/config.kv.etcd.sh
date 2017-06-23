@@ -60,7 +60,7 @@ function get_mon_config {
     ceph-authtool "$MON_KEYRING" --create-keyring --gen-key -n mon. --cap mon 'allow *'
 
     for item in ${OSD_BOOTSTRAP_KEYRING}:Osd ${MDS_BOOTSTRAP_KEYRING}:Mds ${RGW_BOOTSTRAP_KEYRING}:Rgw; do
-      local array=($"{item//:/ }")
+      local array=("${item//:/ }")
       local keyring=${array[0]}
       local bootstrap="bootstrap-${array[1]}"
       ceph-authtool "$keyring" --create-keyring --gen-key -n client."$(to_lowercase "$bootstrap")" --cap mon "allow profile $(to_lowercase "$bootstrap")"
