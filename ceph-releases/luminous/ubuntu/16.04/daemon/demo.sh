@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-DAEMON_OPTS="--cluster ${CLUSTER} --setuser ceph --setgroup ceph"
+DAEMON_OPTS=(--cluster ${CLUSTER} --setuser ceph --setgroup ceph)
 OSD_PATH="/var/lib/ceph/osd/${CLUSTER}-0"
 MDS_PATH="/var/lib/ceph/mds/${CLUSTER}-0"
 RGW_PATH="/var/lib/ceph/radosgw/$RGW_NAME"
