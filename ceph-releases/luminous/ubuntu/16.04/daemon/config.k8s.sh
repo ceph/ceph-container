@@ -24,13 +24,14 @@ function get_mon_config {
     (( timeout-- ))
     sleep 1
   done
+  monmap_add_array=("${monmap_add}")
 
   if [[ -z "${monmap_add// }" ]]; then
     exit 1
   fi
 
   # Create a monmap with the Pod Names and IP
-  monmaptool --create "${monmap_add}" --fsid "${fsid}" "$MONMAP"
+  monmaptool --create "${monmap_add_array[@]}" --fsid "${fsid}" "$MONMAP"
 
 }
 
