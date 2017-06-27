@@ -7,6 +7,7 @@ MDS_PATH="/var/lib/ceph/mds/${CLUSTER}-0"
 RGW_PATH="/var/lib/ceph/radosgw/$RGW_NAME"
 MGR_PATH="/var/lib/ceph/mgr/${CLUSTER}-$MGR_NAME"
 RESTAPI_IP=$MON_IP
+MGR_IP=$MON_IP
 
 
 #######
@@ -152,6 +153,7 @@ public addr = ${RESTAPI_IP}:${RESTAPI_PORT}
 restapi base url = ${RESTAPI_BASE_URL}
 restapi log level = ${RESTAPI_LOG_LEVEL}
 log file = ${RESTAPI_LOG_FILE}
+
 ENDHERE
   fi
 
@@ -176,6 +178,15 @@ function bootstrap_mgr {
   mkdir -p "$MGR_PATH"
   ceph "${CLI_OPTS[@]}" auth get-or-create mgr."$MGR_NAME" mon 'allow *' -o "$MGR_PATH"/keyring
   chown --verbose -R ceph. "$MGR_PATH"
+
+  if ! grep -E "\[mgr\]" /etc/ceph/"${CLUSTER}".conf; then
+    cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
+[mgr]
+mgr_modules = dashboard
+ENDHERE
+  fi
+
+  ceph "${CLI_OPTS[@]}" config-key put mgr/dashboard/server_addr "$MGR_IP"
 
   # start ceph-mgr
   ceph-mgr "${DAEMON_OPTS[@]}" -i "$MGR_NAME"
