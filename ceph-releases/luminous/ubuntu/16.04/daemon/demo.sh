@@ -27,22 +27,6 @@ function bootstrap_mon {
 # OSD #
 #######
 function bootstrap_osd {
-  # NOTE (leseb): remove this once Luminous is out!
-  if ! grep -E "\[osd\]" /etc/ceph/"${CLUSTER}".conf; then
-    cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
-
-[osd]
-enable experimental unrecoverable data corrupting features = bluestore,rocksdb
-bluestore fsck on mount = true
-bluestore block create = true
-bluestore block db size = 67108864
-bluestore block db create = true
-bluestore block wal size = 1048576000
-bluestore block wal create = true
-
-ENDHERE
-  fi
-
   if [ ! -e "$OSD_PATH"/keyring ]; then
     # bootstrap OSD
     mkdir -p "$OSD_PATH"
@@ -90,6 +74,7 @@ function bootstrap_rgw {
 
     #configure rgw dns name
     cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
+
 [client.radosgw.gateway]
 rgw dns name = ${RGW_NAME}
 
