@@ -30,8 +30,7 @@ ADD s3cfg /root/.s3cfg
 ADD *.sh ceph.defaults check_zombie_mons.py ./osd_scenarios/* entrypoint.sh.in disabled_scenario /
 
 # Modify the entrypoint
-RUN chmod +x /generate_entrypoint.sh && \
-  bash -c "/generate_entrypoint.sh" && \
+RUN bash "/generate_entrypoint.sh" && \
   rm -f /generate_entrypoint.sh && \
   bash -n /*.sh
 
