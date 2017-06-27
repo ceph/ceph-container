@@ -1,12 +1,13 @@
 #!/bin/bash
 set -e
 
-DAEMON_OPTS=(--cluster ${CLUSTER} --setuser ceph --setgroup ceph)
+unset "DAEMON_OPTS[${#DAEMON_OPTS[@]}-1]" # remove the last element of the array
 OSD_PATH="/var/lib/ceph/osd/${CLUSTER}-0"
 MDS_PATH="/var/lib/ceph/mds/${CLUSTER}-0"
 RGW_PATH="/var/lib/ceph/radosgw/$RGW_NAME"
 MGR_PATH="/var/lib/ceph/mgr/${CLUSTER}-$MGR_NAME"
 RESTAPI_IP=$MON_IP
+MGR_IP=$MON_IP
 
 
 #######
@@ -17,7 +18,7 @@ function bootstrap_mon {
   start_mon
 
   # change replica size
-  ceph ${CLI_OPTS} osd pool set rbd size 1 || true # in Luminous this pool won't exist anymore and this patch runs on Luminous rc
+  ceph "${CLI_OPTS[@]}" osd pool set rbd size 1 || true # in Luminous this pool won't exist anymore and this patch runs on Luminous rc
   chown --verbose ceph. /etc/ceph/*
 }
 
@@ -26,22 +27,6 @@ function bootstrap_mon {
 # OSD #
 #######
 function bootstrap_osd {
-  # NOTE (leseb): remove this once Luminous is out!
-  if ! grep -E "\[osd\]" /etc/ceph/"${CLUSTER}".conf; then
-    cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
-
-[osd]
-enable experimental unrecoverable data corrupting features = bluestore,rocksdb
-bluestore fsck on mount = true
-bluestore block create = true
-bluestore block db size = 67108864
-bluestore block db create = true
-bluestore block wal size = 1048576000
-bluestore block wal create = true
-
-ENDHERE
-  fi
-
   if [ ! -e "$OSD_PATH"/keyring ]; then
     # bootstrap OSD
     mkdir -p "$OSD_PATH"
@@ -52,7 +37,7 @@ ENDHERE
 
   # start OSD
   chown --verbose -R ceph. "$OSD_PATH"
-  ceph-osd ${DAEMON_OPTS} -i 0
+  ceph-osd "${DAEMON_OPTS[@]}" -i 0
 }
 
 
@@ -62,18 +47,18 @@ ENDHERE
 function bootstrap_mds {
   if [ ! -e "$MDS_PATH"/keyring ]; then
     # create ceph filesystem
-    ceph ${CLI_OPTS} osd pool create cephfs_data 8
-    ceph ${CLI_OPTS} osd pool create cephfs_metadata 8
-    ceph ${CLI_OPTS} fs new cephfs cephfs_metadata cephfs_data
+    ceph "${CLI_OPTS[@]}" osd pool create cephfs_data 8
+    ceph "${CLI_OPTS[@]}" osd pool create cephfs_metadata 8
+    ceph "${CLI_OPTS[@]}" fs new cephfs cephfs_metadata cephfs_data
 
     # bootstrap MDS
     mkdir -p "$MDS_PATH"
-    ceph ${CLI_OPTS} auth get-or-create mds.0 mds 'allow' osd 'allow *' mon 'allow profile mds' -o "$MDS_PATH"/keyring
+    ceph "${CLI_OPTS[@]}" auth get-or-create mds.0 mds 'allow' osd 'allow *' mon 'allow profile mds' -o "$MDS_PATH"/keyring
     chown --verbose -R ceph. "$MDS_PATH"
   fi
 
   # start MDS
-  ceph-mds ${DAEMON_OPTS} -i 0
+  ceph-mds "${DAEMON_OPTS[@]}" -i 0
 }
 
 
@@ -84,11 +69,12 @@ function bootstrap_rgw {
   if [ ! -e "$RGW_PATH"/keyring ]; then
     # bootstrap RGW
     mkdir -p "$RGW_PATH"
-    ceph ${CLI_OPTS} auth get-or-create client.radosgw.gateway osd 'allow rwx' mon 'allow rw' -o "$RGW_KEYRING"
+    ceph "${CLI_OPTS[@]}" auth get-or-create client.radosgw.gateway osd 'allow rwx' mon 'allow rw' -o "$RGW_KEYRING"
     chown --verbose -R ceph. "$RGW_PATH"
 
     #configure rgw dns name
     cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
+
 [client.radosgw.gateway]
 rgw dns name = ${RGW_NAME}
 
@@ -96,7 +82,7 @@ ENDHERE
   fi
 
   # start RGW
-  radosgw ${DAEMON_OPTS} -n client.radosgw.gateway -k "$RGW_PATH"/keyring --rgw-socket-path="" --rgw-frontends="civetweb port=${RGW_CIVETWEB_PORT}"
+  radosgw "${DAEMON_OPTS[@]}" -n client.radosgw.gateway -k "$RGW_PATH"/keyring --rgw-socket-path="" --rgw-frontends="civetweb port=${RGW_CIVETWEB_PORT}"
 }
 
 function bootstrap_demo_user {
@@ -106,7 +92,7 @@ function bootstrap_demo_user {
       cat /ceph-demo-user
     else
       log "Setting up a demo user..."
-      radosgw-admin ${CLI_OPTS} user create --uid="$CEPH_DEMO_UID" --display-name="Ceph demo user" --access-key="$CEPH_DEMO_ACCESS_KEY" --secret-key="$CEPH_DEMO_SECRET_KEY"
+      radosgw-admin "${CLI_OPTS[@]}" user create --uid="$CEPH_DEMO_UID" --display-name="Ceph demo user" --access-key="$CEPH_DEMO_ACCESS_KEY" --secret-key="$CEPH_DEMO_SECRET_KEY"
       sed -i s/AWS_ACCESS_KEY_PLACEHOLDER/"$CEPH_DEMO_ACCESS_KEY"/ /root/.s3cfg
       sed -i s/AWS_SECRET_KEY_PLACEHOLDER/"$CEPH_DEMO_SECRET_KEY"/ /root/.s3cfg
       echo "Access key: $CEPH_DEMO_ACCESS_KEY" > /ceph-demo-user
@@ -137,7 +123,7 @@ function bootstrap_nfs {
   rpc.idmapd || return 0
 
   # start ganesha
-  ganesha.nfsd -F ${GANESHA_OPTIONS} "${GANESHA_EPOCH}"
+  ganesha.nfsd -F "${GANESHA_OPTIONS[@]}" "${GANESHA_EPOCH}"
 }
 
 
@@ -152,11 +138,12 @@ public addr = ${RESTAPI_IP}:${RESTAPI_PORT}
 restapi base url = ${RESTAPI_BASE_URL}
 restapi log level = ${RESTAPI_LOG_LEVEL}
 log file = ${RESTAPI_LOG_FILE}
+
 ENDHERE
   fi
 
   # start ceph-rest-api
-  ceph-rest-api ${CLI_OPTS} -c /etc/ceph/"${CLUSTER}".conf -n client.admin &
+  ceph-rest-api "${CLI_OPTS[@]}" -c /etc/ceph/"${CLUSTER}".conf -n client.admin &
 }
 
 
@@ -165,7 +152,7 @@ ENDHERE
 ##############
 function bootstrap_rbd_mirror {
   # start rbd-mirror
-  rbd-mirror ${DAEMON_OPTS}
+  rbd-mirror "${DAEMON_OPTS[@]}"
 }
 
 
@@ -174,11 +161,20 @@ function bootstrap_rbd_mirror {
 #######
 function bootstrap_mgr {
   mkdir -p "$MGR_PATH"
-  ceph ${CLI_OPTS} auth get-or-create mgr."$MGR_NAME" mon 'allow *' -o "$MGR_PATH"/keyring
+  ceph "${CLI_OPTS[@]}" auth get-or-create mgr."$MGR_NAME" mon 'allow *' -o "$MGR_PATH"/keyring
   chown --verbose -R ceph. "$MGR_PATH"
 
+  if ! grep -E "\[mgr\]" /etc/ceph/"${CLUSTER}".conf; then
+    cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
+[mgr]
+mgr_modules = dashboard
+ENDHERE
+  fi
+
+  ceph "${CLI_OPTS[@]}" config-key put mgr/dashboard/server_addr "$MGR_IP"
+
   # start ceph-mgr
-  ceph-mgr ${DAEMON_OPTS} -i "$MGR_NAME"
+  ceph-mgr "${DAEMON_OPTS[@]}" -i "$MGR_NAME"
 }
 
 
@@ -204,4 +200,4 @@ bootstrap_mgr
 touch /var/lib/ceph/I_AM_A_DEMO /etc/ceph/I_AM_A_DEMO
 
 log "SUCCESS"
-exec ceph ${CLI_OPTS} -w
+exec ceph "${CLI_OPTS[@]}" -w
