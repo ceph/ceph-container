@@ -59,6 +59,8 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 : "${GANESHA_OPTIONS:=""}"
 : "${GANESHA_EPOCH:=""}" # For restarting
 : "${MGR_NAME:=${HOSTNAME}}"
+: "${MGR_DASHBOARD:=1}"
+: "${MGR_IP:=0.0.0.0}"
 
 # Create a default array
 CRUSH_LOCATION_DEFAULT=("root=default" "host=${HOSTNAME}")
