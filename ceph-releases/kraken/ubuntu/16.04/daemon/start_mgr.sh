@@ -18,5 +18,5 @@ function start_mgr {
 
   log "SUCCESS"
   # start ceph-mgr
-  exec /usr/bin/ceph-mgr "$DAEMON_OPTS" -i "$MGR_NAME"
+  exec /usr/bin/ceph-mgr "${DAEMON_OPTS[@]}" -i "$MGR_NAME"
 }
