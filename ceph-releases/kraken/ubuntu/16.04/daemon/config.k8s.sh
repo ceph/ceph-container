@@ -24,9 +24,10 @@ function get_mon_config {
     (( timeout-- ))
     sleep 1
   done
-  monmap_add_array=("${monmap_add}")
+  IFS=" " read -r -a monmap_add_array <<< "${monmap_add}"
 
   if [[ -z "${monmap_add// }" ]]; then
+    log "No Ceph Monitor pods discovered. Abort mission!"
     exit 1
   fi
 
