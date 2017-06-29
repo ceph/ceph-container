@@ -129,7 +129,7 @@ function dev_part {
 }
 
 function osd_trying_to_determine_scenario {
-  : "${OSD_DEVICE:-none}"
+  : "${OSD_DEVICE:=none}"
   if [[ ${OSD_DEVICE} == "none" ]]; then
     log "Bootstrapped OSD(s) found; using OSD directory"
     source osd_directory.sh
