@@ -9,6 +9,7 @@ function osd_activate {
 
   CEPH_DISK_OPTIONS=()
   DATA_UUID=$(blkid -o value -s PARTUUID "${OSD_DEVICE}"1)
+  BLOCK_UUID=$(blkid -o value -s PARTUUID "${OSD_DEVICE}"2)
   LOCKBOX_UUID=$(blkid -o value -s PARTUUID "${OSD_DEVICE}"3 || true)
 
   # watch the udev event queue, and exit if all current events are handled
@@ -25,6 +26,7 @@ function osd_activate {
     mount /dev/disk/by-partuuid/"${LOCKBOX_UUID}" /var/lib/ceph/osd-lockbox/"${DATA_UUID}" || true
     CEPH_DISK_OPTIONS+=('--dmcrypt')
     MOUNTED_PART="/dev/mapper/${DATA_UUID}"
+    ceph --name client.osd-lockbox."${DATA_UUID}" --keyring /var/lib/ceph/osd-lockbox/"${DATA_UUID}"/keyring config-key get dm-crypt/osd/"${DATA_UUID}"/luks | python parse_osd_dmcrypt_key.py | cryptsetup --key-file - luksOpen "${OSD_DEVICE}"2 "${BLOCK_UUID}" || true
   fi
 
   if [[ -z "${CEPH_DISK_OPTIONS[*]}" ]]; then
