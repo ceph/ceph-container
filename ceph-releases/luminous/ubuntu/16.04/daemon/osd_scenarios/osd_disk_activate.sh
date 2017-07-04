@@ -8,8 +8,10 @@ function osd_activate {
   fi
 
   CEPH_DISK_OPTIONS=()
-  DATA_UUID=$(blkid -o value -s PARTUUID "${OSD_DEVICE}"1)
-  LOCKBOX_UUID=$(blkid -o value -s PARTUUID "${OSD_DEVICE}"3 || true)
+  DATA_UUID=$(get_part_uuid "${OSD_DEVICE}"1)
+  JOURNAL_PART=$(ceph-disk list "${OSD_DEVICE}" | awk '/ceph journal/ {print $1}') # This is privileged container so 'ceph-disk list' works
+  JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}")
+  LOCKBOX_UUID=$(get_part_uuid "${OSD_DEVICE}"3 || true)
 
   # watch the udev event queue, and exit if all current events are handled
   udevadm settle --timeout=600
@@ -18,13 +20,27 @@ function osd_activate {
   MOUNTED_PART=${DATA_PART}
 
   if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
-    echo "Mounting LOCKBOX directory"
+    log "Mounting LOCKBOX directory"
     # NOTE(leseb): adding || true so when this bug will be fixed the entrypoint will not fail
     # Ceph bug tracker: http://tracker.ceph.com/issues/18945
     mkdir -p /var/lib/ceph/osd-lockbox/"${DATA_UUID}"
     mount /dev/disk/by-partuuid/"${LOCKBOX_UUID}" /var/lib/ceph/osd-lockbox/"${DATA_UUID}" || true
+    local ceph_fsid
+    local cluster_name
+    cluster_name=$(basename "$(grep -R fsid /etc/ceph/ | grep -oE '^[^.]*')")
+    ceph_fsid=$(ceph-conf --lookup fsid -c /etc/ceph/"$cluster_name".conf)
+    echo "$ceph_fsid" > /var/lib/ceph/osd-lockbox/"${DATA_UUID}"/ceph_fsid
+    chown --verbose ceph. /var/lib/ceph/osd-lockbox/"${DATA_UUID}"/ceph_fsid
     CEPH_DISK_OPTIONS+=('--dmcrypt')
     MOUNTED_PART="/dev/mapper/${DATA_UUID}"
+
+    # Open LUKS device(s) if necessary
+    if [[ ! -e /dev/mapper/"${DATA_UUID}" ]]; then
+      open_encrypted_part "${DATA_UUID}" "${DATA_PART}" "${DATA_UUID}"
+    fi
+    if [[ ! -e /dev/mapper/"${JOURNAL_UUID}" ]]; then
+      open_encrypted_part "${JOURNAL_UUID}" "${JOURNAL_PART}" "${DATA_UUID}"
+    fi
   fi
 
   if [[ -z "${CEPH_DISK_OPTIONS[*]}" ]]; then

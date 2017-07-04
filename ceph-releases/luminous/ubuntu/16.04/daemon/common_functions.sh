@@ -336,3 +336,16 @@ function detect_ceph_files {
     fi
   fi
 }
+
+# Opens an encrypted partition
+function open_encrypted_part {
+  # $1 is the encrypted device
+  # $2 is the partition uuid
+  # $3 is the data partition uuid (always this one for the lockbox)
+  log "Opening encrypted device $1"
+  ceph "${CLI_OPTS[@]}" --name client.osd-lockbox."${3}" \
+  --keyring /var/lib/ceph/osd-lockbox/"${3}"/keyring \
+  config-key \
+  get \
+  dm-crypt/osd/"${3}"/luks | base64 -d | cryptsetup --key-file - luksOpen "${2}" "${1}"
+}
