@@ -17,4 +17,4 @@ VOLUME ["/etc/ceph","/var/lib/ceph"]
 EXPOSE 6789 6800 6801 6802 6803 6804 6805 80 5000
 
 # Execute the entrypoint
-ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/entrypoint.sh"]
