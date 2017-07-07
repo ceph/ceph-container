@@ -56,7 +56,12 @@ function get_mon_config {
     done
 
     log "Creating Keyrings."
-    ceph-authtool "$ADMIN_KEYRING" --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
+    if [ -z "$ADMIN_SECRET" ]; then
+      CLI+=(--gen-key)
+    else
+      CLI+=("--add-key=$ADMIN_SECRET")
+    fi
+    ceph-authtool "$ADMIN_KEYRING" --create-keyring "${CLI[@]}" -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
     ceph-authtool "$MON_KEYRING" --create-keyring --gen-key -n mon. --cap mon 'allow *'
 
     for item in ${OSD_BOOTSTRAP_KEYRING}:Osd ${MDS_BOOTSTRAP_KEYRING}:Mds ${RGW_BOOTSTRAP_KEYRING}:Rgw; do

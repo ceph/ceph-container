@@ -66,8 +66,14 @@ ENDHERE
   fi
 
   if [ ! -e "$ADMIN_KEYRING" ]; then
-    # Generate administrator key
-    ceph-authtool "$ADMIN_KEYRING" --create-keyring --gen-key -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
+    if [ -z "$ADMIN_SECRET" ]; then
+      # Automatically generate administrator key
+      CLI+=(--gen-key)
+    else
+      # Generate custom provided administrator key
+      CLI+=("--add-key=$ADMIN_SECRET")
+    fi
+    ceph-authtool "$ADMIN_KEYRING" --create-keyring -n client.admin "${CLI[@]}" --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
   fi
 
   if [ ! -e "$MON_KEYRING" ]; then
