@@ -8,10 +8,10 @@ function osd_activate {
   fi
 
   CEPH_DISK_OPTIONS=()
-  DATA_UUID=$(get_part_uuid "${OSD_DEVICE}"1)
-  JOURNAL_PART=$(ceph-disk list "${OSD_DEVICE}" | awk '/ceph journal/ {print $1}') # This is privileged container so 'ceph-disk list' works
-  JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}")
-  LOCKBOX_UUID=$(get_part_uuid "${OSD_DEVICE}"3 || true)
+  DATA_UUID=$(get_part_uuid $(dev_part "${OSD_DEVICE}" 1))
+  JOURNAL_PART=$(ceph-disk list "${OSD_DEVICE}" | awk '/ceph journal/ {print $1}' || true) # This is privileged container so 'ceph-disk list' works
+  JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}" || true)
+  LOCKBOX_UUID=$(get_part_uuid $(dev_part "${OSD_DEVICE}" 3) || true)
 
   # watch the udev event queue, and exit if all current events are handled
   udevadm settle --timeout=600
