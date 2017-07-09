@@ -9,7 +9,12 @@ function osd_activate {
 
   CEPH_DISK_OPTIONS=()
   DATA_UUID=$(get_part_uuid "${OSD_DEVICE}"1)
-  JOURNAL_PART=$(ceph-disk list "${OSD_DEVICE}" | awk '/ceph journal/ {print $1}') # This is privileged container so 'ceph-disk list' works
+  if [[ -n "${OSD_JOURNAL}" ]]; then
+    CLI+=("${OSD_JOURNAL}")
+  else
+    CLI+=("${OSD_DEVICE}")
+  fi
+  JOURNAL_PART=$(ceph-disk list "${CLI[@]}" | awk '/ceph journal/ {print $1}') # This is privileged container so 'ceph-disk list' works
   JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}")
   LOCKBOX_UUID=$(get_part_uuid "${OSD_DEVICE}"3 || true)
 
