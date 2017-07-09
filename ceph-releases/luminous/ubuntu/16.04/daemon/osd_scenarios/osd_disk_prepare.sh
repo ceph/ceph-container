@@ -69,9 +69,9 @@ function osd_disk_prepare {
     DATA_UUID=$(blkid -o value -s PARTUUID "${OSD_DEVICE}"1)
     umount /var/lib/ceph/osd-lockbox/"${DATA_UUID}" || true
   elif [[ -n "${OSD_JOURNAL}" ]]; then
-    ceph-disk -v prepare "${CLI_OPTS[@]}" --journal-uuid "${OSD_JOURNAL_UUID}" "${OSD_DEVICE}" "${OSD_JOURNAL}"
+    ceph-disk -v prepare "${CLI_OPTS[@]}" --filestore --journal-uuid "${OSD_JOURNAL_UUID}" "${OSD_DEVICE}" "${OSD_JOURNAL}"
   else
-    ceph-disk -v prepare "${CLI_OPTS[@]}" --journal-uuid "${OSD_JOURNAL_UUID}" "${OSD_DEVICE}"
+    ceph-disk -v prepare "${CLI_OPTS[@]}" --filestore --journal-uuid "${OSD_JOURNAL_UUID}" "${OSD_DEVICE}"
   fi
 
   # watch the udev event queue, and exit if all current events are handled
