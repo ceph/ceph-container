@@ -66,8 +66,11 @@ function osd_activate {
   if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
     # Get the device used for block db and wal otherwise apply_ceph_ownership_to_disks will fail
     OSD_BLUESTORE_BLOCK_DB_TMP=$(resolve_symlink "${OSD_PATH}block.db")
+# shellcheck disable=SC2034
     OSD_BLUESTORE_BLOCK_DB=${OSD_BLUESTORE_BLOCK_DB_TMP%?}
+# shellcheck disable=SC2034
     OSD_BLUESTORE_BLOCK_WAL_TMP=$(resolve_symlink "${OSD_PATH}block.wal")
+# shellcheck disable=SC2034
     OSD_BLUESTORE_BLOCK_WAL=${OSD_BLUESTORE_BLOCK_WAL_TMP%?}
   fi
   apply_ceph_ownership_to_disks
