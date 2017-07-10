@@ -15,7 +15,7 @@ function osd_activate {
     CLI+=("${OSD_DEVICE}")
   fi
   JOURNAL_PART=$(ceph-disk list "${CLI[@]}" | awk '/ceph journal/ {print $1}') # This is privileged container so 'ceph-disk list' works
-  JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}")
+  JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}" || true)
   LOCKBOX_UUID=$(get_part_uuid "${OSD_DEVICE}"3 || true)
 
   # watch the udev event queue, and exit if all current events are handled
