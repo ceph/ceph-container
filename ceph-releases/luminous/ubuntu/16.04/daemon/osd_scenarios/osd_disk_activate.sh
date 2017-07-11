@@ -9,8 +9,13 @@ function osd_activate {
 
   CEPH_DISK_OPTIONS=()
   DATA_UUID=$(get_part_uuid "${OSD_DEVICE}"1)
-  JOURNAL_PART=$(ceph-disk list "${OSD_DEVICE}" | awk '/ceph journal/ {print $1}') # This is privileged container so 'ceph-disk list' works
-  JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}")
+  if [[ -n "${OSD_JOURNAL}" ]]; then
+    CLI+=("${OSD_JOURNAL}")
+  else
+    CLI+=("${OSD_DEVICE}")
+  fi
+  JOURNAL_PART=$(ceph-disk list "${CLI[@]}" | awk '/ceph journal/ {print $1}') # This is privileged container so 'ceph-disk list' works
+  JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}" || true)
   LOCKBOX_UUID=$(get_part_uuid "${OSD_DEVICE}"3 || true)
 
   # watch the udev event queue, and exit if all current events are handled
@@ -61,8 +66,11 @@ function osd_activate {
   if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
     # Get the device used for block db and wal otherwise apply_ceph_ownership_to_disks will fail
     OSD_BLUESTORE_BLOCK_DB_TMP=$(resolve_symlink "${OSD_PATH}block.db")
+# shellcheck disable=SC2034
     OSD_BLUESTORE_BLOCK_DB=${OSD_BLUESTORE_BLOCK_DB_TMP%?}
+# shellcheck disable=SC2034
     OSD_BLUESTORE_BLOCK_WAL_TMP=$(resolve_symlink "${OSD_PATH}block.wal")
+# shellcheck disable=SC2034
     OSD_BLUESTORE_BLOCK_WAL=${OSD_BLUESTORE_BLOCK_WAL_TMP%?}
   fi
   apply_ceph_ownership_to_disks

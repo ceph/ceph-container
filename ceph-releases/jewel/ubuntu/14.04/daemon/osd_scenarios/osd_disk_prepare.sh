@@ -76,5 +76,7 @@ function osd_disk_prepare {
   # watch the udev event queue, and exit if all current events are handled
   udevadm settle --timeout=600
 
+  sleep 5
+
   apply_ceph_ownership_to_disks
 }
