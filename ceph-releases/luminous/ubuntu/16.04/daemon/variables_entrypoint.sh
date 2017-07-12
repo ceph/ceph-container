@@ -78,7 +78,7 @@ ETCDCTL_OPTS=(--peers ${KV_IP}:${KV_PORT})
 # make sure etcd uses http or https as a prefix
 if [[ "$KV_TYPE" == "etcd" ]]; then
   if [ -n "${KV_CA_CERT}" ]; then
-  	CONFD_NODE_SCHEMA="https://"
+    CONFD_NODE_SCHEMA="https://"
     KV_TLS=(--ca-file=${KV_CA_CERT} --cert-file=${KV_CLIENT_CERT} --key-file=${KV_CLIENT_KEY})
     CONFD_KV_TLS=(-scheme=https -client-ca-keys=${KV_CA_CERT} -client-cert=${KV_CLIENT_CERT} -client-key=${KV_CLIENT_KEY})
   else
