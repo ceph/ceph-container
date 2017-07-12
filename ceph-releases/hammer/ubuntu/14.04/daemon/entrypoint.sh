@@ -30,7 +30,7 @@ set -e
 : ${RESTAPI_LOG_FILE:=/var/log/ceph/ceph-restapi.log}
 : ${KV_TYPE:=none} # valid options: consul, etcd or none
 : ${KV_IP:=127.0.0.1}
-: ${KV_PORT:=4001} # PORT 8500 for Consul
+: ${KV_PORT:=2379} # PORT 8500 for Consul
 
 if [ ! -z "${KV_CA_CERT}" ]; then
 	KV_TLS="--ca-cert=${KV_CA_CERT} --client-cert=${KV_CLIENT_CERT} --client-key=${KV_CLIENT_KEY}"
