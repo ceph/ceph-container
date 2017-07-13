@@ -3,9 +3,9 @@ set -e
 
 function kv {
   # Note the 'cas' command puts a value in the KV store if it is empty
-  local key="$1"
-  shift
-  local value="$*"
+  local key
+  local value
+  read -r key value <<< "$*"
   log "Adding key ${key} with value ${value} to KV store."
   etcdctl "${ETCDCTL_OPTS[@]}" "${KV_TLS[@]}" set "${CLUSTER_PATH}""${key}" "${value}" || log "Value is already set"
 }
