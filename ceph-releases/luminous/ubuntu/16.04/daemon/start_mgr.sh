@@ -14,17 +14,17 @@ function start_mgr {
     ceph "${CLI_OPTS[@]}" auth get-or-create mgr."$MGR_NAME" mon 'allow profile mgr' osd 'allow *' mds 'allow *' -o "$MGR_KEYRING"
     chown --verbose ceph. "$MGR_KEYRING"
     chmod 600 "$MGR_KEYRING"
+  fi
 
-    if [[ "$MGR_DASHBOARD" == 1 ]]; then
-      if ! grep -E "\[mgr\]" /etc/ceph/"${CLUSTER}".conf; then
-        cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
+  if [[ "$MGR_DASHBOARD" == 1 ]]; then
+    if ! grep -E "\[mgr\]" /etc/ceph/"${CLUSTER}".conf; then
+      cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
 
 [mgr]
 mgr_modules = dashboard
 ENDHERE
-      fi
-      ceph "${CLI_OPTS[@]}" config-key put mgr/dashboard/server_addr "$MGR_IP"
     fi
+    ceph "${CLI_OPTS[@]}" config-key put mgr/dashboard/server_addr "$MGR_IP"
   fi
 
   log "SUCCESS"
