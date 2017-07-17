@@ -5,11 +5,12 @@ function start_mgr {
   get_config
   check_config
 
+  # ensure we have the admin key
+  get_admin_key
+  check_admin_key
+
   # Check to see if our MGR has been initialized
   if [ ! -e "$MGR_KEYRING" ]; then
-    get_admin_key
-    check_admin_key
-
     # Create ceph-mgr key
     ceph "${CLI_OPTS[@]}" auth get-or-create mgr."$MGR_NAME" mon 'allow profile mgr' osd 'allow *' mds 'allow *' -o "$MGR_KEYRING"
     chown --verbose ceph. "$MGR_KEYRING"
