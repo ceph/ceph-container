@@ -46,7 +46,7 @@ Note: `cluster_network` and `public_network` are currently not populated in the 
 docker run -d --net=host \
 -e KV_TYPE=etcd \
 -e KV_IP=127.0.0.1 \
--e KV_PORT=4001 \
+-e KV_PORT=2379 \
 ceph/daemon populate_kvstore
 ```
 
