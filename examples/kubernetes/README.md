@@ -170,6 +170,27 @@ ceph-osd-ieio7         1/1       Running   2          2m
 ceph-osd-j1gyd         1/1       Running   2          2m
 ```
 
+### Persistent OSD disk
+Alternatively, you can use persistent OSD disks using the following steps.
+
+After creating `mon` deployment, rather than creating OSD daemonset, choose a disk on the storage node and prepare OSD disks.
+As illustrated in [ceph-osd-prepare-v1-ds.yaml](ceph-osd-prepare-v1-ds.yaml) and [ceph-osd-activate-v1-ds.yaml](ceph-osd-activate-v1-ds.yaml), the daemonset prepares and activates `/dev/sdc`
+
+```
+kubectl create -f ceph-osd-prepare-v1-ds.yaml --namespace=ceph
+```
+
+Run `kubectl get all --namespace=ceph` and watch daemonset `ceph-osd-prepared` is completed. Then delete the `ceph-osd-prepare` daemonset
+and create `ceph-osd-activate` daemonset:
+
+```
+kubectl delete -f ceph-osd-prepare-v1-ds.yaml --namespace=ceph
+kubectl create -f ceph-osd-activate-v1-ds.yaml --namespace=ceph
+```
+
+
+
+
 ### Creating RBD Storage Class
 
 First, create a RBD provisioner pod:
