@@ -175,7 +175,7 @@ ceph-osd-j1gyd         1/1       Running   2          2m
 First, create a RBD provisioner pod:
 
 ```
-$ kubectl create -f https://raw.githubusercontent.com/kubernetes-incubator/external-storage/master/ceph/rbd/deployment.yaml
+$ kubectl create -f https://raw.githubusercontent.com/kubernetes-incubator/external-storage/master/ceph/rbd/deployment.yaml --namespace=ceph
 ```
 Then, if there is no Ceph admin secret with type `kubernetes.io/rbd`, create one:
 
