@@ -69,7 +69,7 @@ function osd_directory {
       chmod 0600 "${OSD_KEYRING}"
       # add the osd to the crush map
       OSD_WEIGHT=$(df -P -k "$OSD_PATH" | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
-      ceph "${CLI_OPTS[@]}" --name=osd."${OSD_ID}" --keyring="${OSD_KEYRING}" osd crush create-or-move -- "${OSD_ID}" "${OSD_WEIGHT}" "${CRUSH_LOCATION}"
+      ceph "${CLI_OPTS[@]}" --name=osd."${OSD_ID}" --keyring="${OSD_KEYRING}" osd crush create-or-move -- "${OSD_ID}" "${OSD_WEIGHT}" "${CRUSH_LOCATION[@]}"
     fi
     echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CLI_OPTS[*]} -f -i ${OSD_ID} --osd-journal ${OSD_J} -k $OSD_KEYRING" | tee -a /etc/forego/"${CLUSTER}"/Procfile
   done
