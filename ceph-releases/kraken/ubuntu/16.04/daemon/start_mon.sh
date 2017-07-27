@@ -145,7 +145,7 @@ function start_mon {
       # In this kind of environment, the monmap is the only source of truth for new monitor to attempt to join the existing quorum
       ceph-mon --setuser ceph --setgroup ceph --cluster "${CLUSTER}" -i "${MON_NAME}" --inject-monmap "$MONMAP" --keyring "$MON_KEYRING" --mon-data "$MON_DATA_DIR"
     fi
-    timeout 7 ceph "${CLI_OPTS}" mon add "${MON_NAME}" "${MON_IP}:6789" || true
+    timeout 7 ceph "${CLI_OPTS[@]}" mon add "${MON_NAME}" "${MON_IP}:6789" || true
   fi
 
   log "SUCCESS"
