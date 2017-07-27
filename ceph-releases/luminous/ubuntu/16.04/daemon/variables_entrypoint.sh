@@ -43,6 +43,7 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 : "${RGW_NAME:=${HOSTNAME}}"
 : "${RGW_ZONEGROUP:=}"
 : "${RGW_ZONE:=}"
+: "${RGW_CIVETWEB_IP:=0.0.0.0}"
 : "${RGW_CIVETWEB_PORT:=8080}"
 : "${RGW_REMOTE_CGI:=0}"
 : "${RGW_REMOTE_CGI_PORT:=9000}"

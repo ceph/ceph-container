@@ -28,7 +28,7 @@ function start_rgw {
 
   log "SUCCESS"
 
-  local rgw_frontends="civetweb port=$RGW_CIVETWEB_PORT"
+  local rgw_frontends="civetweb port=$RGW_CIVETWEB_IP:$RGW_CIVETWEB_PORT"
   if [ "$RGW_REMOTE_CGI" -eq 1 ]; then
     rgw_frontends="fastcgi socket_port=$RGW_REMOTE_CGI_PORT socket_host=$RGW_REMOTE_CGI_HOST"
   fi
