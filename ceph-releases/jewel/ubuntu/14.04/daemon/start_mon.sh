@@ -2,7 +2,7 @@
 set -e
 
 IPV4_REGEXP='[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'
-IPV4_NETWORK_REGEXP="$IPV4_REGEXP/[0-9]\{1,2\}"
+IPV4_NETWORK_REGEXP="$IPV4_REGEXP/[0-9]\\{1,2\\}"
 
 function flat_to_ipv6 {
   # Get a flat input like fe800000000000000042acfffe110003 and output fe80::0042:acff:fe11:0003
@@ -104,6 +104,12 @@ function start_mon {
         ip_version=4
       fi
     fi
+    if [[ "$(echo "$CEPH_PUBLIC_NETWORK" | wc -l)" -ne 1 ]]; then
+      log "It seems that the interface ${nic_more_traffic} with most of the traffic has several subnets configured"
+      log "I don't know which one to use."
+      log "Please do not use NETWORK_AUTO_DETECT but specify which subnet you want to use for CEPH_PUBLIC_NETWORK"
+      exit 1
+    fi
   fi
 
   if [[ -z "$MON_IP" || -z "$CEPH_PUBLIC_NETWORK" ]]; then
@@ -145,7 +151,7 @@ function start_mon {
       # In this kind of environment, the monmap is the only source of truth for new monitor to attempt to join the existing quorum
       ceph-mon --setuser ceph --setgroup ceph --cluster "${CLUSTER}" -i "${MON_NAME}" --inject-monmap "$MONMAP" --keyring "$MON_KEYRING" --mon-data "$MON_DATA_DIR"
     fi
-    timeout 7 ceph "${CLI_OPTS}" mon add "${MON_NAME}" "${MON_IP}:6789" || true
+    timeout 7 ceph "${CLI_OPTS[@]}" mon add "${MON_NAME}" "${MON_IP}:6789" || true
   fi
 
   log "SUCCESS"
