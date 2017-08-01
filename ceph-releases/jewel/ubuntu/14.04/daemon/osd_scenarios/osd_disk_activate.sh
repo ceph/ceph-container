@@ -36,20 +36,8 @@ function osd_activate {
   fi
 
   OSD_ID=$(grep "${MOUNTED_PART}" /proc/mounts | awk '{print $2}' | grep -oh '[0-9]*')
-  OSD_PATH=$(get_osd_path "$OSD_ID")
-  OSD_KEYRING="$OSD_PATH/keyring"
-  if [[ ${OSD_BLUESTORE} -eq 1 ]] && [ -e "${OSD_PATH}block" ]; then
-    OSD_WEIGHT=$(awk "BEGIN { d= $(blockdev --getsize64 "${OSD_PATH}"block)/1099511627776 ; r = sprintf(\"%.2f\", d); print r }")
-  else
-    OSD_WEIGHT=$(df -P -k "$OSD_PATH" | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
-  fi
-
-  # only add crush_location if the current is empty
-  local crush_loc
-  crush_loc=$(ceph "${CLI_OPTS[@]}" --name=osd."${OSD_ID}" --keyring="$OSD_KEYRING" osd find "${OSD_ID}"|python -c 'import sys, json; print(json.load(sys.stdin)["crush_location"])')
-  if [[ "$crush_loc" == "{}" ]]; then
-    ceph "${CLI_OPTS[@]}" --name=osd."${OSD_ID}" --keyring="$OSD_KEYRING" osd crush create-or-move -- "${OSD_ID}" "${OSD_WEIGHT}" "${CRUSH_LOCATION[@]}"
-  fi
+  calculate_osd_weight
+  add_osd_to_crush
 
   log "SUCCESS"
   exec /usr/bin/ceph-osd "${CLI_OPTS[@]}" -f -i "${OSD_ID}" --setuser ceph --setgroup disk
