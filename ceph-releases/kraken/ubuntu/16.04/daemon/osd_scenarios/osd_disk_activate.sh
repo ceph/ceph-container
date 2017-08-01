@@ -8,8 +8,8 @@ function osd_activate {
   fi
 
   CEPH_DISK_OPTIONS=()
-  DATA_UUID=$(blkid -o value -s PARTUUID $(dev_part "${OSD_DEVICE}" 1))
-  LOCKBOX_UUID=$(blkid -o value -s PARTUUID $(dev_part "${OSD_DEVICE}" 3) || true)
+  DATA_UUID=$(blkid -o value -s PARTUUID "$(dev_part "${OSD_DEVICE}" 1)")
+  LOCKBOX_UUID=$(blkid -o value -s PARTUUID "$(dev_part "${OSD_DEVICE}" 3)" || true)
 
   # watch the udev event queue, and exit if all current events are handled
   udevadm settle --timeout=600
