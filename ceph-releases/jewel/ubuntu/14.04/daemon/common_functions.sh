@@ -71,7 +71,8 @@ function create_mandatory_directories {
   mkdir -p /var/lib/ceph/mds/"${CLUSTER}-${MDS_NAME}"
 
   # Adjust the owner of all those directories
-  chown --verbose -R ceph. /var/run/ceph/ /var/lib/ceph/*
+  chown --verbose -R ceph. /var/run/ceph/
+  find -L /var/lib/ceph/ -mindepth 1 -maxdepth 3 -exec chown --verbose ceph. {} \;
 }
 
 
