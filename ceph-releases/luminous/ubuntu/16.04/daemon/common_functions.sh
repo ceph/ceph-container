@@ -268,8 +268,8 @@ function apply_ceph_ownership_to_disks {
     chown --verbose ceph. "${OSD_JOURNAL}"
   elif [[ ${OSD_DMCRYPT} -eq 1 ]]; then
     # apply permission on the lockbox partition
-    wait_for_file "$(dev_part "${OSD_DEVICE}" 3)"
-    chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 3)"
+    wait_for_file "$(dev_part "${OSD_DEVICE}" 5)"
+    chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 5)"
   elif [[ ${OSD_BLUESTORE} -eq 1 ]]; then
     dev_real_path=$(resolve_symlink "$OSD_BLUESTORE_BLOCK_WAL" "$OSD_BLUESTORE_BLOCK_DB")
     for partition in $(list_dev_partitions "$OSD_DEVICE" "$dev_real_path"); do
