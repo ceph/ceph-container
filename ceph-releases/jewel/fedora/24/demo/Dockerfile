@@ -7,7 +7,8 @@
 FROM ceph/base:tag-build-master-jewel-fedora-24
 MAINTAINER Sébastien Han "seb@redhat.com"
 
-# Add bootstrap script
+# Add bootstrap script and s3cfg
+ADD s3cfg /root/.s3cfg
 ADD entrypoint.sh /entrypoint.sh
 
 # Add volumes for Ceph config and data
