@@ -73,5 +73,6 @@ function osd_directory {
     echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CLI_OPTS[*]} -f -i ${OSD_ID} --osd-journal ${OSD_J} -k $OSD_KEYRING" | tee -a /etc/forego/"${CLUSTER}"/Procfile
   done
   log "SUCCESS"
+  source osd_common.sh
   start_forego
 }
