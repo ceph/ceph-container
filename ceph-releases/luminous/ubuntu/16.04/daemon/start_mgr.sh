@@ -18,13 +18,7 @@ function start_mgr {
   fi
 
   if [[ "$MGR_DASHBOARD" == 1 ]]; then
-    if ! grep -E "\[mgr\]" /etc/ceph/"${CLUSTER}".conf; then
-      cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
-
-[mgr]
-mgr_modules = dashboard
-ENDHERE
-    fi
+    ceph "${CLI_OPTS[@]}" mgr module enable dashboard
     ceph "${CLI_OPTS[@]}" config-key put mgr/dashboard/server_addr "$MGR_IP"
   fi
 
