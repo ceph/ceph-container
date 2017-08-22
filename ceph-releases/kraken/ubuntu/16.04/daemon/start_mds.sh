@@ -38,12 +38,12 @@ function start_mds {
 
     if [[ "$(ceph "${CLI_OPTS[@]}" fs ls | grep -c name:."${CEPHFS_NAME}",)" -eq 0 ]]; then
       # Make sure the specified data pool exists
-      if ! ceph "${CLI_OPTS[@]}" osd pool stats "${CEPHFS_DATA_POOL}" > /dev/null 2>&1; then
+      if ! timeout 3 ceph "${CLI_OPTS[@]}" osd pool stats "${CEPHFS_DATA_POOL}" > /dev/null 2>&1; then
        ceph "${CLI_OPTS[@]}" osd pool create "${CEPHFS_DATA_POOL}" "${CEPHFS_DATA_POOL_PG}"
       fi
 
       # Make sure the specified metadata pool exists
-      if ! ceph "${CLI_OPTS[@]}" osd pool stats "${CEPHFS_METADATA_POOL}" > /dev/null 2>&1; then
+      if ! timeout 3 ceph "${CLI_OPTS[@]}" osd pool stats "${CEPHFS_METADATA_POOL}" > /dev/null 2>&1; then
          ceph "${CLI_OPTS[@]}" osd pool create "${CEPHFS_METADATA_POOL}" "${CEPHFS_METADATA_POOL_PG}"
       fi
 
