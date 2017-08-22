@@ -20,6 +20,7 @@ function start_mgr {
   if [[ "$MGR_DASHBOARD" == 1 ]]; then
     ceph "${CLI_OPTS[@]}" mgr module enable dashboard
     ceph "${CLI_OPTS[@]}" config-key put mgr/dashboard/server_addr "$MGR_IP"
+    ceph "${CLI_OPTS[@]}" config-key put mgr/dashboard/server_port "$MGR_PORT"
   fi
 
   log "SUCCESS"
