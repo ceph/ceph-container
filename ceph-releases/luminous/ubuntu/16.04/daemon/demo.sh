@@ -164,13 +164,7 @@ function bootstrap_mgr {
   ceph "${CLI_OPTS[@]}" auth get-or-create mgr."$MGR_NAME" mon 'allow *' -o "$MGR_PATH"/keyring
   chown --verbose -R ceph. "$MGR_PATH"
 
-  if ! grep -E "\[mgr\]" /etc/ceph/"${CLUSTER}".conf; then
-    cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
-[mgr]
-mgr_modules = dashboard
-ENDHERE
-  fi
-
+  ceph "${CLI_OPTS[@]}" mgr module enable dashboard
   ceph "${CLI_OPTS[@]}" config-key put mgr/dashboard/server_addr "$MGR_IP"
 
   # start ceph-mgr
