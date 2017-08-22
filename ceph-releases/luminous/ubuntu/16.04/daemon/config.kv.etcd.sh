@@ -57,8 +57,10 @@ function get_mon_config {
 
     log "Creating Keyrings."
     if [ -z "$ADMIN_SECRET" ]; then
+      # Automatically generate administrator key
       CLI+=(--gen-key)
     else
+      # Generate custom provided administrator key
       CLI+=("--add-key=$ADMIN_SECRET")
     fi
     ceph-authtool "$ADMIN_KEYRING" --create-keyring "${CLI[@]}" -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow' --cap mgr 'allow *'
