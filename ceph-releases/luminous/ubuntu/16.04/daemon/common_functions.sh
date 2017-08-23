@@ -92,8 +92,6 @@ function dev_part {
     # This device is a symlink. Work out it's actual device
     local actual_device
     actual_device=$(readlink -f "${osd_device}")
-    local bn
-    bn=$(basename "${osd_device}")
     if [[ "${actual_device:0-1:1}" == [0-9] ]]; then
       local desired_partition="${actual_device}p${osd_partition}"
     else
@@ -106,13 +104,13 @@ function dev_part {
     symdir=$(dirname "${osd_device}")
     local link=""
     local pfxlen=0
-    for option in ${symdir}*; do
+    for option in ${symdir}/*; do
       [[ -e $option ]] || break
-      if [[ $(readlink -f "$symdir"/"$option") == "$desired_partition" ]]; then
+      if [[ $(readlink -f "$option") == "$desired_partition" ]]; then
         local optprefixlen
-        optprefixlen=$(prefix_length "$option" "$bn")
+        optprefixlen=$(prefix_length "$option" "$osd_device")
         if [[ $optprefixlen > $pfxlen ]]; then
-          link=$symdir/$option
+          link=$option
           pfxlen=$optprefixlen
         fi
       fi
