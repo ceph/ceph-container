@@ -34,6 +34,7 @@ osd pool default pgp num = 8
 osd pool default size = 1
 public network = ${CEPH_PUBLIC_NETWORK}
 cluster network = ${CEPH_PUBLIC_NETWORK}
+log file = /dev/null
 ENDHERE
 
       # For ext4
@@ -55,6 +56,7 @@ auth client required = cephx
 public network = ${CEPH_PUBLIC_NETWORK}
 cluster network = ${CEPH_CLUSTER_NETWORK}
 osd journal size = ${OSD_JOURNAL_SIZE}
+log file = /dev/null
 ENDHERE
     fi
     if [ "$IP_LEVEL" -eq 6 ]; then
