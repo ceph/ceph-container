@@ -76,7 +76,6 @@ CLI_OPTS=(--cluster ${CLUSTER})
 DAEMON_OPTS=(--cluster ${CLUSTER} --setuser ceph --setgroup ceph -d)
 
 MOUNT_OPTS=(-t xfs -o noatime,inode64)
-ETCDCTL_OPTS=(--peers ${KV_IP}:${KV_PORT})
 
 # make sure etcd uses http or https as a prefix
 if [[ "$KV_TYPE" == "etcd" ]]; then
@@ -87,6 +86,8 @@ if [[ "$KV_TYPE" == "etcd" ]]; then
   else
     CONFD_NODE_SCHEMA="http://"
   fi
+  ETCD_SCHEMA=${CONFD_NODE_SCHEMA}
+  ETCDCTL_OPTS=(--peers ${ETCD_SCHEMA}${KV_IP}:${KV_PORT})
 fi
 
 # Internal variables
