@@ -3,21 +3,23 @@
 set -e
 
 function osd_activate {
-  if [[ -z "${OSD_DEVICE}" ]];then
-    log "ERROR- You must provide a device to build your OSD ie: /dev/sdb"
+  if [[ -z "${OSD_DEVICE}" ]] || [[ ! -b "${OSD_DEVICE}" ]]; then
+    log "ERROR: you either provided a non-existing device or no device at all."
+    log "You must provide a device to build your OSD ie: /dev/sdb"
     exit 1
   fi
 
   CEPH_DISK_OPTIONS=()
-  DATA_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
-  if [[ -n "${OSD_JOURNAL}" ]]; then
-    CLI+=("${OSD_JOURNAL}")
-  else
-    CLI+=("${OSD_DEVICE}")
+
+  if [[ ${OSD_FILESTORE} -eq 1 ]] && [[ ${OSD_DMCRYPT} -eq 0 ]]; then
+    if [[ -n "${OSD_JOURNAL}" ]]; then
+      CLI+=("${OSD_JOURNAL}")
+    else
+      CLI+=("${OSD_DEVICE}")
+    fi
+    JOURNAL_PART=$(ceph-disk list "${CLI[@]}" | awk '/ceph journal/ {print $1}') # This is a privileged container so 'ceph-disk list' works
+    JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}" || true)
   fi
-  JOURNAL_PART=$(ceph-disk list "${CLI[@]}" | awk '/ceph journal/ {print $1}') # This is privileged container so 'ceph-disk list' works
-  JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}" || true)
-  LOCKBOX_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 5)" || true)
 
   # watch the udev event queue, and exit if all current events are handled
   udevadm settle --timeout=600
@@ -25,20 +27,14 @@ function osd_activate {
   DATA_PART=$(dev_part "${OSD_DEVICE}" 1)
   MOUNTED_PART=${DATA_PART}
 
-  if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
-    JOURNAL_PART=$(ceph-disk list "${OSD_DEVICE}" | awk '/ceph journal/ {print $1}') # This is privileged container so 'ceph-disk list' works , c'est un ACTIVATE DONC BNON
+  if [[ ${OSD_DMCRYPT} -eq 1 ]] && [[ ${OSD_FILESTORE} -eq 1 ]] && [[ ${OSD_BLUESTORE} -eq 0 ]]; then
+    DATA_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
+    LOCKBOX_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 5)")
+    JOURNAL_PART=$(ceph-disk list "${OSD_DEVICE}" | awk '/ceph journal/ {print $1}') # This is a privileged container so 'ceph-disk list' works
     JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}")
-    log "Mounting LOCKBOX directory"
-    # NOTE(leseb): adding || true so when this bug will be fixed the entrypoint will not fail
-    # Ceph bug tracker: http://tracker.ceph.com/issues/18945
-    mkdir -p /var/lib/ceph/osd-lockbox/"${DATA_UUID}"
-    mount /dev/disk/by-partuuid/"${LOCKBOX_UUID}" /var/lib/ceph/osd-lockbox/"${DATA_UUID}" || true
-    local ceph_fsid
-    local cluster_name
-    cluster_name=$(basename "$(grep -R fsid /etc/ceph/ | grep -oE '^[^.]*')")
-    ceph_fsid=$(ceph-conf --lookup fsid -c /etc/ceph/"$cluster_name".conf)
-    echo "$ceph_fsid" > /var/lib/ceph/osd-lockbox/"${DATA_UUID}"/ceph_fsid
-    chown --verbose ceph. /var/lib/ceph/osd-lockbox/"${DATA_UUID}"/ceph_fsid
+
+    mount_lockbox "$DATA_UUID" "$LOCKBOX_UUID"
+
     CEPH_DISK_OPTIONS+=('--dmcrypt')
     MOUNTED_PART="/dev/mapper/${DATA_UUID}"
 
@@ -48,6 +44,30 @@ function osd_activate {
     fi
     if [[ ! -e /dev/mapper/"${JOURNAL_UUID}" ]]; then
       open_encrypted_part "${JOURNAL_UUID}" "${JOURNAL_PART}" "${DATA_UUID}"
+    fi
+  elif [[ ${OSD_DMCRYPT} -eq 1 ]] && [[ ${OSD_FILESTORE} -eq 0 ]] && [[ ${OSD_BLUESTORE} -eq 1 ]]; then
+    DATA_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
+    BLOCK_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 2)")
+    LOCKBOX_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 5)")
+    BLOCK_DB_PART=$(ceph-disk list "${OSD_BLUESTORE_BLOCK_DB}" | awk '/ceph block.db/ {print $1}') # This is a privileged container so 'ceph-disk list' works
+    BLOCK_DB_UUID=$(get_part_uuid "${BLOCK_DB_PART}")
+    BLOCK_WAL_PART=$(ceph-disk list "${OSD_BLUESTORE_BLOCK_WAL}" | awk '/ceph block.wal/ {print $1}') # This is a privileged container so 'ceph-disk list' works
+    BLOCK_WAL_UUID=$(get_part_uuid "${BLOCK_WAL_PART}")
+
+    mount_lockbox "$DATA_UUID" "$LOCKBOX_UUID"
+
+    CEPH_DISK_OPTIONS+=('--dmcrypt')
+    MOUNTED_PART="/dev/mapper/${DATA_UUID}"
+
+    # Open LUKS device(s) if necessary
+    if [[ ! -e /dev/mapper/"${DATA_UUID}" ]]; then
+      open_encrypted_part "${BLOCK_UUID}" "${DATA_PART}" "${BLOCK_UUID}"
+    fi
+    if [[ ! -e /dev/mapper/"${BLOCK_DB_UUID}" ]]; then
+      open_encrypted_part "${BLOCK_DB_UUID}" "${BLOCK_DB_PART}" "${BLOCK_UUID}"
+    fi
+    if [[ ! -e /dev/mapper/"${BLOCK_WAL_UUID}" ]]; then
+      open_encrypted_part "${BLOCK_WAL_UUID}" "${BLOCK_WAL_PART}" "${BLOCK_UUID}"
     fi
   fi
 

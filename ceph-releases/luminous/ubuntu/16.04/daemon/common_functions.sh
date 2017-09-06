@@ -372,6 +372,20 @@ function calculate_osd_weight {
   fi
 }
 
+function mount_lockbox {
+  log "Mounting LOCKBOX directory"
+  # NOTE(leseb): adding || true so when this bug will be fixed the entrypoint will not fail
+  # Ceph bug tracker: http://tracker.ceph.com/issues/18945
+  mkdir -p /var/lib/ceph/osd-lockbox/"${1}"
+  mount /dev/disk/by-partuuid/"${2}" /var/lib/ceph/osd-lockbox/"${1}" || true
+  local ceph_fsid
+  local cluster_name
+  cluster_name=$(basename "$(grep -R fsid /etc/ceph/ | grep -oE '^[^.]*')")
+  ceph_fsid=$(ceph-conf --lookup fsid -c /etc/ceph/"$cluster_name".conf)
+  echo "$ceph_fsid" > /var/lib/ceph/osd-lockbox/"${1}"/ceph_fsid
+  chown --verbose ceph. /var/lib/ceph/osd-lockbox/"${1}"/ceph_fsid
+}
+
 function umount_lockbox {
   if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
     log "Unmounting LOCKBOX directory"
