@@ -65,6 +65,15 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 : "${MGR_IP:=0.0.0.0}"
 : "${MGR_PORT:=7000}"
 
+# Make sure to change the value of one another if user changes some of the default values
+while read -r line; do
+  if [[ "$line" == "OSD_FILESTORE=1" ]]; then
+    OSD_BLUESTORE=0
+  elif [[ "$line" == "OSD_BLUESTORE=1" ]]; then
+    OSD_FILESTORE=0
+  fi
+done < <(env)
+
 # Create a default array
 CRUSH_LOCATION_DEFAULT=("root=default" "host=${HOSTNAME}")
 [[ -n "$CRUSH_LOCATION" ]] || read -ra CRUSH_LOCATION <<< "${CRUSH_LOCATION_DEFAULT[@]}"
