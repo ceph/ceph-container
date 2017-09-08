@@ -6,7 +6,7 @@ LABEL Maintainer="Sebastien Han 'seb@redhat.com'"
 
 ENV container docker
 
-ARG PACKAGES="ceph-mon ceph-osd ceph-mds ceph-radosgw rbd-mirror nfs-ganesha-rgw e2fsprogs"
+ARG PACKAGES="ceph-mon ceph-osd ceph-mds ceph-radosgw rbd-mirror nfs-ganesha-rgw e2fsprogs ceph-mgr"
 RUN yum -y update && \
     yum -y install $PACKAGES && \
     rpm -q $PACKAGES && \
