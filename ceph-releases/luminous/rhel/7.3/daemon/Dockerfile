@@ -1,7 +1,7 @@
 # RHCS IMAGE
 # RHCS VERSION: 3
 
-FROM rhel7:7.3-released
+FROM rhel7:7-released
 LABEL Maintainer="Sebastien Han 'seb@redhat.com'"
 
 ENV container docker
