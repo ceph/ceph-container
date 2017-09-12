@@ -3,7 +3,7 @@
 ![Ceph Daemon Stars](https://img.shields.io/docker/stars/ceph/daemon.svg)
 ![Ceph Daemon Pulls](https://img.shields.io/docker/pulls/ceph/daemon.svg)
 ![Ceph Daemon Automated](https://img.shields.io/docker/automated/ceph/daemon.svg)
-![Ceph Daemon Build Status](https://img.shields.io/docker/status/ceph/daemon.svg)
+![Ceph Daemon Build Status](https://img.shields.io/docker/build/ceph/daemon.svg)
 
 Ceph-related Docker files.
 
