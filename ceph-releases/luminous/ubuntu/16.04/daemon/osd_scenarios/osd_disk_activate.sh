@@ -61,13 +61,13 @@ function osd_activate {
 
     # Open LUKS device(s) if necessary
     if [[ ! -e /dev/mapper/"${DATA_UUID}" ]]; then
-      open_encrypted_part "${BLOCK_UUID}" "${DATA_PART}" "${BLOCK_UUID}"
+      open_encrypted_part "${BLOCK_UUID}" "${DATA_PART}" "${DATA_UUID}"
     fi
     if [[ ! -e /dev/mapper/"${BLOCK_DB_UUID}" ]]; then
-      open_encrypted_part "${BLOCK_DB_UUID}" "${BLOCK_DB_PART}" "${BLOCK_UUID}"
+      open_encrypted_part "${BLOCK_DB_UUID}" "${BLOCK_DB_PART}" "${DATA_UUID}"
     fi
     if [[ ! -e /dev/mapper/"${BLOCK_WAL_UUID}" ]]; then
-      open_encrypted_part "${BLOCK_WAL_UUID}" "${BLOCK_WAL_PART}" "${BLOCK_UUID}"
+      open_encrypted_part "${BLOCK_WAL_UUID}" "${BLOCK_WAL_PART}" "${DATA_UUID}"
     fi
   fi
 
