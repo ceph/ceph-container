@@ -1,0 +1,5 @@
+[ganesha]
+nameganesha=
+baseurl=http://download.ceph.com/nfs-ganesha/rpm-V2.5-stable/luminous/$basearch/
+gpgcheck=0
+enabled=1
