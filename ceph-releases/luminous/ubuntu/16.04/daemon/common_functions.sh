@@ -49,7 +49,7 @@ function is_available {
 # create the mandatory directories
 function create_mandatory_directories {
   # Let's create the bootstrap directories
-  for keyring in $OSD_BOOTSTRAP_KEYRING $MDS_BOOTSTRAP_KEYRING $RGW_BOOTSTRAP_KEYRING; do
+  for keyring in $OSD_BOOTSTRAP_KEYRING $MDS_BOOTSTRAP_KEYRING $RGW_BOOTSTRAP_KEYRING $RBD_MIRROR_BOOTSTRAP_KEYRING; do
     mkdir -p "$(dirname "$keyring")"
   done
 
