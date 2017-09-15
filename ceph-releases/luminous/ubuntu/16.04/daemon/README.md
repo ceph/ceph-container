@@ -15,7 +15,6 @@ This Dockerfile may be used to bootstrap a Ceph cluster with all the Ceph daemon
 You can use this container to bootstrap any Ceph daemon.
 
 - `CLUSTER` is the name of the cluster (DEFAULT: ceph)
-- `HOSTNAME` is the hostname of the machine (DEFAULT: $(hostname))
 
 ## SELinux
 

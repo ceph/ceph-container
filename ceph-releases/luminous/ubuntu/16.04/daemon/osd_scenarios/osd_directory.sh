@@ -8,11 +8,6 @@ function osd_directory {
     exit 1
   fi
 
-  if [ -z "${HOSTNAME}" ]; then
-    log "HOSTNAME not set; This will prevent to add an OSD into the CRUSH map"
-    exit 1
-  fi
-
   # check if anything is present, if not, create an osd and its directory
   if [[ -n "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
     log "Creating osd with ceph --cluster ${CLUSTER} osd create"
