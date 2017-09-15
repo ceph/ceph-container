@@ -3,9 +3,6 @@
 # the format is key_path value
 # the key path will be prefixed by /ceph-config/$CLUSTER
 
-# auth
-/auth/cephx true
-
 #osd
 /osd/osd_journal_size 100
 
