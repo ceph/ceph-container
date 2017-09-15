@@ -78,7 +78,6 @@ function osd_activate {
   fi
 
   OSD_ID=$(grep "${MOUNTED_PART}" /proc/mounts | awk '{print $2}' | sed -r 's/^.*-([0-9]+)$/\1/')
-  calculate_osd_weight
 
   if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
     # Get the device used for block db and wal otherwise apply_ceph_ownership_to_disks will fail
@@ -91,8 +90,6 @@ function osd_activate {
     OSD_BLUESTORE_BLOCK_WAL=${OSD_BLUESTORE_BLOCK_WAL_TMP%?}
   fi
   apply_ceph_ownership_to_disks
-
-  add_osd_to_crush
 
   log "SUCCESS"
   exec /usr/bin/ceph-osd "${CLI_OPTS[@]}" -f -i "${OSD_ID}" --setuser ceph --setgroup disk

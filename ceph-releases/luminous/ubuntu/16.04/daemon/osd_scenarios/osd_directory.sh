@@ -68,8 +68,6 @@ function osd_directory {
       chown --verbose ceph. "${OSD_KEYRING}"
       chmod 0600 "${OSD_KEYRING}"
       # add the osd to the crush map
-      calculate_osd_weight
-      add_osd_to_crush
     fi
     echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CLI_OPTS[*]} -f -i ${OSD_ID} --osd-journal ${OSD_J} -k $OSD_KEYRING" | tee -a /etc/forego/"${CLUSTER}"/Procfile
   done

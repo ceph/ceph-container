@@ -7,8 +7,6 @@ start_osd() {
   mode=$1 #forego or empty
 
   OSD_ID=$(find /var/lib/ceph/osd/ -maxdepth 1 -mindepth 1 -printf '%TY-%Tm-%Td %TT %p\n' | sort -n | tail -n1 | awk -F '-' -v pattern="$CLUSTER" '$0 ~ pattern {print $4}')
-  calculate_osd_weight
-  add_osd_to_crush
 
   # ceph-disk activiate has exec'ed /usr/bin/ceph-osd ${CLI_OPTS[@]} -f -i ${OSD_ID}
   # wait till docker stop or ceph-osd is killed
