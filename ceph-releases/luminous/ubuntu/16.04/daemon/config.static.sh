@@ -24,14 +24,8 @@ function get_mon_config {
 fsid = $fsid
 mon initial members = ${MON_NAME}
 mon host = ${MON_IP}
-auth cluster required = cephx
-auth service required = cephx
-auth client required = cephx
 osd crush chooseleaf type = 0
 osd journal size = 100
-osd pool default pg num = 8
-osd pool default pgp num = 8
-osd pool default size = 1
 public network = ${CEPH_PUBLIC_NETWORK}
 cluster network = ${CEPH_PUBLIC_NETWORK}
 log file = /dev/null
@@ -50,9 +44,6 @@ ENDHERE
 fsid = $fsid
 mon initial members = ${MON_NAME}
 mon host = ${MON_IP}
-auth cluster required = cephx
-auth service required = cephx
-auth client required = cephx
 public network = ${CEPH_PUBLIC_NETWORK}
 cluster network = ${CEPH_CLUSTER_NETWORK}
 osd journal size = ${OSD_JOURNAL_SIZE}
