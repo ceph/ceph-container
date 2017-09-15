@@ -6,9 +6,6 @@
 # auth
 /auth/cephx true
 
-# auth
-/global/max_open_files 131072
-
 #osd
 /osd/osd_journal_size 100
 
