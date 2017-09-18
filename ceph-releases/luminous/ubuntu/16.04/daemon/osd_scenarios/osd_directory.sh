@@ -8,11 +8,6 @@ function osd_directory {
     exit 1
   fi
 
-  if [ -z "${HOSTNAME}" ]; then
-    log "HOSTNAME not set; This will prevent to add an OSD into the CRUSH map"
-    exit 1
-  fi
-
   # check if anything is present, if not, create an osd and its directory
   if [[ -n "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
     log "Creating osd with ceph --cluster ${CLUSTER} osd create"
@@ -68,8 +63,6 @@ function osd_directory {
       chown --verbose ceph. "${OSD_KEYRING}"
       chmod 0600 "${OSD_KEYRING}"
       # add the osd to the crush map
-      calculate_osd_weight
-      add_osd_to_crush
     fi
     echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CLI_OPTS[*]} -f -i ${OSD_ID} --osd-journal ${OSD_J} -k $OSD_KEYRING" | tee -a /etc/forego/"${CLUSTER}"/Procfile
   done
