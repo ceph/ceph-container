@@ -123,7 +123,7 @@ function bootstrap_nfs {
   rpc.idmapd || return 0
 
   # start ganesha
-  ganesha.nfsd -F "${GANESHA_OPTIONS[@]}" "${GANESHA_EPOCH}"
+  ganesha.nfsd "${GANESHA_OPTIONS[@]}" "${GANESHA_EPOCH}"
 }
 
 
@@ -184,9 +184,7 @@ if ! grep -sq "Red Hat Enterprise Linux Server release" /etc/redhat-release; the
   bootstrap_demo_user
 fi
 bootstrap_rest_api
-# bootstrap_nfs is temporarily disabled due to broken package dependencies with nfs-ganesha"
-# For more info see: https://github.com/ceph/ceph-docker/pull/564"
-#bootstrap_nfs
+bootstrap_nfs
 bootstrap_rbd_mirror
 bootstrap_mgr
 
