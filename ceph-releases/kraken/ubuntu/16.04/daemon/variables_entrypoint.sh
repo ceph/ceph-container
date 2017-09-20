@@ -66,7 +66,7 @@ CRUSH_LOCATION_DEFAULT=("root=default" "host=${HOSTNAME}")
 [[ -n "$CRUSH_LOCATION" ]] || read -ra CRUSH_LOCATION <<< "${CRUSH_LOCATION_DEFAULT[@]}"
 
 # This is ONLY used for the CLI calls, e.g: ceph $CLI_OPTS health
-CLI_OPTS=(--cluster ${CLUSTER})
+CLI_OPTS="--cluster ${CLUSTER}"
 
 # This is ONLY used for the daemon's startup, e.g: ceph-osd $DAEMON_OPTS
 DAEMON_OPTS=(--cluster ${CLUSTER} --setuser ceph --setgroup ceph -d)
