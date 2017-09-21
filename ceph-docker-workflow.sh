@@ -12,7 +12,7 @@ BASEDIR=$(dirname "$0")
 LOCAL_BRANCH=$(cd $BASEDIR && git rev-parse --abbrev-ref HEAD)
 LINK_MAP=$(mktemp -p /tmp)
 DRY_RUN=false
-IGNORED_CHANGES="ceph-releases/hammer/ubuntu/16.04/*"
+IGNORED_CHANGES="ceph-releases/[hammer|infernalis]/*"
 
 
 # FUNCTIONS

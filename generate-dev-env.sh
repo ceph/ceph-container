@@ -63,7 +63,7 @@ goto_basedir
 test_args "$@"
 
 case "$1" in
-  hammer|infernalis|jewel|kraken|luminous)
+  jewel|kraken|luminous)
     case "$2" in
       centos|ubuntu|fedora|opensuse|rhel)
           test_combination "$@"
