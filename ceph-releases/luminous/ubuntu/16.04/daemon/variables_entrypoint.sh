@@ -21,6 +21,7 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 : "${MON_NAME:=${HOSTNAME}}"
 : "${MON_DATA_DIR:=/var/lib/ceph/mon/${CLUSTER}-${MON_NAME}}"
 : "${K8S_HOST_NETWORK:=0}"
+: "${KUBECTL_PARAM:='-l daemon=mon'}"
 : "${NETWORK_AUTO_DETECT:=0}"
 : "${MDS_NAME:=${HOSTNAME}}"
 : "${OSD_FORCE_ZAP:=0}"
