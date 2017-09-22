@@ -39,12 +39,10 @@ function start_rgw {
 function create_rgw_user {
 
   # Check to see if our RGW has been initialized
-  if [ ! -e /var/lib/ceph/radosgw/keyring ]; then
-    log "ERROR- /var/lib/ceph/radosgw/keyring must exist. Please get it from your Rados Gateway"
+  if [ ! -e "$RGW_KEYRING" ]; then
+    log "ERROR- $RGW_KEYRING must exist. Please get it from your Rados Gateway"
     exit 1
   fi
-
-  mv /var/lib/ceph/radosgw/keyring "$RGW_KEYRING"
 
   local user_key=""
   if [ -n "${RGW_USER_SECRET_KEY}" ]; then

@@ -64,8 +64,8 @@ function create_mandatory_directories {
   # Create socket directory
   mkdir -p /var/run/ceph
 
-  # Creating rados directories
-  mkdir -p /var/lib/ceph/radosgw/"${RGW_NAME}"
+  # Create radosgw directory
+  mkdir -p /var/lib/ceph/radosgw/"${CLUSTER}"-rgw."${RGW_NAME}"
 
   # Create the MDS directory
   mkdir -p /var/lib/ceph/mds/"${CLUSTER}-${MDS_NAME}"
