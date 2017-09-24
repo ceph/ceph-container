@@ -148,6 +148,10 @@ case "$CEPH_DAEMON" in
     # TAG: demo
     source demo.sh
     ;;
+  disk_list)
+    # TAG: disk_list
+    source disk_list.sh
+    ;;
   *)
     invalid_ceph_daemon
   ;;
