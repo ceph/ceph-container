@@ -74,8 +74,8 @@ function create_mandatory_directories {
   mkdir -p /var/lib/ceph/mgr/"${CLUSTER}-$MGR_NAME"
 
   # Adjust the owner of all those directories
-  chown --verbose -R ceph. /var/run/ceph/
-  find -L /var/lib/ceph/ -mindepth 1 -maxdepth 3 -exec chown --verbose ceph. {} \;
+  chown "${CHOWN_OPT[@]}" -R ceph. /var/run/ceph/
+  find -L /var/lib/ceph/ -mindepth 1 -maxdepth 3 -exec chown "${CHOWN_OPT[@]}" ceph. {} \;
 }
 
 # Print resolved symbolic links of a device
@@ -263,7 +263,7 @@ function get_part_typecode {
 function apply_ceph_ownership_to_disks {
   if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
     wait_for_file "$(dev_part "${OSD_DEVICE}" 5)"
-    chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 5)"
+    chown "${CHOWN_OPT[@]}" ceph. "$(dev_part "${OSD_DEVICE}" 5)"
   fi
   if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
     dev_real_path=$(resolve_symlink "$OSD_BLUESTORE_BLOCK_WAL" "$OSD_BLUESTORE_BLOCK_DB")
@@ -275,20 +275,20 @@ function apply_ceph_ownership_to_disks {
             "$part_code" == "30cd0809-c2b2-499c-8879-2d6b78529876" ||
             "$part_code" == "89c57f98-2fe5-4dc0-89c1-f3ad0ceff2be" ||
             "$part_code" == "cafecafe-9b03-4f30-b4c6-b4b80ceff106" ]]; then
-        chown --verbose ceph. "$partition"
+        chown "${CHOWN_OPT[@]}" ceph. "$partition"
       fi
     done
   elif [[ ${OSD_FILESTORE} -eq 1 ]]; then
     if [[ -n "${OSD_JOURNAL}" ]]; then
       wait_for_file "${OSD_JOURNAL}"
-      chown --verbose ceph. "${OSD_JOURNAL}"
+      chown "${CHOWN_OPT[@]}" ceph. "${OSD_JOURNAL}"
     else
       wait_for_file "$(dev_part "${OSD_DEVICE}" 2)"
-      chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 2)"
+      chown "${CHOWN_OPT[@]}" ceph. "$(dev_part "${OSD_DEVICE}" 2)"
     fi
   fi
   wait_for_file "$(dev_part "${OSD_DEVICE}" 1)"
-  chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 1)"
+  chown "${CHOWN_OPT[@]}" ceph. "$(dev_part "${OSD_DEVICE}" 1)"
 }
 
 # Get partition uuid of a given partition
@@ -363,7 +363,7 @@ function mount_lockbox {
   cluster_name=$(basename "$(grep -R fsid /etc/ceph/ | grep -oE '^[^.]*')")
   ceph_fsid=$(ceph-conf --lookup fsid -c /etc/ceph/"$cluster_name".conf)
   echo "$ceph_fsid" > /var/lib/ceph/osd-lockbox/"${1}"/ceph_fsid
-  chown --verbose ceph. /var/lib/ceph/osd-lockbox/"${1}"/ceph_fsid
+  chown "${CHOWN_OPT[@]}" ceph. /var/lib/ceph/osd-lockbox/"${1}"/ceph_fsid
 }
 
 function umount_lockbox {

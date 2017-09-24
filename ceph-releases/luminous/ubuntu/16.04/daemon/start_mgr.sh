@@ -13,7 +13,7 @@ function start_mgr {
   if [ ! -e "$MGR_KEYRING" ]; then
     # Create ceph-mgr key
     ceph "${CLI_OPTS[@]}" auth get-or-create mgr."$MGR_NAME" mon 'allow profile mgr' osd 'allow *' mds 'allow *' -o "$MGR_KEYRING"
-    chown --verbose ceph. "$MGR_KEYRING"
+    chown "${CHOWN_OPT[@]}" ceph. "$MGR_KEYRING"
     chmod 600 "$MGR_KEYRING"
   fi
 

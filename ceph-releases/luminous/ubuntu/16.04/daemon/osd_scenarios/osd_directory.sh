@@ -23,7 +23,7 @@ function osd_directory {
 
     # create the folder and own it
     mkdir -p "$OSD_PATH"
-    chown --verbose ceph. "$OSD_PATH"
+    chown "${CHOWN_OPT[@]}" ceph. "$OSD_PATH"
     log "created folder $OSD_PATH"
   fi
 
@@ -37,18 +37,18 @@ function osd_directory {
 
     if [ -n "${JOURNAL_DIR}" ]; then
        OSD_J="${JOURNAL_DIR}/journal.${OSD_ID}"
-       chown --verbose -R ceph. "${JOURNAL_DIR}"
+       chown "${CHOWN_OPT[@]}" -R ceph. "${JOURNAL_DIR}"
     else
        if [ -n "${JOURNAL}" ]; then
           OSD_J=${JOURNAL}
-          chown -R ceph. "$(dirname "${JOURNAL_DIR}")"
+          chown "${CHOWN_OPT[@]}" -R ceph. "$(dirname "${JOURNAL_DIR}")"
        else
           OSD_J=${OSD_PATH}/journal
        fi
     fi
     # check to see if our osd has been initialized
     if [ ! -e "${OSD_PATH}"/keyring ]; then
-      chown --verbose ceph. "$OSD_PATH"
+      chown "${CHOWN_OPT[@]}" ceph. "$OSD_PATH"
       # create osd key and file structure
       ceph-osd "${CLI_OPTS[@]}" -i "$OSD_ID" --mkfs --mkkey --mkjournal --osd-journal "${OSD_J}" --setuser ceph --setgroup ceph
       if [ ! -e "$OSD_BOOTSTRAP_KEYRING"  ]; then
@@ -60,7 +60,7 @@ function osd_directory {
       # add the osd key
       ceph "${CLI_OPTS[@]}" --name client.bootstrap-osd --keyring "$OSD_BOOTSTRAP_KEYRING" auth add osd."${OSD_ID}" -i "${OSD_KEYRING}" osd 'allow *' mon 'allow profile osd'  || log "$1"
       log "done adding key"
-      chown --verbose ceph. "${OSD_KEYRING}"
+      chown "${CHOWN_OPT[@]}" ceph. "${OSD_KEYRING}"
       chmod 0600 "${OSD_KEYRING}"
       # add the osd to the crush map
     fi
