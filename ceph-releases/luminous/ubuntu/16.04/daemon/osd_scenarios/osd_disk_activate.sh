@@ -32,35 +32,17 @@ function osd_activate {
   MOUNTED_PART=${DATA_PART}
 
   if [[ ${OSD_DMCRYPT} -eq 1 ]] && [[ ${OSD_FILESTORE} -eq 1 ]]; then
-    DATA_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
-    LOCKBOX_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 5)")
-    JOURNAL_PART=$(ceph-disk list "${OSD_DEVICE}" | awk '/ceph journal/ {print $1}') # This is a privileged container so 'ceph-disk list' works
-    JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}")
-
+    get_dmcrypt_filestore_uuid
     mount_lockbox "$DATA_UUID" "$LOCKBOX_UUID"
-
     CEPH_DISK_OPTIONS+=('--dmcrypt')
     MOUNTED_PART="/dev/mapper/${DATA_UUID}"
-
     open_encrypted_parts_filestore
-
   elif [[ ${OSD_DMCRYPT} -eq 1 ]] && [[ ${OSD_BLUESTORE} -eq 1 ]]; then
-    DATA_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
-    BLOCK_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 2)")
-    BLOCK_PART=$(dev_part "${OSD_DEVICE}" 2)
-    LOCKBOX_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 5)")
-    BLOCK_DB_PART=$(ceph-disk list "${OSD_BLUESTORE_BLOCK_DB}" | awk '/ceph block.db/ {print $1}') # This is a privileged container so 'ceph-disk list' works
-    BLOCK_DB_UUID=$(get_part_uuid "${BLOCK_DB_PART}")
-    BLOCK_WAL_PART=$(ceph-disk list "${OSD_BLUESTORE_BLOCK_WAL}" | awk '/ceph block.wal/ {print $1}') # This is a privileged container so 'ceph-disk list' works
-    BLOCK_WAL_UUID=$(get_part_uuid "${BLOCK_WAL_PART}")
-
+    get_dmcrypt_bluestore_uuid
     mount_lockbox "$DATA_UUID" "$LOCKBOX_UUID"
-
     CEPH_DISK_OPTIONS+=('--dmcrypt')
     MOUNTED_PART="/dev/mapper/${DATA_UUID}"
-
     open_encrypted_parts_bluestore
-
   fi
 
   if [[ -z "${CEPH_DISK_OPTIONS[*]}" ]]; then

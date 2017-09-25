@@ -73,12 +73,20 @@ function osd_disk_prepare {
   if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
     # unmount lockbox partition when using dmcrypt
     umount_lockbox
-  fi
 
-  # close dmcrypt device
-  DATA_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
-  DATA_PART=$(dev_part "${OSD_DEVICE}" 1)
-  close_encrypted_part "${DATA_UUID}" "${DATA_PART}" "${DATA_UUID}" 1> /dev/null
+    # close dmcrypt device
+    # shellcheck disable=SC2034
+    DATA_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
+    # shellcheck disable=SC2034
+    DATA_PART=$(dev_part "${OSD_DEVICE}" 1)
+    if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
+      get_dmcrypt_bluestore_uuid
+      close_encrypted_parts_bluestore
+    elif [[ "${OSD_FILESTORE}" -eq 1 ]]; then
+      get_dmcrypt_filestore_uuid
+      close_encrypted_parts_filestore
+    fi
+  fi
 
   # watch the udev event queue, and exit if all current events are handled
   udevadm settle --timeout=600

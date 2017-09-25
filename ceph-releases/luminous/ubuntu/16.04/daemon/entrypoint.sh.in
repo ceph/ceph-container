@@ -151,6 +151,7 @@ case "$CEPH_DAEMON" in
   disk_list)
     # TAG: disk_list
     source disk_list.sh
+    start_disk_list
     ;;
   *)
     invalid_ceph_daemon
