@@ -17,7 +17,7 @@ function osd_activate {
     else
       CLI+=("${OSD_DEVICE}")
     fi
-    JOURNAL_PART=$(ceph-disk list "${CLI[@]}" | awk '/ceph journal/ {print $1}') # This is a privileged container so 'ceph-disk list' works
+    JOURNAL_PART=$(ceph-disk list "${CLI[@]}" | grep journal | sed -r 's/^.*\s([^ ]+)$/\1/') # This is a privileged container so 'ceph-disk list' works
     JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}" || true)
   fi
 
