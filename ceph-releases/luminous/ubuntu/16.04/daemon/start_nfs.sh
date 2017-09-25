@@ -26,7 +26,7 @@ function start_nfs {
 
     # Generate the RGW key
     ceph "${CLI_OPTS[@]}" --name client.bootstrap-rgw --keyring "$RGW_BOOTSTRAP_KEYRING" auth get-or-create client.rgw."${RGW_NAME}" osd 'allow rwx' mon 'allow rw' -o "$RGW_KEYRING"
-    chown --verbose ceph. "$RGW_KEYRING"
+    chown "${CHOWN_OPT[@]}" ceph. "$RGW_KEYRING"
     chmod 0600 "$RGW_KEYRING"
   fi
 

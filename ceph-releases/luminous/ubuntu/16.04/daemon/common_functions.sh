@@ -74,8 +74,8 @@ function create_mandatory_directories {
   mkdir -p /var/lib/ceph/mgr/"${CLUSTER}-$MGR_NAME"
 
   # Adjust the owner of all those directories
-  chown --verbose -R ceph. /var/run/ceph/
-  find -L /var/lib/ceph/ -mindepth 1 -maxdepth 3 -exec chown --verbose ceph. {} \;
+  chown "${CHOWN_OPT[@]}" -R ceph. /var/run/ceph/
+  find -L /var/lib/ceph/ -mindepth 1 -maxdepth 3 -exec chown "${CHOWN_OPT[@]}" ceph. {} \;
 }
 
 # Print resolved symbolic links of a device
@@ -263,7 +263,7 @@ function get_part_typecode {
 function apply_ceph_ownership_to_disks {
   if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
     wait_for_file "$(dev_part "${OSD_DEVICE}" 5)"
-    chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 5)"
+    chown "${CHOWN_OPT[@]}" ceph. "$(dev_part "${OSD_DEVICE}" 5)"
   fi
   if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
     dev_real_path=$(resolve_symlink "$OSD_BLUESTORE_BLOCK_WAL" "$OSD_BLUESTORE_BLOCK_DB")
@@ -275,20 +275,20 @@ function apply_ceph_ownership_to_disks {
             "$part_code" == "30cd0809-c2b2-499c-8879-2d6b78529876" ||
             "$part_code" == "89c57f98-2fe5-4dc0-89c1-f3ad0ceff2be" ||
             "$part_code" == "cafecafe-9b03-4f30-b4c6-b4b80ceff106" ]]; then
-        chown --verbose ceph. "$partition"
+        chown "${CHOWN_OPT[@]}" ceph. "$partition"
       fi
     done
   elif [[ ${OSD_FILESTORE} -eq 1 ]]; then
     if [[ -n "${OSD_JOURNAL}" ]]; then
       wait_for_file "${OSD_JOURNAL}"
-      chown --verbose ceph. "${OSD_JOURNAL}"
+      chown "${CHOWN_OPT[@]}" ceph. "${OSD_JOURNAL}"
     else
       wait_for_file "$(dev_part "${OSD_DEVICE}" 2)"
-      chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 2)"
+      chown "${CHOWN_OPT[@]}" ceph. "$(dev_part "${OSD_DEVICE}" 2)"
     fi
   fi
   wait_for_file "$(dev_part "${OSD_DEVICE}" 1)"
-  chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 1)"
+  chown "${CHOWN_OPT[@]}" ceph. "$(dev_part "${OSD_DEVICE}" 1)"
 }
 
 # Get partition uuid of a given partition
@@ -338,18 +338,45 @@ function detect_ceph_files {
   fi
 }
 
+# Opens all bluestore encrypted partitions
+function open_encrypted_parts_bluestore {
+  # Open LUKS device(s) if necessary
+  if [[ ! -e /dev/mapper/"${DATA_UUID}" ]]; then
+    open_encrypted_part "${DATA_UUID}" "${DATA_PART}" "${DATA_UUID}"
+  fi
+  if [[ ! -e /dev/mapper/"${BLOCK_UUID}" ]]; then
+    open_encrypted_part "${BLOCK_UUID}" "${BLOCK_PART}" "${DATA_UUID}"
+  fi
+  if [[ ! -e /dev/mapper/"${BLOCK_DB_UUID}" ]]; then
+    open_encrypted_part "${BLOCK_DB_UUID}" "${BLOCK_DB_PART}" "${DATA_UUID}"
+  fi
+  if [[ ! -e /dev/mapper/"${BLOCK_WAL_UUID}" ]]; then
+    open_encrypted_part "${BLOCK_WAL_UUID}" "${BLOCK_WAL_PART}" "${DATA_UUID}"
+  fi
+}
+
+# Opens all filestore encrypted partitions
+function open_encrypted_parts_filestore {
+  # Open LUKS device(s) if necessary
+  if [[ ! -e /dev/mapper/"${DATA_UUID}" ]]; then
+    open_encrypted_part "${DATA_UUID}" "${DATA_PART}" "${DATA_UUID}"
+  fi
+  if [[ ! -e /dev/mapper/"${JOURNAL_UUID}" ]]; then
+    open_encrypted_part "${JOURNAL_UUID}" "${JOURNAL_PART}" "${DATA_UUID}"
+  fi
+}
+
 # Opens an encrypted partition
 function open_encrypted_part {
-  # $1 is the encrypted device
-  # $2 is the partition uuid
-  # $3 is the data partition uuid (always this one for the lockbox)
-  # add || true to handle the case where the device is already opened
+  # $1 is partition uuid
+  # $2 is partition name, e.g: /dev/sda1
+  # $3 is the 'ceph data' partition uuid, this is the one used by the lockbox
   log "Opening encrypted device $1"
   ceph "${CLI_OPTS[@]}" --name client.osd-lockbox."${3}" \
   --keyring /var/lib/ceph/osd-lockbox/"${3}"/keyring \
   config-key \
   get \
-  dm-crypt/osd/"${3}"/luks | base64 -d | cryptsetup --key-file - luksOpen "${2}" "${1}" || true
+  dm-crypt/osd/"${3}"/luks 2> /dev/null | base64 -d | cryptsetup --key-file - luksOpen "${2}" "${1}"
 }
 
 function mount_lockbox {
@@ -363,7 +390,20 @@ function mount_lockbox {
   cluster_name=$(basename "$(grep -R fsid /etc/ceph/ | grep -oE '^[^.]*')")
   ceph_fsid=$(ceph-conf --lookup fsid -c /etc/ceph/"$cluster_name".conf)
   echo "$ceph_fsid" > /var/lib/ceph/osd-lockbox/"${1}"/ceph_fsid
-  chown --verbose ceph. /var/lib/ceph/osd-lockbox/"${1}"/ceph_fsid
+  chown "${CHOWN_OPT[@]}" ceph. /var/lib/ceph/osd-lockbox/"${1}"/ceph_fsid
+}
+
+# Closes an encrypted partition
+function close_encrypted_part {
+  # $1 is partition uuid
+  # $2 is partition name, e.g: /dev/sda1
+  # $3 is the 'ceph data' partition uuid, this is the one used by the lockbox
+  log "Closing encrypted device $1"
+  ceph "${CLI_OPTS[@]}" --name client.osd-lockbox."${3}" \
+  --keyring /var/lib/ceph/osd-lockbox/"${3}"/keyring \
+  config-key \
+  get \
+  dm-crypt/osd/"${3}"/luks 2> /dev/null | base64 -d | cryptsetup --key-file - luksClose "${1}"
 }
 
 function umount_lockbox {
@@ -374,4 +414,16 @@ function umount_lockbox {
     DATA_UUID=$(get_part_uuid "${OSD_DEVICE}"1)
     umount /var/lib/ceph/osd-lockbox/"${DATA_UUID}" || true
   fi
+}
+
+function ami_privileged {
+  if ! blkid > /dev/null || ! stat /dev/disk/ > /dev/null; then
+    log "ERROR: I don't have enough privileges, I can't discover devices on that machine."
+    log "ERROR: run me as a privileged container with the following options"
+    log "ERROR: --privileged=true -v /dev/:/dev/"
+    exit 1
+  fi
+  # NOTE (leseb): when not running with --privileged=true -v /dev/:/dev/
+  # lsblk is not able to get device mappers path and is complaining.
+  # That's why stderr is suppressed in /dev/null
 }
