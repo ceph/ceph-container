@@ -10,8 +10,10 @@ function osd_directory {
 
   # check if anything is present, if not, create an osd and its directory
   if [[ -n "$(find /var/lib/ceph/osd -prune -empty)" ]]; then
-    log "Creating osd with ceph --cluster ${CLUSTER} osd create"
-    OSD_ID=$(ceph --cluster "${CLUSTER}" osd create)
+    log "Creating osd"
+    UUID=$(uuidgen)
+    OSD_SECRET=$(ceph-authtool --gen-print-key)
+    OSD_ID=$(echo "{\"cephx_secret\": \"${OSD_SECRET}\"}" | ceph osd new "${UUID}" -i - -n client.bootstrap-osd -k "$OSD_BOOTSTRAP_KEYRING")
     if is_integer "$OSD_ID"; then
       log "OSD created with ID: ${OSD_ID}"
     else
@@ -20,11 +22,26 @@ function osd_directory {
     fi
 
     OSD_PATH=$(get_osd_path "$OSD_ID")
+    if [ -n "${JOURNAL_DIR}" ]; then
+       OSD_J="${JOURNAL_DIR}/journal.${OSD_ID}"
+       chown "${CHOWN_OPT[@]}" -R ceph. "${JOURNAL_DIR}"
+    else
+       if [ -n "${JOURNAL}" ]; then
+          OSD_J=${JOURNAL}
+          chown "${CHOWN_OPT[@]}" -R ceph. "$(dirname "${JOURNAL_DIR}")"
+       else
+          OSD_J=${OSD_PATH}/journal
+       fi
+    fi
 
     # create the folder and own it
     mkdir -p "$OSD_PATH"
     chown "${CHOWN_OPT[@]}" ceph. "$OSD_PATH"
     log "created folder $OSD_PATH"
+    # write the secret to the osd keyring file
+    ceph-authtool --create-keyring "${OSD_PATH}"/keyring --name osd."${OSD_ID}" --add-key "${OSD_SECRET}"
+    # init data directory
+    ceph-osd -i "${OSD_ID}" --mkfs --osd-uuid "${UUID}" --mkjournal --osd-journal "${OSD_J}" --setuser ceph --setgroup ceph
   fi
 
   # create the directory and an empty Procfile
@@ -45,24 +62,6 @@ function osd_directory {
        else
           OSD_J=${OSD_PATH}/journal
        fi
-    fi
-    # check to see if our osd has been initialized
-    if [ ! -e "${OSD_PATH}"/keyring ]; then
-      chown "${CHOWN_OPT[@]}" ceph. "$OSD_PATH"
-      # create osd key and file structure
-      ceph-osd "${CLI_OPTS[@]}" -i "$OSD_ID" --mkfs --mkkey --mkjournal --osd-journal "${OSD_J}" --setuser ceph --setgroup ceph
-      if [ ! -e "$OSD_BOOTSTRAP_KEYRING"  ]; then
-        log "ERROR- $OSD_BOOTSTRAP_KEYRING must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-osd -o $OSD_BOOTSTRAP_KEYRING '"
-        exit 1
-      fi
-      ceph_health client.bootstrap-osd "$OSD_BOOTSTRAP_KEYRING"
-
-      # add the osd key
-      ceph "${CLI_OPTS[@]}" --name client.bootstrap-osd --keyring "$OSD_BOOTSTRAP_KEYRING" auth add osd."${OSD_ID}" -i "${OSD_KEYRING}" osd 'allow *' mon 'allow profile osd'  || log "$1"
-      log "done adding key"
-      chown "${CHOWN_OPT[@]}" ceph. "${OSD_KEYRING}"
-      chmod 0600 "${OSD_KEYRING}"
-      # add the osd to the crush map
     fi
     echo "${CLUSTER}-${OSD_ID}: /usr/bin/ceph-osd ${CLI_OPTS[*]} -f -i ${OSD_ID} --osd-journal ${OSD_J} -k $OSD_KEYRING" | tee -a /etc/forego/"${CLUSTER}"/Procfile
   done
