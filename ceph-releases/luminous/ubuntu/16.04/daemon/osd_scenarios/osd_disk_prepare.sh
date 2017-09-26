@@ -73,11 +73,6 @@ function osd_disk_prepare {
   # unmount lockbox partition when using dmcrypt
   umount_lockbox
 
-  # close dmcrypt device
-  DATA_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
-  DATA_PART=$(dev_part "${OSD_DEVICE}" 1)
-  close_encrypted_part "${DATA_UUID}" "${DATA_PART}" "${DATA_UUID}" 1> /dev/null
-
   # watch the udev event queue, and exit if all current events are handled
   udevadm settle --timeout=600
 

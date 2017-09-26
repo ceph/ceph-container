@@ -407,13 +407,11 @@ function close_encrypted_part {
 }
 
 function umount_lockbox {
-  if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
-    log "Unmounting LOCKBOX directory"
-    # NOTE(leseb): adding || true so when this bug will be fixed the entrypoint will not fail
-    # Ceph bug tracker: http://tracker.ceph.com/issues/18944
-    DATA_UUID=$(get_part_uuid "${OSD_DEVICE}"1)
-    umount /var/lib/ceph/osd-lockbox/"${DATA_UUID}" || true
-  fi
+  log "Unmounting LOCKBOX directory"
+  # NOTE(leseb): adding || true so when this bug will be fixed the entrypoint will not fail
+  # Ceph bug tracker: http://tracker.ceph.com/issues/18944
+  DATA_UUID=$(get_part_uuid "${OSD_DEVICE}"1)
+  umount /var/lib/ceph/osd-lockbox/"${DATA_UUID}" || true
 }
 
 function ami_privileged {
