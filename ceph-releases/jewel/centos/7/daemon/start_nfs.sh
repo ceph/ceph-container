@@ -1,1 +1,0 @@
-../../../ubuntu/14.04/daemon/start_nfs.sh

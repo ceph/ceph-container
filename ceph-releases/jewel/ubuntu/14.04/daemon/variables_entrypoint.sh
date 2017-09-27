@@ -5,7 +5,7 @@
 # LIST OF ALL SCENARIOS AVAILABLE #
 ###################################
 
-ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_ceph_disk osd_ceph_disk_prepare osd_ceph_disk_activate osd_ceph_activate_journal mds rgw rgw_user restapi nfs zap_device mon_health"
+ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_ceph_disk osd_ceph_disk_prepare osd_ceph_disk_activate osd_ceph_activate_journal mds rgw rgw_user restapi zap_device mon_health disk_list"
 
 
 #########################
@@ -22,7 +22,7 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 : "${MON_DATA_DIR:=/var/lib/ceph/mon/${CLUSTER}-${MON_NAME}}"
 : "${K8S_HOST_NETWORK:=0}"
 : "${NETWORK_AUTO_DETECT:=0}"
-: "${MDS_NAME:=mds-${HOSTNAME}}"
+: "${MDS_NAME:=${HOSTNAME}}"
 : "${OSD_FORCE_ZAP:=0}"
 : "${OSD_JOURNAL_SIZE:=100}"
 : "${OSD_DMCRYPT:=0}"
@@ -35,6 +35,7 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 : "${CEPHFS_METADATA_POOL:=${CEPHFS_NAME}_metadata}"
 : "${CEPHFS_METADATA_POOL_PG:=8}"
 : "${RGW_NAME:=${HOSTNAME}}"
+: "${RBD_MIRROR_NAME:=${HOSTNAME}}"
 : "${RGW_ZONEGROUP:=}"
 : "${RGW_ZONE:=}"
 : "${RGW_CIVETWEB_IP:=0.0.0.0}"
@@ -42,7 +43,6 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 : "${RGW_REMOTE_CGI:=0}"
 : "${RGW_REMOTE_CGI_PORT:=9000}"
 : "${RGW_REMOTE_CGI_HOST:=0.0.0.0}"
-: "${RGW_USER:="cephnfs"}"
 : "${RESTAPI_IP:=0.0.0.0}"
 : "${RESTAPI_PORT:=5000}"
 : "${RESTAPI_BASE_URL:=/api/v0.1}"
@@ -51,8 +51,7 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 : "${KV_TYPE:=none}" # valid options: etcd, k8s|kubernetes or none
 : "${KV_IP:=127.0.0.1}"
 : "${KV_PORT:=2379}"
-: "${GANESHA_OPTIONS:=""}"
-: "${GANESHA_EPOCH:=""}" # For restarting
+OSD_FILESTORE=1
 
 # Create a default array
 CRUSH_LOCATION_DEFAULT=("root=default" "host=${HOSTNAME}")
@@ -69,7 +68,7 @@ MOUNT_OPTS=(-t xfs -o noatime,inode64)
 # make sure etcd uses http or https as a prefix
 if [[ "$KV_TYPE" == "etcd" ]]; then
   if [ -n "${KV_CA_CERT}" ]; then
-  	CONFD_NODE_SCHEMA="https://"
+    CONFD_NODE_SCHEMA="https://"
     KV_TLS=(--ca-file=${KV_CA_CERT} --cert-file=${KV_CLIENT_CERT} --key-file=${KV_CLIENT_KEY})
     CONFD_KV_TLS=(-scheme=https -client-ca-keys=${KV_CA_CERT} -client-cert=${KV_CLIENT_CERT} -client-key=${KV_CLIENT_KEY})
   else
@@ -83,7 +82,7 @@ fi
 MDS_KEYRING=/var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring
 ADMIN_KEYRING=/etc/ceph/${CLUSTER}.client.admin.keyring
 MON_KEYRING=/etc/ceph/${CLUSTER}.mon.keyring
-RGW_KEYRING=/var/lib/ceph/radosgw/${RGW_NAME}/keyring
+RGW_KEYRING=/var/lib/ceph/radosgw/${CLUSTER}-rgw.${RGW_NAME}/keyring
 MDS_BOOTSTRAP_KEYRING=/var/lib/ceph/bootstrap-mds/${CLUSTER}.keyring
 RGW_BOOTSTRAP_KEYRING=/var/lib/ceph/bootstrap-rgw/${CLUSTER}.keyring
 OSD_BOOTSTRAP_KEYRING=/var/lib/ceph/bootstrap-osd/${CLUSTER}.keyring

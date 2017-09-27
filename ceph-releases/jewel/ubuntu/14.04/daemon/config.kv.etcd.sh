@@ -63,7 +63,7 @@ function get_mon_config {
       # Generate custom provided administrator key
       CLI+=("--add-key=$ADMIN_SECRET")
     fi
-    ceph-authtool "$ADMIN_KEYRING" --create-keyring "${CLI[@]}" -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
+    ceph-authtool "$ADMIN_KEYRING" --create-keyring "${CLI[@]}" -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow' --cap mgr 'allow *'
     ceph-authtool "$MON_KEYRING" --create-keyring --gen-key -n mon. --cap mon 'allow *'
 
     for item in ${OSD_BOOTSTRAP_KEYRING}:Osd ${MDS_BOOTSTRAP_KEYRING}:Mds ${RGW_BOOTSTRAP_KEYRING}:Rgw; do
@@ -82,7 +82,7 @@ function get_mon_config {
     log "Importing Keyrings and Monmap to KV."
     etcdctl "${ETCDCTL_OPTS[@]}" "${KV_TLS[@]}" set "${CLUSTER_PATH}"/monKeyring < "$MON_KEYRING"
     etcdctl "${ETCDCTL_OPTS[@]}" "${KV_TLS[@]}" set "${CLUSTER_PATH}"/adminKeyring < "$ADMIN_KEYRING"
-    chown --verbose ceph. "$MON_KEYRING" "$ADMIN_KEYRING"
+    chown "${CHOWN_OPT[@]}" ceph. "$MON_KEYRING" "$ADMIN_KEYRING"
 
     uuencode "$MONMAP" - | etcdctl "${ETCDCTL_OPTS[@]}" "${KV_TLS[@]}" set "${CLUSTER_PATH}"/monmap
 
@@ -104,7 +104,7 @@ function import_bootstrap_keyrings {
     local bootstrap_keyring
     bootstrap_keyring="bootstrap${array[1]}Keyring"
     etcdctl "${ETCDCTL_OPTS[@]}" "${KV_TLS[@]}" get "${CLUSTER_PATH}"/"${bootstrap_keyring}" > "$keyring"
-    chown --verbose ceph. "$keyring"
+    chown "${CHOWN_OPT[@]}" ceph. "$keyring"
   done
 }
 
