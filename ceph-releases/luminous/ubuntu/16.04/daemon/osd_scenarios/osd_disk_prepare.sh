@@ -70,8 +70,10 @@ function osd_disk_prepare {
     fi
   fi
 
-  # unmount lockbox partition when using dmcrypt
-  umount_lockbox
+  if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+    # unmount lockbox partition when using dmcrypt
+    umount_lockbox
+  fi
 
   # watch the udev event queue, and exit if all current events are handled
   udevadm settle --timeout=600
