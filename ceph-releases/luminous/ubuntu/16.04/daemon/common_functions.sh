@@ -338,6 +338,29 @@ function detect_ceph_files {
   fi
 }
 
+# This function gets the uuid of bluestore partitions
+# These uuids will be used to open and close encrypted partitions
+function get_dmcrypt_bluestore_uuid {
+  DATA_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
+  BLOCK_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 2)")
+  BLOCK_PART=$(dev_part "${OSD_DEVICE}" 2)
+  LOCKBOX_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 5)")
+  BLOCK_DB_PART=$(ceph-disk list "${OSD_BLUESTORE_BLOCK_DB}" | awk '/ceph block.db/ {print $1}') # This is a privileged container so 'ceph-disk list' works
+  BLOCK_DB_UUID=$(get_part_uuid "${BLOCK_DB_PART}")
+  BLOCK_WAL_PART=$(ceph-disk list "${OSD_BLUESTORE_BLOCK_WAL}" | awk '/ceph block.wal/ {print $1}') # This is a privileged container so 'ceph-disk list' works
+  BLOCK_WAL_UUID=$(get_part_uuid "${BLOCK_WAL_PART}")
+}
+
+# This function gets the uuid of filestore partitions
+# These uuids will be used to open and close encrypted partitions
+function get_dmcrypt_filestore_uuid {
+  DATA_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
+  # shellcheck disable=SC2034
+  LOCKBOX_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 5)")
+  JOURNAL_PART=$(ceph-disk list "${OSD_DEVICE}" | awk '/ceph journal/ {print $1}') # This is a privileged container so 'ceph-disk list' works
+  JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}")
+}
+
 # Opens all bluestore encrypted partitions
 function open_encrypted_parts_bluestore {
   # Open LUKS device(s) if necessary
@@ -363,6 +386,34 @@ function open_encrypted_parts_filestore {
   fi
   if [[ ! -e /dev/mapper/"${JOURNAL_UUID}" ]]; then
     open_encrypted_part "${JOURNAL_UUID}" "${JOURNAL_PART}" "${DATA_UUID}"
+  fi
+}
+
+# Closes all bluestore encrypted partitions
+function close_encrypted_parts_bluestore {
+  # Open LUKS device(s) if necessary
+  if [[ -e /dev/mapper/"${DATA_UUID}" ]]; then
+    close_encrypted_part "${DATA_UUID}" "${DATA_PART}" "${DATA_UUID}"
+  fi
+  if [[ -e /dev/mapper/"${BLOCK_UUID}" ]]; then
+    close_encrypted_part "${BLOCK_UUID}" "${BLOCK_PART}" "${DATA_UUID}"
+  fi
+  if [[ -e /dev/mapper/"${BLOCK_DB_UUID}" ]]; then
+    close_encrypted_part "${BLOCK_DB_UUID}" "${BLOCK_DB_PART}" "${DATA_UUID}"
+  fi
+  if [[ -e /dev/mapper/"${BLOCK_WAL_UUID}" ]]; then
+    close_encrypted_part "${BLOCK_WAL_UUID}" "${BLOCK_WAL_PART}" "${DATA_UUID}"
+  fi
+}
+
+# Closes all filestore encrypted partitions
+function close_encrypted_parts_filestore {
+  # Open LUKS device(s) if necessary
+  if [[ -e /dev/mapper/"${DATA_UUID}" ]]; then
+    close_encrypted_part "${DATA_UUID}" "${DATA_PART}" "${DATA_UUID}"
+  fi
+  if [[ -e /dev/mapper/"${JOURNAL_UUID}" ]]; then
+    close_encrypted_part "${JOURNAL_UUID}" "${JOURNAL_PART}" "${DATA_UUID}"
   fi
 }
 
@@ -412,6 +463,18 @@ function umount_lockbox {
   # Ceph bug tracker: http://tracker.ceph.com/issues/18944
   DATA_UUID=$(get_part_uuid "${OSD_DEVICE}"1)
   umount /var/lib/ceph/osd-lockbox/"${DATA_UUID}" || true
+}
+
+function ami_privileged {
+  if ! blkid > /dev/null || ! stat /dev/disk/ > /dev/null; then
+    log "ERROR: I don't have enough privileges, I can't discover devices on that machine."
+    log "ERROR: run me as a privileged container with the following options"
+    log "ERROR: --privileged=true -v /dev/:/dev/"
+    exit 1
+  fi
+  # NOTE (leseb): when not running with --privileged=true -v /dev/:/dev/
+  # lsblk is not able to get device mappers path and is complaining.
+  # That's why stderr is suppressed in /dev/null
 }
 
 function ami_privileged {
