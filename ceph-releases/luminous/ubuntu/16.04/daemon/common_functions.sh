@@ -461,7 +461,7 @@ function umount_lockbox {
   log "Unmounting LOCKBOX directory"
   # NOTE(leseb): adding || true so when this bug will be fixed the entrypoint will not fail
   # Ceph bug tracker: http://tracker.ceph.com/issues/18944
-  DATA_UUID=$(get_part_uuid "${OSD_DEVICE}"1)
+  DATA_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
   umount /var/lib/ceph/osd-lockbox/"${DATA_UUID}" || true
 }
 
