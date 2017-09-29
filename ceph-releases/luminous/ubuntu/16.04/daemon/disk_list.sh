@@ -6,6 +6,7 @@ set -e
 # VARIABLES #
 #############
 
+mkdir -p /var/lib/ceph/tmp/
 tmp_dir="$(mktemp --directory --tmpdir=/var/lib/ceph/tmp/)"
 DOCKER_ENV=""
 
@@ -43,13 +44,15 @@ function umount_ceph_data () {
 function get_docker_env () {
   mount_ceph_data
   cd "$tmp_dir" || return
-  if [[ -n "${1}" ]]; then
-    if is_dmcrypt; then
-      cd /var/lib/ceph/osd-lockbox/"$data_uuid"
+  if [[ -n ${1} ]]; then
+    if [[ "${1}" == "whoami" ]]; then
+      if is_dmcrypt; then
+        cd /var/lib/ceph/osd-lockbox/"$data_uuid" || return
+      fi
     fi
-    if [[ -L "${1}" ]]; then
+    if [[ -L ${1} ]]; then
       resolve_symlink "${1}"
-    elif [[ -f "${1}" ]]; then
+    elif [[ -f ${1} ]]; then
       cat "${1}"
     fi
   else
@@ -116,7 +119,7 @@ function start_disk_list () {
     # this means we called this from osd_activate and that we are asking for a specific dev
     # the idea is to pass as a variable the 'type' we are looking for and we get the partition back
     # e.g: start_disk_list journal, will return /dev/sda2
-    if [[ -n "$DISK_LIST_SEARCH" ]]; then
+    if [[ -n $DISK_LIST_SEARCH ]]; then
       get_docker_env "$DISK_LIST_SEARCH"
     else
       get_docker_env

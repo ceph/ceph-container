@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+source disk_list.sh
 
 # log arguments with timestamp
 function log {
@@ -357,7 +358,10 @@ function get_dmcrypt_filestore_uuid {
   DATA_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
   # shellcheck disable=SC2034
   LOCKBOX_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 5)")
-  JOURNAL_PART=$(ceph-disk list "${OSD_DEVICE}" | awk '/ceph journal/ {print $1}') # This is a privileged container so 'ceph-disk list' works
+  export DISK_LIST_SEARCH=journal_dmcrypt
+  start_disk_list
+  JOURNAL_PART=$(start_disk_list)
+  unset DISK_LIST_SEARCH
   JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}")
 }
 
