@@ -45,16 +45,17 @@ function osd_disk_prepare {
     fi
   fi
 
+  IFS=" " read -r -a CEPH_DISK_CLI_OPTS <<< "${CLI_OPTS[*]}"
   if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
     # We need to do a mapfile because ${OSD_LOCKBOX_UUID} needs to be quoted
     # so doing a regular CLI_OPTS+=("${OSD_LOCKBOX_UUID}") will make shellcheck unhappy.
     # Although the array can still be incremented by the others task using a regular += operator
-    mapfile -t CLI_OPTS_ARRAY <<< "${CLI_OPTS[*]} --dmcrypt --lockbox-uuid ${OSD_LOCKBOX_UUID}"
-    IFS=" " read -r -a CLI_OPTS <<< "${CLI_OPTS_ARRAY[*]}"
+    mapfile -t CEPH_DISK_CLI_OPTS_ARRAY <<< "${CEPH_DISK_CLI_OPTS[*]} --dmcrypt --lockbox-uuid ${OSD_LOCKBOX_UUID}"
+    IFS=" " read -r -a CEPH_DISK_CLI_OPTS <<< "${CEPH_DISK_CLI_OPTS_ARRAY[*]}"
   fi
   if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
-    CLI_OPTS+=(--bluestore)
-    ceph-disk -v prepare "${CLI_OPTS[@]}" \
+    CEPH_DISK_CLI_OPTS+=(--bluestore)
+    ceph-disk -v prepare "${CEPH_DISK_CLI_OPTS[@]}" \
     --block.wal "${OSD_BLUESTORE_BLOCK_WAL}" \
     --block.wal-uuid "${OSD_BLUESTORE_BLOCK_WAL_UUID}" \
     --block.db "${OSD_BLUESTORE_BLOCK_DB}" \
@@ -62,11 +63,11 @@ function osd_disk_prepare {
     --block-uuid "${OSD_BLUESTORE_BLOCK_UUID}" \
     "${OSD_DEVICE}"
   elif [[ "${OSD_FILESTORE}" -eq 1 ]]; then
-    CLI_OPTS+=(--filestore)
+    CEPH_DISK_CLI_OPTS+=(--filestore)
     if [[ -n "${OSD_JOURNAL}" ]]; then
-      ceph-disk -v prepare "${CLI_OPTS[@]}" --journal-uuid "${OSD_JOURNAL_UUID}" "${OSD_DEVICE}" "${OSD_JOURNAL}"
+      ceph-disk -v prepare "${CEPH_DISK_CLI_OPTS[@]}" --journal-uuid "${OSD_JOURNAL_UUID}" "${OSD_DEVICE}" "${OSD_JOURNAL}"
     else
-      ceph-disk -v prepare "${CLI_OPTS[@]}" --journal-uuid "${OSD_JOURNAL_UUID}" "${OSD_DEVICE}"
+      ceph-disk -v prepare "${CEPH_DISK_CLI_OPTS[@]}" --journal-uuid "${OSD_JOURNAL_UUID}" "${OSD_DEVICE}"
     fi
   fi
 

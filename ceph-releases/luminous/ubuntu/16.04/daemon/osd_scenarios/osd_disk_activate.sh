@@ -1,6 +1,7 @@
 #!/bin/bash
 # shellcheck disable=SC2034
 set -e
+source disk_list.sh
 
 function osd_activate {
   if [[ -z "${OSD_DEVICE}" ]] || [[ ! -b "${OSD_DEVICE}" ]]; then
@@ -17,8 +18,11 @@ function osd_activate {
     else
       CLI+=("${OSD_DEVICE}")
     fi
-    JOURNAL_PART=$(ceph-disk list "${CLI[@]}" | grep journal | sed -r 's/^.*\s([^ ]+)$/\1/') # This is a privileged container so 'ceph-disk list' works
-    JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}" || true)
+    export DISK_LIST_SEARCH=journal
+    start_disk_list
+    JOURNAL_PART=$(start_disk_list)
+    unset DISK_LIST_SEARCH
+    JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}")
   fi
 
   # creates /dev/mapper/<uuid> for dmcrypt
