@@ -19,7 +19,7 @@ function trap_error {
     echo "I'll sleep for 365 days waiting for you darling, bye bye"
 
     # exporting current environement so the next bash will be in the same setup
-    for value in $(env); do
+    env | while IFS= read -r value; do
       echo "export $value" >> /root/.bashrc
     done
 

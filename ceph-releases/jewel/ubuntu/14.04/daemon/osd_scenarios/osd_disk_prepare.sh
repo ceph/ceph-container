@@ -16,6 +16,7 @@ function osd_disk_prepare {
     log "ERROR- $OSD_BOOTSTRAP_KEYRING must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-osd -o $OSD_BOOTSTRAP_KEYRING'"
     exit 1
   fi
+
   ceph_health client.bootstrap-osd "$OSD_BOOTSTRAP_KEYRING"
 
   # check device status first
@@ -44,25 +45,36 @@ function osd_disk_prepare {
     fi
   fi
 
+  IFS=" " read -r -a CEPH_DISK_CLI_OPTS <<< "${CLI_OPTS[*]}"
   if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
-    get_admin_key
-    check_admin_key
     # We need to do a mapfile because ${OSD_LOCKBOX_UUID} needs to be quoted
     # so doing a regular CLI_OPTS+=("${OSD_LOCKBOX_UUID}") will make shellcheck unhappy.
     # Although the array can still be incremented by the others task using a regular += operator
-    mapfile -t CLI_OPTS_ARRAY <<< "${CLI_OPTS[*]} --dmcrypt --lockbox-uuid ${OSD_LOCKBOX_UUID}"
-    IFS=" " read -r -a CLI_OPTS <<< "${CLI_OPTS_ARRAY[*]}"
+    mapfile -t CEPH_DISK_CLI_OPTS_ARRAY <<< "${CEPH_DISK_CLI_OPTS[*]} --dmcrypt --lockbox-uuid ${OSD_LOCKBOX_UUID}"
+    IFS=" " read -r -a CEPH_DISK_CLI_OPTS <<< "${CEPH_DISK_CLI_OPTS_ARRAY[*]}"
   fi
-  # the admin key must be present on the node
-  # in order to store the encrypted key in the monitor's k/v store
-  if [[ -n "${OSD_JOURNAL}" ]]; then
-    ceph-disk -v prepare "${CLI_OPTS[@]}" --journal-uuid "${OSD_JOURNAL_UUID}" "${OSD_DEVICE}" "${OSD_JOURNAL}"
-  else
-    ceph-disk -v prepare "${CLI_OPTS[@]}" --journal-uuid "${OSD_JOURNAL_UUID}" "${OSD_DEVICE}"
+  if [[ "${OSD_FILESTORE}" -eq 1 ]]; then
+    if [[ -n "${OSD_JOURNAL}" ]]; then
+      ceph-disk -v prepare "${CEPH_DISK_CLI_OPTS[@]}" --journal-uuid "${OSD_JOURNAL_UUID}" "${OSD_DEVICE}" "${OSD_JOURNAL}"
+    else
+      ceph-disk -v prepare "${CEPH_DISK_CLI_OPTS[@]}" --journal-uuid "${OSD_JOURNAL_UUID}" "${OSD_DEVICE}"
+    fi
   fi
 
-  # unmount lockbox partition when using dmcrypt
-  umount_lockbox
+  if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+    # unmount lockbox partition when using dmcrypt
+    umount_lockbox
+
+    # close dmcrypt device
+    # shellcheck disable=SC2034
+    DATA_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
+    # shellcheck disable=SC2034
+    DATA_PART=$(dev_part "${OSD_DEVICE}" 1)
+    if [[ "${OSD_FILESTORE}" -eq 1 ]]; then
+      get_dmcrypt_filestore_uuid
+      close_encrypted_parts_filestore
+    fi
+  fi
 
   # watch the udev event queue, and exit if all current events are handled
   udevadm settle --timeout=600

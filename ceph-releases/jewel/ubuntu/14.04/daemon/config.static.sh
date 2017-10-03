@@ -12,24 +12,45 @@ function get_admin_key {
 
 function get_mon_config {
   # IPv4 is the default unless we specify it
-  local ip_level=${1:-4}
+  IP_LEVEL=${1:-4}
 
   if [ ! -e /etc/ceph/"${CLUSTER}".conf ]; then
     local fsid
-    fsid=$(uuidgen)
-    cat <<ENDHERE >/etc/ceph/"${CLUSTER}".conf
+		fsid=$(uuidgen)
+    if [[ "$CEPH_DAEMON" == demo ]]; then
+      fsid=$(uuidgen)
+      cat <<ENDHERE >/etc/ceph/"${CLUSTER}".conf
 [global]
 fsid = $fsid
 mon initial members = ${MON_NAME}
 mon host = ${MON_IP}
-auth cluster required = cephx
-auth service required = cephx
-auth client required = cephx
+osd crush chooseleaf type = 0
+osd journal size = 100
+public network = ${CEPH_PUBLIC_NETWORK}
+cluster network = ${CEPH_PUBLIC_NETWORK}
+log file = /dev/null
+ENDHERE
+
+      # For ext4
+      if [ "$(findmnt -n -o FSTYPE -T /var/lib/ceph)" = "ext4" ]; then
+      cat <<ENDHERE >> /etc/ceph/"${CLUSTER}".conf
+osd max object name len = 256
+osd max object namespace len = 64
+ENDHERE
+      fi
+    else
+      cat <<ENDHERE >/etc/ceph/"${CLUSTER}".conf
+[global]
+fsid = $fsid
+mon initial members = ${MON_NAME}
+mon host = ${MON_IP}
 public network = ${CEPH_PUBLIC_NETWORK}
 cluster network = ${CEPH_CLUSTER_NETWORK}
 osd journal size = ${OSD_JOURNAL_SIZE}
+log file = /dev/null
 ENDHERE
-    if [ "$ip_level" -eq 6 ]; then
+    fi
+    if [ "$IP_LEVEL" -eq 6 ]; then
       echo "ms bind ipv6 = true" >> /etc/ceph/"${CLUSTER}".conf
     fi
   else
@@ -45,7 +66,7 @@ ENDHERE
       # Generate custom provided administrator key
       CLI+=("--add-key=$ADMIN_SECRET")
     fi
-    ceph-authtool "$ADMIN_KEYRING" --create-keyring "${CLI[@]}" -n client.admin --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow'
+    ceph-authtool "$ADMIN_KEYRING" --create-keyring -n client.admin "${CLI[@]}" --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow' --cap mgr 'allow *'
   fi
 
   if [ ! -e "$MON_KEYRING" ]; then
@@ -68,8 +89,8 @@ ENDHERE
     ceph-authtool "$RGW_BOOTSTRAP_KEYRING" --create-keyring --gen-key -n client.bootstrap-rgw --cap mon 'allow profile bootstrap-rgw'
   fi
 
-    # Apply proper permissions to the keys
-    chown --verbose ceph. "$MON_KEYRING" "$OSD_BOOTSTRAP_KEYRING" "$MDS_BOOTSTRAP_KEYRING" "$RGW_BOOTSTRAP_KEYRING"
+  # Apply proper permissions to the keys
+  chown "${CHOWN_OPT[@]}" ceph. "$MON_KEYRING" "$OSD_BOOTSTRAP_KEYRING" "$MDS_BOOTSTRAP_KEYRING" "$RGW_BOOTSTRAP_KEYRING"
 
   if [ ! -e "$MONMAP" ]; then
     if [ -e /etc/ceph/monmap ]; then
@@ -79,9 +100,8 @@ ENDHERE
       # Generate initial monitor map
       monmaptool --create --add "${MON_NAME}" "${MON_IP}:6789" --fsid "${fsid}" "$MONMAP"
     fi
-    chown --verbose ceph. "$MONMAP"
+    chown "${CHOWN_OPT[@]}" ceph. "$MONMAP"
   fi
-
 }
 
 function get_config {

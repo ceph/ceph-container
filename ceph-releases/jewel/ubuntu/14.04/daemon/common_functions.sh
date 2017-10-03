@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+source disk_list.sh
 
 # log arguments with timestamp
 function log {
@@ -64,17 +65,21 @@ function create_mandatory_directories {
   # Create socket directory
   mkdir -p /var/run/ceph
 
-  # Creating rados directories
-  mkdir -p /var/lib/ceph/radosgw/"${RGW_NAME}"
+  # Create radosgw directory
+  mkdir -p /var/lib/ceph/radosgw/"${CLUSTER}"-rgw."${RGW_NAME}"
 
   # Create the MDS directory
   mkdir -p /var/lib/ceph/mds/"${CLUSTER}-${MDS_NAME}"
 
   # Adjust the owner of all those directories
-  chown --verbose -R ceph. /var/run/ceph/
-  find -L /var/lib/ceph/ -mindepth 1 -maxdepth 3 -exec chown --verbose ceph. {} \;
+  chown "${CHOWN_OPT[@]}" -R ceph. /var/run/ceph/
+  find -L /var/lib/ceph/ -mindepth 1 -maxdepth 3 -exec chown "${CHOWN_OPT[@]}" ceph. {} \;
 }
 
+# Print resolved symbolic links of a device
+function resolve_symlink {
+  readlink -f "${@}"
+}
 
 # Calculate proper device names, given a device and partition number
 function dev_part {
@@ -234,20 +239,41 @@ function get_osd_path {
   echo "$OSD_PATH_BASE-$1/"
 }
 
+# List all the partitions on a block device
+function list_dev_partitions {
+  # We need to remove the /dev/ part of the device name
+  # since /proc/partitions has entries like sda only.
+  # However we return a complete device name e.g: /dev/sda
+  for args in "${@}"; do
+    grep -Eo "${args#/dev/}[0-9]" < /proc/partitions | while read -r line; do
+      echo "/dev/$line"
+    done
+  done
+}
+
+# Find the typecode of a partition
+function get_part_typecode {
+  for part in "${@}"; do
+    sgdisk --info="${part: -1}" "${part%?}" | awk '/Partition GUID code/ {print tolower($4)}'
+  done
+}
+
 function apply_ceph_ownership_to_disks {
-  if [[ -n "${OSD_JOURNAL}" ]]; then
-    wait_for_file "${OSD_JOURNAL}"
-    chown --verbose ceph. "${OSD_JOURNAL}"
-  elif [[ ${OSD_DMCRYPT} -eq 1 ]]; then
-    # apply permission on the lockbox partition
+  if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
     wait_for_file "$(dev_part "${OSD_DEVICE}" 3)"
-    chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 3)"
-  else
-    wait_for_file "$(dev_part "${OSD_DEVICE}" 2)"
-    chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 2)"
+    chown "${CHOWN_OPT[@]}" ceph. "$(dev_part "${OSD_DEVICE}" 3)"
+  fi
+  if [[ ${OSD_FILESTORE} -eq 1 ]]; then
+    if [[ -n "${OSD_JOURNAL}" ]]; then
+      wait_for_file "${OSD_JOURNAL}"
+      chown "${CHOWN_OPT[@]}" ceph. "${OSD_JOURNAL}"
+    else
+      wait_for_file "$(dev_part "${OSD_DEVICE}" 2)"
+      chown "${CHOWN_OPT[@]}" ceph. "$(dev_part "${OSD_DEVICE}" 2)"
+    fi
   fi
   wait_for_file "$(dev_part "${OSD_DEVICE}" 1)"
-  chown --verbose ceph. "$(dev_part "${OSD_DEVICE}" 1)"
+  chown "${CHOWN_OPT[@]}" ceph. "$(dev_part "${OSD_DEVICE}" 1)"
 }
 
 # Get partition uuid of a given partition
@@ -262,33 +288,161 @@ function ceph_health {
   if ! timeout 10 ceph "${CLI_OPTS[@]}" --name "$bootstrap_user" --keyring "$bootstrap_key" health; then
     log "Timed out while trying to reach out to the Ceph Monitor(s)."
     log "Make sure your Ceph monitors are up and running in quorum."
-    log "Also verify the validity of client.bootstrap-osd keyring."
+    log "Also verify the validity of $bootstrap_user keyring."
     exit 1
   fi
 }
 
-# shellcheck disable=SC2153
-function add_osd_to_crush {
-  # only add crush_location if the current is empty
-  local crush_loc
-  OSD_KEYRING="$OSD_PATH/keyring"
-  crush_loc=$(ceph "${CLI_OPTS[@]}" --name=osd."${OSD_ID}" --keyring="$OSD_KEYRING" osd find "${OSD_ID}"|python -c 'import sys, json; print(json.load(sys.stdin)["crush_location"])')
-  if [[ "$crush_loc" == "{}" ]]; then
-    ceph "${CLI_OPTS[@]}" --name=osd."${OSD_ID}" --keyring="$OSD_KEYRING" osd crush create-or-move -- "${OSD_ID}" "${OSD_WEIGHT}" "${CRUSH_LOCATION[@]}"
+function is_net_ns {
+  # if we run a container with --net=host we will see all the connections
+  # if we don't, we should see the file header
+  [[ $(wc -l < /proc/net/tcp) == 1 ]]
+}
+
+function is_pid_ns {
+  # if we run a container with --pid=host we will see all the processes
+  # if we don't, we should see 3 (pid 1 and ps and the new line)
+  [[ $(ps --no-header x | wc -l) -gt 3 ]]
+}
+
+# This function is only used when CEPH_DAEMON=demo
+# For a 'demo' container, we must ensure there is no Ceph files
+function detect_ceph_files {
+  if [ -f /etc/ceph/I_AM_A_DEMO ] || [ -f /var/lib/ceph/I_AM_A_DEMO ]; then
+    log "Found residual files of a demo container."
+    log "This looks like a restart, processing."
+    return 0
+  fi
+  if [ -d /var/lib/ceph ] || [ -d /etc/ceph ]; then
+    if [[ "$(find /var/lib/ceph/ -mindepth 3 -maxdepth 3 -type f | wc -l)" != 0 ]] || [[ -z "$(find /etc/ceph -prune -empty)" ]]; then
+      log "I can see existing Ceph files, please remove them!"
+      log "To run the demo container, remove the content of /var/lib/ceph/ and /etc/ceph/"
+      log "Before doing this, make sure you are removing any sensitive data."
+      exit 1
+    fi
   fi
 }
 
-function calculate_osd_weight {
-  OSD_PATH=$(get_osd_path "$OSD_ID")
-  OSD_WEIGHT=$(df -P -k "$OSD_PATH" | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
+# This function gets the uuid of filestore partitions
+# These uuids will be used to open and close encrypted partitions
+function get_dmcrypt_filestore_uuid {
+  DATA_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
+  # shellcheck disable=SC2034
+  LOCKBOX_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 3)")
+  export DISK_LIST_SEARCH=journal_dmcrypt
+  start_disk_list
+  JOURNAL_PART=$(start_disk_list)
+  unset DISK_LIST_SEARCH
+  JOURNAL_UUID=$(get_part_uuid "${JOURNAL_PART}")
+}
+
+# Opens all bluestore encrypted partitions
+function open_encrypted_parts_bluestore {
+  # Open LUKS device(s) if necessary
+  if [[ ! -e /dev/mapper/"${DATA_UUID}" ]]; then
+    open_encrypted_part "${DATA_UUID}" "${DATA_PART}" "${DATA_UUID}"
+  fi
+  if [[ ! -e /dev/mapper/"${BLOCK_UUID}" ]]; then
+    open_encrypted_part "${BLOCK_UUID}" "${BLOCK_PART}" "${DATA_UUID}"
+  fi
+  if [[ ! -e /dev/mapper/"${BLOCK_DB_UUID}" ]]; then
+    open_encrypted_part "${BLOCK_DB_UUID}" "${BLOCK_DB_PART}" "${DATA_UUID}"
+  fi
+  if [[ ! -e /dev/mapper/"${BLOCK_WAL_UUID}" ]]; then
+    open_encrypted_part "${BLOCK_WAL_UUID}" "${BLOCK_WAL_PART}" "${DATA_UUID}"
+  fi
+}
+
+# Opens all filestore encrypted partitions
+function open_encrypted_parts_filestore {
+  # Open LUKS device(s) if necessary
+  if [[ ! -e /dev/mapper/"${DATA_UUID}" ]]; then
+    open_encrypted_part "${DATA_UUID}" "${DATA_PART}" "${DATA_UUID}"
+  fi
+  if [[ ! -e /dev/mapper/"${JOURNAL_UUID}" ]]; then
+    open_encrypted_part "${JOURNAL_UUID}" "${JOURNAL_PART}" "${DATA_UUID}"
+  fi
+}
+
+# Closes all filestore encrypted partitions
+function close_encrypted_parts_filestore {
+  # Open LUKS device(s) if necessary
+  if [[ -e /dev/mapper/"${DATA_UUID}" ]]; then
+    close_encrypted_part "${DATA_UUID}" "${DATA_PART}" "${DATA_UUID}"
+  fi
+  if [[ -e /dev/mapper/"${JOURNAL_UUID}" ]]; then
+    close_encrypted_part "${JOURNAL_UUID}" "${JOURNAL_PART}" "${DATA_UUID}"
+  fi
+}
+
+# Opens an encrypted partition
+function open_encrypted_part {
+  # $1 is partition uuid
+  # $2 is partition name, e.g: /dev/sda1
+  # $3 is the 'ceph data' partition uuid, this is the one used by the lockbox
+  log "Opening encrypted device $1"
+  ceph "${CLI_OPTS[@]}" --name client.osd-lockbox."${3}" \
+  --keyring /var/lib/ceph/osd-lockbox/"${3}"/keyring \
+  config-key \
+  get \
+  dm-crypt/osd/"${3}"/luks 2> /dev/null | base64 -d | cryptsetup --key-file - luksOpen "${2}" "${1}"
+}
+
+function mount_lockbox {
+  log "Mounting LOCKBOX directory"
+  # NOTE(leseb): adding || true so when this bug will be fixed the entrypoint will not fail
+  # Ceph bug tracker: http://tracker.ceph.com/issues/18945
+  mkdir -p /var/lib/ceph/osd-lockbox/"${1}"
+  mount /dev/disk/by-partuuid/"${2}" /var/lib/ceph/osd-lockbox/"${1}" || true
+  local ceph_fsid
+  local cluster_name
+  cluster_name=$(basename "$(grep -R fsid /etc/ceph/ | grep -oE '^[^.]*')")
+  ceph_fsid=$(ceph-conf --lookup fsid -c /etc/ceph/"$cluster_name".conf)
+  echo "$ceph_fsid" > /var/lib/ceph/osd-lockbox/"${1}"/ceph_fsid
+  chown "${CHOWN_OPT[@]}" ceph. /var/lib/ceph/osd-lockbox/"${1}"/ceph_fsid
+}
+
+# Closes an encrypted partition
+function close_encrypted_part {
+  # $1 is partition uuid
+  # $2 is partition name, e.g: /dev/sda1
+  # $3 is the 'ceph data' partition uuid, this is the one used by the lockbox
+  log "Closing encrypted device $1"
+  ceph "${CLI_OPTS[@]}" --name client.osd-lockbox."${3}" \
+  --keyring /var/lib/ceph/osd-lockbox/"${3}"/keyring \
+  config-key \
+  get \
+  dm-crypt/osd/"${3}"/luks 2> /dev/null | base64 -d | cryptsetup --key-file - luksClose "${1}"
 }
 
 function umount_lockbox {
-  if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
-    log "Unmounting LOCKBOX directory"
-    # NOTE(leseb): adding || true so when this bug will be fixed the entrypoint will not fail
-    # Ceph bug tracker: http://tracker.ceph.com/issues/18944
-    DATA_UUID=$(get_part_uuid "${OSD_DEVICE}"1)
-    umount /var/lib/ceph/osd-lockbox/"${DATA_UUID}" || true
+  log "Unmounting LOCKBOX directory"
+  # NOTE(leseb): adding || true so when this bug will be fixed the entrypoint will not fail
+  # Ceph bug tracker: http://tracker.ceph.com/issues/18944
+  DATA_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
+  umount /var/lib/ceph/osd-lockbox/"${DATA_UUID}" || true
+}
+
+function ami_privileged {
+  if ! blkid > /dev/null || ! stat /dev/disk/ > /dev/null; then
+    log "ERROR: I don't have enough privileges, I can't discover devices on that machine."
+    log "ERROR: run me as a privileged container with the following options"
+    log "ERROR: --privileged=true -v /dev/:/dev/"
+    exit 1
   fi
+  # NOTE (leseb): when not running with --privileged=true -v /dev/:/dev/
+  # lsblk is not able to get device mappers path and is complaining.
+  # That's why stderr is suppressed in /dev/null
+}
+
+function ami_privileged {
+  if ! blkid > /dev/null || ! stat /dev/disk/ > /dev/null; then
+    log "ERROR: I don't have enough privileges, I can't discover devices on that machine."
+    log "ERROR: run me as a privileged container with the following options"
+    log "ERROR: --privileged=true -v /dev/:/dev/"
+    exit 1
+  fi
+  # NOTE (leseb): when not running with --privileged=true -v /dev/:/dev/
+  # lsblk is not able to get device mappers path and is complaining.
+  # That's why stderr is suppressed in /dev/null
 }

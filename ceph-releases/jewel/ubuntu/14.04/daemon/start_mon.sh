@@ -117,10 +117,10 @@ function start_mon {
     exit 1
   fi
 
-  get_mon_config $ip_version
-
   # If we don't have a monitor keyring, this is a new monitor
   if [ ! -e "$MON_DATA_DIR/keyring" ]; then
+    get_mon_config $ip_version
+
     if [ ! -e "$MON_KEYRING" ]; then
       log "ERROR- $MON_KEYRING must exist.  You can extract it from your current monitor by running 'ceph auth get mon. -o $MON_KEYRING' or use a KV Store"
       exit 1
@@ -154,8 +154,7 @@ function start_mon {
     timeout 7 ceph "${CLI_OPTS[@]}" mon add "${MON_NAME}" "${MON_IP}:6789" || true
   fi
 
-  log "SUCCESS"
-
   # start MON
+  log "SUCCESS"
   exec /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}:6789"
 }

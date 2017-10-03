@@ -22,7 +22,7 @@ function start_rgw {
 
     # Generate the RGW key
     ceph "${CLI_OPTS[@]}" --name client.bootstrap-rgw --keyring "$RGW_BOOTSTRAP_KEYRING" auth get-or-create client.rgw."${RGW_NAME}" osd 'allow rwx' mon 'allow rw' -o "$RGW_KEYRING"
-    chown --verbose ceph. "$RGW_KEYRING"
+    chown "${CHOWN_OPT[@]}" ceph. "$RGW_KEYRING"
     chmod 0600 "$RGW_KEYRING"
   fi
 
@@ -39,12 +39,10 @@ function start_rgw {
 function create_rgw_user {
 
   # Check to see if our RGW has been initialized
-  if [ ! -e /var/lib/ceph/radosgw/keyring ]; then
-    log "ERROR- /var/lib/ceph/radosgw/keyring must exist. Please get it from your Rados Gateway"
+  if [ ! -e "$RGW_KEYRING" ]; then
+    log "ERROR- $RGW_KEYRING must exist. Please get it from your Rados Gateway"
     exit 1
   fi
-
-  mv /var/lib/ceph/radosgw/keyring "$RGW_KEYRING"
 
   local user_key=""
   if [ -n "${RGW_USER_SECRET_KEY}" ]; then
