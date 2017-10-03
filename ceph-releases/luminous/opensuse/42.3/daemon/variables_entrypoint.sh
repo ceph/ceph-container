@@ -1,0 +1,1 @@
+../../../ubuntu/16.04/daemon/variables_entrypoint.sh
