@@ -76,6 +76,7 @@ gen-all-bootstrap-keyrings() {
   gen-bootstrap-keyring osd > ceph.osd.keyring
   gen-bootstrap-keyring mds > ceph.mds.keyring
   gen-bootstrap-keyring rgw > ceph.rgw.keyring
+  gen-bootstrap-keyring rbd > ceph.rbd.keyring
 }
 
 gen-all() {
@@ -101,4 +102,3 @@ main() {
 }
 
 main "$@"
-
