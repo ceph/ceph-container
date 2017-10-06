@@ -51,6 +51,8 @@ function osd_activate {
 
   OSD_ID=$(grep "${MOUNTED_PART}" /proc/mounts | awk '{print $2}' | sed -r 's/^.*-([0-9]+)$/\1/')
 
+  calculate_osd_weight
+  add_osd_to_crush
   apply_ceph_ownership_to_disks
 
   log "SUCCESS"
