@@ -74,4 +74,4 @@ case "$1" in
       esac
     ;;
 esac
-popd &> /dev/null
+popd &> /dev/null || true # Don't return failure if we never pushd'ed
