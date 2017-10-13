@@ -36,7 +36,7 @@ function copy_dirs {
 function build_base_img {
 if [[ -d base ]] && [[ "$(find base -type f | wc -l)" -gt 1 ]]; then
     pushd base
-    docker build -t base .
+    sudo docker build -t base .
     popd
     rm -rf base
   fi
@@ -47,7 +47,7 @@ function build_daemon_img {
   if grep "FROM ceph/base" Dockerfile; then
     sed -i 's|FROM .*|FROM base|g' Dockerfile
   fi
-  docker build -t ceph/daemon .
+  sudo docker build -t ceph/daemon .
   popd
   rm -rf daemon
 }
