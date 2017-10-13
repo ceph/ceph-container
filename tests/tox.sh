@@ -49,10 +49,10 @@ rm -rf "$WORKSPACE"/{daemon,demo,base}
 bash "$WORKSPACE"/travis-builds/purge_cluster.sh
 # XXX purge_cluster only stops containers, it doesn't really remove them so try to
 # remove them for real
-containers_to_remove=$(docker ps -a -q)
+containers_to_remove=$(sudo docker ps -a -q)
 
 if [ "${containers_to_remove}" ]; then
-    docker rm -f $@ ${containers_to_remove} || echo failed to remove containers
+    sudo docker rm -f $@ ${containers_to_remove} || echo failed to remove containers
 fi
 
 # copy the files to the root for the
@@ -66,13 +66,15 @@ cp -Lrv ceph-releases/$CEPH_STABLE_RELEASE/$IMAGE_DISTRO/demo/* demo || true
 bash "$WORKSPACE"/travis-builds/build_imgs.sh
 
 # start a local docker registry
-docker run -d -p 5000:5000 --restart=always --name registry registry:2
+sudo docker run -d -p 5000:5000 --restart=always --name registry registry:2
 # add the image we just built to the registry
-docker tag ceph/daemon localhost:5000/ceph/daemon:$CEPH_STABLE_RELEASE-latest
+sudo docker tag ceph/daemon localhost:5000/ceph/daemon:$CEPH_STABLE_RELEASE-latest
 # this avoids a race condition between the tagging and the push
 # which causes this to sometimes fail when run by jenkins
 sleep 1
-docker --debug push localhost:5000/ceph/daemon:$CEPH_STABLE_RELEASE-latest
+sudo docker --debug push localhost:5000/ceph/daemon:$CEPH_STABLE_RELEASE-latest
+
+ip -4 a
 
 # test
 #################################################################################

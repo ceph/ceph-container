@@ -3,14 +3,14 @@
 
 # FUNCTIONS
 function purge_ceph {
-  containers_to_stop=$(docker ps -q)
+  containers_to_stop=$(sudo docker ps -q)
 
   if [ "${containers_to_stop}" ]; then
-    docker stop ${containers_to_stop} || echo failed to stop containers
+    sudo docker stop ${containers_to_stop} || echo failed to stop containers
   fi
 
-  rm -rf /var/lib/ceph/*
-  rm -rf /etc/ceph
+  sudo rm -rf /var/lib/ceph/*
+  sudo rm -rf /etc/ceph
 }
 
 
