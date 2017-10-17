@@ -346,9 +346,17 @@ function get_dmcrypt_bluestore_uuid {
   BLOCK_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 2)")
   BLOCK_PART=$(dev_part "${OSD_DEVICE}" 2)
   LOCKBOX_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 5)")
-  BLOCK_DB_PART=$(ceph-disk list "${OSD_BLUESTORE_BLOCK_DB}" | awk '/ceph block.db/ {print $1}') # This is a privileged container so 'ceph-disk list' works
+
+  export DISK_LIST_SEARCH=block.db_dmcrypt
+  start_disk_list
+  BLOCK_DB_PART=$(start_disk_list)
+  unset DISK_LIST_SEARCH
   BLOCK_DB_UUID=$(get_part_uuid "${BLOCK_DB_PART}")
-  BLOCK_WAL_PART=$(ceph-disk list "${OSD_BLUESTORE_BLOCK_WAL}" | awk '/ceph block.wal/ {print $1}') # This is a privileged container so 'ceph-disk list' works
+
+  export DISK_LIST_SEARCH=block.wal_dmcrypt
+  start_disk_list
+  BLOCK_WAL_PART=$(start_disk_list)
+  unset DISK_LIST_SEARCH
   BLOCK_WAL_UUID=$(get_part_uuid "${BLOCK_WAL_PART}")
 }
 
