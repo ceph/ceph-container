@@ -13,6 +13,7 @@ function get_mon_config {
 
   local timeout=10
   local monmap_add=""
+  IFS=" " read -r -a args <<< "${KUBECTL_PARAMS}"
   # shellcheck disable=SC2153
   local namespace="${NAMESPACE}"
   if [[ -z "${namespace}" ]]; then
@@ -21,11 +22,9 @@ function get_mon_config {
   while [[ -z "${monmap_add// }" && "${timeout}" -gt 0 ]]; do
     # Get the ceph mon pods (name and IP) from the Kubernetes API. Formatted as a set of monmap params
     if [[ ${K8S_HOST_NETWORK} -eq 0 ]]; then
-      # shellcheck disable=SC2086
-      monmap_add=$(kubectl get pods --namespace="${namespace}" ${KUBECTL_PARAM} -o template --template="{{range .items}}{{if .status.podIP}}--add {{.metadata.name}} {{.status.podIP}}:6789 {{end}} {{end}}")
+      monmap_add=$(kubectl get pods --namespace="${namespace}" "${args[@]}" -o template --template="{{range .items}}{{if .status.podIP}}--add {{.metadata.name}} {{.status.podIP}}:6789 {{end}} {{end}}")
     else
-      # shellcheck disable=SC2086
-      monmap_add=$(kubectl get pods --namespace="${namespace}" ${KUBECTL_PARAM} -o template --template="{{range .items}}{{if .status.podIP}}--add {{.spec.nodeName}} {{.status.podIP}}:6789 {{end}} {{end}}")
+      monmap_add=$(kubectl get pods --namespace="${namespace}" "${args[@]}" -o template --template="{{range .items}}{{if .status.podIP}}--add {{.spec.nodeName}} {{.status.podIP}}:6789 {{end}} {{end}}")
     fi
     (( timeout-- ))
     sleep 1
