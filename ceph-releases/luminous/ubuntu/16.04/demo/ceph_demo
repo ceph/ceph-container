@@ -1,0 +1,197 @@
+#!/bin/bash
+set -e
+
+
+#############
+# VARIABLES #
+#############
+CEPH_DEMO_UID=demo
+RGW_CIVETWEB_PORT=8000
+IP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
+if [ -n "$2" ]; then
+  WORKING_DIR=$2
+else
+  WORKING_DIR=/usr/share/ceph-demo
+fi
+
+
+#############
+# FUNCTIONS #
+#############
+function show_usage {
+	cat <<EOM
+Usage: ./$(basename "$0") start [working dir]|stop|status|purge|help
+
+      start: stars Ceph container. Default working directory is ${WORKING_DIR}.
+      It can be changed like this: ./$(basename "$0") start [working dir].
+      Only files within this directory can be uploaded to Ceph Rados Gateway.
+      stop: stops Ceph container.
+      status: shows useful information about Ceph container.
+      purge: DANGEROUS, removes the Ceph container and all its data.
+      help: shows this help.
+
+
+Interact with S3:
+      Make bucket
+        ./$(basename "$0") mb BUCKET
+      Remove bucket
+        ./$(basename "$0") rb BUCKET
+      List objects or buckets
+        ./$(basename "$0") ls [BUCKET[/PREFIX]]
+      List all object in all buckets
+        ./$(basename "$0") la
+      Put file into bucket
+        ./$(basename "$0") put FILE [FILE...] BUCKET[/PREFIX]
+      Get file from bucket
+        ./$(basename "$0") get BUCKET/OBJECT LOCAL_FILE
+      Delete file from bucket
+        ./$(basename "$0") del BUCKET/OBJECT
+      Synchronize a directory tree to S3
+        ./$(basename "$0") sync LOCAL_DIR BUCKET[/PREFIX] or BUCKET[/PREFIX] LOCAL_DIR
+      Disk usage by buckets
+        ./$(basename "$0") du [BUCKET[/PREFIX]]
+      Get various information about Buckets or Files
+        ./$(basename "$0") info BUCKET[/OBJECT]
+      Copy object
+        ./$(basename "$0") cp BUCKET1/OBJECT1 BUCKET2[/OBJECT2]
+      Move object
+        ./$(basename "$0") mv BUCKET1/OBJECT1 BUCKET2[/OBJECT2]
+
+EOM
+}
+
+function test_args {
+  if [ $# -lt 1 ]; then
+    show_usage
+    exit 1
+  fi
+}
+
+function docker_exist {
+  if ! command -v docker &> /dev/null; then
+    echo "Docker CLI is not available."
+    echo "Please follow instructions to install Docker: https://docs.docker.com/engine/installation/"
+    exit 1
+  fi
+}
+
+function create_ceph_demo_volumes {
+  for vol in varlibceph etcceph; do
+    if ! docker volume ls | grep -sq "$vol"; then
+      docker volume create --name "$vol" &> /dev/null
+    fi
+  done
+}
+
+function get_aws_key {
+  CEPH_DEMO_ACCESS_KEY=$(docker exec ceph-demo grep -Po '(?<="access_key": ")[^"]*' /demo_user_details)
+  CEPH_DEMO_SECRET_KEY=$(docker exec ceph-demo grep -Po '(?<="secret_key": ")[^"]*' /demo_user_details)
+}
+
+function wait_for_container {
+  echo -n "Starting Ceph container..."
+  until docker logs ceph-demo 2> /dev/null | grep -sq SUCCESS; do
+    sleep 3 && echo -n "."
+  done
+  echo ""
+}
+
+function start_ceph_demo {
+  [ ! -d $WORKING_DIR ] || mkdir -p $WORKING_DIR
+  if [[ "$(docker ps -a --filter='name=ceph-demo' | wc -l)" -gt "1" ]]; then
+    docker start ceph-demo &> /dev/null
+    wait_for_container
+  elif ! docker ps | grep -sq ceph-demo; then
+    docker run --detach \
+    --name ceph-demo \
+    --memory 1g \
+    --mount type=volume,source=etcceph,target=/etc/ceph \
+    --mount type=volume,source=varlibceph,target=/var/lib/ceph \
+    -v $WORKING_DIR:$WORKING_DIR \
+    -p "$IP":8000:8000 \
+    -p "$IP":7000:7000 \
+    -e CEPH_DEMO_UID=$CEPH_DEMO_UID \
+    -e NETWORK_AUTO_DETECT=4 \
+    -e RGW_CIVETWEB_PORT=8000 \
+    ceph/daemon demo &> /dev/null
+    wait_for_container
+  else
+    echo ""
+    echo "Ceph container is already running!"
+  fi
+}
+
+function echo_info {
+  if docker ps | grep -sq ceph-demo; then
+    get_aws_key
+    echo ""
+    echo "Ceph status is: $(docker exec ceph-demo ceph health)"
+    echo "Ceph Rados Gateway address is: http://$IP:$RGW_CIVETWEB_PORT"
+    echo "S3 user is: 'demo'"
+    echo "S3 access key is: $CEPH_DEMO_ACCESS_KEY"
+    echo "S3 secret key is: $CEPH_DEMO_SECRET_KEY"
+    echo ""
+  else
+    echo "Ceph container is not running, start it with:"
+    echo "./$(basename "$0") start [working dir]"
+  fi
+}
+
+function stop_ceph_demo {
+  docker stop ceph-demo &> /dev/null
+}
+
+function purge_ceph_demo {
+  stop_ceph_demo
+  docker rm -f ceph-demo &> /dev/null
+  docker volume rm etcceph varlibceph &> /dev/null
+}
+
+function s3cmd_wrap {
+  IFS=" " read -r -a array <<< "$*"
+  local docker_exec
+  docker_exec="docker exec ceph-demo s3cmd"
+  if [[ "${array[0]}" =~ mb|rb|ls|del|info|du ]]; then
+    $docker_exec "${array[0]}" "${array[1]/#/s3://}"
+  elif [[ "${array[0]}" =~ cp|mv ]]; then
+    $docker_exec "${array[0]}" "${array[1]/#/s3://}" "${array[2]/#/s3://}"
+  elif [[ "${array[0]}" =~ get ]]; then
+    $docker_exec "${array[0]}" "${array[1]/#/s3://}" "${array[2]}"
+  elif [[ "${array[0]}" =~ put ]]; then
+    $docker_exec "${array[0]}" "${array[1]}" "${array[2]/#/s3://}"
+  else
+    $docker_exec "${array[@]}"
+  fi
+}
+
+
+########
+# MAIN #
+########
+test_args  "$@"
+docker_exist
+
+case "$1" in
+  start)
+    create_ceph_demo_volumes
+    start_ceph_demo
+    echo_info
+    ;;
+  status)
+    echo_info
+    ;;
+  stop)
+    echo "Stopping Ceph container..."
+    stop_ceph_demo
+    ;;
+  purge)
+    purge_ceph_demo
+    echo "Ceph container purged."
+    ;;
+  mb|rb|ls|la|put|get|del|info|du|cp|mv)
+    s3cmd_wrap "$@"
+    ;;
+  help|*)
+    show_usage
+    ;;
+esac

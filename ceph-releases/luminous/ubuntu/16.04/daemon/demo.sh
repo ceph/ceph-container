@@ -69,7 +69,7 @@ function bootstrap_rgw {
   if [ ! -e "$RGW_PATH"/keyring ]; then
     # bootstrap RGW
     mkdir -p "$RGW_PATH"
-    ceph "${CLI_OPTS[@]}" auth get-or-create client.radosgw.gateway osd 'allow rwx' mon 'allow rw' -o "$RGW_KEYRING"
+    ceph "${CLI_OPTS[@]}" auth get-or-create client.rgw."$(uname -n)" osd 'allow rwx' mon 'allow rw' -o "$RGW_KEYRING"
     chown --verbose -R ceph. "$RGW_PATH"
 
     #configure rgw dns name
@@ -82,32 +82,36 @@ ENDHERE
   fi
 
   # start RGW
-  radosgw "${DAEMON_OPTS[@]}" -n client.radosgw.gateway -k "$RGW_PATH"/keyring --rgw-socket-path="" --rgw-frontends="civetweb port=${RGW_CIVETWEB_PORT}"
+  radosgw "${DAEMON_OPTS[@]}" -n client.rgw."$(uname -n)" -k "$RGW_KEYRING" --rgw-socket-path="" --rgw-frontends="civetweb port=${RGW_CIVETWEB_PORT}"
 }
 
 function bootstrap_demo_user {
-  if [ -n "$CEPH_DEMO_UID" ] && [ -n "$CEPH_DEMO_ACCESS_KEY" ] && [ -n "$CEPH_DEMO_SECRET_KEY" ]; then
-    if [ -f /ceph-demo-user ]; then
-      log "Demo user already exists with credentials:"
-      cat /ceph-demo-user
-    else
-      log "Setting up a demo user..."
+  if [ -f /ceph-demo-user ]; then
+    log "Demo user already exists with credentials:"
+    cat /ceph-demo-user
+  else
+    log "Setting up a demo user..."
+    if [ -n "$CEPH_DEMO_UID" ] && [ -n "$CEPH_DEMO_ACCESS_KEY" ] && [ -n "$CEPH_DEMO_SECRET_KEY" ]; then
       radosgw-admin "${CLI_OPTS[@]}" user create --uid="$CEPH_DEMO_UID" --display-name="Ceph demo user" --access-key="$CEPH_DEMO_ACCESS_KEY" --secret-key="$CEPH_DEMO_SECRET_KEY"
-      sed -i s/AWS_ACCESS_KEY_PLACEHOLDER/"$CEPH_DEMO_ACCESS_KEY"/ /root/.s3cfg
-      sed -i s/AWS_SECRET_KEY_PLACEHOLDER/"$CEPH_DEMO_SECRET_KEY"/ /root/.s3cfg
-      echo "Access key: $CEPH_DEMO_ACCESS_KEY" > /ceph-demo-user
-      echo "Secret key: $CEPH_DEMO_SECRET_KEY" >> /ceph-demo-user
+    else
+      radosgw-admin "${CLI_OPTS[@]}" user create --uid="$CEPH_DEMO_UID" --display-name="Ceph demo user" > "${CEPH_DEMO_UID}_user_details"
+      CEPH_DEMO_ACCESS_KEY=$(grep -Po '(?<="access_key": ")[^"]*' "${CEPH_DEMO_UID}_user_details")
+      CEPH_DEMO_SECRET_KEY=$(grep -Po '(?<="secret_key": ")[^"]*' "${CEPH_DEMO_UID}_user_details")
+    fi
+    sed -i s/AWS_ACCESS_KEY_PLACEHOLDER/"$CEPH_DEMO_ACCESS_KEY"/ /root/.s3cfg
+    sed -i s/AWS_SECRET_KEY_PLACEHOLDER/"$CEPH_DEMO_SECRET_KEY"/ /root/.s3cfg
+    echo "Access key: $CEPH_DEMO_ACCESS_KEY" > /ceph-demo-user
+    echo "Secret key: $CEPH_DEMO_SECRET_KEY" >> /ceph-demo-user
 
-      # Use rgw port
-      sed -i "s/host_base = localhost/host_base = ${RGW_NAME}:${RGW_CIVETWEB_PORT}/" /root/.s3cfg
-      sed -i "s/host_bucket = localhost/host_bucket = ${RGW_NAME}:${RGW_CIVETWEB_PORT}/" /root/.s3cfg
+    # Use rgw port
+    sed -i "s/host_base = localhost/host_base = ${RGW_NAME}:${RGW_CIVETWEB_PORT}/" /root/.s3cfg
+    sed -i "s/host_bucket = localhost/host_bucket = ${RGW_NAME}:${RGW_CIVETWEB_PORT}/" /root/.s3cfg
 
-      if [ -n "$CEPH_DEMO_BUCKET" ]; then
-        log "Creating bucket..."
-        # waiting for rgw to be ready, 5 seconds is usually enough
-        sleep 5
-        s3cmd mb s3://"$CEPH_DEMO_BUCKET"
-      fi
+    if [ -n "$CEPH_DEMO_BUCKET" ]; then
+      log "Creating bucket..."
+      # waiting for rgw to be ready, 5 seconds is usually enough
+      sleep 5
+      s3cmd mb s3://"$CEPH_DEMO_BUCKET"
     fi
   fi
 }
@@ -180,9 +184,7 @@ bootstrap_mon
 bootstrap_osd
 bootstrap_mds
 bootstrap_rgw
-if ! grep -sq "Red Hat Enterprise Linux Server release" /etc/redhat-release; then
-  bootstrap_demo_user
-fi
+bootstrap_demo_user
 bootstrap_rest_api
 bootstrap_nfs
 bootstrap_rbd_mirror

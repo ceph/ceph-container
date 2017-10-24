@@ -155,7 +155,7 @@ case "$CEPH_DAEMON" in
     ;;
   *)
     invalid_ceph_daemon
-  ;;
+    ;;
 esac
 
 exit 0
