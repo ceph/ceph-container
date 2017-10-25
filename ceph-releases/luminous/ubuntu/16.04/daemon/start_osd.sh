@@ -1,11 +1,14 @@
 #!/bin/bash
 set -e
 
-if is_redhat; then
-  source /etc/sysconfig/ceph
-elif is_ubuntu; then
-  source /etc/default/ceph
-fi
+[ -e /etc/sysconfig/ceph ] && . /etc/sysconfig/ceph && ceph_env_file=/etc/sysconfig/ceph
+[ -e /etc/default/ceph ] && . /etc/default/ceph && ceph_env_file=/etc/default/ceph
+
+# shellcheck disable=SC2013
+for i in $(grep -vE '^#|^$' < "$ceph_env_file"); do
+  # shellcheck disable=SC2163
+  export $i
+done
 
 function start_osd {
   get_config
