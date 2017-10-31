@@ -160,7 +160,7 @@ function s3cmd_wrap {
     $docker_exec "${array[0]}" "${array[1]/#/s3://}" "${array[2]/#/s3://}"
   elif [[ "${array[0]}" =~ get ]]; then
     $docker_exec "${array[0]}" "${array[1]/#/s3://}" "${array[2]}"
-  elif [[ "${array[0]}" =~ put ]]; then
+  elif [[ "${array[0]}" =~ put|sync ]]; then
     $docker_exec "${array[0]}" "${array[1]}" "${array[2]/#/s3://}"
   else
     $docker_exec "${array[@]}"
@@ -191,7 +191,7 @@ case "$1" in
     purge_ceph_demo
     echo "Ceph nano container purged."
     ;;
-  mb|rb|ls|la|put|get|del|info|du|cp|mv)
+  mb|rb|ls|la|put|get|del|info|du|cp|mv|sync)
     s3cmd_wrap "$@"
     ;;
   help|*)
