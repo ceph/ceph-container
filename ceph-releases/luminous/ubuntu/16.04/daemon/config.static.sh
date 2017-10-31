@@ -29,6 +29,7 @@ osd journal size = 100
 public network = ${CEPH_PUBLIC_NETWORK}
 cluster network = ${CEPH_PUBLIC_NETWORK}
 log file = /dev/null
+osd pool default size = 1
 ENDHERE
 
       # For ext4

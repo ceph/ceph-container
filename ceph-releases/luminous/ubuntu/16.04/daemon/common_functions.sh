@@ -329,12 +329,14 @@ function detect_ceph_files {
     log "This looks like a restart, processing."
     return 0
   fi
-  if [ -d /var/lib/ceph ] || [ -d /etc/ceph ]; then
-    if [[ "$(find /var/lib/ceph/ -mindepth 3 -maxdepth 3 -type f | wc -l)" != 0 ]] || [[ -z "$(find /etc/ceph -prune -empty)" ]]; then
-      log "I can see existing Ceph files, please remove them!"
-      log "To run the demo container, remove the content of /var/lib/ceph/ and /etc/ceph/"
-      log "Before doing this, make sure you are removing any sensitive data."
-      exit 1
+  if [[ "$NETWORK_AUTO_DETECT" == "0" ]]; then
+    if [ -d /var/lib/ceph ] || [ -d /etc/ceph ]; then
+      if [[ "$(find /var/lib/ceph/ -mindepth 3 -maxdepth 3 -type f | wc -l)" != 0 ]] || [[ -z "$(find /etc/ceph -prune -empty)" ]]; then
+        log "I can see existing Ceph files, please remove them!"
+        log "To run the demo container, remove the content of /var/lib/ceph/ and /etc/ceph/"
+        log "Before doing this, make sure you are removing any sensitive data."
+        exit 1
+      fi
     fi
   fi
 }
