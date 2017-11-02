@@ -47,6 +47,12 @@ spec:
         - name: osd-pod
           image: ceph/daemon:latest
           imagePullPolicy: Always
+          lifecycle:
+            preStop:
+                exec:
+                  # Run OSD exit script on Pod stop.
+                  command:
+                    - "/osd-exit.sh"
           volumeMounts:
             - name: devices
               mountPath: /dev
