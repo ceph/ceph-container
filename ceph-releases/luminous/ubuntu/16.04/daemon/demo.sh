@@ -75,7 +75,7 @@ function bootstrap_rgw {
     #configure rgw dns name
     cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
 
-[client.radosgw.gateway]
+[client.rgw.${RGW_NAME}]
 rgw dns name = ${RGW_NAME}
 
 ENDHERE
