@@ -7,3 +7,4 @@ ceph.mon.keyring
 ceph.osd.keyring
 ceph.rgw.keyring
 client-admin-key
+ceph-releases/devel/*
