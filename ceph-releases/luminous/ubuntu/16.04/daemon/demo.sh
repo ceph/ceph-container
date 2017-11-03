@@ -4,7 +4,7 @@ set -e
 unset "DAEMON_OPTS[${#DAEMON_OPTS[@]}-1]" # remove the last element of the array
 OSD_PATH="/var/lib/ceph/osd/${CLUSTER}-0"
 MDS_PATH="/var/lib/ceph/mds/${CLUSTER}-0"
-RGW_PATH="/var/lib/ceph/radosgw/$RGW_NAME"
+RGW_PATH="/var/lib/ceph/radosgw/${CLUSTER}-rgw.${RGW_NAME}"
 MGR_PATH="/var/lib/ceph/mgr/${CLUSTER}-$MGR_NAME"
 RESTAPI_IP=$MON_IP
 MGR_IP=$MON_IP
@@ -77,6 +77,11 @@ function bootstrap_rgw {
 
 [client.rgw.${RGW_NAME}]
 rgw dns name = ${RGW_NAME}
+rgw enable usage log = true
+rgw usage log tick interval = 1
+rgw usage log flush threshold = 1
+rgw usage max shards = 32
+rgw usage max user shards = 1
 
 ENDHERE
   fi
@@ -102,6 +107,8 @@ function bootstrap_demo_user {
     sed -i s/AWS_SECRET_KEY_PLACEHOLDER/"$CEPH_DEMO_SECRET_KEY"/ /root/.s3cfg
     echo "Access key: $CEPH_DEMO_ACCESS_KEY" > /ceph-demo-user
     echo "Secret key: $CEPH_DEMO_SECRET_KEY" >> /ceph-demo-user
+
+    radosgw-admin "${CLI_OPTS[@]}" caps add --caps="buckets=*;users=*;usage=*;metadata=*" --uid="$CEPH_DEMO_UID"
 
     # Use rgw port
     sed -i "s/host_base = localhost/host_base = ${RGW_NAME}:${RGW_CIVETWEB_PORT}/" /root/.s3cfg
