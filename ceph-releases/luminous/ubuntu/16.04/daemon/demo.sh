@@ -77,6 +77,11 @@ function bootstrap_rgw {
 
 [client.rgw.${RGW_NAME}]
 rgw dns name = ${RGW_NAME}
+rgw enable usage log = true
+rgw usage log tick interval = 1
+rgw usage log flush threshold = 1
+rgw usage max shards = 32
+rgw usage max user shards = 1
 
 ENDHERE
   fi
