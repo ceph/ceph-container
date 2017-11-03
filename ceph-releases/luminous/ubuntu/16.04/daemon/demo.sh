@@ -108,6 +108,8 @@ function bootstrap_demo_user {
     echo "Access key: $CEPH_DEMO_ACCESS_KEY" > /ceph-demo-user
     echo "Secret key: $CEPH_DEMO_SECRET_KEY" >> /ceph-demo-user
 
+    radosgw-admin "${CLI_OPTS[@]}" caps add --caps="buckets=*;users=*;usage=*;metadata=*" --uid="$CEPH_DEMO_UID"
+
     # Use rgw port
     sed -i "s/host_base = localhost/host_base = ${RGW_NAME}:${RGW_CIVETWEB_PORT}/" /root/.s3cfg
     sed -i "s/host_bucket = localhost/host_bucket = ${RGW_NAME}:${RGW_CIVETWEB_PORT}/" /root/.s3cfg
