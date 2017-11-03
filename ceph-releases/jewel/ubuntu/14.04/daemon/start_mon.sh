@@ -149,6 +149,16 @@ function start_mon {
       # This is needed for etcd or k8s deployments as new containers joining need to have a map of the cluster
       # The list of monitors will not be provided by the ceph.conf since we don't have the overall knowledge of what's already deployed
       # In this kind of environment, the monmap is the only source of truth for new monitor to attempt to join the existing quorum
+      if [[ ! -f "$MONMAP" ]]; then
+        get_mon_config $ip_version
+      fi
+      # Be sure that the mon name of the current monitor in the monmap is equal to ${MON_NAME}.
+      # Names can be different in case of full qualifed hostnames
+      MON_ID=$(monmaptool --print ${MONMAP} | sed -n "s/^.*${MON_IP}:6789.*mon\.//p")
+      if [[ -n "$MON_ID" && "$MON_ID" != "$MON_NAME" ]]; then
+        monmaptool --rm $MON_ID $MONMAP >/dev/null
+        monmaptool --add $MON_NAME $MON_IP $MONMAP >/dev/null
+      fi
       ceph-mon --setuser ceph --setgroup ceph --cluster "${CLUSTER}" -i "${MON_NAME}" --inject-monmap "$MONMAP" --keyring "$MON_KEYRING" --mon-data "$MON_DATA_DIR"
     fi
     timeout 7 ceph "${CLI_OPTS[@]}" mon add "${MON_NAME}" "${MON_IP}:6789" || true
