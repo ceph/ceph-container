@@ -4,7 +4,7 @@ set -e
 unset "DAEMON_OPTS[${#DAEMON_OPTS[@]}-1]" # remove the last element of the array
 OSD_PATH="/var/lib/ceph/osd/${CLUSTER}-0"
 MDS_PATH="/var/lib/ceph/mds/${CLUSTER}-0"
-RGW_PATH="/var/lib/ceph/radosgw/$RGW_NAME"
+RGW_PATH="/var/lib/ceph/radosgw/${CLUSTER}-rgw.${RGW_NAME}"
 MGR_PATH="/var/lib/ceph/mgr/${CLUSTER}-$MGR_NAME"
 RESTAPI_IP=$MON_IP
 MGR_IP=$MON_IP
