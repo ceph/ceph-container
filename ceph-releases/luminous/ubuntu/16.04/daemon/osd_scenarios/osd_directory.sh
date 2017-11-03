@@ -51,14 +51,8 @@ function osd_directory {
       chown "${CHOWN_OPT[@]}" ceph. "$OSD_PATH"
       # create osd key and file structure
       ceph-osd "${CLI_OPTS[@]}" -i "$OSD_ID" --mkfs --mkkey --mkjournal --osd-journal "${OSD_J}" --setuser ceph --setgroup ceph
-      if [ ! -e "$OSD_BOOTSTRAP_KEYRING"  ]; then
-        log "ERROR- $OSD_BOOTSTRAP_KEYRING must exist. You can extract it from your current monitor by running 'ceph auth get client.bootstrap-osd -o $OSD_BOOTSTRAP_KEYRING '"
-        exit 1
-      fi
-      ceph_health client.bootstrap-osd "$OSD_BOOTSTRAP_KEYRING"
-
       # add the osd key
-      ceph "${CLI_OPTS[@]}" --name client.bootstrap-osd --keyring "$OSD_BOOTSTRAP_KEYRING" auth add osd."${OSD_ID}" -i "${OSD_KEYRING}" osd 'allow *' mon 'allow profile osd'  || log "$1"
+      ceph "${CLI_OPTS[@]}" --name client.admin auth add osd."${OSD_ID}" -i "${OSD_KEYRING}" osd 'allow *' mon 'allow profile osd'  || log "$1"
       log "done adding key"
       chown "${CHOWN_OPT[@]}" ceph. "${OSD_KEYRING}"
       chmod 0600 "${OSD_KEYRING}"
