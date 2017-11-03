@@ -82,6 +82,7 @@ rgw usage log tick interval = 1
 rgw usage log flush threshold = 1
 rgw usage max shards = 32
 rgw usage max user shards = 1
+log file = /var/log/ceph/client.rgw.${RGW_NAME}.log
 
 ENDHERE
   fi

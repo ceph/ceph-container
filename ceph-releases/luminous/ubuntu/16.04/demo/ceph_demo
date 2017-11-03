@@ -28,6 +28,7 @@ Usage: ./$(basename "$0") start [working dir]|stop|status|purge|help
       stop: stops Ceph nano container.
       status: shows useful information about Ceph nano container.
       purge: DANGEROUS, removes the Ceph nano container and all its data.
+      logs: shows container S3 logs (can be really verbose).
       help: shows this help.
 
 
@@ -167,6 +168,11 @@ function s3cmd_wrap {
   fi
 }
 
+function show_rgw_logs {
+  log_file=$(docker exec ceph-nano ls /var/log/ceph/ | grep client.rgw)
+  docker exec ceph-nano cat /var/log/ceph/"$log_file"
+}
+
 
 ########
 # MAIN #
@@ -193,6 +199,9 @@ case "$1" in
     ;;
   mb|rb|ls|la|put|get|del|info|du|cp|mv|sync)
     s3cmd_wrap "$@"
+    ;;
+  logs)
+    show_rgw_logs
     ;;
   help|*)
     show_usage
