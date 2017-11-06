@@ -74,8 +74,6 @@ sudo docker tag ceph/daemon localhost:5000/ceph/daemon:$CEPH_STABLE_RELEASE-late
 sleep 1
 sudo docker --debug push localhost:5000/ceph/daemon:$CEPH_STABLE_RELEASE-latest
 
-ip -4 a
-
 # test
 #################################################################################
 
