@@ -73,7 +73,7 @@ Interact with S3:
     ./$PROGRAM rb BUCKET                               Remove bucket
     ./$PROGRAM ls [BUCKET[/PREFIX]                     List objects or buckets
     ./$PROGRAM la                                      List all object in all buckets
-    ./$PROGRAM put FILE [FILE...] BUCKET[/PREFIX]      Put file into bucket
+    ./$PROGRAM put FILE BUCKET[/PREFIX]                Put file into bucket
     ./$PROGRAM get BUCKET/OBJECT LOCAL_FILE            Get file from bucket
     ./$PROGRAM del BUCKET/OBJECT                       Delete file from bucket
     ./$PROGRAM sync LOCAL_DIR BUCKET[/PREFIX]          Synchronize a directory tree to S3
