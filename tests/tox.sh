@@ -39,7 +39,14 @@ fi
 
 rm -rf "$WORKSPACE"/ceph-ansible || true
 git clone -b $CEPH_ANSIBLE_BRANCH --single-branch https://github.com/ceph/ceph-ansible.git ceph-ansible
-pip install -r $TOXINIDIR/ceph-ansible/tests/requirements.txt
+
+if [ "$CEPH_ANSIBLE_BRANCH" == 'stable-2.2' -o "$CEPH_ANSIBLE_BRANCH" == 'stable-3.0' ]; then
+  REQUIREMENTS=requirements2.2.txt
+else
+  REQUIREMENTS=requirements2.4.txt
+fi
+
+pip install -r $TOXINIDIR/ceph-ansible/tests/$REQUIREMENTS
 
 # pull requests tests should never have these directories here, but branches
 # do, so for the build scripts to work correctly, these neeed to be removed
