@@ -13,7 +13,7 @@ function osd_directory {
     log "Creating osd"
     UUID=$(uuidgen)
     OSD_SECRET=$(ceph-authtool --gen-print-key)
-    OSD_ID=$(echo "{\"cephx_secret\": \"${OSD_SECRET}\"}" | ceph osd new "${UUID}" -i - -n client.bootstrap-osd -k "$OSD_BOOTSTRAP_KEYRING")
+    OSD_ID=$(echo "{\"cephx_secret\": \"${OSD_SECRET}\"}" | ceph --cluster "${CLUSTER}" osd new "${UUID}" -i - -n client.bootstrap-osd -k "$OSD_BOOTSTRAP_KEYRING")
     if is_integer "$OSD_ID"; then
       log "OSD created with ID: ${OSD_ID}"
     else
@@ -41,7 +41,7 @@ function osd_directory {
     # write the secret to the osd keyring file
     ceph-authtool --create-keyring "${OSD_PATH}"/keyring --name osd."${OSD_ID}" --add-key "${OSD_SECRET}"
     # init data directory
-    ceph-osd -i "${OSD_ID}" --mkfs --osd-uuid "${UUID}" --mkjournal --osd-journal "${OSD_J}" --setuser ceph --setgroup ceph
+    ceph-osd --cluster "${CLUSTER}" -i "${OSD_ID}" --mkfs --osd-uuid "${UUID}" --mkjournal --osd-journal "${OSD_J}" --setuser ceph --setgroup ceph
   fi
 
   # create the directory and an empty Procfile
