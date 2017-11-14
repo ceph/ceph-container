@@ -19,30 +19,12 @@ function osd_disk_prepare {
 
   ceph_health client.bootstrap-osd "$OSD_BOOTSTRAP_KEYRING"
 
-  # check device status first
-  if ! parted --script "${OSD_DEVICE}" print > /dev/null 2>&1; then
-    if [[ ${OSD_FORCE_ZAP} -eq 1 ]]; then
-      log "It looks like ${OSD_DEVICE} isn't consistent, however OSD_FORCE_ZAP is enabled so we are zapping the device anyway"
-      ceph-disk -v zap "${OSD_DEVICE}"
-    else
-      log "Regarding parted, device ${OSD_DEVICE} is inconsistent/broken/weird."
-      log "It would be too dangerous to destroy it without any notification."
-      log "Please set OSD_FORCE_ZAP to '1' if you really want to zap this disk."
-      exit 1
-    fi
-  fi
-
   # then search for some ceph metadata on the disk
   if parted --script "${OSD_DEVICE}" print | grep -qE '^ 1.*ceph data'; then
-    if [[ ${OSD_FORCE_ZAP} -eq 1 ]]; then
-      log "It looks like ${OSD_DEVICE} is an OSD, however OSD_FORCE_ZAP is enabled so we are zapping the device anyway"
-      ceph-disk -v zap "${OSD_DEVICE}"
-    else
-      log "INFO- It looks like ${OSD_DEVICE} is an OSD, set OSD_FORCE_ZAP=1 to use this device anyway and zap its content"
-      log "You can also use the zap_device scenario on the appropriate device to zap it"
-      log "Moving on, trying to activate the OSD now."
-      return
-    fi
+    log "INFO: It looks like ${OSD_DEVICE} is an OSD"
+    log "You can use the zap_device scenario on the appropriate device to zap it"
+    log "Moving on, trying to activate the OSD now."
+    return
   fi
 
   IFS=" " read -r -a CEPH_DISK_CLI_OPTS <<< "${CLI_OPTS[*]}"

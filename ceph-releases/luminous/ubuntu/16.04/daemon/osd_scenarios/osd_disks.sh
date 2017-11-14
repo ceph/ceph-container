@@ -47,12 +47,9 @@ function osd_disks {
     OSD_DEV="/dev/$(echo "${OSD_DISK}"|sed 's/\(.*\):\(.*\)/\2/')"
 
     if parted --script "${OSD_DEV}" print | grep -qE '^ 1.*ceph data'; then
-      if [[ ${OSD_FORCE_ZAP} -eq 1 ]]; then
-        ceph-disk -v zap "${OSD_DEV}"
-      else
-        log "ERROR- It looks like the device ($OSD_DEV) is an OSD, set OSD_FORCE_ZAP=1 to use this device anyway and zap its content"
-        exit 1
-      fi
+      log "ERROR: It looks like the device ($OSD_DEV) is an OSD"
+      log "You can use the zap_device scenario on the appropriate device to zap it."
+      exit 1
     fi
 
     ceph-disk -v prepare "${CLI_OPTS[@]}" "${OSD_DEV}" "${OSD_JOURNAL}"

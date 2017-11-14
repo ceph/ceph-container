@@ -24,7 +24,6 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 : "${K8S_MON_SELECTOR:=app=ceph,daemon=mon}"
 : "${NETWORK_AUTO_DETECT:=0}"
 : "${MDS_NAME:=${HOSTNAME}}"
-: "${OSD_FORCE_ZAP:=0}"
 : "${OSD_JOURNAL_SIZE:=100}"
 : "${OSD_BLUESTORE:=1}"
 : "${OSD_FILESTORE:=0}"

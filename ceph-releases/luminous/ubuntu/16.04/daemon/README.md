@@ -121,7 +121,7 @@ Options for OSDs (TODO: consolidate these options between the types):
 
 If the operator does not specify an `OSD_TYPE` autodetection happens:
 
-- `disk` is used if no bootstrapped OSD is found. `OSD_FORCE_ZAP=1` must be set at this point.
+- `disk` is used if no bootstrapped OSD is found.
 - `activate` is used if a bootstrapped OSD is found and `OSD_DEVICE` is also provided.
 - `directory` is used if a bootstrapped OSD is found and no `OSD_DEVICE` is provided.
 
@@ -135,7 +135,6 @@ docker run -d --net=host \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
 -e OSD_DEVICE=/dev/vdd \
--e OSD_FORCE_ZAP=1 \
 ceph/daemon osd
 ```
 
@@ -147,7 +146,6 @@ docker run -d --net=host \
 --pid=host \
 -v /dev/:/dev/ \
 -e OSD_DEVICE=/dev/vdd \
--e OSD_FORCE_ZAP=1 \
 -e KV_TYPE=etcd \
 -e KV_IP=192.168.0.20 \
 ceph/daemon osd
