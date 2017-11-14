@@ -145,8 +145,27 @@ function wait_for_container {
   ceph_nano_s3_health
 }
 
+function selinux {
+  if command -v getenforce &> /dev/null; then
+    if [[ $(getenforce) == "Enforcing" ]]; then
+      chcon -Rt svirt_sandbox_file_t "$WORKING_DIR"
+    fi
+  fi
+}
+
+function docker_version {
+  docker_version=$(docker --version | awk '{ sub (",", "", $3); print $3 }' | cut -f1 -d '.')
+  if [[ "$docker_version" -ge "17" ]]; then
+    # shellcheck disable=SC2054,SC2191
+    VOLUMES=(--mount type=volume,source=etcceph,target=/etc/ceph --mount type=volume,source=varlibceph,target=/var/lib/ceph)
+  else
+    VOLUMES=(-v etcceph:/etc/ceph -v varlibceph:/var/lib/ceph)
+  fi
+}
+
 function start_ceph_nano {
   [ ! -d $WORKING_DIR ] || mkdir -p $WORKING_DIR
+  selinux
   set_trap_docker_start
   if [[ "$(docker ps --filter='name=ceph-nano' | wc -l)" -eq "2" ]]; then
     echo "$PROGRAM is already running!"
@@ -162,11 +181,11 @@ function start_ceph_nano {
       echo "You are offline, binding $PROGRAM on $IP."
     fi
     echo -n "Starting $PROGRAM..."
+    docker_version
     docker run --detach \
     --name ceph-nano \
     --memory 1g \
-    --mount type=volume,source=etcceph,target=/etc/ceph \
-    --mount type=volume,source=varlibceph,target=/var/lib/ceph \
+    "${VOLUMES[@]}" \
     -v $WORKING_DIR:$WORKING_DIR \
     -p "$IP":8000:8000 \
     -p "$IP":7000:7000 \
@@ -189,7 +208,8 @@ function echo_info {
     echo ""
     echo "Ceph status is: $(docker exec ceph-nano ceph health)"
     echo "Ceph Rados Gateway address is: http://$IP:$RGW_CIVETWEB_PORT"
-    echo "S3 user is: 'nano'"
+    echo "Your working directory is: $WORKING_DIR"
+    echo "S3 user is: nano"
     echo "S3 access key is: $CEPH_NANO_ACCESS_KEY"
     echo "S3 secret key is: $CEPH_NANO_SECRET_KEY"
     echo ""
@@ -211,7 +231,7 @@ function stop_ceph_nano {
 
 function rm_ceph_nano {
   trap - ERR
-  docker rm -f ceph-nano &> /dev/null
+  docker rm -f ceph-nano &> /dev/null || true
 }
 
 function purge_ceph_nano {
