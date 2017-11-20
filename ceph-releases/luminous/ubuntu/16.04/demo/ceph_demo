@@ -13,12 +13,8 @@ if [[ $(ip r | head -n1) =~ 127.0.0.1 ]]; then
 else
   IP=$(ip route get 8.8.8.8 2>/dev/null | head -1 |sed -e 's/.*src \([0-9]*\.[0-9]*\.[0-9]*\.[0-9]*\).*/\1/g')
 fi
-if [ -n "$2" ]; then
-  WORKING_DIR=$2
-else
-  WORKING_DIR=/usr/share/ceph-nano
-fi
 
+WORKING_DIR=/usr/share/ceph-nano
 
 #############
 # FUNCTIONS #
@@ -164,6 +160,9 @@ function docker_version {
 }
 
 function start_ceph_nano {
+  if [ -n "$1" ]; then
+    WORKING_DIR="$1"
+  fi
   [ ! -d $WORKING_DIR ] && mkdir -p $WORKING_DIR
   selinux
   set_trap_docker_start
@@ -301,7 +300,7 @@ docker_exist
 case "$1" in
   start)
     create_ceph_nano_volumes
-    start_ceph_nano
+    start_ceph_nano "$2"
     echo_info
     ;;
   status)
