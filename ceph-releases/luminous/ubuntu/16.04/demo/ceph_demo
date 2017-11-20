@@ -11,14 +11,10 @@ RGW_CIVETWEB_PORT=8000
 if [[ $(ip r | head -n1) =~ 127.0.0.1 ]]; then
   IP=127.0.0.1
 else
-  IP=$(ip route get 8.8.8.8 2> /dev/null | awk 'NR==1 {print $NF}')
-fi
-if [ -n "$2" ]; then
-  WORKING_DIR=$2
-else
-  WORKING_DIR=/usr/share/ceph-nano
+  IP=$(ip route get 8.8.8.8 2>/dev/null | head -1 |sed -e 's/.*src \([0-9]*\.[0-9]*\.[0-9]*\.[0-9]*\).*/\1/g')
 fi
 
+WORKING_DIR=/usr/share/ceph-nano
 
 #############
 # FUNCTIONS #
@@ -164,7 +160,10 @@ function docker_version {
 }
 
 function start_ceph_nano {
-  [ ! -d $WORKING_DIR ] || mkdir -p $WORKING_DIR
+  if [ -n "$1" ]; then
+    WORKING_DIR="$1"
+  fi
+  [ ! -d $WORKING_DIR ] && mkdir -p $WORKING_DIR
   selinux
   set_trap_docker_start
   if [[ "$(docker ps --filter='name=ceph-nano' | wc -l)" -eq "2" ]]; then
@@ -252,6 +251,15 @@ function s3cmd_wrap {
     elif [[ "${array[0]}" =~ get ]]; then
       $docker_exec "${array[0]}" "${array[1]/#/s3://}" "${array[2]}"
     elif [[ "${array[0]}" =~ put|sync ]]; then
+      local input_file="${array[1]}"
+      if [ ! -e "$input_file" ]; then
+          echo "$input_file doesn't exist !"
+          return
+      fi
+      if [ "$(dirname $input_file)" != "$WORKING_DIR" ]; then
+          echo "$input_file should be in $WORKING_DIR directory !"
+          return
+      fi
       $docker_exec "${array[0]}" "${array[1]}" "${array[2]/#/s3://}"
     else
       $docker_exec "${array[@]}"
@@ -301,7 +309,7 @@ docker_exist
 case "$1" in
   start)
     create_ceph_nano_volumes
-    start_ceph_nano
+    start_ceph_nano "$2"
     echo_info
     ;;
   status)
