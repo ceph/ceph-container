@@ -164,7 +164,7 @@ function docker_version {
 }
 
 function start_ceph_nano {
-  [ ! -d $WORKING_DIR ] || mkdir -p $WORKING_DIR
+  [ ! -d $WORKING_DIR ] && mkdir -p $WORKING_DIR
   selinux
   set_trap_docker_start
   if [[ "$(docker ps --filter='name=ceph-nano' | wc -l)" -eq "2" ]]; then
