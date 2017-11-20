@@ -251,6 +251,15 @@ function s3cmd_wrap {
     elif [[ "${array[0]}" =~ get ]]; then
       $docker_exec "${array[0]}" "${array[1]/#/s3://}" "${array[2]}"
     elif [[ "${array[0]}" =~ put|sync ]]; then
+      local input_file="${array[1]}"
+      if [ ! -e "$input_file" ]; then
+          echo "$input_file doesn't exist !"
+          return
+      fi
+      if [ "$(dirname $input_file)" != "$WORKING_DIR" ]; then
+          echo "$input_file should be in $WORKING_DIR directory !"
+          return
+      fi
       $docker_exec "${array[0]}" "${array[1]}" "${array[2]/#/s3://}"
     else
       $docker_exec "${array[@]}"
