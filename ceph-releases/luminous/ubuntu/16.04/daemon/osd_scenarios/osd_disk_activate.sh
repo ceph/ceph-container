@@ -69,6 +69,12 @@ function osd_activate {
   fi
   apply_ceph_ownership_to_disks
 
+  if [[ ${OSD_NUMACTL} -eq 1 ]]; then
+      NUMACTL="/usr/bin/numactl -N ${OSD_NUMACTL_NODE_NUMBER} --${OSD_NUMACTL_POLICY}=${OSD_NUMACTL_POLICY_OPT}"
+  else
+      NUMACTL=""
+  fi
+
   log "SUCCESS"
-  exec /usr/bin/ceph-osd "${CLI_OPTS[@]}" -f -i "${OSD_ID}" --setuser ceph --setgroup disk
+  exec ${NUMACTL} /usr/bin/ceph-osd "${CLI_OPTS[@]}" -f -i "${OSD_ID}" --setuser ceph --setgroup disk
 }
