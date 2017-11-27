@@ -28,5 +28,5 @@ function start_rbd_mirror {
 
   log "SUCCESS"
   # start rbd-mirror
-  exec /usr/bin/rbd-mirror "${DAEMON_OPTS[@]}" -n client.rbd-mirror."${RBD_MIRROR_NAME}" -k "$RBD_MIRROR_KEYRING"
+  exec /usr/bin/rbd-mirror "${DAEMON_OPTS[@]}" -n client.rbd-mirror."${RBD_MIRROR_NAME}"
 }
