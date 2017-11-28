@@ -24,3 +24,8 @@
 [client]
 {{range gets "/client/*"}}
   {{base .Key}} = {{.Value}}{{end}}
+{{range ls "/client_host"}}
+  [{{.}}]
+    {{with $key := . | printf "/client_host/%s/*"}}{{range gets $key}}
+      {{base .Key}} = {{.Value}}{{end}}{{end}}
+{{end}}
