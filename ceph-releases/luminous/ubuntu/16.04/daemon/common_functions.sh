@@ -263,8 +263,13 @@ function get_part_typecode {
 
 function apply_ceph_ownership_to_disks {
   if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
-    wait_for_file "$(dev_part "${OSD_DEVICE}" 5)"
-    chown "${CHOWN_OPT[@]}" ceph. "$(dev_part "${OSD_DEVICE}" 5)"
+    if [[ -b "$(dev_part "${OSD_DEVICE}" 3)" ]]; then
+      wait_for_file "$(dev_part "${OSD_DEVICE}" 3)"
+      chown "${CHOWN_OPT[@]}" ceph. "$(dev_part "${OSD_DEVICE}" 3)"
+    else
+      wait_for_file "$(dev_part "${OSD_DEVICE}" 5)"
+      chown "${CHOWN_OPT[@]}" ceph. "$(dev_part "${OSD_DEVICE}" 5)"
+    fi
   fi
   if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
     dev_real_path=$(resolve_symlink "$OSD_BLUESTORE_BLOCK_WAL" "$OSD_BLUESTORE_BLOCK_DB")
@@ -367,7 +372,12 @@ function get_dmcrypt_bluestore_uuid {
 function get_dmcrypt_filestore_uuid {
   DATA_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
   # shellcheck disable=SC2034
-  LOCKBOX_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 5)")
+  # we could be in the middle of an update from Jewel to Luminous then the partition is number 3
+  if [[ -b "$(dev_part "${OSD_DEVICE}" 3)" ]]; then
+    LOCKBOX_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 3)")
+  else
+    LOCKBOX_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 5)")
+  fi
   export DISK_LIST_SEARCH=journal_dmcrypt
   start_disk_list
   JOURNAL_PART=$(start_disk_list)
