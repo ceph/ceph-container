@@ -148,6 +148,10 @@ case "$CEPH_DAEMON" in
     # TAG: demo
     source demo.sh
     ;;
+  topology)
+    # TAG: topology
+    lstopo-no-graphics
+    ;;
   disk_list)
     # TAG: disk_list
     source disk_list.sh

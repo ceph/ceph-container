@@ -325,6 +325,48 @@ On CoreOS (and probably other systemd-based systems), you can do this by creatin
 LimitNOFILE=4096
 ```
 
+### Start an OSD with numactl
+
+To apply NUMA policy to an OSD daemon, the daemon may be started
+within the container using `numactl` by passing the following options:
+
+- `OSD_NUMACTL` must be set to 1 to enable the feature (default 0)
+- `OSD_NUMACTL_NODE_NUMBER` CPU number, e.g. 0,1,2..., the OSD will use
+- `OSD_NUMACTL_POLICY` one of interleave, membind, cpunodebind, or preferred
+- `OSD_NUMACTL_POLICY_OPT` NODE number values to pass to the `OSD_NUMACTL_POLICY`
+
+For example:
+
+```
+docker run -d --net=host \
+--privileged=true \
+--pid=host \
+-v /etc/ceph:/etc/ceph \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-v /dev/:/dev/ \
+-e OSD_DEVICE=/dev/vdd \
+-e OSD_NUMACTL=1 \
+-e OSD_NUMACTL_NODE_NUMBER=0 \
+-e OSD_NUMACTL_POLICY=preferred \
+-e OSD_NUMACTL_POLICY_OPT=0 \
+ceph/daemon osd
+```
+
+will result in the OSD daemon being started with the following:
+
+`exec /usr/bin/numactl -N 0 --preferred=0 /usr/bin/ceph-osd ...`
+
+See `man numactl` for more information.
+
+To determine the available NUMA node numbers on a system use the
+topology option:
+
+```
+docker run ceph/daemon topology
+```
+
+The above returns the output of `lstopo-no-graphics`.
+
 ## Deploy a MDS
 
 By default, the MDS does _NOT_ create a ceph filesystem. If you wish to have this MDS create a ceph filesystem (it will only do this if the specified `CEPHFS_NAME` does not already exist), you _must_ set, at a minimum, `CEPHFS_CREATE=1`. It is strongly recommended that you read the rest of this section, as well.
