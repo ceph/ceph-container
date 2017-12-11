@@ -62,9 +62,7 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 : "${GANESHA_OPTIONS:=""}"
 : "${GANESHA_EPOCH:=""}" # For restarting
 : "${MGR_NAME:=${HOSTNAME}}"
-: "${MGR_DASHBOARD:=1}"
 : "${MGR_IP:=0.0.0.0}"
-: "${MGR_PORT:=7000}"
 
 # Make sure to change the value of one another if user changes some of the default values
 while read -r line; do
