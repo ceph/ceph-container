@@ -11,8 +11,8 @@ function zap_device {
   fi
 
   if [[ "${OSD_DEVICE}" == "all_ceph_disks" ]]; then
-    for type in data journal block wal db; do
-      for disk in $(blkid -t PARTLABEL="ceph $type" -o device | uniq); do
+    for type in " data" " journal" " block" " block.wal" " block.db"; do
+      for disk in $(blkid -t PARTLABEL="ceph$type" -o device | uniq); do
         dev="$dev ${disk%?}"
       done
     done
