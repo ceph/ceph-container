@@ -186,6 +186,7 @@ function start_ceph_nano {
     --memory 1g \
     "${VOLUMES[@]}" \
     -v $WORKING_DIR:$WORKING_DIR \
+    -p "$IP":5000:5000 \
     -p "$IP":8000:8000 \
     -p "$IP":7000:7000 \
     -e CEPH_DEMO_UID=$CEPH_NANO_UID \
