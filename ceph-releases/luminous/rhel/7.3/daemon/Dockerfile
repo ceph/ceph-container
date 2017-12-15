@@ -7,10 +7,12 @@ LABEL Maintainer="Sebastien Han 'seb@redhat.com'"
 ENV container docker
 
 ARG PACKAGES="ceph-mon ceph-osd ceph-mds ceph-radosgw rbd-mirror nfs-ganesha-rgw e2fsprogs ceph-mgr"
+ARG PURGES="/tmp/* /var/tmp/* /usr/lib/{dracut,locale,systemd,udev} /usr/bin/hyperkube /usr/bin/etcd /usr/bin/systemd-analyze /etc/{udev,selinux}"
 RUN yum -y update && \
     yum -y install $PACKAGES && \
     rpm -q $PACKAGES && \
-    yum clean all
+    yum clean all && \
+    rm -rf $PURGES
 
 # Editing /etc/redhat-storage-server release file
 RUN echo "Red Hat Ceph Storage Server 3 (Container)" > /etc/redhat-storage-release
