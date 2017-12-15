@@ -15,7 +15,8 @@ RUN yum install -y epel-release
 ADD ganesha.repo /etc/yum.repos.d/
 RUN yum clean all
 ARG PACKAGES="unzip ceph-mon ceph-osd ceph-mds ceph-mgr ceph-base ceph-common ceph-radosgw rbd-mirror device-mapper sharutils etcd kubernetes-client e2fsprogs s3cmd wget nfs-ganesha nfs-ganesha-ceph nfs-ganesha-rgw"
-RUN yum install -y $PACKAGES && rpm -q $PACKAGES && yum clean all
+ARG PURGES="/tmp/* /var/tmp/* /usr/lib/{dracut,locale,systemd,udev} /usr/bin/hyperkube /usr/bin/etcd /usr/bin/systemd-analyze /etc/{udev,selinux} /usr/lib/{udev,systemd}"
+RUN yum install -y $PACKAGES && rpm -q $PACKAGES && yum clean all && rm -rf $PURGES
 
 # Install confd
 ADD https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-linux-amd64 /usr/local/bin/confd

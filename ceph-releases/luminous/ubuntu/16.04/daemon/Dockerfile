@@ -14,6 +14,7 @@ ADD https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}
 
 # Packages list
 ARG PACKAGES="ceph-mon ceph-osd ceph-mds ceph-mgr ceph-base ceph-common radosgw rbd-mirror sharutils etcd s3cmd nfs-ganesha nfs-ganesha-ceph nfs-ganesha-rgw"
+ARG PURGES="/var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/lib/{dracut,locale,systemd,udev} /usr/bin/hyperkube /usr/bin/etcd /usr/bin/systemd-analyze /etc/{udev,selinux} /usr/lib/{udev,systemd}"
 
 # install prerequisites
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget unzip uuid-runtime python-setuptools udev dmsetup && \
@@ -24,7 +25,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget unz
     echo "deb http://download.ceph.com/nfs-ganesha/deb-V2.5-stable/luminous/ xenial main" | tee /etc/apt/sources.list.d/nfs-ganesha.list && \
     apt-get update && apt-get install -y --force-yes $PACKAGES && \
     dpkg -s $PACKAGES && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    apt-get clean && rm -rf $PURGES && \
 \
 # Install confd
     chmod +x /usr/local/bin/confd && mkdir -p /etc/confd/conf.d && mkdir -p /etc/confd/templates && \
