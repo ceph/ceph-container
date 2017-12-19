@@ -8,6 +8,7 @@ RGW_PATH="/var/lib/ceph/radosgw/${CLUSTER}-rgw.${RGW_NAME}"
 MGR_PATH="/var/lib/ceph/mgr/${CLUSTER}-$MGR_NAME"
 RESTAPI_IP=$MON_IP
 MGR_IP=$MON_IP
+: "${DEMO_DAEMONS:=all}"
 
 
 #######
@@ -143,7 +144,7 @@ function bootstrap_nfs {
 # API #
 #######
 function bootstrap_rest_api {
-  if ! grep -E "\[client.restapi\]" /etc/ceph/"${CLUSTER}".conf; then
+  if ! grep -E "\\[client.restapi\\]" /etc/ceph/"${CLUSTER}".conf; then
     cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
 [client.restapi]
 public addr = ${RESTAPI_IP}:${RESTAPI_PORT}
@@ -184,19 +185,73 @@ function bootstrap_mgr {
 }
 
 
+###################
+# BUILD BOOTSTRAP #
+###################
+
+function build_bootstrap {
+  # NOTE(leseb): always bootstrap a mon and mgr no matter what
+  # this is will prevent someone writing daemons in the wrong order
+  # once both mon and mgr are up we don't care about the order
+  bootstrap_mon
+  bootstrap_mgr
+
+  if [[ "$DEMO_DAEMONS" == "all" ]]; then
+    daemons_list="osd mds rgw nfs rbd_mirror rest_api"
+  else
+    # change commas to space
+    comma_to_space=${DEMO_DAEMONS//,/ }
+
+    # transform to an array
+    IFS=" " read -r -a array <<< "$comma_to_space"
+
+    # sort and remove potential duplicate
+    daemons_list=$(echo "${array[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+  fi
+
+  for daemon in $daemons_list; do
+    case "$daemon" in
+      mon)
+        # the mon is already present so we skip this
+        continue
+        ;;
+      mgr)
+        # the mgr is already present so we skip this
+        continue
+        ;;
+      osd)
+        bootstrap_osd
+        ;;
+      mds)
+        bootstrap_mds
+        ;;
+      rgw)
+        bootstrap_rgw
+        bootstrap_demo_user
+        ;;
+      nfs)
+        bootstrap_nfs
+        ;;
+      rbd_mirror)
+        bootstrap_rbd_mirror
+        ;;
+      rest_api)
+        bootstrap_rest_api
+        ;;
+      *)
+        log "ERROR: unknown scenario!"
+        log "Available scenarios are: mon mgr osd mds rgw nfs rbd_mirror rest_api"
+        exit 1
+        ;;
+    esac
+  done
+}
+
 #########
 # WATCH #
 #########
 detect_ceph_files
-bootstrap_mon
-bootstrap_osd
-bootstrap_mds
-bootstrap_rgw
-bootstrap_demo_user
-bootstrap_rest_api
-bootstrap_nfs
-bootstrap_rbd_mirror
-bootstrap_mgr
+build_bootstrap
 
 # create 2 files so we can later check that this is a demo container
 touch /var/lib/ceph/I_AM_A_DEMO /etc/ceph/I_AM_A_DEMO
