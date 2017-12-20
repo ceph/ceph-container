@@ -197,7 +197,7 @@ kubectl create -f ceph-osd-activate-v1-ds.yaml --namespace=ceph
 First, create a RBD provisioner pod:
 
 ```
-$ kubectl create -f https://raw.githubusercontent.com/kubernetes-incubator/external-storage/master/ceph/rbd/deployment.yaml --namespace=ceph
+$ kubectl create -f https://raw.githubusercontent.com/kubernetes-incubator/external-storage/master/ceph/rbd/deploy/non-rbac/deployment.yaml --namespace=ceph
 ```
 Then, if there is no Ceph admin secret with type `kubernetes.io/rbd`, create one:
 
