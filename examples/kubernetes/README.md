@@ -218,6 +218,9 @@ parameters:
     adminId: admin
     adminSecretName: ceph-secret-admin
     adminSecretNamespace: "ceph"
+    userId: admin
+    userSecretName: ceph-secret-admin # must be present in claim namespace
+    pool: hddpool # ceph osd pool to map this class to
 ```
 
 Now, try create a claim:
