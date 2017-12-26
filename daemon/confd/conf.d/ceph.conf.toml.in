@@ -8,6 +8,6 @@ keys = [
  "/mon_host/",
  "/osd/",
  "/mds/",
- "/client/,"
- "client_host/"
+ "/client/",
+ "/client_host/"
 ]
