@@ -1,18 +1,23 @@
 # RHCS IMAGE
 # RHCS VERSION: 3
 
-FROM rhel7:7-released
+ARG DOCKER_REPO
+FROM ${DOCKER_REPO}rhel7:7.3-released
 LABEL Maintainer="Sebastien Han 'seb@redhat.com'"
 
 ENV container docker
 
+# Add bootstrap script, ceph defaults key/values for KV store
+ADD *.sh ceph.defaults check_zombie_mons.py ./osd_scenarios/* entrypoint.sh.in disabled_scenario /
+
+ARG CEPH_REPO_URL
 ARG PACKAGES="ceph-mon ceph-osd ceph-mds ceph-radosgw rbd-mirror nfs-ganesha-rgw e2fsprogs ceph-mgr"
-ARG PURGES="/tmp/* /var/tmp/* /usr/lib/{dracut,locale,systemd,udev} /usr/bin/hyperkube /usr/bin/etcd /usr/bin/systemd-analyze /etc/{udev,selinux}"
-RUN yum -y update && \
+RUN [ -n "$CEPH_REPO_URL" ] && yum-config-manager --add-repo ${CEPH_REPO_URL} ; \
+    yum -y update && \
     yum -y install $PACKAGES && \
     rpm -q $PACKAGES && \
     yum clean all && \
-    rm -rf $PURGES
+    /clean_container.sh && rm -f /clean_container.sh
 
 # Editing /etc/redhat-storage-server release file
 RUN echo "Red Hat Ceph Storage Server 3 (Container)" > /etc/redhat-storage-release
@@ -22,8 +27,6 @@ EXPOSE 6789 6800 6801 6802 6803 6804 6805 80 5000
 # Add volumes for Ceph config and data
 VOLUME ["/etc/ceph","/var/lib/ceph","/etc/ganesha"]
 
-# Add bootstrap script, ceph defaults key/values for KV store
-ADD *.sh ceph.defaults check_zombie_mons.py ./osd_scenarios/* entrypoint.sh.in disabled_scenario /
 
 # Modify the entrypoint
 RUN bash "/generate_entrypoint.sh" && \
