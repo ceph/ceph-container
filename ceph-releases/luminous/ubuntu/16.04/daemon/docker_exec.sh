@@ -11,6 +11,7 @@ function set_trap_err {
 NOTRAP=
 function trap_error {
   set +x
+  declare -F err_cleanup && err_cleanup
   if [ -z "$NOTRAP" ]; then
     echo "An issue occured and you asked me to stay alive."
     echo "You can connect to me with: sudo docker exec -i -t $HOSTNAME /bin/bash"
@@ -38,8 +39,9 @@ function _term {
   # That's an expected failure so don't handle it
   # Doing "trap ERR" or "trap - ERR" didn't worked :/
   NOTRAP="yes"
-
+  declare -F sigterm_cleanup_pre && sigterm_cleanup_pre
   kill -TERM "$child_for_exec" 2>/dev/null
+  declare -F sigterm_cleanup_post && sigterm_cleanup_post
 }
 
 function exec {
@@ -56,10 +58,3 @@ function exec {
   echo "exec: PID $child_for_exec: exit $return_code"
   exit $return_code
 }
-
-########
-# Main #
-########
-# Let's engage set_trap_err
-# and override the default exec() built-in
-set_trap_err
