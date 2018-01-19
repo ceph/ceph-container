@@ -70,5 +70,17 @@ function osd_activate {
   apply_ceph_ownership_to_disks
 
   log "SUCCESS"
+  # This ensures all resources have been unmounted after the OSD has exited
+  # We define `sigterm_cleanup_post` here because:
+  # - we want to 'protect' the following `exec` in particular.
+  # - having the cleaning code just next to the concerned function in the same file is nice.
+  function sigterm_cleanup_post {
+    local ceph_mnt
+    ceph_mnt=$(findmnt --nofsroot --noheadings --output SOURCE --submounts --target /var/lib/ceph/osd/ | tail -n +2)
+    for mnt in $ceph_mnt; do
+      log "Unmounting $mnt"
+      umount "$mnt" || log "Failed to umount $mnt"
+    done
+  }
   exec /usr/bin/ceph-osd "${CLI_OPTS[@]}" -f -i "${OSD_ID}" --setuser ceph --setgroup disk
 }
