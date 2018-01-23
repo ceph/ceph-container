@@ -22,7 +22,7 @@ TEMP := $(shell mktemp -d)
 
 build:
 	@echo === docker build $(IMAGE) with $(BASEIMAGE) @ daemon:build
-	@cp -a ../ceph-releases/$(CEPH_VERSION)/$(BASEOS_NAME)/$(BASEOS_TAG)/daemon/* $(TEMP)
+	@cp -lR ../ceph-releases/$(CEPH_VERSION)/$(BASEOS_NAME)/$(BASEOS_TAG)/daemon/* $(TEMP)
 	@cd $(TEMP) && $(SED_CMD) 's|BASEIMAGE|$(BASEIMAGE)|g' Dockerfile
 	@docker build $(BUILD_ARGS) -t $(IMAGE) $(TEMP)
 	@rm -fr $(TEMP)
