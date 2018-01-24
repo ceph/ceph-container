@@ -25,27 +25,17 @@ function mandatory_checks () {
   fi
 }
 
-function is_loop_dev () {
-  [[ "$1" == *"loop"* ]]
-}
-
 function is_dmcrypt () {
-  if is_loop_dev "${OSD_DEVICE}"; then
-    blkid -t TYPE=crypto_LUKS "${OSD_DEVICE}p1" -o value -s PARTUUID &> /dev/null
-  else
-    blkid -t TYPE=crypto_LUKS "${OSD_DEVICE}1" -o value -s PARTUUID &> /dev/null
-  fi
+  # As soon as we find partitions with TYPE=crypto_LUKS on ${OSD_DEVICE} we can
+  # assume this device is part of dmcrypt scenario.
+  blkid -t TYPE=crypto_LUKS "${OSD_DEVICE}"* -o value -s PARTUUID &> /dev/null
 }
 
 function mount_ceph_data () {
   if is_dmcrypt; then
     mount /dev/mapper/"${data_uuid}" "$tmp_dir"
   else
-    if is_loop_dev "${OSD_DEVICE}"; then
-      mount "${OSD_DEVICE}p1" "$tmp_dir"
-    else
-      mount "${OSD_DEVICE}1" "$tmp_dir"
-    fi
+    mount /dev/mapper/"$(blkid -t PARTLABEL="ceph data" -s PARTUUID -o value "${OSD_DEVICE}"*)" "$tmp_dir"
   fi
 }
 
