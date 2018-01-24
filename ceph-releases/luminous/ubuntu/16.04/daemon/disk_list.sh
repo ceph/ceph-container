@@ -25,12 +25,6 @@ function mandatory_checks () {
   fi
 }
 
-function is_dmcrypt () {
-  # As soon as we find partitions with TYPE=crypto_LUKS on ${OSD_DEVICE} we can
-  # assume this device is part of dmcrypt scenario.
-  blkid -t TYPE=crypto_LUKS "${OSD_DEVICE}"* -o value -s PARTUUID &> /dev/null
-}
-
 function mount_ceph_data () {
   if is_dmcrypt; then
     mount /dev/mapper/"${data_uuid}" "$tmp_dir"
