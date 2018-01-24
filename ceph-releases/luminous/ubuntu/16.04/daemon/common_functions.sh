@@ -302,6 +302,12 @@ function get_part_uuid {
   blkid -o value -s PARTUUID "${1}"
 }
 
+function is_dmcrypt () {
+  # As soon as we find partitions with TYPE=crypto_LUKS on ${OSD_DEVICE} we can
+  # assume this device is part of dmcrypt scenario.
+  blkid -t TYPE=crypto_LUKS "${OSD_DEVICE}"* -o value -s PARTUUID &> /dev/null
+}
+
 function ceph_health {
   local bootstrap_user=$1
   local bootstrap_key=$2
