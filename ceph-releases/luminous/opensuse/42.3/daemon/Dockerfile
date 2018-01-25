@@ -8,7 +8,6 @@ MAINTAINER Blaine Gardner "blaine.gardner@suse.com"
 # OS version string for repos
 ARG OS_VERSION='openSUSE_Leap_42.3'
 # Prevent upgrades to a newer major release
-ARG CEPH_VERSION_NUM_UPPERBOUND='13'
 ENV CEPH_VERSION 'luminous'
 ARG CONFD_VERSION='0.13.0'
 
@@ -16,24 +15,19 @@ ARG PACKAGE_MANAGER="zypper --non-interactive"
 ARG ADDREPO="$PACKAGE_MANAGER addrepo"
 ARG INSTALL="$PACKAGE_MANAGER install"
 
-# Install Ceph
+# Ceph source repository
 ARG CEPH_REPO="http://download.opensuse.org/repositories/filesystems:/ceph:/${CEPH_VERSION}/${OS_VERSION}/"
 # The Cloud:Tools repo has s3cmd
 ARG CLOUD_REPO="http://download.opensuse.org/repositories/Cloud:/Tools/${OS_VERSION}/"
-# Virtualization:Containers has confd
-ARG CONTAINERS_REPO="http://download.opensuse.org/repositories/home:/blgardner:/branches:/Virtualization:/containers/${OS_VERSION}/"
-# blgardner's home repo is the current place to get forego
-ARG FOREGO_REPO="http://download.opensuse.org/repositories/home:/blgardner/${OS_VERSION}/"
-ARG PACKAGES="ceph<${CEPH_VERSION_NUM_UPPERBOUND} \
-              ceph-radosgw<${CEPH_VERSION_NUM_UPPERBOUND} \
-              rbd-mirror<${CEPH_VERSION_NUM_UPPERBOUND} \
+# Other build dependencies (confd, forego)
+ARG BUILD_DEPS_REPO="http://download.opensuse.org/repositories/filesystems:/ceph/${OS_VERSION}/"
+ARG PACKAGES="ceph ceph-radosgw rbd-mirror \
               nfs-ganesha-ceph nfs-ganesha-rgw \
               etcd device-mapper e2fsprogs kubernetes-client \
               confd=$CONFD_VERSION forego"
 RUN ( $ADDREPO $CEPH_REPO ceph-luminous && \
     $ADDREPO $CLOUD_REPO cloud-tools && \
-    $ADDREPO $CONTAINERS_REPO virtualization-containers && \
-    $ADDREPO $FOREGO_REPO forego && \
+    $ADDREPO $BUILD_DEPS_REPO build-deps && \
     $PACKAGE_MANAGER --gpg-auto-import-keys refresh && \
     $INSTALL $PACKAGES && \
     $PACKAGE_MANAGER info $PACKAGES && \
