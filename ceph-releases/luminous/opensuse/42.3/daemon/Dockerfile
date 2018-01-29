@@ -9,7 +9,6 @@ MAINTAINER Blaine Gardner "blaine.gardner@suse.com"
 ARG OS_VERSION='openSUSE_Leap_42.3'
 # Prevent upgrades to a newer major release
 ENV CEPH_VERSION 'luminous'
-ARG CONFD_VERSION='0.13.0'
 
 ARG PACKAGE_MANAGER="zypper --non-interactive"
 ARG ADDREPO="$PACKAGE_MANAGER addrepo"
@@ -24,7 +23,7 @@ ARG BUILD_DEPS_REPO="http://download.opensuse.org/repositories/filesystems:/ceph
 ARG PACKAGES="ceph ceph-radosgw rbd-mirror \
               nfs-ganesha-ceph nfs-ganesha-rgw \
               etcd device-mapper e2fsprogs kubernetes-client s3cmd \
-              confd=$CONFD_VERSION forego"
+              confd forego"
 RUN ( $ADDREPO $CEPH_REPO ceph-luminous && \
     $ADDREPO $CLOUD_REPO cloud-tools && \
     $ADDREPO $BUILD_DEPS_REPO build-deps && \
