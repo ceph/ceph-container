@@ -23,7 +23,7 @@ ARG CLOUD_REPO="http://download.opensuse.org/repositories/Cloud:/Tools/${OS_VERS
 ARG BUILD_DEPS_REPO="http://download.opensuse.org/repositories/filesystems:/ceph/${OS_VERSION}/"
 ARG PACKAGES="ceph ceph-radosgw rbd-mirror \
               nfs-ganesha-ceph nfs-ganesha-rgw \
-              etcd device-mapper e2fsprogs kubernetes-client \
+              etcd device-mapper e2fsprogs kubernetes-client s3cmd \
               confd=$CONFD_VERSION forego"
 RUN ( $ADDREPO $CEPH_REPO ceph-luminous && \
     $ADDREPO $CLOUD_REPO cloud-tools && \
