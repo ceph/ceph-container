@@ -16,7 +16,7 @@ ARG INSTALL="$PACKAGE_MANAGER install"
 
 # Ceph source repository
 ARG CEPH_REPO="http://download.opensuse.org/repositories/filesystems:/ceph:/${CEPH_VERSION}/${OS_VERSION}/"
-# The Cloud:Tools repo has s3cmd
+# The Cloud:Tools repo has 's3cmd' (used by the demo only)
 ARG CLOUD_REPO="http://download.opensuse.org/repositories/Cloud:/Tools/${OS_VERSION}/"
 # Other build dependencies (confd, forego)
 ARG BUILD_DEPS_REPO="http://download.opensuse.org/repositories/filesystems:/ceph/${OS_VERSION}/"
