@@ -100,6 +100,26 @@ List of available options:
   - 4 = Detect IPv4 only
   - 6 = Detect IPv6 only
 
+## Deploy a Manager daemon  
+Since luminous, a manager daemon is mandatory, see [docs](http://docs.ceph.com/docs/master/mgr/)
+  
+Without KV store, run:
+```
+docker run -d --net=host \
+-v /etc/ceph:/etc/ceph \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+ceph/daemon mgr
+```
+
+With KV store, run:
+```
+docker run -d --net=host \
+-v /var/lib/ceph:/var/lib/ceph \
+-e KV_TYPE=etcd \
+-e KV_IP=192.168.0.20 \
+ceph/daemon mgr
+```
+
 ## Deploy an OSD
 
 There are four available `OSD_TYPE` values:
