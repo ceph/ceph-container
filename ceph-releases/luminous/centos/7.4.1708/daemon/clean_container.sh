@@ -5,8 +5,8 @@ DEBUG=
 # Let's remove easy stuff
 strip -s /usr/local/bin/{confd,forego}
 
-# Compressing those very big binaries
-# As we don't run them often, the peformance penalty isn't huge
+# Compressing those very big binaries while keeping it executable
+# As we don't run them often, the performance penalty isn't huge
 for binary in /usr/bin/{etcdctl,kubectl} /usr/local/bin/{forego,confd}; do
   gzexe $binary && rm ${binary}~
 done
