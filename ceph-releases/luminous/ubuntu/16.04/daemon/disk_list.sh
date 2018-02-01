@@ -35,7 +35,7 @@ function mount_ceph_data () {
   if is_dmcrypt; then
     mount /dev/mapper/"${data_uuid}" "$tmp_dir"
   else
-    mount /dev/mapper/"$(blkid -t PARTLABEL="ceph data" -s PARTUUID -o value "${OSD_DEVICE}"*)" "$tmp_dir"
+    mount /dev/disk/by-partuuid/"$(blkid -t PARTLABEL="ceph data" -s PARTUUID -o value "${OSD_DEVICE}"*)" "$tmp_dir"
   fi
 }
 
