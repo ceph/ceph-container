@@ -56,5 +56,9 @@ function exec {
   wait "$child_for_exec"
   return_code=$?
   echo "exec: PID $child_for_exec: exit $return_code"
+  # If needed, it's possible to execute some user defined code if the exec'd process fails
+  if [ "$return_code" -ne 0 ]; then
+    declare -F trap_exec_failure && trap_exec_failure
+  fi
   exit $return_code
 }
