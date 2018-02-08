@@ -1,0 +1,20 @@
+# Install prerequisites
+DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget unzip uuid-runtime python-setuptools udev dmsetup && \
+# Install ceph, ganesha and etcd
+wget -q -O- 'https://download.ceph.com/keys/release.asc' | apt-key add - && \
+echo "deb http://download.ceph.com/debian-$CEPH_VERSION/ xenial main" | tee /etc/apt/sources.list.d/ceph-$CEPH_VERSION.list && \
+echo "deb http://download.ceph.com/nfs-ganesha/deb-V2.5-stable/luminous/ xenial main" | tee /etc/apt/sources.list.d/nfs-ganesha.list && \
+apt-get update && apt-get install -y  --no-install-recommends --force-yes $PACKAGES && \
+dpkg -s $PACKAGES && \
+apt-get clean && rm -rf $PURGES && \
+# Download & install confd
+wget -O /usr/local/bin/confd "https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-linux-amd64" && \
+chmod +x /usr/local/bin/confd && mkdir -p /etc/confd/conf.d && mkdir -p /etc/confd/templates && \
+# Install forego
+wget -O /forego.tgz 'https://bin.equinox.io/c/ekMN3bCZFUn/forego-stable-linux-amd64.tgz' && \
+cd /usr/local/bin && tar xfz /forego.tgz && chmod +x /usr/local/bin/forego && rm /forego.tgz && \
+# Install kubectl
+wget -O /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
+chmod +x /usr/local/bin/kubectl && \
+# Cleaning container
+bash /ubuntu-specific_clean_container.sh && rm /ubuntu-specific_clean_container.sh
