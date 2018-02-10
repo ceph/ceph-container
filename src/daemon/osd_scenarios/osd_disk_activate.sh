@@ -55,7 +55,8 @@ function osd_activate {
     ceph-disk -v --setuser ceph --setgroup disk activate "${CEPH_DISK_OPTIONS[@]}" --no-start-daemon "${DATA_PART}"
   fi
 
-  OSD_ID=$(grep "${MOUNTED_PART}" /proc/mounts | awk '{print $2}' | sed -r 's/^.*-([0-9]+)$/\1/')
+  actual_part=$(readlink -f "${MOUNTED_PART}")
+  OSD_ID=$(grep "${actual_part}" /proc/mounts | awk '{print $2}' | sed -r 's/^.*-([0-9]+)$/\1/')
 
   if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
     # Get the device used for block db and wal otherwise apply_ceph_ownership_to_disks will fail
