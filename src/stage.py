@@ -6,9 +6,11 @@ import shutil
 import sys
 import time
 
-from envglobals import *  # noqa: F403
-from filecopytools import list_files, mkdir_if_dne, copy_files, recursive_copy_dir
-from replace import do_variable_replace
+# sys.path.append('stagelib')
+
+from stagelib.envglobals import *  # noqa: F403
+from stagelib.filecopytools import list_files, mkdir_if_dne, copy_files, recursive_copy_dir
+from stagelib.replace import do_variable_replace
 
 if sys.version_info[0] < 3:
     print('This must be run with Python 3+')

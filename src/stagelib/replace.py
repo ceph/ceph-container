@@ -4,7 +4,7 @@ import logging
 import os
 import re
 
-from envglobals import *  # noqa: F403
+from stagelib.envglobals import *  # noqa: F403, F401
 
 # Support __VARIABLE__ file replacement for variables matching '__<VARIABLE_NAME>__'.
 # Support only variables with capital letters and underscores.
@@ -58,7 +58,7 @@ def _file_replace(template_text, file_path, variable_file_dir):
 
 
 def _replace_global_in_text(global_var_match, text):
-    global_var_name = global_var_match[len('STAGE_REPLACE_WITH_'):] # strip STAGE_REPLACE_WITH_
+    global_var_name = global_var_match[len('STAGE_REPLACE_WITH_'):]  # strip STAGE_REPLACE_WITH_
     global_value = globals()[global_var_name]
     logger.info('    Replacing {} with {}'.format(global_var_match, global_value))
     return text.replace(global_var_match, global_value)
