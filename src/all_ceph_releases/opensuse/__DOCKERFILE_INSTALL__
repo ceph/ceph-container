@@ -1,0 +1,14 @@
+( ZYPPER="zypper --non-interactive" && \
+      $ZYPPER addrepo $CEPH_REPO ceph-luminous && \
+      $ZYPPER addrepo $CLOUD_REPO cloud-tools && \
+      $ZYPPER addrepo $BUILD_DEPS_REPO build-deps && \
+      $ZYPPER --gpg-auto-import-keys refresh && \
+      $ZYPPER update && \
+      $ZYPPER install $PACKAGES && \
+      $ZYPPER info $PACKAGES && \
+      # Remove added repos to save space
+      $ZYPPER removerepo ceph-luminous && \
+      $ZYPPER removerepo cloud-tools && \
+      $ZYPPER removerepo build-deps && \
+      $ZYPPER clean --all ) || \
+      ( retval=$? && cat /var/log/zypper.log && exit $retval )

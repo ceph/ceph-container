@@ -10,3 +10,7 @@ client-admin-key
 ceph-releases/devel/*
 
 staging-*/
+__pycache__/
+*.pyc
+*.pyo
+*.log

@@ -24,11 +24,13 @@
 #      replacement should be done from the baseos_reg/baseos_repo:baseos_tag
 #      rather than a __VARIABLE__ file.
 
-IMAGES_TO_BUILD ?= \
+FLAVORS_TO_BUILD ?= \
 	luminous@amd64@ubuntu@_@ubuntu@16.04 \
-	luminous@amd64@opensuse@_@openuse@42.3 \
+	luminous@amd64@opensuse@_@opensuse@42.3 \
 
-export REGISTRY ?= ceph
+IMAGES_TO_BUILD := daemon-base daemon
+
+REGISTRY ?= ceph
 
 # ==============================================================================
 # Targets
@@ -37,36 +39,44 @@ export REGISTRY ?= ceph
 all: build
 
 setvars.%:
-	$(eval ceph_version := $(word 1, $(subst @, ,$*)))
-	$(eval arch := $(word 2, $(subst @, ,$*)))
-	$(eval baseos_name := $(word 3, $(subst @, ,$*)))
-	$(eval baseos_reg := $(word 4, $(subst @, ,$*)))
-	$(eval baseos_repo := $(word 5, $(subst @, ,$*)))
-	$(eval baseos_tag := $(word 6, $(subst @, ,$*)))
-	$(eval staging_dir := staging-$(ceph_version)-$(baseos_name)-$(baseos_tag))
+	$(eval export CEPH_VERSION := $(word 1, $(subst @, ,$*)))
+	$(eval export ARCH := $(word 2, $(subst @, ,$*)))
+	$(eval export BASEOS_NAME := $(word 3, $(subst @, ,$*)))
+	$(eval export BASEOS_REG := $(word 4, $(subst @, ,$*)))
+	$(eval export BASEOS_REPO := $(word 5, $(subst @, ,$*)))
+	$(eval export BASEOS_TAG := $(word 6, $(subst @, ,$*)))
+	$(eval export IMAGES_TO_BUILD := $(IMAGES_TO_BUILD))
+	$(eval export STAGING_DIR := staging-$(CEPH_VERSION)-$(BASEOS_NAME)-$(BASEOS_TAG)-$(ARCH))
+	$(eval export BASE_IMAGE := $(BASEOS_REG)/$(BASEOS_REPO):$(BASEOS_TAG))
+# Strip _/ from  beginning if exists
+	$(eval export BASE_IMAGE := $(patsubst _/%,%,$(BASE_IMAGE)))
+	$(eval export DAEMON_BASE_IMAGE := \
+		$(REGISTRY)/daemon-base:$(CEPH_VERSION)-$(BASEOS_NAME)-$(BASEOS_TAG)-$(ARCH))
+	$(eval export DAEMON_IMAGE := \
+		$(REGISTRY)/daemon:$(CEPH_VERSION)-$(BASEOS_NAME)-$(BASEOS_TAG)-$(ARCH))
 	@true
 
 stage.%: setvars.%
-	sh stage.sh $(ceph_version) $(baseos_name) $(baseos_tag)
+	@sh -c ./stage.py
 
-daemon.%: setvars.%
-	@$(MAKE) -C $(staging_dir)/daemon $(MAKECMDGOALS) \
-		CEPH_VERSION=$(ceph_version) ARCH=$(arch) \
-		BASEOS_NAME=$(baseos_name) BASEOS_REG=$(baseos_reg) \
-		BASEOS_REPO=$(baseos_repo) BASEOS_TAG=$(baseos_tag)
+daemon-base.%: setvars.%
+	@$(MAKE) -C $(STAGING_DIR)/daemon-base $(MAKECMDGOALS)
+
+daemon.%: daemon-base.%
+	@$(MAKE) -C $(STAGING_DIR)/daemon $(MAKECMDGOALS)
 
 do.image.%: daemon.% ;
 
 clean.image.%: daemon.%
-	rm -rf $(staging_dir)
+	rm -rf $(STAGING_DIR)
 
-stage: $(foreach p, $(IMAGES_TO_BUILD), stage.$(p)) ;
-build: $(foreach p, $(IMAGES_TO_BUILD), stage.$(p) do.image.$(p)) ;
-push: $(foreach p, $(IMAGES_TO_BUILD), do.image.$(p)) ;
-clean: $(foreach p, $(IMAGES_TO_BUILD), clean.image.$(p))
+stage: $(foreach p, $(FLAVORS_TO_BUILD), stage.$(p)) ;
+build: $(foreach p, $(FLAVORS_TO_BUILD), stage.$(p) do.image.$(p)) ;
+push: $(foreach p, $(FLAVORS_TO_BUILD), do.image.$(p)) ;
+clean: $(foreach p, $(FLAVORS_TO_BUILD), clean.image.$(p))
 
 # TODO: clean.all that also looks for all artifacts in their expected locations,
-#       not just things part of IMAGES_TO_BUILD
+#       not just things part of FLAVORS_TO_BUILD
 
 # ==============================================================================
 # Help

@@ -14,13 +14,13 @@
 
 .PHONY: build push clean
 
-IMAGE = $(REGISTRY)/daemon:$(CEPH_VERSION)-$(BASEOS_NAME)-$(BASEOS_TAG)-$(ARCH)
-
 build:
-	@echo === docker build $(IMAGE)
-	@docker build $(BUILD_ARGS) -t $(IMAGE) .
+	@echo === docker build $(DAEMON_IMAGE)
+	@sed -i.makebkp -e 's|MAKEFILE_REPLACE_WITH_DAEMON_BASE_IMAGE|$(DAEMON_BASE_IMAGE)|' Dockerfile
+	@docker build $(BUILD_ARGS) -t $(DAEMON_IMAGE) .
 
-push: ; @docker push $(IMAGE)
+
+push: ; @docker push $(DAEMON_IMAGE)
 clean:
 	# Don't fail if can't clean; user may have removed the image
-	docker rmi $(IMAGE) || true
+	docker rmi $(DAEMON_IMAGE) || true
