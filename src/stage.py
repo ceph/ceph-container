@@ -59,12 +59,12 @@ def main():
     blacklist = get_blacklist('flavor_blacklist.txt')
     logger.debug('Blacklist: {}'.format(blacklist))
 
-    for src_path in path_search_order:
-        if not os.path.isdir(src_path):
-            continue
-        src_files = list_files(src_path)
-        # e.g., IMAGES_TO_BUILD = ['daemon-base', 'daemon']
-        for image in IMAGES_TO_BUILD:  # noqa: F405
+    for image in IMAGES_TO_BUILD:  # noqa: F405
+        for src_path in path_search_order:
+            if not os.path.isdir(src_path):
+                continue
+            src_files = list_files(src_path)
+            # e.g., IMAGES_TO_BUILD = ['daemon-base', 'daemon']
             staging_path = os.path.join(STAGING_DIR, image)  # noqa: F405
             mkdir_if_dne(staging_path, mode=0o755)
             logger.info('Copy {} files to {}'.format(src_path, staging_path))
@@ -73,8 +73,6 @@ def main():
                 os.path.join(src_path, image), staging_path))
             recursive_copy_dir(src_path=os.path.join(src_path, image), dst_path=staging_path,
                                blacklist=blacklist)
-
-    for image in IMAGES_TO_BUILD:  # noqa: F405
         do_variable_replace(replace_root_dir=os.path.join(STAGING_DIR, image))  # noqa: F405
 
 
