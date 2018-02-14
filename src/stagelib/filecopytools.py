@@ -16,20 +16,41 @@ def mkdir_if_dne(path, mode=0o755):
         os.mkdir(path, mode)
 
 
-def copy_files(filenames, src_path, dst_path):
-    """Copy a list of filenames from src to dst. Will overwrite existing files."""
+def copy_files(filenames, src_path, dst_path, blacklist):
+    """
+    Copy a list of filenames from src to dst. Will overwrite existing files.
+    If any files are in the blacklist, they will not be copied.
+    If the src directory is in the blacklist, the dest path will not be created, and the files will
+      not be copied or processed.
+    """
+    if os.path.join(src_path, '') in blacklist:
+        logging.debug('    Skipping blacklisted dir {}'.format(src_path))
+        return
+    mkdir_if_dne(dst_path)
     for f in filenames:
-        logging.info('    {:<60}  -> {}'.format(os.path.join(src_path, f), dst_path))
-        shutil.copy2(os.path.join(src_path, f), dst_path)
+        file_path = os.path.join(src_path, f)
+        if file_path in blacklist:
+            logging.debug('    Skipping blacklisted file {}'.format(file_path))
+            continue
+        logging.info('    {:<60}  -> {}'.format(file_path, dst_path))
+        shutil.copy2(file_path, dst_path)
 
 
-def recursive_copy_dir(src_path, dst_path):
-    """Copy all files in a directory recursively to dst. Will overwrite existing files."""
+def recursive_copy_dir(src_path, dst_path, blacklist=[]):
+    """
+    Copy all files in the src directory recursively to dst. Will overwrite existing files.
+    If any files encountered are in the blacklist, they will not be copied.
+    If any directories encountered are in the blacklist, the corresponding dest path will not be
+      created, and files/subdirs within the blacklisted dir will not be copied.
+    """
     if not os.path.isdir(src_path):
         return
     for dirname, subdirs, files in os.walk(src_path, topdown=True):
         # Remove src_path (and '/' immediately following) from our dirname
+        if os.path.join(dirname, '') in blacklist:
+            logging.debug('    Pruning blacklisted dir {}'.format(dirname))
+            subdirs[:] = []
+            continue
         dst_path_offset = dirname[len(src_path)+1:]
-        dst_path_subdir = os.path.join(dst_path, dst_path_offset)
-        mkdir_if_dne(dst_path_subdir)
-        copy_files(files, dirname, dst_path_subdir)
+        copy_files(filenames=files, src_path=dirname,
+                   dst_path=os.path.join(dst_path, dst_path_offset), blacklist=blacklist)

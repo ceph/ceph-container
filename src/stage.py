@@ -6,11 +6,11 @@ import shutil
 import sys
 import time
 
-# sys.path.append('stagelib')
 
 from stagelib.envglobals import *  # noqa: F403
 from stagelib.filecopytools import list_files, mkdir_if_dne, copy_files, recursive_copy_dir
 from stagelib.replace import do_variable_replace
+from stagelib.blacklist import get_blacklist
 
 if sys.version_info[0] < 3:
     print('This must be run with Python 3+')
@@ -20,7 +20,7 @@ curtime = time.time()
 if os.path.isfile('stage.log') and \
         (time.time() - os.path.getmtime('stage.log') > 86400):
     os.remove('stage.log')  # poor man's log rotator: delete log if it's old
-logging.basicConfig(filename='stage.log', level=logging.INFO,
+logging.basicConfig(filename='stage.log', level=logging.DEBUG,
                     format='%(levelname)5s:  %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -56,6 +56,9 @@ def main():
         shutil.rmtree(STAGING_DIR)  # noqa: F405
     os.mkdir(STAGING_DIR, mode=0o755)  # noqa: F405
 
+    blacklist = get_blacklist('flavor_blacklist.txt')
+    logger.debug('Blacklist: {}'.format(blacklist))
+
     for src_path in path_search_order:
         if not os.path.isdir(src_path):
             continue
@@ -65,10 +68,11 @@ def main():
             staging_path = os.path.join(STAGING_DIR, image)  # noqa: F405
             mkdir_if_dne(staging_path, mode=0o755)
             logger.info('Copy {} files to {}'.format(src_path, staging_path))
-            copy_files(src_files, src_path, staging_path)
+            copy_files(src_files, src_path, staging_path, blacklist)
             logger.info('Copy {} files to {}'.format(
                 os.path.join(src_path, image), staging_path))
-            recursive_copy_dir(src_path=os.path.join(src_path, image), dst_path=staging_path)
+            recursive_copy_dir(src_path=os.path.join(src_path, image), dst_path=staging_path,
+                               blacklist=blacklist)
 
     for image in IMAGES_TO_BUILD:  # noqa: F405
         do_variable_replace(replace_root_dir=os.path.join(STAGING_DIR, image))  # noqa: F405
