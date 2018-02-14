@@ -14,4 +14,8 @@ core/FILE
 # Least specific
 ```
 
-TODO: meta/blacklist file
+
+The staging script (written in python) outputs a `stage.log` file which writes info messages by
+default. If the `DEBUG` environment variable is set to any value, debug messages will also be
+printed to the log. Debug output can be explicitly disabled with `unset DEBUG` or by setting
+`DEBUG=0`. Any other value of `DEBUG` will enable debug output.
