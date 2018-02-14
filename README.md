@@ -82,3 +82,28 @@ A recorded video on how to deploy your Ceph cluster entirely in Docker container
 ## With Ansible
 
 [![Demo Running Ceph in Docker containers with Ansible](http://img.youtube.com/vi/DQYZU1VsqXc/0.jpg)](http://youtu.be/DQYZU1VsqXc "Demo Running Ceph in Docker containers with Ansible")
+
+# Project structure and staging
+
+## Staging override priority order
+More specific files will override (overwrite) less specific files when staging. Note here that
+`FILE` may be a file or a directory containing further files.
+
+```
+# Most specific
+ceph-releases/<ceph release>/<os distro>/<os release>/{daemon-base,daemon}/FILE
+ceph-releases/<ceph release>/<os distro>/<os release>/FILE
+ceph-releases/<ceph release>/<os distro>/{daemon-base,daemon}/FILE
+ceph-releases/<ceph release>/<os distro>/FILE
+ceph-releases/<ceph release>/{daemon-base,daemon}/FILE
+ceph-releases/<ceph release>/FILE
+ceph-releases/ALL/<os distro>/<os release>/{daemon-base,daemon}/FILE
+ceph-releases/ALL/<os distro>/<os release>/FILE
+ceph-releases/ALL/<os distro>/{daemon-base,daemon}/FILE
+ceph-releases/ALL/<os distro>/FILE
+ceph-releases/ALL/{daemon-base,daemon}/FILE
+ceph-releases/ALL/FILE
+src/{daemon-base,daemon}/FILE
+src/FILE
+# Least specific
+```
