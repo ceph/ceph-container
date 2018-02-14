@@ -29,10 +29,11 @@ def _replace_file_in_text(variable_file_path, text, file_path):
     variable = os.path.basename(variable_file_path)
     with open(variable_file_path) as variable_file:
         variable_text = variable_file.read().rstrip()
-        if len(variable_text) < 38:
-            logging.info('\t{:<38} by {:<38}  -> {}'.format(variable, variable_text, file_path))
+        if "\n" in variable_text:
+            # Output 'user-defined script' if string is multiline
+            logging.info('\t{:<80}  :: {:<38} <- {}'.format(file_path, variable, '[user-defined script]'))
         else:
-            logging.info('\t{:<38} by {:<38}  -> {}'.format(variable, 'user defined script', file_path))
+            logging.info('\t{:<80}  :: {:<38} <- {}'.format(file_path, variable, variable_text))
         return text.replace(variable, variable_text)
 
 
@@ -47,7 +48,7 @@ def _save_with_backup(file_path, text):
 def _file_replace(template_text, file_path, variable_file_dir):
     variable_matches = re.findall(VARIABLE_FILE_PATTERN, template_text)
     if not variable_matches:
-        logging.debug('\t{:<80}  -> {}'.format('No __VARIABLES__', file_path))
+        logging.debug('\t{:<80}     [No __VARIABLES__]'.format(file_path))
         return template_text
     # Allow variable files to have their own variables in them
     # by reprocessing until there are no more matches
@@ -68,11 +69,12 @@ def _replace_global_in_text(global_var_match, text):
 def _global_replace(template_text, file_path):
     variable_matches = re.findall(GLOBAL_PATTERN, template_text)
     if not variable_matches:
-        logging.debug('\t{:<80}  -> {}'.format('No GLOBAL_VARs', file_path))
+        # logging.debug('\t{:<80}  -> {}'.format('No GLOBAL_VARs', file_path))
+        logging.debug('\t{:<80}     [No STAGE_REPLACE_WITH_VARs]'.format(file_path))
         return template_text
     for var in variable_matches:
         var_name = var[len('STAGE_REPLACE_WITH_'):]  # strip STAGE_REPLACE_WITH_
-        logging.debug('\t{:<38} by {:<38}  -> {}'.format(var_name, globals()[var_name], file_path))
+        logging.info('\t{:<80}  :: {:<38} <- {}'.format(file_path, var_name, globals()[var_name]))
         template_text = _replace_global_in_text(var, template_text)
     return template_text
 
@@ -93,7 +95,7 @@ def do_variable_replace(replace_root_dir):
     for dirname, subdirs, files in os.walk(replace_root_dir, topdown=True):
         for f in files:
             if re.match(VARIABLE_FILE_PATTERN, f):
-                logging.debug('\t{:<80}  -> {}/{}'.format('Skip variable replace', dirname, f))
+                logging.debug('\t{:<80}     [Skip __VARIABLE__ replace]'.format(os.path.join(dirname, f)))
                 continue
             file_path = os.path.join(dirname, f)
             template_text = _get_file_text(file_path)

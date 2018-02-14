@@ -27,13 +27,13 @@ def copy_files(filenames, src_path, dst_path, blacklist):
     dst_path = os.path.join(dst_path, '')
     logging.debug('      {:<80}    -> {}'.format(src_path+'/', dst_path))
     if os.path.join(src_path, '') in blacklist:
-        logging.info('\t{:<80}  -> {}'.format(src_path, '[BLACKLISTED]'))
+        logging.info('\t{:<80}     [DIR BLACKLISTED]'.format(src_path))
         return
     mkdir_if_dne(dst_path)
     for f in filenames:
         file_path = os.path.join(src_path, f)
         if file_path in blacklist:
-            logging.info('\t{:<80}  -> {}'.format(file_path, '[BLACKLISTED]'))
+            logging.info('\t{:<80}     [FILE BLACKLISTED]'.format(file_path))
             continue
         logging.info('\t{:<80}  -> {}'.format(file_path, dst_path))
         shutil.copy2(file_path, dst_path)
@@ -51,7 +51,7 @@ def recursive_copy_dir(src_path, dst_path, blacklist=[]):
     for dirname, subdirs, files in os.walk(src_path, topdown=True):
         # Remove src_path (and '/' immediately following) from our dirname
         if os.path.join(dirname, '') in blacklist:
-            logging.info('\t{:<80}  -> {}'.format(dirname, '[BLACKLISTED]'))
+            logging.info('\t{:<80}     [DIR BLACKLISTED]'.format(dirname))
             subdirs[:] = []
             continue
         dst_path_offset = dirname[len(src_path)+1:]

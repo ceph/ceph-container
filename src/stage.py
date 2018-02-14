@@ -20,9 +20,14 @@ curtime = time.time()
 if os.path.isfile('stage.log') and \
         (time.time() - os.path.getmtime('stage.log') > 86400):
     os.remove('stage.log')  # poor man's log rotator: delete log if it's old
-logging.basicConfig(filename='stage.log', level=logging.DEBUG,
+loglevel = logging.INFO
+# If DEBUG env var is set to anything but '0' (including empty string), log debug text
+if 'DEBUG' in os.environ and not os.environ['DEBUG'] == '0':
+    loglevel = logging.DEBUG
+logging.basicConfig(filename='stage.log', level=loglevel,
                     format='%(levelname)5s:  %(message)s')
 logger = logging.getLogger(__name__)
+
 
 
 def main():
