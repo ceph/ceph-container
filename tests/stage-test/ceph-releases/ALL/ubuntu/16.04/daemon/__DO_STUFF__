@@ -1,0 +1,4 @@
+# Do daemon stuff
+# This should test nested variables
+    Codename: __OS_CODENAME__
+    Some stuff

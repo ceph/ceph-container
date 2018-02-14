@@ -18,7 +18,7 @@ conn = boto.connect_s3(
 bucket = conn.create_bucket('my-s3-test-bucket')
 
 for bucket in conn.get_all_buckets():
-    print "{name}\t{created}".format(
+    print "{name}        {created}".format(
         name = bucket.name,
         created = bucket.creation_date,
     )
