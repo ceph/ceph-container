@@ -60,6 +60,9 @@ def main():
     logger.debug('Blacklist: {}'.format(blacklist))
 
     for image in IMAGES_TO_BUILD:  # noqa: F405
+        logger.info('')
+        logger.info('{}/'.format(image))
+        logger.info('    Copying files')
         for src_path in path_search_order:
             if not os.path.isdir(src_path):
                 continue
@@ -67,10 +70,7 @@ def main():
             # e.g., IMAGES_TO_BUILD = ['daemon-base', 'daemon']
             staging_path = os.path.join(STAGING_DIR, image)  # noqa: F405
             mkdir_if_dne(staging_path, mode=0o755)
-            logger.info('Copy {} files to {}'.format(src_path, staging_path))
             copy_files(src_files, src_path, staging_path, blacklist)
-            logger.info('Copy {} files to {}'.format(
-                os.path.join(src_path, image), staging_path))
             recursive_copy_dir(src_path=os.path.join(src_path, image), dst_path=staging_path,
                                blacklist=blacklist)
         do_variable_replace(replace_root_dir=os.path.join(STAGING_DIR, image))  # noqa: F405

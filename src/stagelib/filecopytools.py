@@ -23,16 +23,19 @@ def copy_files(filenames, src_path, dst_path, blacklist):
     If the src directory is in the blacklist, the dest path will not be created, and the files will
       not be copied or processed.
     """
+    # Adding a trailing "/" if needed to improve output coherency
+    dst_path = os.path.join(dst_path, '')
+    logging.debug('      {:<80}    -> {}'.format(src_path+'/', dst_path))
     if os.path.join(src_path, '') in blacklist:
-        logging.debug('    Skipping blacklisted dir {}'.format(src_path))
+        logging.info('\t{:<80}  -> {}'.format(src_path, '[BLACKLISTED]'))
         return
     mkdir_if_dne(dst_path)
     for f in filenames:
         file_path = os.path.join(src_path, f)
         if file_path in blacklist:
-            logging.debug('    Skipping blacklisted file {}'.format(file_path))
+            logging.info('\t{:<80}  -> {}'.format(file_path, '[BLACKLISTED]'))
             continue
-        logging.info('    {:<60}  -> {}'.format(file_path, dst_path))
+        logging.info('\t{:<80}  -> {}'.format(file_path, dst_path))
         shutil.copy2(file_path, dst_path)
 
 
@@ -48,7 +51,7 @@ def recursive_copy_dir(src_path, dst_path, blacklist=[]):
     for dirname, subdirs, files in os.walk(src_path, topdown=True):
         # Remove src_path (and '/' immediately following) from our dirname
         if os.path.join(dirname, '') in blacklist:
-            logging.debug('    Pruning blacklisted dir {}'.format(dirname))
+            logging.info('\t{:<80}  -> {}'.format(dirname, '[BLACKLISTED]'))
             subdirs[:] = []
             continue
         dst_path_offset = dirname[len(src_path)+1:]
