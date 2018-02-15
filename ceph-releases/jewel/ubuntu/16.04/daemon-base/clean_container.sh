@@ -1,0 +1,1 @@
+../../../../kraken/ubuntu/16.04/daemon-base/clean_container.sh
