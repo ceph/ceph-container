@@ -11,6 +11,7 @@ from stagelib.envglobals import (printGlobal, CEPH_VERSION, OS_NAME, OS_VERSION,
                                  IMAGES_TO_BUILD, STAGING_DIR)
 from stagelib.filetools import (list_files, mkdir_if_dne, copy_files, recursive_copy_dir,
                                 IOOSErrorGracefulFail)
+import stagelib.git as git
 from stagelib.replace import do_variable_replace
 from stagelib.blacklist import get_blacklist
 
@@ -47,6 +48,9 @@ if sys.version_info[0] < 3:
 def main(CORE_FILES_DIR, CEPH_RELEASES_DIR, BLACKLIST_FILE):
     logger.info('\n\n\n')  # Make it easier to determine where new runs start
     logger.info('Start time: {}'.format(time.ctime()))
+    logger.info('Git repo:   {}'.format(git.get_repo()))
+    logger.info('Git branch: {}'.format(git.get_branch()))
+    logger.info('Git commit: {}'.format(git.get_hash()))
 
     print('')
     printGlobal('CEPH_VERSION')
