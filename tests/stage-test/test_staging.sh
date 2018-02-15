@@ -18,6 +18,17 @@ from stage import *
 CORE_FILES_DIR = "tests/stage-test/src"
 CEPH_RELEASES_DIR = "tests/stage-test/ceph-releases/"
 BLACKLIST_FILE = "tests/stage-test/flavor-blacklist.txt"
+
+def get_repo(): return 'testrepo'
+git.get_repo = get_repo
+def get_branch(): return 'testbranch'
+git.get_branch = get_branch
+def get_hash(): return 'testhash'
+git.get_hash = get_hash
+def file_is_dirty(file):
+    return True if file == 'tests/stage-test/src/daemon/src-daemon-test-file' else False
+git.file_is_dirty = file_is_dirty
+
 main(CORE_FILES_DIR, CEPH_RELEASES_DIR, BLACKLIST_FILE)
 EOF
 )
