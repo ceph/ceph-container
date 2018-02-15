@@ -5,7 +5,9 @@ import os
 import shutil
 import sys
 
-COPY_LOGTEXT = '        {:<80}  -> {}'
+import stagelib.git as git
+
+COPY_LOGTEXT = '      {:<82}  -> {:1}'
 PARENTHETICAL_LOGTEXT = '        {:<80}     {}'
 
 
@@ -54,7 +56,7 @@ def _copy_file(file_path, dst_path):
         IOOSErrorGracefulFail(o, "Could not copy file {} to {}".format(file_path, dst_path))
 
 
-def copy_files(filenames, src_path, dst_path, blacklist):
+def copy_files(filenames, src_path, dst_path, blacklist=[], files_copied={}):
     """
     Copy a list of filenames from src to dst. Will overwrite existing files.
     If any files are in the blacklist, they will not be copied.
@@ -72,11 +74,13 @@ def copy_files(filenames, src_path, dst_path, blacklist):
         if file_path in blacklist:
             logging.info(PARENTHETICAL_LOGTEXT.format(file_path, '[FILE BLACKLISTED]'))
             continue
-        logging.info(COPY_LOGTEXT.format(file_path, dst_path))
+        dirty_marker = '*' if git.file_is_dirty(file_path) else ' '
+        logging.info(COPY_LOGTEXT.format(dirty_marker + ' ' + file_path, dst_path))
+        files_copied[os.path.join(dst_path, f)] = dirty_marker + ' ' + file_path
         _copy_file(file_path, dst_path)
 
 
-def recursive_copy_dir(src_path, dst_path, blacklist=[]):
+def recursive_copy_dir(src_path, dst_path, blacklist=[], files_copied={}):
     """
     Copy all files in the src directory recursively to dst. Will overwrite existing files.
     If any files encountered are in the blacklist, they will not be copied.
@@ -93,4 +97,25 @@ def recursive_copy_dir(src_path, dst_path, blacklist=[]):
             continue
         dst_path_offset = dirname[len(src_path)+1:]
         copy_files(filenames=files, src_path=dirname,
-                   dst_path=os.path.join(dst_path, dst_path_offset), blacklist=blacklist)
+                   dst_path=os.path.join(dst_path, dst_path_offset),
+                   blacklist=blacklist, files_copied=files_copied)
+
+
+def save_files_copied(files_copied, save_filename, strip_prefix=' '):
+    """
+    Given a dict of files that have been copied in the form {dst: src}, write a list of all files
+    and their sources to the file. Optionally, a common prefix can be removed from the dst files.
+    """
+    printfmt = '{:<80}  <- {}\n'
+    src_key = '  <source file> (preceding * indicates file is modified in git without a commit)'
+    separator = '-' * (85 + len(src_key)) + '\n'
+    filetext = separator
+    filetext += 'Source version info:  repo [{}] - branch [{}] - commit hash [{}]\n\n'.format(
+               git.get_repo(), git.get_branch(), git.get_hash())
+    filetext += printfmt.format('<staged file>', src_key)
+    filetext += separator
+    for staged_file, source_file in files_copied.items():
+        if staged_file.startswith(strip_prefix):
+            staged_file = staged_file[len(strip_prefix):]
+        filetext += printfmt.format(staged_file, source_file)
+    save_text_to_file(filetext, save_filename)
