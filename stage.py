@@ -10,7 +10,7 @@ import time
 from stagelib.envglobals import (printGlobal, CEPH_VERSION, OS_NAME, OS_VERSION,
                                  IMAGES_TO_BUILD, STAGING_DIR)
 from stagelib.filetools import (list_files, mkdir_if_dne, copy_files, recursive_copy_dir,
-                                IOOSErrorGracefulFail)
+                                IOOSErrorGracefulFail, save_files_copied)
 import stagelib.git as git
 from stagelib.replace import do_variable_replace
 from stagelib.blacklist import get_blacklist
@@ -79,21 +79,28 @@ def main(CORE_FILES_DIR, CEPH_RELEASES_DIR, BLACKLIST_FILE):
     blacklist = get_blacklist(BLACKLIST_FILE)
     logger.debug('Blacklist: {}'.format(blacklist))
 
+    files_copied = {}
+    # e.g., IMAGES_TO_BUILD = ['daemon-base', 'daemon']
     for image in IMAGES_TO_BUILD:
         logger.info('')
         logger.info('{}/'.format(image))
-        logger.info('    Copying files')
+        logger.info('    Copying files (preceding * indicates file has been modified)')
         for src_path in path_search_order:
             if not os.path.isdir(src_path):
                 continue
             src_files = list_files(src_path)
-            # e.g., IMAGES_TO_BUILD = ['daemon-base', 'daemon']
             staging_path = os.path.join(STAGING_DIR, image)
             mkdir_if_dne(staging_path, mode=0o755)
-            copy_files(src_files, src_path, staging_path, blacklist)
+            # Copy files in each path first, then copy contents of <image> dir
+            copy_files(src_files, src_path, staging_path, blacklist, files_copied)
             recursive_copy_dir(src_path=os.path.join(src_path, image), dst_path=staging_path,
-                               blacklist=blacklist)
+                               blacklist=blacklist, files_copied=files_copied)
+        # Do variable replacements on all files in <staging>/<image>
         do_variable_replace(replace_root_dir=os.path.join(STAGING_DIR, image))
+
+    # Save a file named files-sources to the staging dir
+    save_files_copied(files_copied, os.path.join(STAGING_DIR, 'files-sources'),
+                      strip_prefix=os.path.join(STAGING_DIR, ''))
 
 
 if __name__ == "__main__":
