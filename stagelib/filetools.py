@@ -2,11 +2,12 @@
 
 import logging
 import os
+import stagelib.git as git
 import shutil
 import stagelib.git as git
 import sys
 
-COPY_LOGTEXT = '        {:<80}  -> {}'
+COPY_LOGTEXT = '      {:<82}  -> {:1}'
 PARENTHETICAL_LOGTEXT = '        {:<80}     {}'
 
 
@@ -49,7 +50,7 @@ def _copy_file(file_path, dst_path):
         IOOSErrorGracefulFail(o, "Could not copy file {} to {}".format(file_path, dst_path))
 
 
-def copy_files(filenames, src_path, dst_path, blacklist):
+def copy_files(filenames, src_path, dst_path, blacklist=[], files_copied={}):
     """
     Copy a list of filenames from src to dst. Will overwrite existing files.
     If any files are in the blacklist, they will not be copied.
@@ -67,18 +68,13 @@ def copy_files(filenames, src_path, dst_path, blacklist):
         if file_path in blacklist:
             logging.info(PARENTHETICAL_LOGTEXT.format(file_path, '[FILE BLACKLISTED]'))
             continue
-<<<<<<< HEAD:stagelib/filecopytools.py
-        logging.info(COPY_LOGTEXT.format(file_path, dst_path))
-        shutil.copy2(file_path, dst_path)
-=======
         dirty_marker = '*' if git.file_is_dirty(file_path) else ' '
         logging.info(COPY_LOGTEXT.format(dirty_marker + ' ' + file_path, dst_path))
         files_copied[os.path.join(dst_path, f)] = dirty_marker + ' ' + file_path
         _copy_file(file_path, dst_path)
->>>>>>> ff7b131... fixup w first:stagelib/filetools.py
 
 
-def recursive_copy_dir(src_path, dst_path, blacklist=[]):
+def recursive_copy_dir(src_path, dst_path, blacklist=[], files_copied={}):
     """
     Copy all files in the src directory recursively to dst. Will overwrite existing files.
     If any files encountered are in the blacklist, they will not be copied.
@@ -95,9 +91,6 @@ def recursive_copy_dir(src_path, dst_path, blacklist=[]):
             continue
         dst_path_offset = dirname[len(src_path)+1:]
         copy_files(filenames=files, src_path=dirname,
-<<<<<<< HEAD:stagelib/filecopytools.py
-                   dst_path=os.path.join(dst_path, dst_path_offset), blacklist=blacklist)
-=======
                    dst_path=os.path.join(dst_path, dst_path_offset),
                    blacklist=blacklist, files_copied=files_copied)
 
@@ -111,4 +104,3 @@ def save_files_copied(files_copied, save_filename, strip_prefix=' '):
             staged_file = staged_file[len(strip_prefix):]
         filetext += printfmt.format(staged_file, source_file)
     save_text_to_file(filetext, save_filename)
->>>>>>> ff7b131... fixup w first:stagelib/filetools.py
