@@ -305,7 +305,13 @@ function get_part_uuid {
 function is_dmcrypt () {
   # As soon as we find partitions with TYPE=crypto_LUKS on ${OSD_DEVICE} we can
   # assume this device is part of dmcrypt scenario.
-  blkid -t TYPE=crypto_LUKS "${OSD_DEVICE}"* -o value -s PARTUUID &> /dev/null
+
+  # To keep compatibility with existing code
+  if [ -n "${1}" ]; then
+    local OSD_DEVICE
+    OSD_DEVICE="${1}"
+  fi
+  blkid -t TYPE=crypto_LUKS "${OSD_DEVICE}"* -o value -s PARTUUID 1> /dev/null
 }
 
 function ceph_health {
