@@ -8,3 +8,9 @@ ceph.osd.keyring
 ceph.rgw.keyring
 client-admin-key
 ceph-releases/devel/*
+
+staging-*/
+__pycache__/
+*.pyc
+*.pyo
+*.log

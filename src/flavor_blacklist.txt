@@ -1,0 +1,18 @@
+# Use this blacklist to prevent certain files from being staged for given
+# build flavors.
+# This could be useful, for example, to prevent versions of ceph before luminous
+# from getting configs/files relating to nfs-ganesha.
+#
+# How to use this file:
+#  1. Lines beginning with some number of spaces followed by '#' are a comment.
+      # e.g., this is also a comment
+#  2. Blacklist format "<path to be blacklisted> <ENV_VAR1>=<val1> <ENV_VAR2>=<val2> ...
+#     a. Any number of environment variables can be specified. A path will be blacklisted only if
+#        all given environment variables match their expected values.
+#        e.g., The line '/some/file BASEOS_REG=ubuntu BASEOS_TAG=16.04'
+#              matches ubuntu:16.04 but not ubuntu:18.04
+#     b. <path to be blacklisted> can be individual files or directories.
+
+all_ceph_releases/blacklist-test-luminous CEPH_VERSION=luminous
+all_ceph_releases/blacklist-test-ubuntu-1604 BASEOS_REPO=ubuntu BASEOS_TAG=16.04
+all_ceph_releases/daemon-base/blacklist-test-dir/ BASEOS_REPO=opensuse
