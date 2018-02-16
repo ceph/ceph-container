@@ -4,6 +4,8 @@ Source version info:  repo [testrepo] - branch [testbranch] - commit hash [testh
 <staged file>                                                                     <-   <source file> (preceding * indicates file is modified in git without a commit)
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 daemon-base/__MAINTAINER__                                                        <-   tests/stage-test/ceph-releases/ALL/ubuntu/__MAINTAINER__
+daemon-base/__EMPTY__                                                             <-   tests/stage-test/src/daemon-base/__EMPTY__
+daemon-base/__H4X0R__                                                             <-   tests/stage-test/src/daemon-base/__H4X0R__
 daemon-base/src-daemon-base-test-file                                             <-   tests/stage-test/src/daemon-base/src-daemon-base-test-file
 daemon-base/__OS_CODENAME__                                                       <-   tests/stage-test/ceph-releases/ALL/ubuntu/16.04/__OS_CODENAME__
 daemon-base/ubuntu-mimic-override                                                 <-   tests/stage-test/ceph-releases/luminous/ubuntu/16.04/ubuntu-mimic-override

@@ -34,7 +34,7 @@ EOF
 )
 python3 -c "${run_stage}"
 
-diff --brief -Nr --exclude '*.log' tests/stage-test/stage-key/ "${STAGING_DIR}"
+diff --brief -Nr --exclude 'find-src' --exclude '*.log' tests/stage-test/stage-key/ "${STAGING_DIR}"
 
 echo "STAGING TEST PASSED"
 echo ""
