@@ -1,1 +1,0 @@
-../../../ubuntu/16.04/daemon/remove-mon.sh
