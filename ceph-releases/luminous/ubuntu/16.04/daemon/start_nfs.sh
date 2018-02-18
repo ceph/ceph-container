@@ -31,7 +31,6 @@ function start_nfs {
   fi
 
   log "SUCCESS"
-  # start ganesha
-  /usr/bin/ganesha.nfsd "${GANESHA_OPTIONS[@]}" -L /var/log/ganesha/ganesha.log "${GANESHA_EPOCH}" || return 0
-  exec tailf /var/log/ganesha/ganesha.log
+  # start ganesha, logging both to STDOUT and to the configured location
+  exec /usr/bin/ganesha.nfsd "${GANESHA_OPTIONS[@]}" -F -L STDOUT "${GANESHA_EPOCH}"
 }
