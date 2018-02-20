@@ -17,13 +17,10 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 : "${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}"
 : "${CEPH_DAEMON:=${1}}" # default daemon to first argument
 : "${CEPH_GET_ADMIN_KEY:=0}"
-: "${HOSTNAME:=$(uname -n | cut -d'.' -f1)}"
-: "${MON_NAME:=${HOSTNAME}}"
 : "${MON_DATA_DIR:=/var/lib/ceph/mon/${CLUSTER}-${MON_NAME}}"
 : "${K8S_HOST_NETWORK:=0}"
 : "${K8S_MON_SELECTOR:=app=ceph,daemon=mon}"
 : "${NETWORK_AUTO_DETECT:=0}"
-: "${MDS_NAME:=${HOSTNAME}}"
 : "${OSD_JOURNAL_SIZE:=100}"
 : "${OSD_BLUESTORE:=1}"
 : "${OSD_FILESTORE:=0}"
@@ -41,8 +38,6 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 : "${CEPHFS_DATA_POOL_PG:=8}"
 : "${CEPHFS_METADATA_POOL:=${CEPHFS_NAME}_metadata}"
 : "${CEPHFS_METADATA_POOL_PG:=8}"
-: "${RGW_NAME:=${HOSTNAME}}"
-: "${RBD_MIRROR_NAME:=${HOSTNAME}}"
 : "${RGW_ZONEGROUP:=}"
 : "${RGW_ZONE:=}"
 : "${RGW_CIVETWEB_IP:=0.0.0.0}"
@@ -61,8 +56,13 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 : "${KV_PORT:=2379}"
 : "${GANESHA_OPTIONS:=""}"
 : "${GANESHA_EPOCH:=""}" # For restarting
-: "${MGR_NAME:=${HOSTNAME}}"
 : "${MGR_IP:=0.0.0.0}"
+HOSTNAME=$(uname -n | cut -d'.' -f1)
+: "${MON_NAME:=${HOSTNAME}}"
+: "${RGW_NAME:=${HOSTNAME}}"
+: "${RBD_MIRROR_NAME:=${HOSTNAME}}"
+: "${MGR_NAME:=${HOSTNAME}}"
+: "${MDS_NAME:=${HOSTNAME}}"
 
 # Make sure to change the value of one another if user changes some of the default values
 while read -r line; do
