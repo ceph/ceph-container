@@ -1,0 +1,33 @@
+# Use this blacklist to prevent certain files from being staged for given
+# build flavors.
+# This could be useful, for example, to prevent versions of ceph before luminous
+# from getting configs/files relating to nfs-ganesha.
+#
+# How to use this file:
+#  1. Lines beginning with some number of spaces followed by '#' are a comment.
+      # e.g., this is also a comment
+#
+#  2. Use only spaces as separators. As many spaces as desired can be used, but spaces only.
+#
+#  3. Blacklist format:  <path> <ENV_VAR1>=<val1>[,<val2>[,...]] [<ENV_VAR2>=...]
+#     a. <path> can be individual files or directories.
+#     b. Any number of environment variables can be specified. If an system environment variable
+#        is set to any of the comma-delimited values associated with it, then the <path> will be
+#        blacklisted.
+#     c. Examples:
+#        i.   some/file BASEOS_REG=ubuntu OS_VERSION=16.04
+#               blacklists some/file for ubuntu:16.04 but not ubuntu:18.04
+#        ii.  some/dir/ CEPH_VERSION=kraken,luminous
+#               blacklists some/dir/ and all its contents for kraken and luminous but not mimic
+#
+#  4. List of the most useful Makefile environment variables (see top-level Makefile for all):
+#     - CEPH_VERSION - Ceph named version being built (e.g., luminous, mimic)
+#     - ARCH - Architecture of binaries being built (e.g., amd64, arm32, arm64)
+#     - OS_NAME - OS name as used by the ceph-container project (e.g., ubuntu, opensuse)
+#     - OS_VERSION - OS version as used by the ceph-container project (e.g., 16.04, 42.3)
+#     - BASEOS_REG - Registry for the container base image (e.g., _ (default), arm32v7, arm64v8)
+#                    There is a relation between binaries built (ARCH) and this value
+#     - BASEOS_REPO - Repository for the container base image (e.g., ubuntu, opensuse, alpine)
+#     - BASEOS_TAG - Tagged version of the BASEOS_REPO container (e.g., 16.04, 42.3, 3.6)
+#
+#  5. See tests/stage-test/flavor-blacklist.txt for a few examples.

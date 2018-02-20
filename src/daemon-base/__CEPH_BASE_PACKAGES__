@@ -1,0 +1,9 @@
+ca-certificates \
+        ceph-common \
+        ceph-mon \
+        ceph-osd \
+        ceph-mds \
+        ceph-mgr \
+        kmod \
+        *radosgw \
+        rbd-mirror

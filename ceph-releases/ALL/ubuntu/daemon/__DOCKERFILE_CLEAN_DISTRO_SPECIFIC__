@@ -1,0 +1,2 @@
+# Timezone is not configured so let's remove the zoneinfo
+dpkg --purge --force-all tzdata
