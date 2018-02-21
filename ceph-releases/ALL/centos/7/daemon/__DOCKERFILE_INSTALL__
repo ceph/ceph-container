@@ -1,0 +1,3 @@
+yum install -y ${SYSTEM_PACKAGES} && \
+rpm -q ${SYSTEM_PACKAGES} && \
+yum clean all

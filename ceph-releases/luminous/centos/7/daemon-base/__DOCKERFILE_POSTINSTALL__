@@ -1,0 +1,4 @@
+ADD ganesha.repo /etc/yum.repos.d/
+RUN sed -i "s/CEPH_VERSION/${CEPH_VERSION}/g" /etc/yum.repos.d/ganesha.repo && \
+    yum install -y __CEPH_GANESHA_PACKAGES__ && \
+    rpm -q __CEPH_GANESHA_PACKAGES__

@@ -30,6 +30,7 @@
 #       luminous@arm64@ubuntu@16.04@arm64v8@ubuntu@16.04
 
 FLAVORS_TO_BUILD ?= \
+  luminous@x86_64@centos@7@_@centos@7 \
 	luminous@amd64@ubuntu@16.04@_@ubuntu@16.04
 #	luminous@amd64@opensuse@42.3@_@opensuse@42.3 \
 

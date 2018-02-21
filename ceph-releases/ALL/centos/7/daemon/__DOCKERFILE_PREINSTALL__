@@ -1,0 +1,5 @@
+__DOCKERFILE_INSTALL_CONFD__
+__DOCKERFILE_INSTALL_FOREGO__
+__DOCKERFILE_INSTALL_KUBECTL__
+
+ARG SYSTEM_PACKAGES="unzip device-mapper sharutils etcd kubernetes-client e2fsprogs s3cmd lvm2"
