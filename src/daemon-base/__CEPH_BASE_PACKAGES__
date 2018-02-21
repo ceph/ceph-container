@@ -5,5 +5,5 @@ ca-certificates \
         ceph-mds \
         ceph-mgr \
         kmod \
-        *radosgw \
+        __RADOSGW_PACKAGES__ \
         rbd-mirror
