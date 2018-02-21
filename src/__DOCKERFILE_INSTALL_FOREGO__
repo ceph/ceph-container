@@ -1,0 +1,4 @@
+
+RUN ( wget -qO /forego.tgz 'https://bin.equinox.io/c/ekMN3bCZFUn/forego-stable-linux-amd64.tgz' && \
+      cd /usr/local/bin && tar xfz /forego.tgz && chmod +x /usr/local/bin/forego && rm /forego.tgz && \
+      gzexe /usr/local/bin/forego && rm -rf /usr/local/bin/forego~ )

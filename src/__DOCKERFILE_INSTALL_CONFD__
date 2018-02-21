@@ -1,0 +1,9 @@
+ENV CONFD_VERSION 0.10.0
+
+RUN ( wget -qO /usr/local/bin/confd "https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-linux-amd64" && \
+     chmod +x /usr/local/bin/confd && mkdir -p /etc/confd/conf.d && mkdir -p /etc/confd/templates && \
+     gzexe /usr/local/bin/confd && rm -f /usr/local/bin/confd~ )
+
+# Add templates for confd
+ADD ./confd/templates/* /etc/confd/templates/
+ADD ./confd/conf.d/* /etc/confd/conf.d/
