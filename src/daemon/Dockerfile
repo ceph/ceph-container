@@ -32,6 +32,8 @@ RUN ( \
     echo "Cleaning process removed ${REMOVED_SIZE}MB" && \
     echo "Dropped container size from ${INITIAL_SIZE}MB to ${FINAL_SIZE}MB"
 
+__DOCKERFILE_POSTINSTALL__
+
 #======================================================
 # Add ceph-container files
 #======================================================
