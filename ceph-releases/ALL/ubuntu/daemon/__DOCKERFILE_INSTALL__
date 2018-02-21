@@ -3,8 +3,6 @@
     DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
       wget unzip uuid-runtime python-setuptools udev dmsetup && \
-    echo "deb http://download.ceph.com/nfs-ganesha/deb-V2.5-stable/luminous/ __OS_CODENAME__ main" \
-      | tee /etc/apt/sources.list.d/nfs-ganesha.list && \
     apt-get update && apt-get install -y  --no-install-recommends --force-yes $PACKAGES && \
     dpkg -s $PACKAGES && \
     apt-get clean

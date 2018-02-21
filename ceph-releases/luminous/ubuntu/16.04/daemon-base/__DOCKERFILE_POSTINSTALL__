@@ -1,0 +1,4 @@
+RUN echo "deb http://download.ceph.com/nfs-ganesha/deb-V2.5-stable/${CEPH_RELEASE}/ __OS_CODENAME__ main" \
+      | tee /etc/apt/sources.list.d/nfs-ganesha.list && \
+      DEBIAN_FRONTEND=noninteractive apt-get install -yy -q --no-install-recommends __CEPH_GANESHA_PACKAGES__ && \
+      DEBIAN_FRONTEND=noninteractive apt-get clean
