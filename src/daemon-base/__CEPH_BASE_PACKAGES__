@@ -3,7 +3,6 @@ ca-certificates \
         ceph-mon \
         ceph-osd \
         ceph-mds \
-        ceph-mgr \
         kmod \
-        __RADOSGW_PACKAGES__ \
+        __RADOSGW_PACKAGES__ __CEPH_MGR_PACKAGES__ \
         rbd-mirror
