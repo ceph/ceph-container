@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -xe
 
+# TODO: This needs updated for new project structure
 
 # FUNCTIONS
 # NOTE (leseb): how to choose between directory for multiple change?
