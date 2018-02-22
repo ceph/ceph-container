@@ -12,12 +12,17 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 # LIST OF ALL VARIABLES #
 #########################
 
+HOSTNAME=$(uname -n | cut -d'.' -f1)
+: "${MON_NAME:=${HOSTNAME}}"
+: "${RGW_NAME:=${HOSTNAME}}"
+: "${RBD_MIRROR_NAME:=${HOSTNAME}}"
+: "${MDS_NAME:=${HOSTNAME}}"
 : "${CLUSTER:=ceph}"
+: "${MON_DATA_DIR:=/var/lib/ceph/mon/${CLUSTER}-${MON_NAME}}"
 : "${CLUSTER_PATH:=ceph-config/${CLUSTER}}" # For KV config
 : "${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}"
 : "${CEPH_DAEMON:=${1}}" # default daemon to first argument
 : "${CEPH_GET_ADMIN_KEY:=0}"
-: "${MON_DATA_DIR:=/var/lib/ceph/mon/${CLUSTER}-${MON_NAME}}"
 : "${K8S_HOST_NETWORK:=0}"
 : "${K8S_MON_SELECTOR:=app=ceph,daemon=mon}"
 : "${NETWORK_AUTO_DETECT:=0}"
@@ -48,11 +53,6 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 : "${KV_IP:=127.0.0.1}"
 : "${KV_PORT:=2379}"
 OSD_FILESTORE=1
-HOSTNAME=$(uname -n | cut -d'.' -f1)
-: "${MON_NAME:=${HOSTNAME}}"
-: "${RGW_NAME:=${HOSTNAME}}"
-: "${RBD_MIRROR_NAME:=${HOSTNAME}}"
-: "${MDS_NAME:=${HOSTNAME}}"
 
 # Create a default array
 CRUSH_LOCATION_DEFAULT=("root=default" "host=${HOSTNAME}")

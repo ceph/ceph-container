@@ -12,12 +12,18 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 # LIST OF ALL VARIABLES #
 #########################
 
+HOSTNAME=$(uname -n | cut -d'.' -f1)
+: "${MON_NAME:=${HOSTNAME}}"
+: "${RGW_NAME:=${HOSTNAME}}"
+: "${RBD_MIRROR_NAME:=${HOSTNAME}}"
+: "${MGR_NAME:=${HOSTNAME}}"
+: "${MDS_NAME:=${HOSTNAME}}"
 : "${CLUSTER:=ceph}"
+: "${MON_DATA_DIR:=/var/lib/ceph/mon/${CLUSTER}-${MON_NAME}}"
 : "${CLUSTER_PATH:=ceph-config/${CLUSTER}}" # For KV config
 : "${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}"
 : "${CEPH_DAEMON:=${1}}" # default daemon to first argument
 : "${CEPH_GET_ADMIN_KEY:=0}"
-: "${MON_DATA_DIR:=/var/lib/ceph/mon/${CLUSTER}-${MON_NAME}}"
 : "${K8S_HOST_NETWORK:=0}"
 : "${K8S_MON_SELECTOR:=app=ceph,daemon=mon}"
 : "${NETWORK_AUTO_DETECT:=0}"
@@ -57,12 +63,6 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 : "${GANESHA_OPTIONS:=""}"
 : "${GANESHA_EPOCH:=""}" # For restarting
 : "${MGR_IP:=0.0.0.0}"
-HOSTNAME=$(uname -n | cut -d'.' -f1)
-: "${MON_NAME:=${HOSTNAME}}"
-: "${RGW_NAME:=${HOSTNAME}}"
-: "${RBD_MIRROR_NAME:=${HOSTNAME}}"
-: "${MGR_NAME:=${HOSTNAME}}"
-: "${MDS_NAME:=${HOSTNAME}}"
 
 # Make sure to change the value of one another if user changes some of the default values
 while read -r line; do
