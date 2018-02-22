@@ -6,6 +6,8 @@ import os
 logger = logging.getLogger(__name__)
 
 
+# Take a raw blacklist condition, and return its parts
+# VAR=t1,t2 --> ('VAR', ['t1', 't2'])
 def _parse_condition(rawcondition):
     parts = rawcondition.split('=')
     if not len(parts) == 2:

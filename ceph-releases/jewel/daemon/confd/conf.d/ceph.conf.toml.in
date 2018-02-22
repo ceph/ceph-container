@@ -1,0 +1,13 @@
+[template]
+src = "ceph.conf.tmpl"
+dest = "/etc/ceph/@CLUSTER@.conf"
+keys = [
+ "/auth/",
+ "/global/",
+ "/mon/",
+ "/mon_host/",
+ "/osd/",
+ "/mds/",
+ "/client/",
+ "client_host/"
+]

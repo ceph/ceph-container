@@ -1,0 +1,146 @@
+#!/bin/bash
+set -e
+export LC_ALL=C
+
+source variables_entrypoint.sh
+source common_functions.sh
+source debug.sh
+
+###########################
+# CONFIGURATION GENERATOR #
+###########################
+
+# Load in the bootstrapping routines
+# based on the data store
+case "$KV_TYPE" in
+  etcd)
+    # TAG: kv_type_etcd
+    source /config.kv.etcd.sh
+    ;;
+  k8s|kubernetes)
+    # TAG: kv_type_k8s
+    source /config.k8s.sh
+    ;;
+  *)
+    source /config.static.sh
+    ;;
+esac
+
+
+###############
+# CEPH_DAEMON #
+###############
+
+# Normalize DAEMON to lowercase
+CEPH_DAEMON=$(to_lowercase "${CEPH_DAEMON}")
+
+create_mandatory_directories
+
+# If we are given a valid first argument, set the
+# CEPH_DAEMON variable from it
+case "$CEPH_DAEMON" in
+  populate_kvstore)
+    # TAG: populate_kvstore
+    source populate_kv.sh
+    populate_kv
+    ;;
+  mon)
+    # TAG: mon
+    source start_mon.sh
+    start_mon
+    ;;
+  osd)
+    # TAG: osd
+    source start_osd.sh
+    start_osd
+    ;;
+  osd_directory)
+    # TAG: osd_directory
+    source start_osd.sh
+    OSD_TYPE="directory"
+    start_osd
+    ;;
+  osd_directory_single)
+    # TAG: osd_directory_single
+    source start_osd.sh
+    OSD_TYPE="directory_single"
+    start_osd
+    ;;
+  osd_ceph_disk)
+    # TAG: osd_ceph_disk
+    source start_osd.sh
+    OSD_TYPE="disk"
+    start_osd
+    ;;
+  osd_ceph_disk_prepare)
+    # TAG: osd_ceph_disk_prepare
+    source start_osd.sh
+    OSD_TYPE="prepare"
+    start_osd
+    ;;
+  osd_ceph_disk_activate)
+    # TAG: osd_ceph_disk_activate
+    source start_osd.sh
+    OSD_TYPE="activate"
+    start_osd
+    ;;
+  osd_ceph_activate_journal)
+    # TAG: osd_ceph_activate_journal
+    source start_osd.sh
+    OSD_TYPE="activate_journal"
+    start_osd
+    ;;
+  mds)
+    # TAG: mds
+    source start_mds.sh
+    start_mds
+    ;;
+  rgw)
+    # TAG: rgw
+    source start_rgw.sh
+    start_rgw
+    ;;
+  rgw_user)
+    # TAG: rgw_user
+    source start_rgw.sh
+    create_rgw_user
+    ;;
+  restapi)
+    # TAG: restapi
+    source start_restapi.sh
+    start_restapi
+    ;;
+  rbd_mirror)
+    # TAG: rbd_mirror
+    source start_rbd_mirror.sh
+    start_rbd_mirror
+    ;;
+  nfs)
+    # TAG: nfs
+    echo "Temporarily disabled due to broken package dependencies with nfs-ganesha"
+    echo "For more info see: https://github.com/ceph/ceph-docker/pull/564"
+    exit 1
+    source start_nfs.sh
+    start_nfs
+    ;;
+  zap_device)
+    # TAG: zap_device
+    source zap_device.sh
+    zap_device
+    ;;
+  mon_health)
+    # TAG: mon_health
+    source watch_mon_health.sh
+    watch_mon_health
+    ;;
+  mgr)
+    # TAG: mgr
+    source start_mgr.sh
+    start_mgr
+    ;;
+  *)
+    invalid_ceph_daemon
+  ;;
+esac
+
+exit 0
