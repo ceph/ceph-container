@@ -102,6 +102,8 @@ To practically aid developers, helpful tools have been built for staging:
  - To create specific staging directory(-ies): `make FLAVORS_TO_BUILD=<flavorspec> stage`
  - Find the source of a staged file: `cd <staging> ; ./find-src <file-path>`
  - List of staged files and their sources: `<staging>/files-sources`
+ - List of all possible buildable flavors: `make show.flavors`
+ - Show flavors affected by branch changes: `make flavors.modified`
  - Stage log: `stage.log`
 
 ### Building images
@@ -149,10 +151,13 @@ absolutely apply only to the specific flavor(s) and not to others.
 5. Make a PR of your changes.
 
 ### Adding a Ceph release
-Ideally, adding a new Ceph release is fairly easy. In the best case, all that needs done is adding flavors for the new Ceph version to the Makefile.
+Ideally, adding a new Ceph release is fairly easy. In the best case, all that needs done is adding
+flavors for the new Ceph version to the Makefile. At minimum, `ALL_BUILDABLE_FLAVORS` must be
+updated in the Makefile.
 
 In the worst case, trying to make as few modifications as possible:
 1. Add flavors for new Ceph versions to the Makefile.
+   - At minimum: `ALL_BUILDABLE_FLAVORS`.
 2. Edit `src/` files to support the new version if necessary, making sure not to break previous
    versions.
 3. Edit `src/ALL/<distro>` files to support the new version if necessary, making sure not to break
@@ -164,6 +169,7 @@ In the worst case, trying to make as few modifications as possible:
 
 ### Adding a distro build
 1. Add flavors for the new distro to the Makefile.
+   - At minimum: `ALL_BUILDABLE_FLAVORS`.
 2. Add a `src/ALL/<new distro>` directory for the new distro
    - Make sure to install all the required packages for `daemon-base` (see
      `src/daemon-base/__CEPH_BASE_PACKAGES__)` and for `daemon` (see
