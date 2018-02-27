@@ -9,11 +9,12 @@ set -ex
 function install_docker {
   sudo apt-get install -y --force-yes docker.io
   sudo systemctl start docker
+  sudo chgrp "$(whoami)" /var/run/docker.sock
 }
 
 function login_docker_hub {
   echo "Login in the Docker Hub"
-  sudo docker login -u "$DOCKER_HUB_USERNAME" -p "$DOCKER_HUB_PASSWORD"
+  docker login -u "$DOCKER_HUB_USERNAME" -p "$DOCKER_HUB_PASSWORD"
 }
 
 function build_ceph_imgs {
