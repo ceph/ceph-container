@@ -105,6 +105,8 @@ To practically aid developers, helpful tools have been built for staging:
  - To create specific staging directory(-ies): `make FLAVORS_TO_BUILD=<flavors> stage`
  - Find the source of a staged file: `cd <staging dir> ; ./find-src <file-path>`
  - List of staged files and their sources: `<staging dir>/files-sources`
+ - List of all possible buildable flavors: `make show.flavors`
+ - Show flavors affected by branch changes: `make flavors.modified`
  - Stage log: `stage.log`
 
 ### Building images
@@ -201,6 +203,7 @@ and there are no special updates required, they are likely to work with just thi
 
 In the worst case, trying to make as few modifications as possible:
 1. Add flavors for new Ceph versions to the Makefile.
+   - At minimum: `ALL_BUILDABLE_FLAVORS`.
 2. Edit `src/` files to support the new version if necessary, making sure not to break previous
    versions. Keep container environment variables in mind here.
 3. Edit `ceph-releases/ALL/<distro>` files to support the new version if necessary, making sure not
