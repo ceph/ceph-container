@@ -16,6 +16,7 @@
 # ==============================================================================
 # Build tunables
 
+# When updating these defaults, be sure to check that ALL_BUILDABLE_FLAVORS is updated
 FLAVORS_TO_BUILD ?= \
 	luminous,amd64,ubuntu,16.04,_,ubuntu,16.04 \
 	jewel,amd64,ubuntu,16.04,_,ubuntu,16.04 \
@@ -27,6 +28,14 @@ REGISTRY ?= ceph
 
 # ==============================================================================
 # Internal definitions
+
+# All flavor options that can be passed to FLAVORS_TO_BUILD
+ALL_BUILDABLE_FLAVORS := \
+	luminous,amd64,ubuntu,16.04,_,ubuntu,16.04 \
+	jewel,amd64,ubuntu,16.04,_,ubuntu,16.04 \
+	jewel,amd64,ubuntu,14.04,_,ubuntu,14.04 \
+	kraken,amd64,ubuntu,16.04,_,ubuntu,16.04 \
+
 IMAGES_TO_BUILD := daemon-base daemon
 
 # Given a variable name $(1) and a build flavor $(2), print a string
@@ -120,8 +129,8 @@ test.staging:
 
 # ==============================================================================
 # Help
+.PHONY: help show.flavors flavors.modified
 
-.PHONY: help
 help:
 	@echo ''
 	@echo 'Usage: make [OPTIONS] ... <TARGETS>'
@@ -129,22 +138,29 @@ help:
 	@echo 'TARGETS:'
 	@echo ''
 	@echo '  Building:'
-	@echo '    stage           Form staging dirs for all images. Dirs are reformed if they exist.'
-	@echo '    build           Build all images. Staging dirs are reformed if they exist.'
-	@echo '    build.parallel  Build all images in parallel.'
-	@echo '    push            Push release images to registry.'
+	@echo '    stage             Form staging dirs for all images. Dirs are reformed if they exist.'
+	@echo '    build             Build all images. Staging dirs are reformed if they exist.'
+	@echo '    build.parallel    Build all images in parallel.'
+	@echo '    push              Push release images to registry.'
 	@echo ''
 	@echo '  Clean:'
-	@echo '    clean           Remove images and staging dirs for the current flavors.'
-	@echo '    clean.nones     Remove all image artifacts tagged <none>.'
-	@echo '    clean.all       Remove all images and all staging dirs. Implies "clean.nones".'
-	@echo '                    Will only delete images in the specified REGISTRY for safety.'
-	@echo '    clean.nuke      Same as "clean.all" but will not be limited to specified REGISTRY.'
-	@echo '                    USE AT YOUR OWN RISK! This may remove non-project images.'
+	@echo '    clean             Remove images and staging dirs for the current flavors.'
+	@echo '    clean.nones       Remove all image artifacts tagged <none>.'
+	@echo '    clean.all         Remove all images and all staging dirs. Implies "clean.nones".'
+	@echo '                      Will only delete images in the specified REGISTRY for safety.'
+	@echo '    clean.nuke        Same as "clean.all" but will not be limited to specified REGISTRY.'
+	@echo '                      USE AT YOUR OWN RISK! This may remove non-project images.'
 	@echo ''
 	@echo '  Testing:'
-	@echo '    lint            Lint the source code.'
-	@echo '    test.staging    Perform stageing integration test.'
+	@echo '    lint              Lint the source code.'
+	@echo '    test.staging      Perform stageing integration test.'
+	@echo ''
+	@echo '  Help:'
+	@echo '    help              Print this help message.'
+	@echo '    show.flavors      Show all flavor options to FLAVORS_TO_BUILD.'
+	@echo "    flavors.modified  Show the flavors impacted by this branch's changes vs origin/master."
+	@echo '                      All buildable flavors are staged for this test.'
+	@echo '                      The env var VS_BRANCH can be set to compare vs a different branch.'
 	@echo ''
 	@echo 'OPTIONS:'
 	@echo ''
@@ -166,3 +182,9 @@ help:
 	@echo '             Defaults to "ceph".'
 	@echo '    e.g., REGISTRY="myreg" will tag images "myreg/daemon{,-base}" and push to "myreg".'
 	@echo ''
+
+show.flavors:
+	@echo $(ALL_BUILDABLE_FLAVORS)
+
+flavors.modified:
+	@ALL_BUILDABLE_FLAVORS="$(ALL_BUILDABLE_FLAVORS)" ./flavors-modified-vs-master.py
