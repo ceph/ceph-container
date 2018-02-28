@@ -14,7 +14,10 @@ export STAGING_DIR=tests/stage-test/staging/${CEPH_VERSION}-${BASEOS_REPO}-${BAS
 export IMAGES_TO_BUILD="daemon-base daemon"
 
 run_stage=$(cat <<'EOF'
+import sys
+sys.path.append('maint-lib')
 from stage import *
+
 CORE_FILES_DIR = "tests/stage-test/src"
 CEPH_RELEASES_DIR = "tests/stage-test/ceph-releases/"
 BLACKLIST_FILE = "tests/stage-test/flavor-blacklist.txt"
