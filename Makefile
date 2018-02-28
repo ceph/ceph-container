@@ -64,7 +64,7 @@ endef
 
 # ==============================================================================
 # Build targets
-.PHONY: all stage build build.parallel push
+.PHONY: all stage build build.parallel build.all push
 
 stage.%:
 	@$(call set_env_var,CEPH_VERSION,$*) $(call set_env_var,ARCH,$*) \
@@ -92,6 +92,9 @@ push:  $(foreach p, $(FLAVORS_TO_BUILD), do.image.$(p)) ;
 build.parallel:
 # Due to output-sync, will not output results until finished so there is no text interleaving
 	@$(MAKE) --jobs --output-sync build
+
+build.all:
+	@$(MAKE) FLAVORS_TO_BUILD="$(ALL_BUILDABLE_FLAVORS)" build.parallel
 
 
 # ==============================================================================
@@ -140,7 +143,8 @@ help:
 	@echo '  Building:'
 	@echo '    stage             Form staging dirs for all images. Dirs are reformed if they exist.'
 	@echo '    build             Build all images. Staging dirs are reformed if they exist.'
-	@echo '    build.parallel    Build all images in parallel.'
+	@echo '    build.parallel    Build default flavors in parallel.'
+	@echo '    build.all         Build all buildable flavors with build.parallel'
 	@echo '    push              Push release images to registry.'
 	@echo ''
 	@echo '  Clean:'
