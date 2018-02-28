@@ -1,0 +1,2 @@
+__ZYPPER__ --gpg-auto-import-keys refresh && \
+    __ZYPPER__ update --no-recommends --auto-agree-with-licenses --replacefiles --details

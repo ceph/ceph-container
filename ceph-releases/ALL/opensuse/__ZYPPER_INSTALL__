@@ -1,0 +1,1 @@
+__ZYPPER__ install --no-recommends --auto-agree-with-licenses --replacefiles --details
