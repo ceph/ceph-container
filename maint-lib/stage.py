@@ -101,7 +101,7 @@ def main(CORE_FILES_DIR, CEPH_RELEASES_DIR, BLACKLIST_FILE):
     # Save a file named files-sources to the staging dir
     save_files_copied(files_copied, os.path.join(STAGING_DIR, 'files-sources'),
                       strip_prefix=os.path.join(STAGING_DIR, ''))
-    copy_files(['find-src'], 'stagelib', STAGING_DIR)
+    copy_files(['find-src'], 'maint-lib/stagelib', STAGING_DIR)
 
 
 if __name__ == "__main__":
