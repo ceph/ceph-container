@@ -1,0 +1,6 @@
+( __ZYPPER__ addrepo __CEPH_REPO__ ceph-${CEPH_VERSION} && \
+    __ZYPPER_UPDATE__ && \
+    __ZYPPER_INSTALL__ __CEPH_BASE_PACKAGES__ && \
+    __ZYPPER__ info __CEPH_BASE_PACKAGES__ && \
+    __ZYPPER__ removerepo ceph-${CEPH_VERSION} ) || \
+    ( retval=$? && cat /var/log/zypper.log && exit $retval )
