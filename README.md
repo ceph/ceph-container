@@ -91,6 +91,8 @@ return true. As an example, `echo 'first' && __DO_STUFF__ && echo 'last'` will p
 'last' correctly only if `__DO_STUFF__` returns true. A take-no-action override needs to have the
 content `/bin/true`, as an empty file will cause an error.
 
+Variables can be nested meaning `__DO_STUFF__` can contain some code including a reference to another variable like `__ANOTHER_VARIABLE__`.
+
 ##### Environment variable replacements
 In any source file, a special variable in the form `STAGE_REPLACE_WITH_ENV_VAR` (capital letters
 with underscores) can placed. Once all files are staged, the `STAGE_REPLACE_WITH_ENV_VAR` variable
@@ -98,6 +100,8 @@ will be replaced with the raw contents of the environment variable named `ENV_VA
 
 Environment variable replacements **cannot** be nested inside of other environment variable
 replacements. `__VAR__` file definitions, however, may specify environment variable replacements.
+
+A typical usage is to use ``STAGE_REPLACE_WITH_ARCH`` when you need to specify the building architecture.
 
 #### Staging development aids
 To practically aid developers, helpful tools have been built for staging:
@@ -118,8 +122,30 @@ user to define which flavors to operate on. Flavor specifications follow a stric
 declares what ceph-container source to use, what architecture to build for, and what container image
 to use as the base for the build. See `make help` for a full description.
 
+#### Building a single flavor
+Once the flavor is selected, just specify its name in the __FLAVORS_TO_BUILD__ and call the __build__ target like in :
+```
+make FLAVORS_TO_BUILD=luminous,amd64,centos,7,_,centos,7 build
+```
+
+#### Building multiple flavors
+Proceed as per the single one and separate them by a space like in :
+```
+make FLAVORS_TO_BUILD="luminous,amd64,centos,7,_,centos,7 kraken,amd64,centos,7,_,centos,7"  build
+```
+
+If you want to build all possible images, just call
+```
+make build.all
+```
+
+If you want to build them in parallel :
+```
+make build.parallel
+```
+
 #### Building images from staging
-It is possible to build container images directly from staging in the event that `make build` is not
+It is also possible to build container images directly from staging in the event that `make build` is not
 appealing. Simply stage the flavor(s) to be built, and then execute the desired build command for
 `daemon-base` and `daemon`.
 ```
@@ -200,6 +226,12 @@ Ideally, adding a new Ceph release is fairly easy. In the best case, all that ne
 flavors for the new Ceph version to the Makefile. At minimum, `ALL_BUILDABLE_FLAVORS` must be
 updated in the Makefile. If distro source is properly configured to support multiple Ceph releases
 and there are no special updates required, they are likely to work with just this minimal change.
+
+Note the ``$CEPH_VERSION`` variable usually used in ``__DOCKERFILE_INSTALL__`` is substituted from the first field of the flavor name.
+
+In this example, ```luminous,amd64,centos,7,_,centos,7```, ``$CEPH_VERSION`` will be set to __luminous__.
+
+Adding a new flavor name like ```mimic,amd64,centos,7,_,centos,7``` is enough to create a new __mimic__ Ceph release.
 
 In the worst case, trying to make as few modifications as possible:
 1. Add flavors for new Ceph versions to the Makefile.
