@@ -1,0 +1,7 @@
+echo 'Postinstall cleanup' && \
+ ( rm -rf "/tmp/* /var/tmp/* /usr/lib/{dracut,locale,systemd,udev} /usr/bin/hyperkube /usr/bin/etcd /usr/bin/systemd-analyze /etc/{udev,selinux} /usr/lib/{udev,systemd} /usr/share/hwdata/{iab.txt,oui.txt} /usr/share/{doc,info,locale,man}/*" && \
+   find /var/log/ -type f -exec truncate -s 0 {} \; && \
+   rm -f /usr/lib/ceph/mgr/dashboard/static/AdminLTE-*/plugins/datatables/extensions/TableTools/images/psd/* && \
+   find  / -xdev -name "*.pyc" -exec rm {} \; && \
+   xz /usr/bin/ceph-dencoder && \
+   rpmdb --rebuilddb )
