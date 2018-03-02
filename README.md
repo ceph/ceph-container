@@ -77,6 +77,8 @@ src/FILE
 # Least specific
 ```
 
+When a developer needs to add a new file, he must consider how generic this file is. The more generic the file is, the most the file should be in a least specific directory.
+
 #### Basic templating in staging
 ##### Variable file replacements
 In any source file, a special variable in the form `__VAR_NAME__` (two leading and trailing
@@ -91,13 +93,17 @@ return true. As an example, `echo 'first' && __DO_STUFF__ && echo 'last'` will p
 'last' correctly only if `__DO_STUFF__` returns true. A take-no-action override needs to have the
 content `/bin/true`, as an empty file will cause an error.
 
+Variables can be nested meaning `__DO_STUFF__` can contain some code including a reference to another variable like `__ANOTHER_VARIABLE__`.
+
 ##### Environment variable replacements
 In any source file, a special variable in the form `STAGE_REPLACE_WITH_ENV_VAR` (capital letters
 with underscores) can placed. Once all files are staged, the `STAGE_REPLACE_WITH_ENV_VAR` variable
-will be replaced with the raw contents of the environment variable named `ENV_VAR`. 
+will be replaced with the raw contents of the environment variable named `ENV_VAR`.
 
 Environment variable replacements **cannot** be nested inside of other environment variable
 replacements. `__VAR__` file definitions, however, may specify environment variable replacements.
+
+A typical usage is to use ``STAGE_REPLACE_WITH_GENERIC_ARCH`` when you need to specify the building architecture.
 
 #### Staging development aids
 To practically aid developers, helpful tools have been built for staging:
@@ -118,8 +124,27 @@ user to define which flavors to operate on. Flavor specifications follow a stric
 declares what ceph-container source to use, what architecture to build for, and what container image
 to use as the base for the build. See `make help` for a full description.
 
+#### Building a single flavor
+Once the flavor is selected, just specify its name in the __FLAVORS_TO_BUILD__ and call the __build__ target like in :
+```
+sudo make FLAVORS_TO_BUILD=luminous,x86_64,centos,7,_,centos,7 build
+```
+
+#### Building multiple flavors
+Proceed as per the single one and separate them by a space like in :
+```
+sudo make FLAVORS_TO_BUILD="luminous,x86_64,centos,7,_,centos,7 kraken,x86_64,centos,7,_,centos,7"  build
+```
+
+If you want to build all possible images, just remove the __FLAVORS_TO_BUILD__ argument from the command line.
+
+If you want to build them in parallel, use the __-j__ flag as in
+```
+ sudo make -j4 FLAVORS_TO_BUILD="luminous,x86_64,centos,7,_,centos,7 kraken,x86_64,centos,7,_,centos,7"  build
+```
+
 #### Building images from staging
-It is possible to build container images directly from staging in the event that `make build` is not
+For developers, note that it is also possible to build container images directly from staging in the event that `make build` is not
 appealing. Simply stage the flavor(s) to be built, and then execute the desired build command for
 `daemon-base` and `daemon`.
 ```
@@ -139,7 +164,7 @@ implement. To maximize reuse and keep the core source base in one place, care sh
 to make the core source applicable to all flavors whenever possible. Note the existence of the
 "CEPH_VERSION" environment variable (and other similar variables) built into the containers.
 ceph-container source code can use container environment variables to execute code paths
-conditionally, making an override of source files for specific Ceph versions unnecessary. 
+conditionally, making an override of source files for specific Ceph versions unnecessary.
 
 Where possible `src/` provides a specification of a "sane default" that may need to be
 overridden for certain flavors. For example, the `src/daemon/__DAEMON_PACKAGES__` file defines the
@@ -201,12 +226,19 @@ flavors for the new Ceph version to the Makefile. At minimum, `ALL_BUILDABLE_FLA
 updated in the Makefile. If distro source is properly configured to support multiple Ceph releases
 and there are no special updates required, they are likely to work with just this minimal change.
 
+Note the __$CEPH_VERSION__ variable usually used in ``__DOCKERFILE_INSTALL__`` to select a package repository like in ```echo "deb http://download.ceph.com/nfs-ganesha/deb-V2.5-stable/$CEPH_VERSION/ __OS_CODENAME__ main" \
+``` is substituted from the first field of the flavor name.
+
+In this example, ```luminous,x86_64,centos,7,_,centos,7```, ``$CEPH_VERSION`` will be set to __luminous__.
+
+Adding a new flavor name like ```mimic,x86_64,centos,7,_,centos,7``` is enough to create a new __mimic__ Ceph release.
+
 In the worst case, trying to make as few modifications as possible:
 1. Add flavors for new Ceph versions to the Makefile.
    - At minimum: `ALL_BUILDABLE_FLAVORS`.
 2. Edit `src/` files to support the new version if necessary, making sure not to break previous
    versions. Keep container environment variables in mind here.
-3. Edit `ceph-releases/ALL/<distro>` files to support the new version if necessary, making sure not 
+3. Edit `ceph-releases/ALL/<distro>` files to support the new version if necessary, making sure not
    to break previous versions.
 4. Add `ceph-releases/<new ceph version>` files to support the new version if necessary.
 5. Build test versions of the images (`make FLAVORS_TO_BUILD=<new release flavors> build`).
