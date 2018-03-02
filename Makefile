@@ -22,6 +22,9 @@ FLAVORS_TO_BUILD ?= \
 	jewel,amd64,ubuntu,16.04,_,ubuntu,16.04 \
 	jewel,amd64,ubuntu,14.04,_,ubuntu,14.04 \
 	kraken,amd64,ubuntu,16.04,_,ubuntu,16.04 \
+	luminous,amd64,centos,7,_,centos,7 \
+	jewel,amd64,centos,7,_,centos,7 \
+	kraken,amd64,centos,7,_,centos,7 \
 
 REGISTRY ?= ceph
 
@@ -36,7 +39,9 @@ ALL_BUILDABLE_FLAVORS := \
 	jewel,amd64,ubuntu,16.04,_,ubuntu,16.04 \
 	jewel,amd64,ubuntu,14.04,_,ubuntu,14.04 \
 	kraken,amd64,ubuntu,16.04,_,ubuntu,16.04 \
-
+	luminous,amd64,centos,7,_,centos,7 \
+	jewel,amd64,centos,7,_,centos,7 \
+	kraken,amd64,centos,7,_,centos,7 \
 
 # ==============================================================================
 # Build targets

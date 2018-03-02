@@ -1,0 +1,14 @@
+bash -c ' \
+  if [ -n "__GANESHA_PACKAGES__" ]; then \
+    echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
+    echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
+    echo "baseurl=http://download.ceph.com/nfs-ganesha/rpm-V2.5-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
+    echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
+    echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
+  fi' && \
+yum update -y && \
+rpm --import 'https://download.ceph.com/keys/release.asc' && \
+rpm -Uvh http://download.ceph.com/rpm-${CEPH_VERSION}/el7/noarch/ceph-release-1-1.el7.noarch.rpm && \
+yum install -y epel-release && \
+yum install -y __CEPH_BASE_PACKAGES__ && \
+rpm -q __CEPH_BASE_PACKAGES__
