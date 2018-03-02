@@ -7,6 +7,11 @@ import subprocess
 import sys
 
 
+def _fatal(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+    sys.exit(1)
+
+
 def _run_cmd(cmd_array):
     return subprocess.check_output(cmd_array).decode("utf-8")
 
@@ -17,8 +22,7 @@ def _stage_flavor(flavor):
     staging_dir_pattern = re.compile(r'^\s*STAGING_DIR\s*:\s+(.*)$', re.MULTILINE)
     match = staging_dir_pattern.search(stage_output)
     if not match or not match[1] or match[1] == '':
-        print("Could not find staging dir for:\n{}".format(stage_output))
-        sys.exit(1)
+        _fatal("Could not find staging dir for:\n{}".format(stage_output))
     return match[1]
 
 
@@ -40,8 +44,7 @@ if 'VS_BRANCH' in os.environ and not os.environ['VS_BRANCH'] == '':
 try:
     filediff = _run_cmd(['git', 'diff', '--name-only', VS_BRANCH])
 except subprocess.CalledProcessError as c:
-    print('Could not get file diff. Is the VS_BRANCH specified a real branch?')
-    sys.exit(1)
+    _fatal('Could not get file diff. Is the VS_BRANCH specified a real branch?')
 
 # Files that haven't been committed don't show up in git diff, so also list those
 modified_files_with_status = _run_cmd(['git', 'status', '--short'])
