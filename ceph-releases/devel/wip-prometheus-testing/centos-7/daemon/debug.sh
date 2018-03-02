@@ -1,1 +1,0 @@
-../../../../luminous/ubuntu/16.04/daemon/debug.sh

@@ -1,1 +1,0 @@
-../../../../ubuntu/14.04/daemon/osd_scenarios/osd_activate_journal.sh
