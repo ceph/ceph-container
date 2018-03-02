@@ -6,7 +6,7 @@ import re
 import sys
 
 from stagelib.filetools import save_text_to_file, IOOSErrorGracefulFail
-from stagelib.envglobals import (CEPH_VERSION, ARCH, OS_NAME,  # noqa: F401
+from stagelib.envglobals import (CEPH_VERSION, ARCH, GENERIC_ARCH, OS_NAME,  # noqa: F401
                                 OS_VERSION, BASEOS_REG, BASEOS_REPO, BASEOS_TAG, IMAGES_TO_BUILD,
                                 STAGING_DIR)
 

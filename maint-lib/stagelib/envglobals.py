@@ -12,6 +12,12 @@ try:
     BASEOS_REPO = os.environ['BASEOS_REPO']
     BASEOS_TAG = os.environ['BASEOS_TAG']
     ARCH = os.environ['ARCH']
+    # Some tooling requires an amd64 string in the url whenever the ARCH is x86_64
+    # GENERIC_ARCH will then represent that alternative name of this ARCH
+    GENERIC_ARCH = ARCH
+    if ARCH == "x86_64":
+        GENERIC_ARCH = "amd64"
+    os.environ['GENERIC_ARCH'] = GENERIC_ARCH
     IMAGES_TO_BUILD = os.environ['IMAGES_TO_BUILD'].split(' ')
     STAGING_DIR = os.environ['STAGING_DIR']
 except KeyError as k:

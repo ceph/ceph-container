@@ -60,6 +60,7 @@ def main(CORE_FILES_DIR, CEPH_RELEASES_DIR, BLACKLIST_FILE):
     printGlobal('BASEOS_REPO')
     printGlobal('BASEOS_TAG')
     printGlobal('ARCH')
+    printGlobal('GENERIC_ARCH')
     printGlobal('IMAGES_TO_BUILD')
     printGlobal('STAGING_DIR')
     print('')
