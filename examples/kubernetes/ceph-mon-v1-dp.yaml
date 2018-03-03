@@ -16,24 +16,25 @@ spec:
       labels:
         app: ceph
         daemon: mon
-      annotations:
-        scheduler.alpha.kubernetes.io/affinity: >
-          {
-            "podAntiAffinity": {
-              "RequiredDuringSchedulingIgnoredDuringExecution": [{
-                "labelSelector": {
-                  "matchExpressions": [{
-                    "key": "daemon",
-                    "operator": "In",
-                    "values":["mon"]
-                  }]
-                },
-              "topologyKey": "kubernetes.io/hostname"
-              }]
-            }
-          }
     spec:
       serviceAccount: default
+      tolerations:
+        - key: CriticalAddonsOnly
+          operator: Exists
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values: ["ceph"]
+              - key: daemon
+                operator: In
+                values: ["mon"]
+            topologyKey: kubernetes.io/hostname
       volumes:
         - name: ceph-conf
           secret:
