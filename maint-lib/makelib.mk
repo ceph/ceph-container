@@ -20,6 +20,8 @@ $(shell set -eu ; \
 	BASE_IMAGE=$${BASE_IMAGE#_/} ; \
 	DAEMON_BASE_IMAGE=$(REGISTRY)/daemon-base:$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$ARCH ; \
 	DAEMON_IMAGE=$(REGISTRY)/daemon:$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$ARCH ; \
+	TIMESTAMP=$(TIMESTAMP); \
+	RELEASE=$(RELEASE); \
 	echo "$(1)=\"$$$(1)\""
 )
 endef

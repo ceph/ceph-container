@@ -63,6 +63,8 @@ def main(CORE_FILES_DIR, CEPH_RELEASES_DIR, BLACKLIST_FILE):
     printGlobal('GENERIC_ARCH')
     printGlobal('IMAGES_TO_BUILD')
     printGlobal('STAGING_DIR')
+    printGlobal('TIMESTAMP')
+    printGlobal('RELEASE')
     print('')
 
     # Search from least specfic to most specific
