@@ -17,6 +17,7 @@
 # Build tunables
 
 # When updating these defaults, be sure to check that ALL_BUILDABLE_FLAVORS is updated
+# CEPH_VERSION,ARCH,OS_NAME,OS_VERSION,BASEOS_REG,BASEOS_REPO,BASEOS_TAG
 FLAVORS_TO_BUILD ?= \
 	luminous,amd64,ubuntu,16.04,_,ubuntu,16.04 \
 	jewel,amd64,ubuntu,16.04,_,ubuntu,16.04 \
@@ -34,6 +35,7 @@ REGISTRY ?= ceph
 include maint-lib/makelib.mk
 
 # All flavor options that can be passed to FLAVORS_TO_BUILD
+# CEPH_VERSION,ARCH,OS_NAME,OS_VERSION,BASEOS_REG,BASEOS_REPO,BASEOS_TAG
 ALL_BUILDABLE_FLAVORS := \
 	luminous,amd64,ubuntu,16.04,_,ubuntu,16.04 \
 	jewel,amd64,ubuntu,16.04,_,ubuntu,16.04 \
