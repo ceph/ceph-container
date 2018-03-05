@@ -74,7 +74,11 @@ push:  $(foreach p, $(FLAVORS_TO_BUILD), do.image.$(p)) ;
 
 build.parallel:
 # Due to output-sync, will not output results until finished so there is no text interleaving
+ifeq (4.00,$(firstword $(sort $(MAKE_VERSION) 4.00)))
 	@$(MAKE) --jobs --output-sync build
+else
+	@$(MAKE) --jobs build
+endif
 
 build.all:
 	@$(MAKE) FLAVORS_TO_BUILD="$(ALL_BUILDABLE_FLAVORS)" build.parallel
