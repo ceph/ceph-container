@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 
+import stagelib.git as git
 try:
     CEPH_VERSION = os.environ['CEPH_VERSION']
     OS_NAME = os.environ['OS_NAME']
@@ -14,6 +15,21 @@ try:
     ARCH = os.environ['ARCH']
     IMAGES_TO_BUILD = os.environ['IMAGES_TO_BUILD'].split(' ')
     STAGING_DIR = os.environ['STAGING_DIR']
+
+    # Exporting git information as variables
+    GIT_REPO = git.get_repo()
+    os.environ['GIT_REPO'] = GIT_REPO
+    GIT_COMMIT = git.get_hash()
+    os.environ['GIT_COMMIT'] = GIT_COMMIT
+    GIT_BRANCH = git.get_branch()
+    os.environ['GIT_BRANCH'] = GIT_BRANCH
+    if git.file_is_dirty(""):
+        GIT_CLEAN = "True"
+    else:
+        GIT_CLEAN = "False"
+    os.environ['GIT_CLEAN'] = GIT_CLEAN
+
+    RELEASE = "{}".format(os.environ['RELEASE'])
 except KeyError as k:
     unset_var = k.args[0]
     errtext = """
@@ -30,7 +46,7 @@ Required environment variables:
  - IMAGES_TO_BUILD - Container images to be built (usually should be 'dockerfile daemon')
  - STAGING_DIR - Dir into which files will be staged
                  This dir will be overwritten if it already exists
-
+ - RELEASE - The release number
 """
     sys.stderr.write(errtext.format(unset_var))
     sys.exit(1)
