@@ -3,6 +3,8 @@
 FROM STAGE_REPLACE_WITH_DAEMON_BASE_IMAGE
 MAINTAINER __DOCKERFILE_MAINTAINER__
 
+__DOCKERFILE_TRACEABILITY_LABELS__
+
 #======================================================
 # Install ceph and dependencies, and clean up
 #======================================================

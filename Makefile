@@ -29,6 +29,10 @@ FLAVORS_TO_BUILD ?= \
 
 REGISTRY ?= ceph
 
+# By default the RELEASE version is the git branch name
+# Could be overrided by user at build time
+RELEASE ?= $(shell git rev-parse --abbrev-ref HEAD)
+
 
 # ==============================================================================
 # Internal definitions
@@ -56,6 +60,7 @@ stage.%:
 	$(call set_env_var,BASEOS_TAG,$*) $(call set_env_var,IMAGES_TO_BUILD,$*) \
 	$(call set_env_var,STAGING_DIR,$*) $(call set_env_var,BASE_IMAGE,$*) \
 	$(call set_env_var,DAEMON_BASE_IMAGE,$*) $(call set_env_var,DAEMON_IMAGE,$*) \
+	$(call set_env_var,RELEASE,$*) \
 	sh -c maint-lib/stage.py
 
 daemon-base.%: stage.%
@@ -172,6 +177,8 @@ help:
 	@echo '  REGISTRY - The name of the registry to tag images with and to push images to.'
 	@echo '             Defaults to "ceph".'
 	@echo '    e.g., REGISTRY="myreg" will tag images "myreg/daemon{,-base}" and push to "myreg".'
+	@echo ''
+	@echo '  RELEASE - The release version to integrate in the tag. If omitted, set to the branch name.'
 	@echo ''
 
 show.flavors:
