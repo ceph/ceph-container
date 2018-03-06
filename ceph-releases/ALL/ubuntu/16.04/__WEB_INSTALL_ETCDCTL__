@@ -1,0 +1,2 @@
+# Web install of etcdctl is unnecessary
+    /bin/true

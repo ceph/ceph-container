@@ -1,0 +1,11 @@
+\
+        ca-certificates \
+        ceph-common \
+        ceph-mon \
+        ceph-osd \
+        ceph-mds \
+        __CEPH_MGR_PACKAGE__ \
+        kmod \
+        __RADOSGW_PACKAGE__ \
+        rbd-mirror \
+        __GANESHA_PACKAGES__

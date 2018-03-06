@@ -1,0 +1,7 @@
+echo 'Web install confd' && \
+      CONFD_VERSION=0.10.0 && \
+      # Assume linux
+      CONFD_ARCH=linux-STAGE_REPLACE_WITH_GENERIC_ARCH && \
+      wget -q -O /usr/local/bin/confd \
+        "https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-${CONFD_ARCH}" && \
+      chmod +x /usr/local/bin/confd && mkdir -p /etc/confd/conf.d && mkdir -p /etc/confd/templates

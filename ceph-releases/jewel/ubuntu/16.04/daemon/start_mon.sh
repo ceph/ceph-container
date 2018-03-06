@@ -1,1 +1,0 @@
-../../14.04/daemon/start_mon.sh
