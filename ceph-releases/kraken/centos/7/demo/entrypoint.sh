@@ -1,1 +1,0 @@
-../../../ubuntu/16.04/demo/entrypoint.sh
