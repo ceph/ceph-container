@@ -1,1 +1,0 @@
-../../../ubuntu/14.04/daemon/zap_device.sh

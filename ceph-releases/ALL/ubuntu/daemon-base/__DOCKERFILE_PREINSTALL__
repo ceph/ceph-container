@@ -1,0 +1,1 @@
+ADD 'https://download.ceph.com/keys/release.asc' /tmp/ceph-release.asc
