@@ -1,1 +1,0 @@
-../../14.04/base/entrypoint.sh
