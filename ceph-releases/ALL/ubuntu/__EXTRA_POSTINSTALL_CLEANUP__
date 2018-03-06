@@ -1,0 +1,2 @@
+# Sane default, don't do extra cleanup
+    /bin/true

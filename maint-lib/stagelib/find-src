@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+USAGE="$(cat <<EOF
+
+Given the name of a staged file in this directory, this script will return
+the path to the file's source in the source tree.
+
+USAGE:
+$0 <staged file>  - Show the source tree source of <staged file>
+$0 --help|-h      - Show this help text
+
+EOF
+)"
+
+if [ $# -ne 1 ]; then
+  echo "${USAGE}"
+  exit 1
+fi
+
+staged_file="$1"
+
+if [ "${staged_file}" = "--help" ] || [ "${staged_file}" = "-h" ]; then
+  echo "${USAGE}"
+fi
+
+matching_file="$(egrep "^${staged_file}" files-sources)"
+echo "${matching_file#*<-}"

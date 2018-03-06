@@ -1,4 +1,4 @@
-# docker-ceph
+# ceph-container
 
 ![Ceph Daemon Stars](https://img.shields.io/docker/stars/ceph/daemon.svg)
 ![Ceph Daemon Pulls](https://img.shields.io/docker/pulls/ceph/daemon.svg)
@@ -9,67 +9,204 @@ Ceph-related Docker files.
 
 ## Core Components:
 
-- [`ceph/base`](ceph-releases/jewel/ubuntu/14.04/base/): Ceph base container image. This is nothing but a fresh install of the latest Ceph + Ganesha on Ubuntu LTS (14.04)
-- [`ceph/daemon`](ceph-releases/jewel/ubuntu/14.04/daemon/): All-in-one container for all core daemons.
+- [`ceph/daemon-base`](src/daemon-base/): Base container image containing Ceph core components.
+- [`ceph/daemon`](daemon/): All-in-one container containing all Ceph daemons.
 
 See README files in subdirectories for instructions on using containers.
 
 ## Demo
 
-- [`ceph/demo`](ceph-releases/jewel/ubuntu/14.04/demo/): Demonstration cluster for testing and learning. This container runs all the major ceph and ganesha components installed, bootstrapped, and executed for you to play with. (not intended for use in building a production cluster)
+- [`ceph/demo`](ceph-releases/jewel/ubuntu/14.04/demo/): Demonstration cluster for testing and
+  learning. This container runs all the major Ceph and Ganesha components installed, bootstrapped,
+  and executed for you to play with. (not intended for use in building a production cluster)
 
-# How to contribute?!
 
-The following assumes that you already forked the repository, added the correct remote and are familiar with git commands.
+# Contributing to ceph-container
 
-## Prepare your development environment
+1. Become familiar with the [project structure](#project-structure).
+2. Follow the appropriate [contribution workflow](#contribution-workflow)
 
-Simply execute `./generate-dev-env.sh CEPH_RELEASE DISTRO DISTRO_VERSION`. For example if you run `./generate-dev-env.sh jewel ubuntu 16.04` the script will:
+## Project structure
+The primary deliverables of this project are two container images: `daemon-base`, and `daemon`. As
+such, the project structure is influenced by what files and configurations go into each image. The
+main source base (including configuration files and build specifications) of the project is located
+in `src/` and is further specified in `src/daemon-base` and `src/daemon`.
 
-- hardlink the files from `ceph-releases/jewel/ubuntu/16.04/{base,daemon,demo}` in `./base`, `./daemon` and `./demo`.
-- create a file in `{base,daemon,demo}/SOURCE_TREE` which will remind you the version you are working on.
+Because this project supports several different Ceph versions and many OS distros, the structure
+also allows individual Ceph versions, individual distros, and combinations of
+Ceph-version-and-distro (we will call these **flavors**) to override the base source, configuration,
+and specification files by specifying their own versions of the files or new files entirely. In
+addition to overrides the `flavor-blacklist.txt` file can be configured prevent a file from
+overriding another for specific subsets of flavors.  
 
-From this, you can start modifying your code and building your images locally.
+Mentally modeling the end result of overrides and blacklists for any given flavor is difficult.
+Similarly, programmatically selecting the correct files for each flavor build is also difficult. In
+order to effectively work with this project structure, we introduce the concept of **staging**.
 
-## My code is ready, what's next?
+### The concept of staging
+Special tooling has been built to collect all source files with appropriate overrides and without
+blacklisted items into a unique staging directory for each flavor (each flavor is also specified by
+a target architecture to support ARM platforms). From a staging directory, containers can be built
+directly from the `<staging>/daemon-base/` and `<staging>/daemon/` image directories. Additionally,
+developers can inspect a staging directory's files to view exactly what will be (or has been) built
+into the container images. Additionally, in order to maintain a core source base that is as reusable
+as possible for all flavors, staging also supports a very basic form of templating. Some tooling has
+been developed to make working with staging as easy as possible.
 
-Contributions must go in the 'ceph-releases' tree, in the appropriate Ceph version, distribution and distribution version. So once you are done, we can just run:
+#### Staging override order
+It is key that staging is deterministic; therefore, a clear definition of override priority is
+needed. More specific files will override (overwrite) less specific files when staging. Note here
+that `FILE` may be a file or a directory containing further files.
 
-- `cp -av base $(cat base/SOURCE_TREE)`
-- `cp -av daemon $(cat base/SOURCE_TREE)`
-- `cp -av demo $(cat base/SOURCE_TREE)`
+```
+# Most specific
+ceph-releases/<ceph release>/<os distro>/<os release>/{daemon-base,daemon}/FILE
+ceph-releases/<ceph release>/<os distro>/<os release>/FILE
+ceph-releases/<ceph release>/<os distro>/{daemon-base,daemon}/FILE
+ceph-releases/<ceph release>/<os distro>/FILE
+ceph-releases/<ceph release>/{daemon-base,daemon}/FILE
+ceph-releases/<ceph release>/FILE
+ceph-releases/ALL/<os distro>/<os release>/{daemon-base,daemon}/FILE
+ceph-releases/ALL/<os distro>/<os release>/FILE
+ceph-releases/ALL/<os distro>/{daemon-base,daemon}/FILE
+ceph-releases/ALL/<os distro>/FILE
+ceph-releases/ALL/{daemon-base,daemon}/FILE
+ceph-releases/ALL/FILE
+src/{daemon-base,daemon}/FILE
+src/FILE
+# Least specific
+```
 
-We identified 2 types of contributions:
+#### Basic templating in staging
+##### Variable file replacements
+In any source file, a special variable in the form `__VAR_NAME__` (two leading and trailing
+underscores with capital letters and underscores between) can be placed. Once all files are staged,
+the `__VAR_NAME__` variable will be replaced with the raw contents of the file with the named
+`__VAR_NAME__`. Trailing whitespace is stripped from the variable file before insertion.
+`__VAR_NAME__` files are allowed to be empty, but they are not allowed to be nonexistent if a file
+declares them.
 
-### Distro specific contributions
+If the `__DO_STUFF__` file is supposed to contain actions that need done it generally needs to
+return true. As an example, `echo 'first' && __DO_STUFF__ && echo 'last'` will print 'first' and
+'last' correctly only if `__DO_SUFF__` returns true. A take-no-action override needs to have the
+content `/bin/true`, as an empty file will cause an error.
 
-The code only changes the `base` image content of a specific distro, nothing to replicate or change for the other images..
+##### Environment varable replacements
+In any source file, a special variable in the form `STAGE_REPLACE_WITH_ENV_VAR` (capital letters
+with underscores) can placed. Once all files are staged, the `STAGE_REPLACE_WITH_ENV_VAR` variable
+will be replaced with the raw contents of the environment variable named `ENV_VAR`.
 
-### New functionality contributions
+#### Staging development aids
+To practically aid developers, helpful tools have been built for staging:
+ - To create all default staging directories: `make stage`
+ - To create specific staging directory(-ies): `make FLAVORS_TO_BUILD=<flavorspec> stage`
+ - Find the source of a staged file: `cd <staging> ; ./find-src <file-path>`
+ - List of staged files and their sources: `<staging>/files-sources`
+ - List of all possible buildable flavors: `make show.flavors`
+ - Show flavors affected by branch changes: `make flavors.modified`
+ - Stage log: `stage.log`
 
-If you look at the ceph-releases directory you will notice that for each release the daemon image's content is symlinked to the Ubuntu daemon 14.04. Even if we support multi-distro, Ubuntu 14.04 remains the default. It would nice if you could get familiar with this approach. This basically means that if you are testing on CentOS then you should update the Ubuntu image instead. All the changes in the entrypoints _should not_ diverse from one distro to another, so this should be safe :). We are currently **only** bringing new functionality in the `jewel` release.
+### Building images
+`make` is used for ceph-container builds. See `make help` for all make options.
+
+#### Specifying flavors for make
+The `make` tooling allows the environment variable `FLAVORS_TO_BUILD` to be optionally set by the
+user to define which flavors to operate on. Flavor specifications follow a strict format that
+declares what ceph-container source to use, what architecture to build for, and what container image
+to use as the base for the build. See `make help` for a full description.
+
+#### Building images from staging
+It is possible to build container images directly from staging in the event that `make build` is not
+appealing. Simply stage the flavor(s) to be built, and then execute the desired build command for
+`daemon-base` and `daemon`.
+```
+# Example
+cd <staging>  
+docker build -t <daemon base tag> daemon-base/
+docker build -t <daemon tag> daemon/
+```
+
+## Contribution workflow
+The goal when adding contributions should be to make modifications or additions to the least
+specific files in order to reuse as much code as possible. Only specify specific changes when they
+absolutely apply only to the specific flavor(s) and not to others.
+
+### Fixing a bug
+1. Stage the flavor on which the bug was found (`make FLAVORS_TO_BUILD=<bugged build> stage`).
+2. Use the `find-src` script or `files-sources` list to locate the bugged file's source location.
+3. Edit the source location to fix the bug.
+4. Build test versions of the images (`make FLAVORS_TO_BUILD=<bugged build> build`).
+5. Test the images you built in your environment.
+6. Make a PR of your changes.
+
+### Adding a feature
+1. Determine the scope of the feature
+   - To which Ceph versions should the feature be added?
+   - To which distros should the feature be added?
+   - As a general guideline, new features should usually be added to all Ceph versions and distros.
+2. Add relevant changes to files in the project structure such that they will be added to only the
+   Ceph versions and distros in scope for the feature.
+3. Build test versions of the images (`make FLAVORS_TO_BUILD=<in-scope-flavors> build`).
+4. Test the images in your environment.
+5. Make a PR of your changes.
+
+### Adding a Ceph release
+Ideally, adding a new Ceph release is fairly easy. In the best case, all that needs done is adding
+flavors for the new Ceph version to the Makefile. At minimum, `ALL_BUILDABLE_FLAVORS` must be
+updated in the Makefile.
+
+In the worst case, trying to make as few modifications as possible:
+1. Add flavors for new Ceph versions to the Makefile.
+   - At minimum: `ALL_BUILDABLE_FLAVORS`.
+2. Edit `src/` files to support the new version if necessary, making sure not to break previous
+   versions.
+3. Edit `src/ALL/<distro>` files to support the new version if necessary, making sure not to break
+   previous versions.
+4. Add `src/<new ceph version>` files to support the new version if necessary.
+5. Build test versions of the images (`make FLAVORS_TO_BUILD=<new release flavors> build`).
+6. Test the images in your environment.
+7. Make a PR of your changes.
+
+### Adding a distro build
+1. Add flavors for the new distro to the Makefile.
+   - At minimum: `ALL_BUILDABLE_FLAVORS`.
+2. Add a `src/ALL/<new distro>` directory for the new distro
+   - Make sure to install all the required packages for `daemon-base` (see
+     `src/daemon-base/__CEPH_BASE_PACKAGES__)` and for `daemon` (see
+     `src/daemon/__DAEMON_PACKAGES__`).
+   - Make sure to specify all `__VAR__` files without sane defaults for the container builds.
+   - Make sure to override any `__VAR__` file sane defaults that do not apply to the new distro.
+   - Refer to other distros for inspiration.
+3. If necessary (try to avoid this as much as possible), add a `src/<ceph release>/<new distro>`
+   directory for the new distro.
+4. Build test versions of the images (`make FLAVORS_TO_BUILD=<new distro flavors> build`).
+5. Test the images in your environment.
+6. Make a PR of your changes.
+
 
 # CI
 
 We use Travis to run several tests on each pull request:
 
-- we build both `base` and `daemon` images
-- we run all the ceph processes in a container based on the images we just built
+- we build both `daemon-base` and `daemon` images
+- we run all the Ceph processes in a container based on the images we just built
 - we execute a validation script at the end to make sure Ceph is healthy
 
-For each PR, we try to detect which Ceph release is being impacted. Since we can only produce a single CI build with Travis, ideally this change will only be on a single release and distro. If we have multiple ceph release and distro, we can only test one, since we have to build `base` and `daemon`. By default, we just pick up the first line that comes from the changes.
+For each PR, we try to detect which Ceph release is being impacted. Since we can only produce a
+single CI build with Travis, ideally this change will only be on a single release and distro. If we
+have multiple Ceph release and distro, we can only test one, since we have to build `base` and
+`daemon`. By default, we just pick up the first line that comes from the changes.
 
 You can check the files in `travis-builds` to learn more about the entire process.
 
-If you don't want to run a build for a particular commit, because all you are changing is the README for example, add `[ci skip]` to the git commit message. Commits that have `[ci skip]` anywhere in the commit messages are ignored by Travis CI.
+If you don't want to run a build for a particular commit, because all you are changing is the README
+for example, add `[ci skip]` to the git commit message. Commits that have `[ci skip]` anywhere in
+the commit messages are ignored by Travis CI.
 
 We are also transitioning to have builds in Jenkins, this is still a work in
 progress and will start taking precedence once it is solid enough. Be sure to
 check the links and updates provided on pull requests.
 
-# Images workflow
-
-Once your contribution is done and merged in master. Either @Ulexus or @leseb will execute `ceph-docker-workflow.sh`, this will basically compare the content of each tag/branch to master. If any difference is found it will push the appropriate changes in each individual branches. Ultimately new pushed tags will trigger a Docker build on the Docker Hub.
 
 # Video demonstration
 

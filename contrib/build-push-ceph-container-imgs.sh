@@ -17,9 +17,17 @@ function login_docker_hub {
   docker login -u "$DOCKER_HUB_USERNAME" -p "$DOCKER_HUB_PASSWORD"
 }
 
+function create_point_release {
+  local latest_tag
+  latest_tag=$(git describe --exact-match HEAD --tags --long 2>/dev/null)
+  if [ "$?" -eq 0 ]; then
+    RELEASE=$latest_tag
+  fi
+}
+
 function build_ceph_imgs {
   echo "Build ceph container images"
-  make build.parallel
+  make "$RELEASE" build.parallel
 }
 
 function push_ceph_imgs {
@@ -34,5 +42,6 @@ function push_ceph_imgs {
 
 install_docker
 login_docker_hub
+prepare_tag_name
 build_ceph_imgs
 push_ceph_imgs
