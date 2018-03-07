@@ -94,7 +94,7 @@ build.all:
 .PHONY: clean clean.nones clean.all clean.nuke
 
 clean.image.%: do.image.%
-	@$(call set_env_var,STAGING_DIR,$*) rm -rf $(STAGING_DIR)
+	@$(call set_env_var,STAGING_DIR,$*); rm -rf $$STAGING_DIR
 
 clean: $(foreach p, $(FLAVORS_TO_BUILD), clean.image.$(p))
 
