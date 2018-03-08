@@ -23,7 +23,7 @@ try:
     os.environ['GIT_COMMIT'] = GIT_COMMIT
     GIT_BRANCH = git.get_branch()
     os.environ['GIT_BRANCH'] = GIT_BRANCH
-    if git.file_is_dirty(""):
+    if git.branch_is_dirty():
         GIT_CLEAN = "True"
     else:
         GIT_CLEAN = "False"

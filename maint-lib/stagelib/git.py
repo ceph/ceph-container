@@ -39,3 +39,12 @@ def file_is_dirty(file_path):
     if re.match(r'^\s*' + file_path + '$', file_status_msg):
         return True
     return False
+
+
+def branch_is_dirty():
+    """If any files are new, modified, or deleted in git's tracking return True. False otherwise."""
+    branch_status_msg = _run_cmd(['git', 'status', '--untracked-files=all', '--porcelain'])
+    # --porcelain returns no output if no changes
+    if branch_status_msg:
+        return True
+    return False
