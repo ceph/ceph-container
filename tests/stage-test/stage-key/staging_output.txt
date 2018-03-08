@@ -1,0 +1,14 @@
+
+  CEPH_VERSION      : luminous
+  ARCH              : amd64
+  OS_NAME           : ubuntu
+  OS_VERSION        : 16.04
+  BASEOS_REG        : _
+  BASEOS_REPO       : ubuntu
+  BASEOS_TAG        : 16.04
+  IMAGES_TO_BUILD   : daemon-base daemon
+  STAGING_DIR       : tests/stage-test/staging/luminous-ubuntu-16.04-amd64
+  RELEASE           : test-release
+  DAEMON_BASE_IMAGE : test-reg/daemon-base:test-release-1
+  DAEMON_IMAGE      : test-reg/daemon:test-release-1
+

@@ -18,6 +18,7 @@ daemon-base/lum-test-file                                                       
 daemon-base/lum-daemon-base-test-file                                             <-   tests/stage-test/ceph-releases/luminous/ubuntu/16.04/daemon-base/lum-daemon-base-test-file
 daemon/__MAINTAINER__                                                             <-   tests/stage-test/ceph-releases/ALL/ubuntu/__MAINTAINER__
 daemon/src-daemon-test-file                                                       <- * tests/stage-test/src/daemon/src-daemon-test-file
+daemon/computed-vars                                                              <-   tests/stage-test/src/daemon/computed-vars
 daemon/src-daemon-test-dir/src-daemon-test-dir-test-file                          <-   tests/stage-test/src/daemon/src-daemon-test-dir/src-daemon-test-dir-test-file
 daemon/__OS_CODENAME__                                                            <-   tests/stage-test/ceph-releases/ALL/ubuntu/16.04/__OS_CODENAME__
 daemon/ubuntu-mimic-override                                                      <-   tests/stage-test/ceph-releases/luminous/ubuntu/16.04/ubuntu-mimic-override
