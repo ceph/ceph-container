@@ -7,8 +7,7 @@ import shutil
 import sys
 import time
 
-from stagelib.envglobals import (printGlobal, CEPH_VERSION, OS_NAME, OS_VERSION,
-                                 IMAGES_TO_BUILD, STAGING_DIR)
+from stagelib.envglobals import (verifyRequiredEnvVars, exportGitInfoEnvVars, getEnvVar)
 from stagelib.filetools import (list_files, mkdir_if_dne, copy_files, recursive_copy_dir,
                                 IOOSErrorGracefulFail, save_files_copied)
 import stagelib.git as git
@@ -20,24 +19,25 @@ from stagelib.blacklist import get_blacklist
 CORE_FILES_DIR = "src"
 CEPH_RELEASES_DIR = "ceph-releases"
 BLACKLIST_FILE = "flavor-blacklist.txt"
-LOG_FILE = os.path.join(STAGING_DIR, "stage.log")
 
+
+STAGING_DIR = getEnvVar('STAGING_DIR')
 # Start with empty staging dir so there are no previous artifacts
 try:
     if os.path.isdir(STAGING_DIR):
         shutil.rmtree(STAGING_DIR)
     os.makedirs(STAGING_DIR, mode=0o755)
 except (OSError, IOError) as o:
-    IOOSErrorGracefulFail(o,
-                          'Could not delete and recreate staging dir: {}'.format(STAGING_DIR))
+    IOOSErrorGracefulFail(
+        o, 'Could not delete and recreate staging dir: {}'.format(STAGING_DIR))
 
+
+LOG_FILE = os.path.join(STAGING_DIR, "stage.log")
 loglevel = logging.INFO
 # If DEBUG env var is set to anything (including empty string) except '0', log debug text
 if 'DEBUG' in os.environ and not os.environ['DEBUG'] == '0':
     loglevel = logging.DEBUG
-logging.basicConfig(filename=LOG_FILE, level=loglevel,
-                    format='%(levelname)5s:  %(message)s')
-logger = logging.getLogger(__name__)
+logging.basicConfig(filename=LOG_FILE, level=loglevel, format='%(levelname)5s:  %(message)s')
 
 # Build dependency on python3 for `replace.py`. Looking to py2.7 deprecation in 2020.
 if sys.version_info[0] < 3:
@@ -46,24 +46,22 @@ if sys.version_info[0] < 3:
 
 
 def main(CORE_FILES_DIR, CEPH_RELEASES_DIR, BLACKLIST_FILE):
-    logger.info('\n\n\n')  # Make it easier to determine where new runs start
-    logger.info('Start time: {}'.format(time.ctime()))
-    logger.info('Git repo:   {}'.format(git.get_repo()))
-    logger.info('Git branch: {}'.format(git.get_branch()))
-    logger.info('Git commit: {}'.format(git.get_hash()))
+    logging.info('\n\n\n')  # Make it easier to determine where new runs start
+    logging.info('Start time: {}'.format(time.ctime()))
+    logging.info('Git repo:   {}'.format(git.get_repo()))
+    logging.info('Git branch: {}'.format(git.get_branch()))
+    logging.info('Git commit: {}'.format(git.get_hash()))
 
     print('')
-    printGlobal('CEPH_VERSION')
-    printGlobal('OS_NAME')
-    printGlobal('OS_VERSION')
-    printGlobal('BASEOS_REG')
-    printGlobal('BASEOS_REPO')
-    printGlobal('BASEOS_TAG')
-    printGlobal('ARCH')
-    printGlobal('IMAGES_TO_BUILD')
-    printGlobal('STAGING_DIR')
-    printGlobal('RELEASE')
+    verifyRequiredEnvVars()
     print('')
+    exportGitInfoEnvVars()
+
+    CEPH_VERSION = getEnvVar('CEPH_VERSION')
+    OS_NAME = getEnvVar('OS_NAME')
+    OS_VERSION = getEnvVar('OS_VERSION')
+    IMAGES_TO_BUILD = getEnvVar('IMAGES_TO_BUILD').split(' ')
+    # STAGING_DIR is gotten globally
 
     # Search from least specfic to most specific
     path_search_order = [
@@ -75,17 +73,17 @@ def main(CORE_FILES_DIR, CEPH_RELEASES_DIR, BLACKLIST_FILE):
         os.path.join(CEPH_RELEASES_DIR, CEPH_VERSION, OS_NAME),
         os.path.join(CEPH_RELEASES_DIR, CEPH_VERSION, OS_NAME, OS_VERSION),
     ]
-    logger.debug('Path search order: {}'.format(path_search_order))
+    logging.debug('Path search order: {}'.format(path_search_order))
 
     blacklist = get_blacklist(BLACKLIST_FILE)
-    logger.debug('Blacklist: {}'.format(blacklist))
+    logging.debug('Blacklist: {}'.format(blacklist))
 
     files_copied = {}
     # e.g., IMAGES_TO_BUILD = ['daemon-base', 'daemon']
     for image in IMAGES_TO_BUILD:
-        logger.info('')
-        logger.info('{}/'.format(image))
-        logger.info('    Copying files (preceding * indicates file has been modified)')
+        logging.info('')
+        logging.info('{}/'.format(image))
+        logging.info('    Copying files (preceding * indicates file has been modified)')
         for src_path in path_search_order:
             if not os.path.isdir(src_path):
                 continue

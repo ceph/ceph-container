@@ -42,7 +42,9 @@ def file_is_dirty(file_path):
 
 
 def branch_is_dirty():
-    """If any files are new, modified, or deleted in git's tracking return True. False otherwise."""
+    """
+    If any files are new, modified, or deleted in git's tracking return True. False otherwise.
+    """
     branch_status_msg = _run_cmd(['git', 'status', '--untracked-files=all', '--porcelain'])
     # --porcelain returns no output if no changes
     if branch_status_msg:

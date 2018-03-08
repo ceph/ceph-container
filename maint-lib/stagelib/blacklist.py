@@ -3,8 +3,6 @@
 import logging
 import os
 
-logger = logging.getLogger(__name__)
-
 
 # Take a raw blacklist condition, and return its parts
 # VAR=t1,t2 --> ('VAR', ['t1', 't2'])
@@ -46,7 +44,7 @@ def _parse_line(line):
     if len(splitline) < 2:
         raise Exception('Blacklist line improperly formatted:\n{}'.format(line))
     if _environment_matches(raw_conditions=splitline[1:]):
-        logger.info('    Blacklist line matches environment: {}'.format(line))
+        logging.info('    Blacklist line matches environment: {}'.format(line))
         return [_get_blacklisted_item(splitline[0])]
     return []
 
@@ -61,7 +59,7 @@ def get_blacklist(blacklist_filename):
     is returned. If the <path to be blacklisted> is a directory, a list of all files in the
     directory recursively is returned.
     """
-    logger.info('Parsing blacklist file: {}'.format(blacklist_filename))
+    logging.info('Parsing blacklist file: {}'.format(blacklist_filename))
     blacklist = []
     with open(blacklist_filename) as blacklist_file:
         for line in blacklist_file.readlines():
