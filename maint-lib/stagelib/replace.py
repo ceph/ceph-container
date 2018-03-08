@@ -6,9 +6,6 @@ import re
 import sys
 
 from stagelib.filetools import save_text_to_file, IOOSErrorGracefulFail
-from stagelib.envglobals import (CEPH_VERSION, ARCH, OS_NAME,  # noqa: F401
-                                OS_VERSION, BASEOS_REG, BASEOS_REPO, BASEOS_TAG, IMAGES_TO_BUILD,
-                                STAGING_DIR)
 
 # Support __VARIABLE__ file replacement for variables matching '__<VARIABLE_NAME>__'.
 # Support only variables with capital letters and underscores.
@@ -18,7 +15,6 @@ VARIABLE_FILE_PATTERN = re.compile('\_\_[A-Z\_0-9]+\_\_')
 # 'STAGE_REPLACE_WITH_<GLOBAL_VAR_NAME>'. Support only globals w/ capital letters and underscores
 GLOBAL_PATTERN = re.compile('STAGE_REPLACE_WITH_[A-Z\_0-9]+')
 
-logger = logging.getLogger(__name__)
 REPLACE_LOGTEXT = '        {:<30} <- {:<46}  :: {}'
 PARENTHETICAL_LOGTEXT = '        {:>80}     {}'
 
@@ -101,7 +97,7 @@ def do_variable_replace(replace_root_dir):
     times until there are no more __VARIABLES__ to be replaced. STAGE_REPLACE_WITH_<ENV_VAR>s are
     not allowed to contain additional variables. They are only processed once.
     """
-    logger.info('    Replacing variables')
+    logging.info('    Replacing variables')
     for dirname, subdirs, files in os.walk(replace_root_dir, topdown=True):
         for f in files:
             if re.match(VARIABLE_FILE_PATTERN, f):
