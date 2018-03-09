@@ -85,7 +85,7 @@ architecture.
 #### Staging development aids
 To practically aid developers, helpful tools have been built for staging:
  - To create all default staging directories: `make stage`
- - To create specific staging directory(-ies): `make FLAVORS_TO_BUILD=<flavors> stage`
+ - To create specific staging directory(-ies): `make FLAVORS=<flavors> stage`
  - Find the source of a staged file: `cd <staging dir> ; ./find-src <file-path>`
  - List of staged files and their sources: `<staging dir>/files-sources`
  - List of all possible buildable flavors: `make show.flavors`
@@ -152,10 +152,10 @@ absolutely apply only to the specific flavor(s) and not to others.
   makes sense for the flavor to maximize reuse across flavors.
 
 ### Fixing a bug
-1. Stage the flavor on which the bug was found (`make FLAVORS_TO_BUILD=<bugged flavor> stage`).
+1. Stage the flavor on which the bug was found (`make FLAVORS=<bugged flavor> stage`).
 2. Use the `find-src` script or `files-sources` list to locate the bugged file's source location.
 3. Edit the source location to fix the bug.
-4. Build test versions of the images (`make FLAVORS_TO_BUILD=<bugged flavor> build`).
+4. Build test versions of the images (`make FLAVORS=<bugged flavor> build`).
 5. Test the images you built in your environment.
 6. Make a PR of your changes.
 
@@ -166,7 +166,7 @@ absolutely apply only to the specific flavor(s) and not to others.
    - As a general guideline, new features should usually be added to all Ceph versions and distros.
 2. Add relevant changes to files in the project structure such that they will be added to only the
    Ceph versions and distros in scope for the feature.
-3. Build test versions of the images (`make FLAVORS_TO_BUILD=<in-scope-flavors> build`).
+3. Build test versions of the images (`make FLAVORS=<in-scope-flavors> build`).
 4. Test the images in your environment.
 5. Make a PR of your changes.
 
@@ -192,7 +192,7 @@ In the worst case, trying to make as few modifications as possible:
 3. Edit `ceph-releases/ALL/<distro>` files to support the new version if necessary, making sure not
    to break previous versions.
 4. Add `ceph-releases/<new ceph version>` files to support the new version if necessary.
-5. Build test versions of the images (`make FLAVORS_TO_BUILD=<new release flavors> build`).
+5. Build test versions of the images (`make FLAVORS=<new release flavors> build`).
 6. Test the images in your environment.
 7. Make a PR of your changes.
 
@@ -208,7 +208,7 @@ In the worst case, trying to make as few modifications as possible:
    - Refer to other distros for inspiration.
 3. If necessary, add a `ceph-release/<ceph release>/<new distro>` directory for the new distro. Try
    to avoid this as much as possible and focus on code reuse from the less specific dirs.
-4. Build test versions of the images (`make FLAVORS_TO_BUILD=<new distro flavors> build`).
+4. Build test versions of the images (`make FLAVORS=<new distro flavors> build`).
 5. Test the images in your environment.
 6. Make a PR of your changes.
 
