@@ -10,7 +10,6 @@ import time
 from stagelib.envglobals import (verifyRequiredEnvVars, exportGitInfoEnvVars, getEnvVar)
 from stagelib.filetools import (list_files, mkdir_if_dne, copy_files, recursive_copy_dir,
                                 IOOSErrorGracefulFail, save_files_copied)
-import stagelib.git as git
 from stagelib.replace import do_variable_replace
 from stagelib.blacklist import get_blacklist
 
@@ -48,14 +47,16 @@ if sys.version_info[0] < 3:
 def main(CORE_FILES_DIR, CEPH_RELEASES_DIR, BLACKLIST_FILE):
     logging.info('\n\n\n')  # Make it easier to determine where new runs start
     logging.info('Start time: {}'.format(time.ctime()))
-    logging.info('Git repo:   {}'.format(git.get_repo()))
-    logging.info('Git branch: {}'.format(git.get_branch()))
-    logging.info('Git commit: {}'.format(git.get_hash()))
 
     print('')
     verifyRequiredEnvVars()
     print('')
+
     exportGitInfoEnvVars()
+    logging.info('GIT_REPO:    {}'.format(getEnvVar('GIT_REPO')))
+    logging.info('GIT_BRANCH: {}'.format(getEnvVar('GIT_BRANCH')))
+    logging.info('GIT_COMMIT: {}'.format(getEnvVar('GIT_COMMIT')))
+    logging.info('GIT_CLEAN:  {}'.format(getEnvVar('GIT_CLEAN')))
 
     CEPH_VERSION = getEnvVar('CEPH_VERSION')
     OS_NAME = getEnvVar('OS_NAME')
