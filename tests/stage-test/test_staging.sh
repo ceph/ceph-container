@@ -45,7 +45,8 @@ EOF
 python3 -c "${run_stage}" | tee tests/stage-test/staging_output.txt
 mv tests/stage-test/staging_output.txt ${STAGING_DIR}
 
-diff --brief -Nr --exclude 'find-src' --exclude '*.log' tests/stage-test/stage-key/ "${STAGING_DIR}"
+diff --brief -Nr --exclude 'find-src' --exclude '*.log' --exclude '*.bak' \
+     tests/stage-test/stage-key/ "${STAGING_DIR}"
 
 echo "STAGING TEST PASSED"
 echo ""
