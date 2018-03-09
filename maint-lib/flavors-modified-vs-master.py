@@ -18,7 +18,7 @@ def _run_cmd(cmd_array):
 
 # Stage the flavor and return the staging dir
 def _stage_flavor(flavor):
-    stage_output = _run_cmd(['make', 'FLAVORS_TO_BUILD=' + flavor, 'stage'])
+    stage_output = _run_cmd(['make', 'FLAVORS=' + flavor, 'stage'])
     staging_dir_pattern = re.compile(r'^\s*STAGING_DIR\s*:\s+(.*)$', re.MULTILINE)
     match = staging_dir_pattern.search(stage_output)
     if not match or not match[1] or match[1] == '':

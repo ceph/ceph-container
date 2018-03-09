@@ -18,7 +18,7 @@
 
 # When updating these defaults, be sure to check that ALL_BUILDABLE_FLAVORS is updated
 # CEPH_VERSION,ARCH,OS_NAME,OS_VERSION,BASEOS_REG,BASEOS_REPO,BASEOS_TAG
-FLAVORS_TO_BUILD ?= \
+FLAVORS ?= \
 	luminous,amd64,ubuntu,16.04,_,ubuntu,16.04 \
 	jewel,amd64,ubuntu,16.04,_,ubuntu,16.04 \
 	jewel,amd64,ubuntu,14.04,_,ubuntu,14.04 \
@@ -38,7 +38,7 @@ RELEASE ?= $(shell git rev-parse --abbrev-ref HEAD)
 # Internal definitions
 include maint-lib/makelib.mk
 
-# All flavor options that can be passed to FLAVORS_TO_BUILD
+# All flavor options that can be passed to FLAVORS
 # CEPH_VERSION,ARCH,OS_NAME,OS_VERSION,BASEOS_REG,BASEOS_REPO,BASEOS_TAG
 ALL_BUILDABLE_FLAVORS := \
 	luminous,amd64,ubuntu,16.04,_,ubuntu,16.04 \
@@ -73,9 +73,9 @@ daemon.%: daemon-base.%
 
 do.image.%: daemon.% ;
 
-stage: $(foreach p, $(FLAVORS_TO_BUILD), stage.$(p)) ;
-build: $(foreach p, $(FLAVORS_TO_BUILD), do.image.$(p)) ;
-push:  $(foreach p, $(FLAVORS_TO_BUILD), do.image.$(p)) ;
+stage: $(foreach p, $(FLAVORS), stage.$(p)) ;
+build: $(foreach p, $(FLAVORS), do.image.$(p)) ;
+push:  $(foreach p, $(FLAVORS), do.image.$(p)) ;
 
 build.parallel:
 # Due to output-sync, will not output results until finished so there is no text interleaving
@@ -86,7 +86,7 @@ else
 endif
 
 build.all:
-	@$(MAKE) FLAVORS_TO_BUILD="$(ALL_BUILDABLE_FLAVORS)" build.parallel
+	@$(MAKE) FLAVORS="$(ALL_BUILDABLE_FLAVORS)" build.parallel
 
 
 # ==============================================================================
@@ -96,7 +96,7 @@ build.all:
 clean.image.%: do.image.%
 	@$(call set_env_var,STAGING_DIR,$*); rm -rf $$STAGING_DIR
 
-clean: $(foreach p, $(FLAVORS_TO_BUILD), clean.image.$(p))
+clean: $(foreach p, $(FLAVORS), clean.image.$(p))
 
 clean.nones:
 	@docker rmi -f $(shell docker images | egrep "^<none> " | awk '{print $$3}') || true
@@ -153,14 +153,14 @@ help:
 	@echo ''
 	@echo '  Help:'
 	@echo '    help              Print this help message.'
-	@echo '    show.flavors      Show all flavor options to FLAVORS_TO_BUILD.'
+	@echo '    show.flavors      Show all flavor options to FLAVORS.'
 	@echo "    flavors.modified  Show the flavors impacted by this branch's changes vs origin/master."
 	@echo '                      All buildable flavors are staged for this test.'
 	@echo '                      The env var VS_BRANCH can be set to compare vs a different branch.'
 	@echo ''
 	@echo 'OPTIONS:'
 	@echo ''
-	@echo '  FLAVORS_TO_BUILD - ceph-container images to operate on in the form'
+	@echo '  FLAVORS - ceph-container images to operate on in the form'
 	@echo '    <ceph rel>,<arch>,<os name>,<os version>,<base registry>,<base repo>,<base tag>'
 	@echo '    and multiple forms may be separated by spaces.'
 	@echo '      ceph rel - named ceph version (e.g., luminous, mimic)'
@@ -171,7 +171,7 @@ help:
 	@echo '      base repo - The base image to use for the daemon-base container. generally this is'
 	@echo '                  also the os name (e.g., ubuntu) but could be something like "alpine"'
 	@echo '      base tag - Tagged version of the base os to use (e.g., ubuntu:"16.04", alpine:"3.6")'
-	@echo '    e.g., FLAVORS_TO_BUILD="luminous,amd64,ubuntu,16.04,_,ubuntu,16.04 \'
+	@echo '    e.g., FLAVORS="luminous,amd64,ubuntu,16.04,_,ubuntu,16.04 \'
 	@echo '                            luminous,arm64,ubuntu,16.04,arm64v8,alpine,3.6"'
 	@echo ''
 	@echo '  REGISTRY - The name of the registry to tag images with and to push images to.'
