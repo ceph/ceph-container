@@ -4,7 +4,7 @@ set -euo pipefail
 # Integration test to make sure staging is working properly
 
 export CEPH_VERSION=luminous
-export ARCH=amd64
+export ARCH=x86_64
 export OS_NAME=ubuntu
 export OS_VERSION=16.04
 export BASEOS_REG=_

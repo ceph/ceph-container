@@ -18,7 +18,7 @@ REQUIRED_ENV_VARS = OrderedDict([
     ('ARCH',              'Architecture of binaries being built (e.g., amd64, arm32, arm64)'),
     ('OS_NAME',           'OS name as used by the ceph-container project (e.g., ubuntu, opensuse)'),  # noqa: E501
     ('OS_VERSION',        'OS version as used by ceph-container project (e.g., 16.04, 42.3 respectively)'),  # noqa: E501
-    ('BASEOS_REG',        'Registry for the container base image (e.g., _ (default reg), arm32v7, arm64v8)' +  # noqa: E501
+    ('BASEOS_REG',        'Registry for the container base image (e.g., _ (x86_64), arm64v8 (aarch64))' +  # noqa: E501
                           ALIGNED_NEWLINE + 'There is a relation between ARCH and this value'),  # noqa: E501
     ('BASEOS_REPO',       'Repository for the container base image (e.g., ubuntu, opensuse, alpine)'),  # noqa: E501
     ('BASEOS_TAG',        'Tagged version of BASEOS_REPO container (e.g., 16.04, 42.3, 3.6 respectively)'),  # noqa: E501
