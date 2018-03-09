@@ -56,14 +56,14 @@ base for the build. See `make help` for a full description.
 Once the flavor is selected, specify its name in the `FLAVORS` environment variable and call the
 `build` target:
 ```
-make FLAVORS=luminous,amd64,centos,7,_,centos,7 build
+make FLAVORS=luminous,x86_64,centos,7,_,centos,7 build
 ```
 
 ### Building multiple flavors
 Multiple flavors are specified by separating each flavor by a space and surrounding the entire
 specification in quotes and built the same as a single flavor:
 ```
-make FLAVORS="luminous,amd64,centos,7,_,centos,7 kraken,amd64,centos,7,_,centos,7"  build
+make FLAVORS="luminous,x86_64,centos,7,_,centos,7 kraken,x86_64,centos,7,_,centos,7"  build
 ```
 
 Flavors can be built in parallel easily with the `build.parallel` target:

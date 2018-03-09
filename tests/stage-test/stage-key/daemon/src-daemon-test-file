@@ -1,4 +1,4 @@
-Arch: amd64
+Arch: x86_64
 Maintainer: ubuntu Maintainer <ubuntu@maintainer.com>
 Stuff: # Do daemon stuff
 # This should test nested variables

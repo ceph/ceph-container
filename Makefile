@@ -19,13 +19,13 @@
 # When updating these defaults, be sure to check that ALL_BUILDABLE_FLAVORS is updated
 # CEPH_VERSION,ARCH,OS_NAME,OS_VERSION,BASEOS_REG,BASEOS_REPO,BASEOS_TAG
 FLAVORS ?= \
-	luminous,amd64,ubuntu,16.04,_,ubuntu,16.04 \
-	jewel,amd64,ubuntu,16.04,_,ubuntu,16.04 \
-	jewel,amd64,ubuntu,14.04,_,ubuntu,14.04 \
-	kraken,amd64,ubuntu,16.04,_,ubuntu,16.04 \
-	luminous,amd64,centos,7,_,centos,7 \
-	jewel,amd64,centos,7,_,centos,7 \
-	kraken,amd64,centos,7,_,centos,7 \
+	luminous,x86_64,ubuntu,16.04,_,ubuntu,16.04 \
+	jewel,x86_64,ubuntu,16.04,_,ubuntu,16.04 \
+	jewel,x86_64,ubuntu,14.04,_,ubuntu,14.04 \
+	kraken,x86_64,ubuntu,16.04,_,ubuntu,16.04 \
+	luminous,x86_64,centos,7,_,centos,7 \
+	jewel,x86_64,centos,7,_,centos,7 \
+	kraken,x86_64,centos,7,_,centos,7 \
 
 REGISTRY ?= ceph
 
@@ -41,14 +41,13 @@ include maint-lib/makelib.mk
 # All flavor options that can be passed to FLAVORS
 # CEPH_VERSION,ARCH,OS_NAME,OS_VERSION,BASEOS_REG,BASEOS_REPO,BASEOS_TAG
 ALL_BUILDABLE_FLAVORS := \
-	luminous,amd64,ubuntu,16.04,_,ubuntu,16.04 \
-	jewel,amd64,ubuntu,16.04,_,ubuntu,16.04 \
-	jewel,amd64,ubuntu,14.04,_,ubuntu,14.04 \
-	kraken,amd64,ubuntu,16.04,_,ubuntu,16.04 \
-	luminous,amd64,centos,7,_,centos,7 \
-	jewel,amd64,centos,7,_,centos,7 \
-	kraken,amd64,centos,7,_,centos,7 \
-	luminous,amd64,opensuse,42.3,_,opensuse,42.3 \
+	luminous,x86_64,ubuntu,16.04,_,ubuntu,16.04 \
+	jewel,x86_64,ubuntu,16.04,_,ubuntu,16.04 \
+	jewel,x86_64,ubuntu,14.04,_,ubuntu,14.04 \
+	kraken,x86_64,ubuntu,16.04,_,ubuntu,16.04 \
+	luminous,x86_64,centos,7,_,centos,7 \
+	jewel,x86_64,centos,7,_,centos,7 \
+	kraken,x86_64,centos,7,_,centos,7 \
 
 # ==============================================================================
 # Build targets
@@ -165,15 +164,15 @@ help:
 	@echo '    <ceph rel>,<arch>,<os name>,<os version>,<base registry>,<base repo>,<base tag>'
 	@echo '    and multiple forms may be separated by spaces.'
 	@echo '      ceph rel - named ceph version (e.g., luminous, mimic)'
-	@echo '      arch - architecture of packages built (e.g., amd64, arm32, arm64)'
+	@echo '      arch - architecture of Ceph packages used (e.g., x86_64, aarch64)'
 	@echo '      os name - directory name for the os used by ceph-container (e.g., ubuntu)'
 	@echo '      os version - directory name for the os version used by ceph-container (e.g., 16.04)'
-	@echo '      base registry - "_" for default amd64; "arm32v7" for arm32; "arm64v8" for arm64, ...'
+	@echo '      base registry - registry to get base image from (e.g., "_" ~ x86_64, "arm64v8" ~ aarch64)'
 	@echo '      base repo - The base image to use for the daemon-base container. generally this is'
 	@echo '                  also the os name (e.g., ubuntu) but could be something like "alpine"'
 	@echo '      base tag - Tagged version of the base os to use (e.g., ubuntu:"16.04", alpine:"3.6")'
-	@echo '    e.g., FLAVORS="luminous,amd64,ubuntu,16.04,_,ubuntu,16.04 \'
-	@echo '                            luminous,arm64,ubuntu,16.04,arm64v8,alpine,3.6"'
+	@echo '    e.g., FLAVORS_TO_BUILD="luminous,x86_64,ubuntu,16.04,_,ubuntu,16.04 \'
+	@echo '                            luminous,aarch64,ubuntu,16.04,arm64v8,alpine,3.6"'
 	@echo ''
 	@echo '  REGISTRY - The name of the registry to tag images with and to push images to.'
 	@echo '             Defaults to "ceph".'
