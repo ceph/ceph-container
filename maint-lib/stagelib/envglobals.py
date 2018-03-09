@@ -88,3 +88,22 @@ def exportGitInfoEnvVars():
     os.environ['GIT_BRANCH'] = GIT_BRANCH
     GIT_CLEAN = not git.branch_is_dirty()
     os.environ['GIT_CLEAN'] = "{}".format(GIT_CLEAN)
+
+
+# Some Ceph architectures aren't the same string as golang architectures, so specify conversions
+_CEPH_ARCH_TO_GOLANG_ARCH_CONVERSIONS = {
+    'x86_64': 'amd64',
+    'aarch64': 'arm64'
+}
+
+
+def exportGoArchEnvVar():
+    """
+    Export the environment variable 'GO_ARCH' with the golang architecture equivalent to the
+    current Ceph arch. E.g., Ceph arch 'x86_64' equates to golang arch 'amd64'.
+    """
+    arch = getEnvVar('ARCH')
+    if arch in _CEPH_ARCH_TO_GOLANG_ARCH_CONVERSIONS:
+        os.environ['GO_ARCH'] = _CEPH_ARCH_TO_GOLANG_ARCH_CONVERSIONS[arch]
+    else:
+        os.environ['GO_ARCH'] = arch

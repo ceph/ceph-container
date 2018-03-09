@@ -7,7 +7,8 @@ import shutil
 import sys
 import time
 
-from stagelib.envglobals import (verifyRequiredEnvVars, exportGitInfoEnvVars, getEnvVar)
+from stagelib.envglobals import (verifyRequiredEnvVars, getEnvVar,
+                                 exportGitInfoEnvVars, exportGoArchEnvVar)
 from stagelib.filetools import (list_files, mkdir_if_dne, copy_files, recursive_copy_dir,
                                 IOOSErrorGracefulFail, save_files_copied)
 from stagelib.replace import do_variable_replace
@@ -57,6 +58,9 @@ def main(CORE_FILES_DIR, CEPH_RELEASES_DIR, BLACKLIST_FILE):
     logging.info('GIT_BRANCH: {}'.format(getEnvVar('GIT_BRANCH')))
     logging.info('GIT_COMMIT: {}'.format(getEnvVar('GIT_COMMIT')))
     logging.info('GIT_CLEAN:  {}'.format(getEnvVar('GIT_CLEAN')))
+
+    exportGoArchEnvVar()
+    logging.info('GO_ARCH: {}'.format(getEnvVar('GO_ARCH')))
 
     CEPH_VERSION = getEnvVar('CEPH_VERSION')
     OS_NAME = getEnvVar('OS_NAME')

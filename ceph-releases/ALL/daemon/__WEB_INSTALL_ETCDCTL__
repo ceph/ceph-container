@@ -1,7 +1,7 @@
 echo 'Web install etcdctl' && \
     ETCDCTL_VERSION=v2.2.4 && \
     # Assume linux
-    ETCDCTL_ARCH=linux-STAGE_REPLACE_WITH_ARCH && \
+    ETCDCTL_ARCH=linux-STAGE_REPLACE_WITH_GO_ARCH && \
     wget -q -O- \
       "https://github.com/coreos/etcd/releases/download/${ETCDCTL_VERSION}/etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}.tar.gz" | \
       tar xfz - -C/tmp/ etcd-${ETCDCTL_VERSION}-${ETCDCTL_ARCH}/etcdctl && \
