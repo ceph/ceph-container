@@ -21,3 +21,6 @@ See `ceph-container/maint-lib/stagelib/envglobals.py` for most updated list and 
  - GIT_BRANCH
  - GIT_COMMIT
  - GIT_CLEAN
+
+### Architecture
+ - GO_ARCH
