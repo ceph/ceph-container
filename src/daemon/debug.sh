@@ -13,7 +13,10 @@ for option in $(comma_to_space "${DEBUG}"); do
       log "VERBOSE: activating bash debugging mode."
       log "To run Ceph daemons in debugging mode, pass the CEPH_ARGS variable like this:"
       log "-e CEPH_ARGS='--debug-ms 1 --debug-osd 10'"
+      log "This container environement variables are: $(env)"
       export PS4='+${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+      # shellcheck disable=SC2034
+      CHOWN_OPT=(--verbose)
       set -x
       ;;
     fstree*)
@@ -52,7 +55,7 @@ for option in $(comma_to_space "${DEBUG}"); do
       ;;
     stayalive)
       log "STAYALIVE: container will not die if a command fails."
-      source docker_exec.sh
+      set_trap_err
       ;;
     *)
       log "$option is not a valid debug option."
