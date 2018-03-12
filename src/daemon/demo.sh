@@ -32,7 +32,7 @@ function bootstrap_osd {
     # bootstrap OSD
     mkdir -p "$OSD_PATH"
     chown --verbose -R ceph. "$OSD_PATH"
-    ceph-disk -v prepare --bluestore "$OSD_PATH"
+    ceph-disk -v prepare "${CLI_OPTS[@]}" --bluestore "$OSD_PATH"
     ceph-disk -v activate --mark-init none --no-start-daemon "$OSD_PATH"
   fi
 
