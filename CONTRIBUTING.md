@@ -16,22 +16,20 @@ in `src/` and is further specified in `src/daemon-base` and `src/daemon`.
 Because this project supports several different Ceph versions and many OS distros, the structure
 also allows individual Ceph versions, individual distros, and combinations of
 Ceph-version-and-distro (we will call these **flavors**) to override the base source, configuration,
-and specification files by specifying their own versions of the files or new files entirely. In
-addition to overrides the `flavor-blacklist.txt` file can be configured prevent a file from
-overriding another for specific subsets of flavors.
+and specification files by specifying their own versions of the files or new files entirely.
 
-Mentally modeling the end result of overrides and blacklists for any given flavor is difficult.
-Similarly, programmatically selecting the correct files for each flavor build is also difficult. In
-order to effectively work with this project structure, we introduce the concept of **staging**.
+Mentally modeling the end result of overrides for any given flavor is difficult. Similarly,
+programmatically selecting the correct files for each flavor build is also difficult. In order to
+effectively work with this project structure, we introduce the concept of **staging**.
 
 ### The concept of staging
-Special tooling has been built to collect all source files with appropriate overrides and without
-blacklisted items into a unique staging directory for each flavor (each flavor is also specified by
-a target architecture to support ARM platforms). From a staging directory, containers can be built
-directly from the `<staging>/daemon-base/` and `<staging>/daemon/` image directories. Additionally,
-developers can inspect a staging directory's files to view exactly what will be (or has been) built
-into the container images. Additionally, in order to maintain a core source base that is as reusable
-as possible for all flavors, staging also supports a very basic form of templating. Some tooling has
+Special tooling has been built to collect all source files with appropriate overrides into a unique
+staging directory for each flavor (each flavor is also specified by a target architecture to support
+ARM platforms). From a staging directory, containers can be built directly from the
+`<staging>/daemon-base/` and `<staging>/daemon/` image directories. Additionally, developers can
+inspect a staging directory's files to view exactly what will be (or has been) built into the
+container images. Additionally, in order to maintain a core source base that is as reusable as
+possible for all flavors, staging also supports a very basic form of templating. Some tooling has
 been developed to make working with staging as easy as possible.
 
 #### Staging override order
