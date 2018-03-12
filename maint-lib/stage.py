@@ -12,13 +12,11 @@ from stagelib.envglobals import (verifyRequiredEnvVars, getEnvVar,
 from stagelib.filetools import (list_files, mkdir_if_dne, copy_files, recursive_copy_dir,
                                 IOOSErrorGracefulFail, save_files_copied)
 from stagelib.replace import do_variable_replace
-from stagelib.blacklist import get_blacklist
 
 
 # Set default values for tunables (primarily only interesting for testing)
 CORE_FILES_DIR = "src"
 CEPH_RELEASES_DIR = "ceph-releases"
-BLACKLIST_FILE = "flavor-blacklist.txt"
 
 
 STAGING_DIR = getEnvVar('STAGING_DIR')
@@ -45,7 +43,7 @@ if sys.version_info[0] < 3:
     sys.exit(1)
 
 
-def main(CORE_FILES_DIR, CEPH_RELEASES_DIR, BLACKLIST_FILE):
+def main(CORE_FILES_DIR, CEPH_RELEASES_DIR):
     logging.info('\n\n\n')  # Make it easier to determine where new runs start
     logging.info('Start time: {}'.format(time.ctime()))
 
@@ -80,9 +78,6 @@ def main(CORE_FILES_DIR, CEPH_RELEASES_DIR, BLACKLIST_FILE):
     ]
     logging.debug('Path search order: {}'.format(path_search_order))
 
-    blacklist = get_blacklist(BLACKLIST_FILE)
-    logging.debug('Blacklist: {}'.format(blacklist))
-
     files_copied = {}
     # e.g., IMAGES_TO_BUILD = ['daemon-base', 'daemon']
     for image in IMAGES_TO_BUILD:
@@ -96,9 +91,9 @@ def main(CORE_FILES_DIR, CEPH_RELEASES_DIR, BLACKLIST_FILE):
             staging_path = os.path.join(STAGING_DIR, image)
             mkdir_if_dne(staging_path, mode=0o755)
             # Copy files in each path first, then copy contents of <image> dir
-            copy_files(src_files, src_path, staging_path, blacklist, files_copied)
+            copy_files(src_files, src_path, staging_path, files_copied)
             recursive_copy_dir(src_path=os.path.join(src_path, image), dst_path=staging_path,
-                               blacklist=blacklist, files_copied=files_copied)
+                               files_copied=files_copied)
         # Do variable replacements on all files in <staging>/<image>
         do_variable_replace(replace_root_dir=os.path.join(STAGING_DIR, image))
 
@@ -109,4 +104,4 @@ def main(CORE_FILES_DIR, CEPH_RELEASES_DIR, BLACKLIST_FILE):
 
 
 if __name__ == "__main__":
-    main(CORE_FILES_DIR, CEPH_RELEASES_DIR, BLACKLIST_FILE)
+    main(CORE_FILES_DIR, CEPH_RELEASES_DIR)

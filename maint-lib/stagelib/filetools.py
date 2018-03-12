@@ -56,49 +56,35 @@ def _copy_file(file_path, dst_path):
         IOOSErrorGracefulFail(o, "Could not copy file {} to {}".format(file_path, dst_path))
 
 
-def copy_files(filenames, src_path, dst_path, blacklist=[], files_copied={}):
+def copy_files(filenames, src_path, dst_path, files_copied={}):
     """
     Copy a list of filenames from src to dst. Will overwrite existing files.
-    If any files are in the blacklist, they will not be copied.
-    If the src directory is in the blacklist, the dest path will not be created, and the files will
-      not be copied or processed.
+    For every copy made, make or update an entry in `files_copied`.
     """
     # Adding a trailing "/" if needed to improve output coherency
     dst_path = os.path.join(dst_path, '')
-    if os.path.join(src_path, '') in blacklist:
-        logging.info(PARENTHETICAL_LOGTEXT.format(src_path, '[DIR BLACKLISTED]'))
-        return
     mkdir_if_dne(dst_path)
     for f in filenames:
         file_path = os.path.join(src_path, f)
-        if file_path in blacklist:
-            logging.info(PARENTHETICAL_LOGTEXT.format(file_path, '[FILE BLACKLISTED]'))
-            continue
         dirty_marker = '*' if git.file_is_dirty(file_path) else ' '
         logging.info(COPY_LOGTEXT.format(dirty_marker + ' ' + file_path, dst_path))
         files_copied[os.path.join(dst_path, f)] = dirty_marker + ' ' + file_path
         _copy_file(file_path, dst_path)
 
 
-def recursive_copy_dir(src_path, dst_path, blacklist=[], files_copied={}):
+def recursive_copy_dir(src_path, dst_path, files_copied={}):
     """
     Copy all files in the src directory recursively to dst. Will overwrite existing files.
-    If any files encountered are in the blacklist, they will not be copied.
-    If any directories encountered are in the blacklist, the corresponding dest path will not be
-      created, and files/subdirs within the blacklisted dir will not be copied.
+    For every copy made, make or update an entry in `files_copied`.
     """
     if not os.path.isdir(src_path):
         return
     for dirname, subdirs, files in os.walk(src_path, topdown=True):
         # Remove src_path (and '/' immediately following) from our dirname
-        if os.path.join(dirname, '') in blacklist:
-            logging.info(PARENTHETICAL_LOGTEXT.format(dirname, '[DIR BLACKLISTED]'))
-            subdirs[:] = []
-            continue
         dst_path_offset = dirname[len(src_path)+1:]
         copy_files(filenames=files, src_path=dirname,
                    dst_path=os.path.join(dst_path, dst_path_offset),
-                   blacklist=blacklist, files_copied=files_copied)
+                   files_copied=files_copied)
 
 
 def save_files_copied(files_copied, save_filename, strip_prefix=' '):

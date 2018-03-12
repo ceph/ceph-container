@@ -24,7 +24,6 @@ import stagelib.git as git
 
 CORE_FILES_DIR = "tests/stage-test/src"
 CEPH_RELEASES_DIR = "tests/stage-test/ceph-releases/"
-BLACKLIST_FILE = "tests/stage-test/flavor-blacklist.txt"
 
 def get_repo(): return 'testrepo'
 git.get_repo = get_repo
@@ -39,7 +38,7 @@ def branch_is_dirty():
     return True
 git.branch_is_dirty = branch_is_dirty
 
-main(CORE_FILES_DIR, CEPH_RELEASES_DIR, BLACKLIST_FILE)
+main(CORE_FILES_DIR, CEPH_RELEASES_DIR)
 EOF
 )
 python3 -c "${run_stage}" | tee tests/stage-test/staging_output.txt
