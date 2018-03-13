@@ -3,6 +3,7 @@ Contributing to ceph-container
 
 1. Become familiar with the [project structure](#project-structure).
 2. Follow the appropriate [contribution workflow](#contribution-workflow)
+3. Follow the [commit guidelines](#commit-guidelines)
 
 
 Project structure
@@ -211,6 +212,26 @@ In the worst case, trying to make as few modifications as possible:
 4. Build test versions of the images (`make FLAVORS=<new distro flavors> build`).
 5. Test the images in your environment.
 6. Make a PR of your changes.
+
+
+Commit guidelines
+-----------------
+- All commits should have a subject and a body
+- The commit subject should briefly describe what the commit changes
+- The commit body should describe the problem addressed and the chosen solution
+  - What was the problem and solution? Why that solution? Were there alternative ideas?
+- Wrap commit subjects and bodies to 72 characters
+- Sign-off your commits
+- Add a best-effort scope designation to commit subjects. This could be a directory name, file name,
+  or the name of a logical grouping of code. Examples:
+  - **[dir]** ceph-releases: change flavor specification(s) in the `ceph-container` dir
+  - **[dir]** jewel: change flavor spec for jewel
+  - **[dir]** kubernetes: edit a Kubernetes example in `examples/kubernetes`
+  - **[file]** osd_disk_activate: edit the `src/daemon/osd_scenarios/osd_disk_activate.sh` file
+  - **[logical group]** osd prep: change how OSDs are prepared, with changes in multiple files
+  - **[combinations]** jewel osd prep: change how OSDs are prepared only in jewel
+
+Suggested reading: https://chris.beams.io/posts/git-commit/
 
 
 CI
