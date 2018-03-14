@@ -12,12 +12,12 @@ set -ex
 # setup
 #################################################################################
 # If WORKSPACE is undefined, set it to $TOXINIDIR
-echo ${WORKSPACE:=$TOXINIDIR}
+echo "${WORKSPACE:=$TOXINIDIR}"
 
 # Write down a couple environment variables, for use in teardown
 OUR_TOX_VARS=$WORKSPACE/.tox_vars
-rm -f $OUR_TOX_VARS
-cat > $OUR_TOX_VARS << EOF
+rm -f "$OUR_TOX_VARS"
+cat > "$OUR_TOX_VARS" << EOF
 export WORKSPACE=$WORKSPACE
 export CEPH_ANSIBLE_SCENARIO_PATH=$CEPH_ANSIBLE_SCENARIO_PATH
 EOF
@@ -44,7 +44,7 @@ else
 fi
 
 rm -rf "$WORKSPACE"/ceph-ansible || true
-git clone -b $CEPH_ANSIBLE_BRANCH --single-branch https://github.com/ceph/ceph-ansible.git ceph-ansible
+git clone -b "$CEPH_ANSIBLE_BRANCH" --single-branch https://github.com/ceph/ceph-ansible.git ceph-ansible
 
 if [[ "$CEPH_ANSIBLE_BRANCH" == 'stable-2.2' ]] || [[ "$CEPH_ANSIBLE_BRANCH" == 'stable-3.0' ]]; then
   REQUIREMENTS=requirements2.2.txt
@@ -52,7 +52,7 @@ else
   REQUIREMENTS=requirements2.4.txt
 fi
 
-pip install -r $TOXINIDIR/ceph-ansible/tests/$REQUIREMENTS
+pip install -r "$TOXINIDIR"/ceph-ansible/tests/"$REQUIREMENTS"
 
 bash "$WORKSPACE"/travis-builds/purge_cluster.sh
 # XXX purge_cluster only stops containers, it doesn't really remove them so try to
@@ -60,13 +60,13 @@ bash "$WORKSPACE"/travis-builds/purge_cluster.sh
 containers_to_remove=$(sudo docker ps -a -q)
 
 if [ "${containers_to_remove}" ]; then
-  sudo docker rm -f "$@" ${containers_to_remove} || echo failed to remove containers
+  sudo docker rm -f "$@" "${containers_to_remove}" || echo failed to remove containers
 fi
 
 cd "$WORKSPACE"
 
 # build everything that was touched to make sure build succeeds
-FLAVOR_ARRAY=( $(make flavors.modified) )
+mapfile -t FLAVOR_ARRAY < <(make flavors.modified)
 
 if [[ "${#FLAVOR_ARRAY[@]}" -eq "0" ]]; then
   echo "The ceph-container code has not changed."
@@ -97,33 +97,33 @@ sudo make FLAVORS="$FLAVOR" build.parallel
 
 current_branch="$(git rev-parse --abbrev-ref HEAD)"
 # build tag from luminous,amd64,centos,7,_,centos,7 to luminous-centos-7-amd64
-TAG="${current_branch}-$(echo $FLAVOR|awk -F ',' '{ print $1"-"$3"-"$4"-"$2}')"
+TAG="${current_branch}-$(echo "$FLAVOR"|awk -F ',' '{ print $1"-"$3"-"$4"-"$2}')"
 
 # start a local docker registry
 sudo docker run -d -p 5000:5000 --restart=always --name registry registry:2
 # add the image we just built to the registry
-sudo docker tag ceph/daemon:$TAG localhost:5000/ceph/daemon:$CEPH_STABLE_RELEASE-latest
+sudo docker tag ceph/daemon:"$TAG" localhost:5000/ceph/daemon:"$CEPH_STABLE_RELEASE"-latest
 # this avoids a race condition between the tagging and the push
 # which causes this to sometimes fail when run by jenkins
 sleep 1
-sudo docker --debug push localhost:5000/ceph/daemon:$CEPH_STABLE_RELEASE-latest
+sudo docker --debug push localhost:5000/ceph/daemon:"$CEPH_STABLE_RELEASE"-latest
 
 cd "$CEPH_ANSIBLE_SCENARIO_PATH"
-vagrant up --no-provision --provider=$VAGRANT_PROVIDER
+vagrant up --no-provision --provider="$VAGRANT_PROVIDER"
 
-bash $TOXINIDIR/ceph-ansible/tests/scripts/generate_ssh_config.sh $CEPH_ANSIBLE_SCENARIO_PATH
+bash "$TOXINIDIR"/ceph-ansible/tests/scripts/generate_ssh_config.sh "$CEPH_ANSIBLE_SCENARIO_PATH"
 
 export ANSIBLE_SSH_ARGS="-F $CEPH_ANSIBLE_SCENARIO_PATH/vagrant_ssh_config"
 
 
 # runs a playbook to configure nodes for testing
-ansible-playbook -vv -i $CEPH_ANSIBLE_SCENARIO_PATH/hosts $TOXINIDIR/tests/setup.yml
-ansible-playbook -vv -i $CEPH_ANSIBLE_SCENARIO_PATH/hosts $TOXINIDIR/ceph-ansible/site-docker.yml.sample --extra-vars="ceph_stable_release=$CEPH_STABLE_RELEASE ceph_docker_image_tag=$CEPH_STABLE_RELEASE-latest ceph_docker_registry=$REGISTRY_ADDRESS fetch_directory=$CEPH_ANSIBLE_SCENARIO_PATH/fetch"
+ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/tests/setup.yml
+ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/site-docker.yml.sample --extra-vars="ceph_stable_release=$CEPH_STABLE_RELEASE ceph_docker_image_tag=$CEPH_STABLE_RELEASE-latest ceph_docker_registry=$REGISTRY_ADDRESS fetch_directory=$CEPH_ANSIBLE_SCENARIO_PATH/fetch"
 
-ansible-playbook -vv -i $CEPH_ANSIBLE_SCENARIO_PATH/hosts $TOXINIDIR/ceph-ansible/tests/functional/setup.yml
+ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/tests/functional/setup.yml
 
-testinfra -n 4 --sudo -v --connection=ansible --ansible-inventory=$CEPH_ANSIBLE_SCENARIO_PATH/hosts $TOXINIDIR/ceph-ansible/tests/functional/tests
+testinfra -n 4 --sudo -v --connection=ansible --ansible-inventory="$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/tests/functional/tests
 
 # teardown
 #################################################################################
-bash $TOXINIDIR/tests/teardown.sh
+bash "$TOXINIDIR"/tests/teardown.sh
