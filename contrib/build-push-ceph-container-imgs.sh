@@ -1,6 +1,9 @@
 #!/bin/bash
 set -ex
 
+# GIT_BRANCH is typically 'origin/master', we strip the variable to only get 'master'
+BRANCH="${GIT_BRANCH#*/}"
+
 
 #############
 # FUNCTIONS #
@@ -33,8 +36,8 @@ function create_head_or_point_release {
     RELEASE="$latest_tag"
   else
     set -e
-    echo "Building a devel Ceph container image based on branch $GIT_BRANCH and commit $GIT_COMMIT"
-    RELEASE="$GIT_BRANCH-$GIT_COMMIT"
+    echo "Building a devel Ceph container image based on branch $BRANCH and commit $GIT_COMMIT"
+    RELEASE="$BRANCH-$GIT_COMMIT"
   fi
 }
 
@@ -49,7 +52,7 @@ function push_ceph_imgs {
   make -j "$(nproc)" RELEASE="$RELEASE" push
 
   for i in daemon-base daemon; do
-    tag=ceph/$i:${GIT_BRANCH}-${GIT_COMMIT}-luminous-ubuntu-16.04-amd64
+    tag=ceph/$i:${BRANCH}-${GIT_COMMIT}-luminous-ubuntu-16.04-amd64
     # tag latest daemon-base and daemon images
     docker tag "$tag" ceph/$i:latest
 
