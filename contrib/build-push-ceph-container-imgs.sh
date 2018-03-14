@@ -15,6 +15,10 @@ LATEST_COMMIT_SHA=$(git rev-parse --short HEAD)
 # FUNCTIONS #
 #############
 
+function cleanup_previous_run {
+  make clean.all || true
+}
+
 function install_docker {
   sudo apt-get install -y --force-yes docker.io
   sudo systemctl start docker
@@ -72,6 +76,7 @@ function push_ceph_imgs {
 # MAIN #
 ########
 
+cleanup_previous_run
 install_docker
 login_docker_hub
 create_head_or_point_release
