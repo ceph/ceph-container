@@ -38,12 +38,14 @@ function create_head_or_point_release {
   # We use the commit sha1 on the devel image so we can have multiple tags
   # instead of overriding the previous one.
   set +e
-  latest_tag=$(git describe --exact-match HEAD --tags --long 2>/dev/null)
+  LATEST_TAG=$(git describe --exact-match HEAD --tags --long 2>/dev/null)
   # shellcheck disable=SC2181
   if [ "$?" -eq 0 ]; then
     set -e
-    echo "Building a release Ceph container image based on tag $latest_tag"
-    RELEASE="$latest_tag"
+    # find branch associated to that tag
+    BRANCH=$(git branch -r --contains tags/"$LATEST_TAG" | grep -Eo 'stable-[0-9].[0-9]')
+    echo "Building a release Ceph container image based on branch $BRANCH and tag $LATEST_TAG"
+    RELEASE="$LATEST_TAG-$BRANCH"
   else
     set -e
     echo "Building a devel Ceph container image based on branch $BRANCH and commit $LATEST_COMMIT_SHA"
