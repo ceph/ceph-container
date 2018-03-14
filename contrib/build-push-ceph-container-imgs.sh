@@ -46,7 +46,7 @@ function build_ceph_imgs {
 
 function push_ceph_imgs {
   echo "Push Ceph container image(s) to the Docker Hub registry"
-  make RELEASE="$RELEASE" push
+  make -j "$(nproc)" RELEASE="$RELEASE" push
 
   for i in daemon-base daemon; do
     tag=ceph/$i:${GIT_BRANCH}-${GIT_COMMIT}-luminous-ubuntu-16.04-amd64
