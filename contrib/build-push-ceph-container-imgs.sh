@@ -31,7 +31,6 @@ function login_docker_hub {
 }
 
 function create_head_or_point_release {
-  local latest_tag
   # We test if we are running on a tagged commit
   # if so, we build images with this particular tag
   # otherwise we just build using the branch name and the latest commit sha1
@@ -78,8 +77,8 @@ function push_ceph_imgs {
 # MAIN #
 ########
 
-cleanup_previous_run
 install_docker
+cleanup_previous_run
 login_docker_hub
 create_head_or_point_release
 build_ceph_imgs
