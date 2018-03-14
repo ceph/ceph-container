@@ -52,7 +52,7 @@ function push_ceph_imgs {
   make -j "$(nproc)" RELEASE="$RELEASE" push
 
   for i in daemon-base daemon; do
-    tag=ceph/$i:${BRANCH}-${GIT_COMMIT}-luminous-ubuntu-16.04-amd64
+    tag=ceph/$i:${BRANCH}-${GIT_COMMIT}-luminous-ubuntu-16.04-x86_64
     # tag latest daemon-base and daemon images
     docker tag "$tag" ceph/$i:latest
 

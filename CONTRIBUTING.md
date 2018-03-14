@@ -178,9 +178,9 @@ and there are no special updates required, they are likely to work with just thi
 Note the `$CEPH_VERSION` variable usually used in `__DOCKERFILE_INSTALL__` is substituted from the
 first field of the flavor name by environment variable substitution.
 
-In this example, `luminous,amd64,centos,7,_,centos,7`, `$CEPH_VERSION` will be set to **luminous**.
+In this example, `luminous,x86_64,centos,7,_,centos,7`, `$CEPH_VERSION` will be set to **luminous**.
 
-Adding a new flavor name like `mimic,amd64,centos,7,_,centos,7` is enough to create a new **mimic**
+Adding a new flavor name like `mimic,x86_64,centos,7,_,centos,7` is enough to create a new **mimic**
 Ceph release.
 
 In the worst case, trying to make as few modifications as possible:

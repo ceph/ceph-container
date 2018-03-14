@@ -79,7 +79,7 @@ if [[ "${#FLAVOR_ARRAY[@]}" -eq "1" ]]; then
   FLAVOR="${FLAVOR_ARRAY[0]}"
 else
   # if more than one release/distro is impacted then we test this in priority
-  FLAVOR="luminous,amd64,ubuntu,16.04,_,ubuntu,16.04"
+  FLAVOR="luminous,x86_64,ubuntu,16.04,_,ubuntu,16.04"
 fi
 
 CURRENT_CEPH_STABLE_RELEASE="$(echo $FLAVOR|awk -F ',' '{ print $1}')"
@@ -89,14 +89,14 @@ CURRENT_CEPH_STABLE_RELEASE="$(echo $FLAVOR|awk -F ',' '{ print $1}')"
 # so we will build the desired CEPH_STABLE_RELEASE since the current patch didn't change the ceph version
 # Since we test all the Ceph releases, we will always test the impacted one
 if [[ "$CEPH_STABLE_RELEASE" != "$CURRENT_CEPH_STABLE_RELEASE" ]]; then
-  FLAVOR="$CEPH_STABLE_RELEASE,amd64,ubuntu,16.04,_,ubuntu,16.04"
+  FLAVOR="$CEPH_STABLE_RELEASE,x86_64,ubuntu,16.04,_,ubuntu,16.04"
 fi
 
 echo "Building flavor $FLAVOR"
 sudo make FLAVORS="$FLAVOR" build.parallel
 
 current_branch="$(git rev-parse --abbrev-ref HEAD)"
-# build tag from luminous,amd64,centos,7,_,centos,7 to luminous-centos-7-amd64
+# build tag from luminous,x86_64,centos,7,_,centos,7 to luminous-centos-7-x86_64
 TAG="${current_branch}-$(echo "$FLAVOR"|awk -F ',' '{ print $1"-"$3"-"$4"-"$2}')"
 
 # start a local docker registry
