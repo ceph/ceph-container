@@ -19,8 +19,6 @@ function login_docker_hub {
 
 function create_head_or_point_release {
   local latest_tag
-  local latest_commit_sha
-  local current_branch
   # We test if we are running on a tagged commit
   # if so, we build images with this particular tag
   # otherwise we just build using the branch name and the latest commit sha1
@@ -28,16 +26,15 @@ function create_head_or_point_release {
   # instead of overriding the previous one.
   set +e
   latest_tag=$(git describe --exact-match HEAD --tags --long 2>/dev/null)
+  # shellcheck disable=SC2181
   if [ "$?" -eq 0 ]; then
     set -e
     echo "Building a release Ceph container image based on tag $latest_tag"
     RELEASE="$latest_tag"
   else
     set -e
-    echo "Building a devel Ceph container image based on branch $current_branch and commit $latest_commit_sha"
-    latest_commit_sha=$(git rev-parse --short HEAD)
-    current_branch=$(git rev-parse --abbrev-ref HEAD)
-    RELEASE="$current_branch-$latest_commit_sha"
+    echo "Building a devel Ceph container image based on branch $GIT_BRANCH and commit $GIT_COMMIT"
+    RELEASE="$GIT_BRANCH-$GIT_COMMIT"
   fi
 }
 
@@ -52,7 +49,7 @@ function push_ceph_imgs {
   make RELEASE="$RELEASE" push
 
   for i in daemon-base daemon; do
-    tag=ceph/$i:${current_branch}-${latest_commit_sha}-luminous-ubuntu-16.04-amd64
+    tag=ceph/$i:${GIT_BRANCH}-${GIT_COMMIT}-luminous-ubuntu-16.04-amd64
     # tag latest daemon-base and daemon images
     docker tag "$tag" ceph/$i:latest
 
