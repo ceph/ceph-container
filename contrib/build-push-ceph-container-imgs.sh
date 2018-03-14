@@ -37,7 +37,7 @@ function create_head_or_point_release {
   # We use the commit sha1 on the devel image so we can have multiple tags
   # instead of overriding the previous one.
   set +e
-  LATEST_TAG=$(git describe --exact-match HEAD --tags --long 2>/dev/null)
+  LATEST_TAG=$(git describe --exact-match HEAD --tags 2>/dev/null)
   # shellcheck disable=SC2181
   if [ "$?" -eq 0 ]; then
     set -e
