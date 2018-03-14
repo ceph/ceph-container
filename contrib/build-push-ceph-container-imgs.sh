@@ -28,11 +28,12 @@ function create_head_or_point_release {
   # instead of overriding the previous one.
   set +e
   latest_tag=$(git describe --exact-match HEAD --tags --long 2>/dev/null)
-  set -e
   if [ "$?" -eq 0 ]; then
+    set -e
     echo "Building a release Ceph container image based on tag $latest_tag"
     RELEASE="$latest_tag"
   else
+    set -e
     echo "Building a devel Ceph container image based on branch $current_branch and commit $latest_commit_sha"
     latest_commit_sha=$(git rev-parse --short HEAD)
     current_branch=$(git rev-parse --abbrev-ref HEAD)
