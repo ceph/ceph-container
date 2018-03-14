@@ -26,7 +26,9 @@ function create_head_or_point_release {
   # otherwise we just build using the branch name and the latest commit sha1
   # We use the commit sha1 on the devel image so we can have multiple tags
   # instead of overriding the previous one.
+  set +e
   latest_tag=$(git describe --exact-match HEAD --tags --long 2>/dev/null)
+  set -e
   if [ "$?" -eq 0 ]; then
     echo "Building a release Ceph container image based on tag $latest_tag"
     RELEASE="$latest_tag"
@@ -47,7 +49,7 @@ function build_ceph_imgs {
 function push_ceph_imgs {
   echo "Push Ceph container image(s) to the Docker Hub registry"
   make RELEASE="$RELEASE" push
-  
+
   for i in daemon-base daemon; do
     tag=ceph/$i:${current_branch}-${latest_commit_sha}-luminous-ubuntu-16.04-amd64
     # tag latest daemon-base and daemon images
