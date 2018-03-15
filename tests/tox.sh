@@ -66,7 +66,7 @@ fi
 cd "$WORKSPACE"
 
 # build everything that was touched to make sure build succeeds
-mapfile -t FLAVOR_ARRAY < <(make flavors.modified)
+mapfile -t FLAVOR_ARRAY < <(sudo make flavors.modified)
 
 if [[ "${#FLAVOR_ARRAY[@]}" -eq "0" ]]; then
   echo "The ceph-container code has not changed."
