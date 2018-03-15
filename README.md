@@ -3,8 +3,6 @@ ceph-container
 
 ![Ceph Daemon Stars](https://img.shields.io/docker/stars/ceph/daemon.svg)
 ![Ceph Daemon Pulls](https://img.shields.io/docker/pulls/ceph/daemon.svg)
-![Ceph Daemon Automated](https://img.shields.io/docker/automated/ceph/daemon.svg)
-![Ceph Daemon Build Status](https://img.shields.io/docker/build/ceph/daemon.svg)
 
 Build Ceph into container images with upstream support for the latest few Ceph releases on
 Ubuntu-based containers. ceph-container also supports builds for multiple distributions but does not
