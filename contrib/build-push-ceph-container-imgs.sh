@@ -60,7 +60,7 @@ function build_ceph_imgs {
 
 function push_ceph_imgs {
   echo "Push Ceph container image(s) to the Docker Hub registry"
-  make -j "$(nproc)" RELEASE="$RELEASE" push
+  make RELEASE="$RELEASE" push.parallel
 
   for i in daemon-base daemon; do
     tag=ceph/$i:${BRANCH}-${LATEST_COMMIT_SHA}-luminous-ubuntu-16.04-x86_64
