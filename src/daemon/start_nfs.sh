@@ -30,6 +30,9 @@ function start_nfs {
     chmod 0600 "$RGW_KEYRING"
   fi
 
+  # create ganesha log directory since the package does not create it
+  mkdir -p /var/log/ganesha/
+
   log "SUCCESS"
   # start ganesha, logging both to STDOUT and to the configured location
   exec /usr/bin/ganesha.nfsd "${GANESHA_OPTIONS[@]}" -F -L STDOUT "${GANESHA_EPOCH}"
