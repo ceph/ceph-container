@@ -18,14 +18,6 @@ Core Components
 See README files in subdirectories for instructions on using containers.
 
 
-Demo
------
-
-- [`ceph/demo`](ceph-releases/jewel/ubuntu/14.04/demo/): Demonstration cluster for testing and
-  learning. This container runs all the major Ceph and Ganesha components installed, bootstrapped,
-  and executed for you to play with. (not intended for use in building a production cluster)
-
-
 Video demonstration
 -------------------
 
