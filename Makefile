@@ -80,9 +80,9 @@ push:  $(foreach p, $(FLAVORS), do.image.$(p)) ;
 build.parallel:
 # Due to output-sync, will not output results until finished so there is no text interleaving
 ifeq (4.00,$(firstword $(sort $(MAKE_VERSION) 4.00)))
-	@$(MAKE) --jobs --output-sync build
+	@$(MAKE) --jobs $(nproc) --output-sync build
 else
-	@$(MAKE) --jobs build
+	@$(MAKE) --jobs $(nproc) build
 endif
 
 build.all:
