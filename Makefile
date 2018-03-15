@@ -77,6 +77,14 @@ stage: $(foreach p, $(FLAVORS), stage.$(p)) ;
 build: $(foreach p, $(FLAVORS), do.image.$(p)) ;
 push:  $(foreach p, $(FLAVORS), do.image.$(p)) ;
 
+push.parallel:
+# Due to output-sync, will not output results until finished so there is no text interleaving
+ifeq (4.00,$(firstword $(sort $(MAKE_VERSION) 4.00)))
+	@$(MAKE) --jobs $(nproc) --output-sync push
+else
+	@$(MAKE) --jobs $(nproc) push
+endif
+
 build.parallel:
 # Due to output-sync, will not output results until finished so there is no text interleaving
 ifeq (4.00,$(firstword $(sort $(MAKE_VERSION) 4.00)))
@@ -138,6 +146,7 @@ help:
 	@echo '    build.parallel    Build default flavors in parallel.'
 	@echo '    build.all         Build all buildable flavors with build.parallel'
 	@echo '    push              Push release images to registry.'
+	@echo '    push.parallel     Push release images to registy in parallel'
 	@echo ''
 	@echo '  Clean:'
 	@echo '    clean             Remove images and staging dirs for the current flavors.'
