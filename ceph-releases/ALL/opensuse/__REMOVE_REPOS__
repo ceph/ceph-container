@@ -1,5 +1,0 @@
-bash -c ' \
-      for uri_alias in __REPOS__; do \
-        echo "Remove repo: ${uri_alias}" ; \
-        __ZYPPER__ removerepo ${uri_alias} ; \
-      done'
