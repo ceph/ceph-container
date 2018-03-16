@@ -108,17 +108,17 @@ clean.image.%: do.image.%
 clean: $(foreach p, $(FLAVORS), clean.image.$(p))
 
 clean.nones:
-	@docker rmi -f $(shell docker images | egrep "^<none> " | awk '{print $$3}') || true
+	@docker rmi -f $(shell docker images | egrep "^<none> " | awk '{print $$3} | uniq') || true
 
 clean.all: clean.nones
 	@rm -rf staging/
 	# Don't mess with other registries for some semblance of a safe nuke.
 	@docker rmi -f \
-		$(shell docker images | egrep "^$(REGISTRY)/daemon(-base)? " | awk '{print $$3}') || true
+		$(shell docker images | egrep "^$(REGISTRY)/daemon(-base)? " | awk '{print $$3}' | uniq) || true
 
 clean.nuke: clean.all
 	@docker rmi -f \
-		$(shell docker images | egrep "^.*/daemon(-base)? " | awk '{print $$3}') || true
+		$(shell docker images | egrep "^.*/daemon(-base)? " | awk '{print $$3} | uniq') || true
 
 
 # ==============================================================================
