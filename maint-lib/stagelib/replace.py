@@ -80,6 +80,7 @@ def _env_var_replace(template_text, file_path):
             sys.stderr.write(
                 'Variable {} in {} could not be replaced, because the env var {} is unset'.format(
                     var, file_path, var_name))
+            sys.exit(1)
         logging.info(REPLACE_LOGTEXT.format(var, var_value, file_path))
         template_text = template_text.replace(var, var_value)
     return template_text
