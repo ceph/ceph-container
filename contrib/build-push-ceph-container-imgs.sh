@@ -9,7 +9,7 @@ set -ex
 # GIT_BRANCH is typically 'origin/master', we strip the variable to only get 'master'
 BRANCH="${GIT_BRANCH#*/}"
 LATEST_COMMIT_SHA=$(git rev-parse --short HEAD)
-
+TAGGED_HEAD=false # does HEAD is on a tag ?
 
 #############
 # FUNCTIONS #
@@ -40,10 +40,7 @@ function create_head_or_point_release {
   LATEST_TAG=$(git describe --exact-match HEAD --tags 2>/dev/null)
   # shellcheck disable=SC2181
   if [ "$?" -eq 0 ]; then
-    # if we are here, there is no latest tag to build later
-    # we declare this variable, it will be use later to decide wether of not
-    # we should tag and push the 'latest' tag
-    DO_NOT_PUSH_LATEST=""
+    TAGGED_HEAD=true # Let's remember we run on a tagged head for a later use
     set -e
     # find branch associated to that tag
     BRANCH=$(git branch -r --contains tags/"$LATEST_TAG" | grep -Eo 'stable-[0-9].[0-9]')
@@ -69,6 +66,12 @@ function push_ceph_imgs {
 }
 
 function push_ceph_imgs_latest {
+  # If we run on a tagged head, we should not push the 'latest' tag
+  if $TAGGED_HEAD; then
+    echo "Don't push latest as we run on a tagged head"
+    return
+  fi
+
   for i in daemon-base daemon; do
     tag=ceph/$i:${BRANCH}-${LATEST_COMMIT_SHA}-luminous-ubuntu-16.04-x86_64
     # tag latest daemon-base and daemon images
@@ -90,7 +93,4 @@ login_docker_hub
 create_head_or_point_release
 build_ceph_imgs
 push_ceph_imgs
-
-if [ -z $DO_NOT_PUSH_LATEST ]; then
-  push_ceph_imgs_latest
-fi
+push_ceph_imgs_latest
