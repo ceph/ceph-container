@@ -1,6 +1,8 @@
-( __ADD_REPOS__ && \
+( __ZYPPER__ addrepo __CLOUD_REPO__ cloud-tools && \
+    __ZYPPER__ addrepo __BUILD_DEPS_REPO__ build-deps && \
     __ZYPPER_UPDATE__ && \
     __ZYPPER_INSTALL__ __DAEMON_PACKAGES__ && \
     rpm --query __DAEMON_PACKAGES__ && \
-    __REMOVE_REPOS__ ) || \
+    __ZYPPER__ removerepo cloud-tools && \
+    __ZYPPER__ removerepo build-deps ) || \
     ( retval=$? && cat /var/log/zypper.log && exit $retval )

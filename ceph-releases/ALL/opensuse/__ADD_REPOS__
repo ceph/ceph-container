@@ -1,5 +1,0 @@
-bash -c ' \
-      for uri_alias in __REPOS__; do \
-        echo "Add repo: ${uri_alias}" ; \
-        __ZYPPER__ addrepo ${uri_alias} ; \
-      done'
