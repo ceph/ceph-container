@@ -63,3 +63,7 @@ Flavors can be built in parallel easily with the `build.parallel` target:
 ```
 make FLAVORS="<flavor> <other flavor> <...>" build.parallel
 ```
+
+## Presentations
+
+<p><a href="https://docs.google.com/presentation/d/e/2PACX-1vQsN2ywxSibTSH-p-0PpNWpKTSfSSLx3gApetKzmuLiMwKm0Sk9mg-Swnae-m5tKkHwCGULDfFOJsvJ/pub?start=false&loop=false&delayms=3000"> Restructuring ceph-container </a></p>
