@@ -9,6 +9,23 @@ Ubuntu-based containers. ceph-container also supports builds for multiple distri
 support the containers non-Ubuntu released images.
 
 
+Find available container image tags
+-----------------------------------
+
+All tags can be found on the Docker Hub.
+For the daemon-base tags [visit](https://hub.docker.com/r/ceph/daemon-base/tags/).
+For the daemon tags [visit](https://hub.docker.com/r/ceph/daemon/tags/).
+
+Alternatively, you can run the following command (install jq first):
+
+```
+$ curl -s https://registry.hub.docker.com/v2/repositories/ceph/daemon/tags/ | jq '."results"[] .name'
+```
+
+Be careful, by default the Docker API returns the first page with its 10 elements.
+To improve your `curl` you can pass the `https://registry.hub.docker.com/v2/repositories/ceph/daemon/tags/?page=2`
+
+
 Core Components
 ---------------
 
