@@ -1,0 +1,8 @@
+( __ADD_REPOS__ && \
+    __ZYPPER__ --gpg-auto-import-keys refresh && \
+    __ZYPPER__ update --no-recommends --auto-agree-with-licenses --replacefiles --details && \
+    __ZYPPER__ install --no-recommends --auto-agree-with-licenses --replacefiles --details \
+        __PACKAGES__ && \
+    __ZYPPER__ info __PACKAGES__ && \
+    __REMOVE_REPOS__ ) || \
+    ( retval=$? && cat /var/log/zypper.log && exit $retval )

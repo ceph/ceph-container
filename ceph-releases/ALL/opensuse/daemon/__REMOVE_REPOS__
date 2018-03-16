@@ -1,0 +1,2 @@
+__ZYPPER__ removerepo build-deps && \
+    __ZYPPER__ removerepo cloud-tools
