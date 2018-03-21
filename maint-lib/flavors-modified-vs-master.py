@@ -42,7 +42,7 @@ if 'VS_BRANCH' in os.environ and not os.environ['VS_BRANCH'] == '':
 
 # Get list of files different from VS_BRANCH
 try:
-    _run_cmd(['git', 'fetch', 'origin', 'master'])
+    _run_cmd(['git', 'fetch', 'origin', 'master', '--quiet'])
     filediff = _run_cmd(['git', 'diff', '--name-only', VS_BRANCH])
 except subprocess.CalledProcessError as c:
     _fatal('Could not fetch origin master or get file diff. Is your remote named origin? Is the VS_BRANCH specified a real branch?')
