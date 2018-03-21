@@ -108,7 +108,7 @@ clean.image.%: do.image.%
 clean: $(foreach p, $(FLAVORS), clean.image.$(p))
 
 clean.nones:
-	@docker rmi -f $(shell docker images | egrep "^<none> " | awk '{print $$3} | uniq') || true
+	@docker rmi -f $(shell docker images | egrep "^<none> " | awk '{print $$3}' | uniq) || true
 
 clean.all: clean.nones
 	@rm -rf staging/
@@ -118,7 +118,7 @@ clean.all: clean.nones
 
 clean.nuke: clean.all
 	@docker rmi -f \
-		$(shell docker images | egrep "^.*/daemon(-base)? " | awk '{print $$3} | uniq') || true
+		$(shell docker images | egrep "^.*/daemon(-base)? " | awk '{print $$3}' | uniq) || true
 
 
 # ==============================================================================
