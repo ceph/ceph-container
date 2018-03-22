@@ -154,6 +154,33 @@ case "$CEPH_DAEMON" in
     source disk_list.sh
     start_disk_list
     ;;
+  tcmu_runner)
+    # TAG: tcmu_runner
+    if is_redhat; then
+      source start_tcmu_runner.sh
+      start_tcmu_runner
+    else
+      log "ERROR: tcmu_runner scenario is only available on Red Hat systems."
+    fi
+    ;;
+  iscsi_api)
+    # TAG: iscsi_api
+    if is_redhat; then
+      source start_rbd_target_api.sh
+      start_rbd_target_api
+    else
+      log "ERROR: iscsi_api scenario is only available on Red Hat systems."
+    fi
+    ;;
+  iscsi_gw)
+    # TAG: iscsi_gw
+    if is_redhat; then
+      source start_rbd_target_gw.sh
+      start_rbd_target_gw
+    else
+      log "ERROR: iscsi_gw scenario is only available on Red Hat systems."
+    fi
+    ;;
   *)
     invalid_ceph_daemon
     ;;

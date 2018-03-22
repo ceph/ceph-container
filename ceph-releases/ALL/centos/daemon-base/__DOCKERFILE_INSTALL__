@@ -5,6 +5,11 @@ bash -c ' \
     echo "baseurl=http://download.ceph.com/nfs-ganesha/rpm-V2.5-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
     echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
     echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
+  fi && \
+  if [ -n "__ISCSI_PACKAGES__" ]; then \
+    for repo in ceph-iscsi-config ceph-iscsi-cli tcmu-runner; do \
+      curl -L https://shaman.ceph.com/api/repos/$repo/master/latest/STAGE_REPLACE_WITH_OS_NAME/STAGE_REPLACE_WITH_OS_VERSION/repo > /etc/yum.repos.d/$repo.repo ; \
+    done ; \
   fi' && \
 yum update -y && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
