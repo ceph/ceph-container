@@ -8,4 +8,5 @@
         kmod \
         __RADOSGW_PACKAGE__ \
         rbd-mirror \
-        __GANESHA_PACKAGES__
+        __GANESHA_PACKAGES__ \
+        __ISCSI_PACKAGES__
