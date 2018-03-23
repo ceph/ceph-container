@@ -25,3 +25,12 @@ $(shell set -eu ; \
 	echo "$(1)=\"$$$(1)\""
 )
 endef
+
+
+# Make supports output-sync flag for parallel builds starting in version 4.
+# Use $(PARALLEL) to set options to make to do a parallel build with output-sync if possible.
+ifeq (4.00,$(firstword $(sort $(MAKE_VERSION) 4.00)))
+PARALLEL := --jobs $(nproc) --output-sync
+else
+PARALLEL := --jobs $(nproc)
+endif
