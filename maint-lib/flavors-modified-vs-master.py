@@ -7,8 +7,8 @@ import subprocess
 import sys
 
 
-def _fatal(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
+def _fatal(message):
+    sys.stderr.write(message)
     sys.exit(1)
 
 
@@ -42,10 +42,14 @@ if 'VS_BRANCH' in os.environ and not os.environ['VS_BRANCH'] == '':
 
 # Get list of files different from VS_BRANCH
 try:
-    _run_cmd(['git', 'fetch', 'origin', 'master', '--quiet'])
+    _ = _run_cmd(['git', 'fetch', 'origin', 'master', '--quiet'])
+except subprocess.CalledProcessError:
+    _fatal("Could not fetch origin master. Is your remote named 'origin'?")
+
+try:
     filediff = _run_cmd(['git', 'diff', '--name-only', VS_BRANCH])
-except subprocess.CalledProcessError as c:
-    _fatal('Could not fetch origin master or get file diff. Is your remote named origin? Is the VS_BRANCH specified a real branch?')
+except subprocess.CalledProcessError:
+    _fatal("Could not get file diff against branch '{}'!".format(VS_BRANCH))
 
 # Files that haven't been committed don't show up in git diff, so also list those
 modified_files_with_status = _run_cmd(['git', 'status', '--short'])
