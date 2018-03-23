@@ -3,3 +3,4 @@ Git branch: testbranch
 Git commit: testhash
 Git clean: False
 Go arch: amd64
+CEPH_POINT_RELEASE: -12.2.1-0

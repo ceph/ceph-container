@@ -64,6 +64,20 @@ Flavors can be built in parallel easily with the `build.parallel` target:
 make FLAVORS="<flavor> <other flavor> <...>" build.parallel
 ```
 
+### Building with a specific version of Ceph
+Some distributions can select a specific version of Ceph to install.
+You just have to append the required version to the ceph release code name.
+
+The required version will be saved in `CEPH_POINT_RELEASE` variable (including the version separator).
+The version separator is usually a dash ('-') or an equal sign ('=').
+`CEPH_POINT_RELEASE` remains empty if no point release is given.
+
+Note that `CEPH_VERSION` variable still feature the ceph code name, **luminous** in this example.
+
+```
+make FLAVORS=luminous-12.2.2,centos,7 build
+```
+
 ## Presentations
 
 <p><a href="https://docs.google.com/presentation/d/e/2PACX-1vQsN2ywxSibTSH-p-0PpNWpKTSfSSLx3gApetKzmuLiMwKm0Sk9mg-Swnae-m5tKkHwCGULDfFOJsvJ/pub?start=false&loop=false&delayms=3000"> Restructuring ceph-container </a></p>

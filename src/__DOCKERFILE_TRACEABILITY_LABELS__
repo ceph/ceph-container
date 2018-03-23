@@ -12,3 +12,6 @@ LABEL GIT_COMMIT="__ENV_[GIT_COMMIT]__"
 
 # Was the repository clean when building ?
 LABEL GIT_CLEAN="__ENV_[GIT_CLEAN]__"
+
+# What CEPH_POINT_RELEASE has been used ?
+LABEL CEPH_POINT_RELEASE="__ENV_[CEPH_POINT_RELEASE]__"

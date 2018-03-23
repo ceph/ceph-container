@@ -3,6 +3,7 @@ See `ceph-container/maint-lib/stagelib/envglobals.py` for most updated list and 
 
 ## Required as input to staging
  - CEPH_VERSION
+ - CEPH_POINT_RELEASE
  - HOST_ARCH
  - BASEOS_REG
  - BASEOS_REPO

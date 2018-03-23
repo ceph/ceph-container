@@ -3,3 +3,4 @@ Git branch: __ENV_[GIT_BRANCH]__
 Git commit: __ENV_[GIT_COMMIT]__
 Git clean: __ENV_[GIT_CLEAN]__
 Go arch: __ENV_[GO_ARCH]__
+CEPH_POINT_RELEASE: __ENV_[CEPH_POINT_RELEASE]__
