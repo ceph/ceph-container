@@ -93,16 +93,16 @@ if [[ "$CEPH_STABLE_RELEASE" != "$CURRENT_CEPH_STABLE_RELEASE" ]]; then
 fi
 
 echo "Building flavor $FLAVOR"
+make_output=$(sudo make FLAVORS="$FLAVOR" stage) # Run staging to get DAEMON_IMAGE name
+daemon_image=$(echo "${make_output}" | grep " DAEMON_IMAGE ") # Find DAEMON_IMAGE line
+daemon_image="${daemon_image#*DAEMON_IMAGE*: }" # Remove DAEMON_IMAGE from beginning
+daemon_image="$(echo "${daemon_image}" | tr -s ' ')" # Remove whitespace
 sudo make FLAVORS="$FLAVOR" build.parallel
-
-current_branch="$(git rev-parse --abbrev-ref HEAD)"
-# build tag from luminous,centos,7 to luminous-centos-7-x86_64
-TAG="${current_branch}-$(echo "$FLAVOR"|awk -F ',' '{ print $1"-"$3"-"$4"-"$2}')"
 
 # start a local docker registry
 sudo docker run -d -p 5000:5000 --restart=always --name registry registry:2
 # add the image we just built to the registry
-sudo docker tag ceph/daemon:"$TAG" localhost:5000/ceph/daemon:"$CEPH_STABLE_RELEASE"-latest
+sudo docker tag "${daemon_image}" localhost:5000/ceph/daemon:"$CEPH_STABLE_RELEASE"-latest
 # this avoids a race condition between the tagging and the push
 # which causes this to sometimes fail when run by jenkins
 sleep 1
