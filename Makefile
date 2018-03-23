@@ -79,20 +79,10 @@ build: $(foreach p, $(FLAVORS), do.image.$(p)) ;
 push:  $(foreach p, $(FLAVORS), do.image.$(p)) ;
 
 push.parallel:
-# Due to output-sync, will not output results until finished so there is no text interleaving
-ifeq (4.00,$(firstword $(sort $(MAKE_VERSION) 4.00)))
-	@$(MAKE) --jobs $(nproc) --output-sync push
-else
-	@$(MAKE) --jobs $(nproc) push
-endif
+	@$(MAKE) $(PARALLEL) push
 
 build.parallel:
-# Due to output-sync, will not output results until finished so there is no text interleaving
-ifeq (4.00,$(firstword $(sort $(MAKE_VERSION) 4.00)))
-	@$(MAKE) --jobs $(nproc) --output-sync build
-else
-	@$(MAKE) --jobs $(nproc) build
-endif
+	@$(MAKE) $(PARALLEL) build
 
 build.all:
 	@$(MAKE) FLAVORS="$(ALL_BUILDABLE_FLAVORS)" build.parallel
