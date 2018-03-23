@@ -1,1 +1,1 @@
-ceph-mgr
+ceph-mgr__ENV_[CEPH_POINT_RELEASE]__

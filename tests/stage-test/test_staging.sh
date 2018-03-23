@@ -3,12 +3,16 @@ set -euo pipefail
 
 # Integration test to make sure staging is working properly
 
-export CEPH_VERSION=luminous
+export CEPH_VERSION_SPEC=luminous-12.2.1-0
+CEPH_VERSION=$(maint-lib/ceph_version.sh "${CEPH_VERSION_SPEC}" "CEPH_VERSION")
+export CEPH_VERSION
+CEPH_POINT_RELEASE=$(maint-lib/ceph_version.sh "${CEPH_VERSION_SPEC}" "CEPH_POINT_RELEASE")
+export CEPH_POINT_RELEASE
 export HOST_ARCH=x86_64
 export BASEOS_REG=_
 export BASEOS_REPO=ubuntu
 export BASEOS_TAG=16.04
-export STAGING_DIR=tests/stage-test/staging/${CEPH_VERSION}-${BASEOS_REPO}-${BASEOS_TAG}-${HOST_ARCH}
+export STAGING_DIR=tests/stage-test/staging/${CEPH_VERSION}${CEPH_POINT_RELEASE}-${BASEOS_REPO}-${BASEOS_TAG}-${HOST_ARCH}
 export IMAGES_TO_BUILD="daemon-base daemon"
 export RELEASE='test-release'
 export DAEMON_BASE_IMAGE=test-reg/daemon-base:test-release-1
@@ -39,11 +43,12 @@ git.branch_is_dirty = branch_is_dirty
 main(CORE_FILES_DIR, CEPH_RELEASES_DIR)
 EOF
 )
+
 python3 -c "${run_stage}" | tee tests/stage-test/staging_output.txt
-mv tests/stage-test/staging_output.txt ${STAGING_DIR}
+mv tests/stage-test/staging_output.txt "${STAGING_DIR}"
 
 diff --brief -Nr --exclude 'find-src' --exclude '*.log' --exclude '*.bak' \
-     tests/stage-test/stage-key/ "${STAGING_DIR}"
+  tests/stage-test/stage-key/ "${STAGING_DIR}"
 
 echo "STAGING TEST PASSED"
 echo ""
