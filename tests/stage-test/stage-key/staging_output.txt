@@ -1,8 +1,6 @@
 
   CEPH_VERSION      : luminous
-  ARCH              : x86_64
-  OS_NAME           : ubuntu
-  OS_VERSION        : 16.04
+  HOST_ARCH         : x86_64
   BASEOS_REG        : _
   BASEOS_REPO       : ubuntu
   BASEOS_TAG        : 16.04

@@ -17,15 +17,15 @@
 # Build tunables
 
 # When updating these defaults, be sure to check that ALL_BUILDABLE_FLAVORS is updated
-# CEPH_VERSION,ARCH,OS_NAME,OS_VERSION,BASEOS_REG,BASEOS_REPO,BASEOS_TAG
+# CEPH_VERSION,BASEOS_REPO,BASEOS_TAG
 FLAVORS ?= \
-	luminous,x86_64,ubuntu,16.04,_,ubuntu,16.04 \
-	jewel,x86_64,ubuntu,16.04,_,ubuntu,16.04 \
-	jewel,x86_64,ubuntu,14.04,_,ubuntu,14.04 \
-	kraken,x86_64,ubuntu,16.04,_,ubuntu,16.04 \
-	luminous,x86_64,centos,7,_,centos,7 \
-	jewel,x86_64,centos,7,_,centos,7 \
-	kraken,x86_64,centos,7,_,centos,7 \
+	luminous,ubuntu,16.04 \
+	jewel,ubuntu,16.04 \
+	jewel,ubuntu,14.04 \
+	kraken,ubuntu,16.04 \
+	luminous,centos,7 \
+	jewel,centos,7 \
+	kraken,centos,7 \
 
 REGISTRY ?= ceph
 
@@ -39,44 +39,37 @@ RELEASE ?= $(shell git rev-parse --abbrev-ref HEAD)
 include maint-lib/makelib.mk
 
 # All flavor options that can be passed to FLAVORS
-# CEPH_VERSION,ARCH,OS_NAME,OS_VERSION,BASEOS_REG,BASEOS_REPO,BASEOS_TAG
+# CEPH_VERSION,BASEOS_REPO,BASEOS_TAG
 ALL_BUILDABLE_FLAVORS := \
-	luminous,x86_64,ubuntu,16.04,_,ubuntu,16.04 \
-	jewel,x86_64,ubuntu,16.04,_,ubuntu,16.04 \
-	jewel,x86_64,ubuntu,14.04,_,ubuntu,14.04 \
-	kraken,x86_64,ubuntu,16.04,_,ubuntu,16.04 \
-	luminous,x86_64,centos,7,_,centos,7 \
-	jewel,x86_64,centos,7,_,centos,7 \
-	kraken,x86_64,centos,7,_,centos,7 \
-	luminous,x86_64,opensuse,42.3,_,opensuse,42.3 \
+	luminous,ubuntu,16.04 \
+	jewel,ubuntu,16.04 \
+	jewel,ubuntu,14.04 \
+	kraken,ubuntu,16.04 \
+	luminous,centos,7 \
+	jewel,centos,7 \
+	kraken,centos,7 \
+	luminous,opensuse,42.3 \
 
 # ==============================================================================
 # Build targets
 .PHONY: all stage build build.parallel build.all push
 
 stage.%:
-	@$(call set_env_var,CEPH_VERSION,$*) $(call set_env_var,ARCH,$*) \
-	$(call set_env_var,OS_NAME,$*) $(call set_env_var,OS_VERSION,$*) \
-	$(call set_env_var,BASEOS_REG,$*) $(call set_env_var,BASEOS_REPO,$*) \
-	$(call set_env_var,BASEOS_TAG,$*) $(call set_env_var,IMAGES_TO_BUILD,$*) \
-	$(call set_env_var,STAGING_DIR,$*) $(call set_env_var,BASE_IMAGE,$*) \
-	$(call set_env_var,DAEMON_BASE_IMAGE,$*) $(call set_env_var,DAEMON_IMAGE,$*) \
-	$(call set_env_var,RELEASE,$*) \
-	sh -c maint-lib/stage.py
+	@$(call set_env_vars,$*) sh -c maint-lib/stage.py
 
 daemon-base.%: stage.%
-	@$(call set_env_var,STAGING_DIR,$*) ; $(MAKE) -C $$STAGING_DIR/daemon-base $(MAKECMDGOALS) \
-	$(call set_env_var,DAEMON_BASE_IMAGE,$*)
+	@$(call set_env_vars,$*); $(MAKE) -C $$STAGING_DIR/daemon-base \
+	  $(call set_env_vars,$*) $(MAKECMDGOALS)
 
 daemon.%: daemon-base.%
-	@$(call set_env_var,STAGING_DIR,$*) ; $(MAKE) -C $$STAGING_DIR/daemon $(MAKECMDGOALS) \
-	$(call set_env_var,DAEMON_IMAGE,$*)
+	@$(call set_env_vars,$*); $(MAKE) $(call set_env_vars,$*) -C $$STAGING_DIR/daemon \
+	  $(call set_env_vars,$*) $(MAKECMDGOALS)
 
 do.image.%: daemon.% ;
 
-stage: $(foreach p, $(FLAVORS), stage.$(p)) ;
-build: $(foreach p, $(FLAVORS), do.image.$(p)) ;
-push:  $(foreach p, $(FLAVORS), do.image.$(p)) ;
+stage: $(foreach p, $(FLAVORS), stage.$(HOST_ARCH),$(p)) ;
+build: $(foreach p, $(FLAVORS), do.image.$(HOST_ARCH),$(p)) ;
+push:  $(foreach p, $(FLAVORS), do.image.$(HOST_ARCH),$(p)) ;
 
 push.parallel:
 	@$(MAKE) $(PARALLEL) push
@@ -93,9 +86,9 @@ build.all:
 .PHONY: clean clean.nones clean.all clean.nuke
 
 clean.image.%: do.image.%
-	@$(call set_env_var,STAGING_DIR,$*); rm -rf $$STAGING_DIR
+	@$(call set_env_vars); rm -rf $$STAGING_DIR
 
-clean: $(foreach p, $(FLAVORS), clean.image.$(p))
+clean: $(foreach p, $(FLAVORS), clean.image.$(HOST_ARCH),$(p))
 
 clean.nones:
 	@docker rmi -f $(shell docker images | egrep "^<none> " | awk '{print $$3}' | uniq) || true
@@ -162,18 +155,14 @@ help:
 	@echo 'OPTIONS:'
 	@echo ''
 	@echo '  FLAVORS - ceph-container images to operate on in the form'
-	@echo '    <ceph rel>,<arch>,<os name>,<os version>,<base registry>,<base repo>,<base tag>'
+	@echo '    <CEPH_VERSION>,<BASEOS_REPO>,<BASEOS_TAG>'
 	@echo '    and multiple forms may be separated by spaces.'
-	@echo '      ceph rel - named ceph version (e.g., luminous, mimic)'
-	@echo '      arch - architecture of Ceph packages used (e.g., x86_64, aarch64)'
-	@echo '      os name - directory name for the os used by ceph-container (e.g., ubuntu)'
-	@echo '      os version - directory name for the os version used by ceph-container (e.g., 16.04)'
-	@echo '      base registry - registry to get base image from (e.g., "_" ~ x86_64, "arm64v8" ~ aarch64)'
-	@echo '      base repo - The base image to use for the daemon-base container. generally this is'
-	@echo '                  also the os name (e.g., ubuntu) but could be something like "alpine"'
-	@echo '      base tag - Tagged version of the base os to use (e.g., ubuntu:"16.04", alpine:"3.6")'
-	@echo '    e.g., FLAVORS_TO_BUILD="luminous,x86_64,ubuntu,16.04,_,ubuntu,16.04 \'
-	@echo '                            luminous,aarch64,ubuntu,16.04,arm64v8,alpine,3.6"'
+	@echo '      CEPH_VERSION - named ceph version (e.g., luminous, mimic)'
+	@echo '      BASEOS_REPO - The base image to use for the daemon-base container. This is also'
+	@echo '                    the distro path sourced from ceph-container (e.g., ubuntu, centos)'
+	@echo '      BASEOS_TAG - Tagged version of the base repo to use. Also the distro version'
+	@echo '                   sourced from ceph-container (e.g., ubuntu:"16.04", centos:"7")'
+	@echo '    e.g., FLAVORS="luminous,ubuntu,16.04 jewel,ubuntu,14.04"'
 	@echo ''
 	@echo '  REGISTRY - The name of the registry to tag images with and to push images to.'
 	@echo '             Defaults to "ceph".'

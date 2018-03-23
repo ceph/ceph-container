@@ -24,8 +24,8 @@ effectively work with this project structure, we introduce the concept of **stag
 
 ### The concept of staging
 Special tooling has been built to collect all source files with appropriate overrides into a unique
-staging directory for each flavor (each flavor is also specified by a target architecture to support
-ARM platforms). From a staging directory, containers can be built directly from the
+staging directory for each flavor (each staging directory is also specified by a target
+architecture). From a staging directory, containers can be built directly from the
 `<staging>/daemon-base/` and `<staging>/daemon/` image directories. Additionally, developers can
 inspect a staging directory's files to view exactly what will be (or has been) built into the
 container images. Additionally, in order to maintain a core source base that is as reusable as
@@ -39,16 +39,16 @@ that `FILE` may be a file or a directory containing further files.
 
 ```
 # Most specific
-ceph-releases/<ceph release>/<os distro>/<os release>/{daemon-base,daemon}/FILE
-ceph-releases/<ceph release>/<os distro>/<os release>/FILE
-ceph-releases/<ceph release>/<os distro>/{daemon-base,daemon}/FILE
-ceph-releases/<ceph release>/<os distro>/FILE
+ceph-releases/<ceph release>/<base os repository>/<base os release>/{daemon-base,daemon}/FILE
+ceph-releases/<ceph release>/<base os repository>/<base os release>/FILE
+ceph-releases/<ceph release>/<base os repository>/{daemon-base,daemon}/FILE
+ceph-releases/<ceph release>/<base os repository>/FILE
 ceph-releases/<ceph release>/{daemon-base,daemon}/FILE
 ceph-releases/<ceph release>/FILE
-ceph-releases/ALL/<os distro>/<os release>/{daemon-base,daemon}/FILE
-ceph-releases/ALL/<os distro>/<os release>/FILE
-ceph-releases/ALL/<os distro>/{daemon-base,daemon}/FILE
-ceph-releases/ALL/<os distro>/FILE
+ceph-releases/ALL/<base os repository>/<base os release>/{daemon-base,daemon}/FILE
+ceph-releases/ALL/<base os repository>/<base os release>/FILE
+ceph-releases/ALL/<base os repository>/{daemon-base,daemon}/FILE
+ceph-releases/ALL/<base os repository>/FILE
 ceph-releases/ALL/{daemon-base,daemon}/FILE
 ceph-releases/ALL/FILE
 src/{daemon-base,daemon}/FILE
@@ -79,7 +79,8 @@ digits are supported. Staging will report an error if an environment variable's 
 Environment variable replacements **cannot** be nested inside of other environment variable
 replacements. `__VAR__` file definitions, however, may specify environment variable replacements.
 
-A typical usage is to use ``__ENV_[ARCH]__`` when you need to specify the building architecture.
+A typical usage is to use ``__ENV_[HOST_ARCH]__`` when you need to specify the building
+architecture.
 
 #### Staging development aids
 To practically aid developers, helpful tools have been built for staging:
