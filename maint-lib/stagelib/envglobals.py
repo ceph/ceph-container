@@ -15,13 +15,11 @@ ALIGNED_NEWLINE = '\n' + ' '*21  # align second line to column
 # Allow lines to extend beyond 99 char limit by 6 chars to support output formatting to 100 cols
 REQUIRED_ENV_VARS = OrderedDict([
     ('CEPH_VERSION',      'Ceph named version being built (e.g., luminous, mimic)'),
-    ('ARCH',              'Architecture of binaries being built (e.g., amd64, arm32, arm64)'),
-    ('OS_NAME',           'OS name as used by the ceph-container project (e.g., ubuntu, opensuse)'),  # noqa: E501
-    ('OS_VERSION',        'OS version as used by ceph-container project (e.g., 16.04, 42.3 respectively)'),  # noqa: E501
+    ('HOST_ARCH',              'Architecture of binaries being built (e.g., amd64, arm32, arm64)'),
     ('BASEOS_REG',        'Registry for the container base image (e.g., _ (x86_64), arm64v8 (aarch64))' +  # noqa: E501
-                          ALIGNED_NEWLINE + 'There is a relation between ARCH and this value'),  # noqa: E501
-    ('BASEOS_REPO',       'Repository for the container base image (e.g., ubuntu, opensuse, alpine)'),  # noqa: E501
-    ('BASEOS_TAG',        'Tagged version of BASEOS_REPO container (e.g., 16.04, 42.3, 3.6 respectively)'),  # noqa: E501
+                          ALIGNED_NEWLINE + 'There is a relation between HOST_ARCH and this value'),  # noqa: E501
+    ('BASEOS_REPO',       'Repository for the container base image (e.g., ubuntu, opensuse)'),  # noqa: E501
+    ('BASEOS_TAG',        'Tagged version of BASEOS_REPO container (e.g., 16.04, 42.3 respectively)'),  # noqa: E501
     ('IMAGES_TO_BUILD',   'Container images to be built (usually should be "dockerfile daemon")'),
     ('STAGING_DIR',       'Dir into which files will be staged' + ALIGNED_NEWLINE +
                           'This dir will be overwritten if it already exists'),
@@ -102,7 +100,7 @@ def exportGoArchEnvVar():
     Export the environment variable 'GO_ARCH' with the golang architecture equivalent to the
     current Ceph arch. E.g., Ceph arch 'x86_64' equates to golang arch 'amd64'.
     """
-    arch = getEnvVar('ARCH')
+    arch = getEnvVar('HOST_ARCH')
     if arch in _CEPH_ARCH_TO_GOLANG_ARCH_CONVERSIONS:
         os.environ['GO_ARCH'] = _CEPH_ARCH_TO_GOLANG_ARCH_CONVERSIONS[arch]
     else:

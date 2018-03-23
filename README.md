@@ -42,21 +42,21 @@ Building ceph-container
 ### Specifying flavors for make
 The `make` tooling allows the environment variable `FLAVORS` to be optionally set by the user to
 define which flavors to operate on. Flavor specifications follow a strict format that declares what
-ceph-container source to use, what architecture to build for, and what container image to use as the
-base for the build. See `make help` for a full description.
+Ceph version to build and what container image to use as the base for the build. See `make help` for
+a full description.
 
 ### Building a single flavor
 Once the flavor is selected, specify its name in the `FLAVORS` environment variable and call the
 `build` target:
 ```
-make FLAVORS=luminous,x86_64,centos,7,_,centos,7 build
+make FLAVORS=luminous,centos,7 build
 ```
 
 ### Building multiple flavors
 Multiple flavors are specified by separating each flavor by a space and surrounding the entire
 specification in quotes and built the same as a single flavor:
 ```
-make FLAVORS="luminous,x86_64,centos,7,_,centos,7 kraken,x86_64,centos,7,_,centos,7"  build
+make FLAVORS="luminous,centos,7 kraken,ubuntu,16.04"  build
 ```
 
 Flavors can be built in parallel easily with the `build.parallel` target:

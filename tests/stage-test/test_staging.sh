@@ -4,13 +4,11 @@ set -euo pipefail
 # Integration test to make sure staging is working properly
 
 export CEPH_VERSION=luminous
-export ARCH=x86_64
-export OS_NAME=ubuntu
-export OS_VERSION=16.04
+export HOST_ARCH=x86_64
 export BASEOS_REG=_
 export BASEOS_REPO=ubuntu
 export BASEOS_TAG=16.04
-export STAGING_DIR=tests/stage-test/staging/${CEPH_VERSION}-${BASEOS_REPO}-${BASEOS_TAG}-${ARCH}
+export STAGING_DIR=tests/stage-test/staging/${CEPH_VERSION}-${BASEOS_REPO}-${BASEOS_TAG}-${HOST_ARCH}
 export IMAGES_TO_BUILD="daemon-base daemon"
 export RELEASE='test-release'
 export DAEMON_BASE_IMAGE=test-reg/daemon-base:test-release-1

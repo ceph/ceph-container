@@ -14,7 +14,7 @@ before_install:
   - docker --version
   - sudo apt-get install -y --force-yes xfsprogs
   - sudo ./travis-builds/purge_cluster.sh
-  - sudo make FLAVORS="luminous,x86_64,centos,7,_,centos,7" build
+  - sudo make FLAVORS="luminous,centos,7" build
 
 install:
   - sudo ./travis-builds/prepare_osd_fs.sh
