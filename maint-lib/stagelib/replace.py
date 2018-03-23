@@ -76,7 +76,7 @@ def _env_var_replace(template_text, file_path):
         var_name = var[len('STAGE_REPLACE_WITH_'):]  # strip STAGE_REPLACE_WITH_
         try:
             var_value = os.environ[var_name]
-        except KeyError as k:
+        except KeyError:
             sys.stderr.write(
                 'Variable {} in {} could not be replaced, because the env var {} is unset'.format(
                     var, file_path, var_name))
