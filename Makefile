@@ -112,9 +112,10 @@ clean.nones:
 
 clean.all: clean.nones
 	@rm -rf staging/
-	# Don't mess with other registries for some semblance of a safe nuke.
+	# Don't mess with other registries for some semblance of a safe clean.
 	@docker rmi -f \
-		$(shell docker images | egrep "^$(REGISTRY)/daemon(-base)? " | awk '{print $$3}' | uniq) || true
+		$(shell docker images | egrep "^$(REGISTRY)/daemon(-base)? " | \
+		  awk '{print $$3}' | uniq) || true
 
 clean.nuke: clean.all
 	@docker rmi -f \
