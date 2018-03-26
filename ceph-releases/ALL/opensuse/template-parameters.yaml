@@ -1,0 +1,28 @@
+template:
+  maintainer: Blaine Gardner <blaine.gardner@suse.com>
+  packages:
+    ceph:
+      rgw: ceph-radosgw
+  install:
+    packages: |-
+      ( \
+      {% for  name, uri in template['repos'].items() %}
+            zypper --non-interactive addrepo {{ uri }} {{ name }} && \
+      {% endfor %}
+            zypper --non-interactive --gpg-auto-import-keys refresh && \
+            zypper --non-interactive update \
+              --no-recommends --auto-agree-with-licenses --replacefiles --details && \
+            zypper --non-interactive install \
+              --no-recommends --auto-agree-with-licenses --replacefiles --details \
+      {{ template['render']['packages']['with_point_release'] }} && \
+            rpm --query \
+      {{ template['render']['packages']['names_only'] }} && \
+      {% for name, uri in template['repos'].items() %}
+            zypper --non-interactive removerepo {{ name }} && \
+      {% endfor %}
+            echo "SUSE install done" \
+          ) || ( retval=$? && cat /var/log/zypper.log && exit $retval )
+  cleanup:
+    packages: |-
+      zypper --non-interactive clean --all && \
+          rm -f /var/log/zypper.log

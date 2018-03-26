@@ -23,6 +23,22 @@ def IOOSErrorGracefulFail(io_os_error, message):
     sys.exit(1)
 
 
+def read_text_from_file(file_path):
+    """Read text from a file."""
+    try:
+        with open(file_path, 'r') as f:
+            return f.read()
+    except (OSError, IOError) as o:
+        IOOSErrorGracefulFail(o, "Could not read text from file: {}".format(file_path))
+
+
+def read_text_from_file_if_exists(file_path):
+    """Read text from a file. If the file doesn't exist, return empty string."""
+    if not os.path.isfile(file_path):
+        return ''
+    return read_text_from_file(file_path)
+
+
 def save_text_to_file(text, file_path):
     """Save text to a file at the file path. Will overwrite an existing file at the same path."""
     try:
@@ -32,7 +48,18 @@ def save_text_to_file(text, file_path):
         IOOSErrorGracefulFail(o, "Could not write text to file: {}".format(file_path))
 
 
-# List only files in dir
+def save_text_to_file_with_backup(text, file_path, backup_path=None):
+    """Save text to a file at the file name. Rename an existing file with .bak extension."""
+    if not backup_path:
+        backup_path = "{}.bak".format(file_path)
+    try:
+        if os.path.isfile(file_path):
+            os.rename(file_path, backup_path)
+    except (OSError, IOError) as o:
+        IOOSErrorGracefulFail(o, "Could not rename file {0} to {0}.bak".format(file_path))
+    save_text_to_file(text, file_path)
+
+
 def list_files(path):
     """ List all files in the path non-recursively. Do not list dirs."""
     return [f for f in os.listdir(path)
@@ -49,11 +76,16 @@ def mkdir_if_dne(path, mode=0o755):
 
 
 # Copy file from src to dst
-def _copy_file(file_path, dst_path):
+def _copy_file(file_path, dst_dir):
+    from stagelib.templating import is_template_param_file, merge_template_param_files
+    if is_template_param_file(file_path):
+        dst_path = os.path.join(dst_dir, os.path.basename(file_path))
+        merge_template_param_files(dst_path, file_path)
+        return
     try:
-        shutil.copy2(file_path, dst_path)
+        shutil.copy2(file_path, dst_dir)
     except (OSError, IOError) as o:
-        IOOSErrorGracefulFail(o, "Could not copy file {} to {}".format(file_path, dst_path))
+        IOOSErrorGracefulFail(o, "Could not copy file {} to {}".format(file_path, dst_dir))
 
 
 def copy_files(filenames, src_path, dst_path, files_copied={}):

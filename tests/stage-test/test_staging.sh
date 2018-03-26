@@ -16,7 +16,16 @@ export RELEASE='test-release'
 export DAEMON_BASE_IMAGE=test-reg/daemon-base:test-release-1
 export DAEMON_IMAGE=test-reg/daemon:test-release-1
 
-run_stage=$(cat <<'EOF'
+unittest_merge_dicts=$(cat <<'EOF'
+import sys
+sys.path.append('maint-lib/stagelib')
+from merge_dicts import _test_merge_dicts
+_test_merge_dicts()
+EOF
+)
+python3 -c "${unittest_merge_dicts}"
+
+test_staging=$(cat <<'EOF'
 import sys
 sys.path.append('maint-lib')
 from stage import *
@@ -41,10 +50,11 @@ git.branch_is_dirty = branch_is_dirty
 main(CORE_FILES_DIR, CEPH_RELEASES_DIR)
 EOF
 )
-python3 -c "${run_stage}" | tee tests/stage-test/staging_output.txt
+python3 -c "${test_staging}" | tee tests/stage-test/staging_output.txt
 mv tests/stage-test/staging_output.txt ${STAGING_DIR}
 
-diff --brief -Nr --exclude 'find-src' --exclude '*.log' --exclude '*.bak' \
+diff --brief -Nr --exclude 'find-src' \
+     --exclude '*.log' --exclude '*.bak' --exclude 'template-parameters.yaml' \
      tests/stage-test/stage-key/ "${STAGING_DIR}"
 
 echo "STAGING TEST PASSED"

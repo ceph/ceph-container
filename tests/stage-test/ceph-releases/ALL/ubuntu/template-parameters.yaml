@@ -1,0 +1,6 @@
+template:
+  maintainer: Ubuntu Maintainer "email@ubuntu.email"
+  ceph-releases:
+    all:
+      ubuntu:
+        root: cr-a-u-root-data

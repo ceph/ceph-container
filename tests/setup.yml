@@ -35,7 +35,7 @@
         block: |
           INSECURE_REGISTRY='--insecure-registry {{ public_network }}'
           BLOCK_REGISTRY='--block-registry docker.io'
-        marker: "# {mark} ANSIBLE MANAGED BLOCK" 
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
 
     - name: restart docker
       service:

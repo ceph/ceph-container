@@ -11,7 +11,7 @@ from stagelib.envglobals import (verifyRequiredEnvVars, getEnvVar,
                                  exportGitInfoEnvVars, exportGoArchEnvVar)
 from stagelib.filetools import (list_files, mkdir_if_dne, copy_files, recursive_copy_dir,
                                 IOOSErrorGracefulFail, save_files_copied)
-from stagelib.replace import do_variable_replace
+from stagelib.templating import render_image_build_files
 
 
 # Set default values for tunables (primarily only interesting for testing)
@@ -84,18 +84,19 @@ def main(CORE_FILES_DIR, CEPH_RELEASES_DIR):
         logging.info('')
         logging.info('{}/'.format(image))
         logging.info('    Copying files (preceding * indicates file has been modified)')
+        staging_path = os.path.join(STAGING_DIR, image)
         for src_path in path_search_order:
             if not os.path.isdir(src_path):
                 continue
             src_files = list_files(src_path)
-            staging_path = os.path.join(STAGING_DIR, image)
             mkdir_if_dne(staging_path, mode=0o755)
             # Copy files in each path first, then copy contents of <image> dir
             copy_files(src_files, src_path, staging_path, files_copied)
             recursive_copy_dir(src_path=os.path.join(src_path, image), dst_path=staging_path,
                                files_copied=files_copied)
-        # Do variable replacements on all files in <staging>/<image>
-        do_variable_replace(replace_root_dir=os.path.join(STAGING_DIR, image))
+        # Render templates in <staging>/<image>
+        logging.info('    Rendering image build file templates')
+        render_image_build_files(root_dir=staging_path)
 
     # Save a file named files-sources to the staging dir
     save_files_copied(files_copied, os.path.join(STAGING_DIR, 'files-sources'),

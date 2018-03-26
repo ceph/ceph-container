@@ -1,0 +1,4 @@
+template:
+  repos:
+    ceph:
+      http://download.opensuse.org/repositories/filesystems:/ceph:/${CEPH_VERSION}/{{ template["os-repo"] }}/

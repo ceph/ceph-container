@@ -1,0 +1,3 @@
+template:
+  packages:
+    list: "{{ template['packages']['daemon']['list'] }}"
