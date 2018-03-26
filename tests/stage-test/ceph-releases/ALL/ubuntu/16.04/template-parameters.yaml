@@ -1,0 +1,7 @@
+template:
+  os-codename: xenial
+  ceph-releases:
+    all:
+      ubuntu:
+        '16.04':
+          root: cr-a-u-x-root-data

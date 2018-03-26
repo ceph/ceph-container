@@ -1,0 +1,11 @@
+template:
+  ceph-releases:
+    all:
+      ubuntu:
+        '16.04': {daemon-base: cr-a-u-x-daemon-base-data, root: cr-a-u-x-root-data}
+        root: cr-a-u-root-data
+  maintainer: Ubuntu Maintainer "email@ubuntu.email"
+  nested: "{{ template['maintainer'] }}\n    {{ template['os-codename'] }}\n    {{\
+    \ template['bloc'] }} && \\\n    echo 'hi mom'"
+  os-codename: xenial
+  src: {daemon-base: src-daemon-base-data, root: src-root-data}

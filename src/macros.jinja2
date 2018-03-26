@@ -1,0 +1,79 @@
+{#
+    Render packages assuming data matches the following format. Items in all-caps must match exactly
+    with matching items for rendering to work properly. Point release text rendering relies on
+    knowing the current package group. Lists are a dumb (not-smart) type that won't generally work
+    with package group detection (and therefore point release text).
+
+    template:
+      packages:
+        point_release_src: (optional)
+          PACKAGE_GROUP_1: PKG_GRP_1_PT_REL_SPEC
+        PACKAGE_GROUP_1:
+          pkg_1: package_1
+          pkg_2: package_2
+        package_group_2:
+          - package_3
+          - package_4
+        package_aggregate_1: (automatically detect pkg group from each key for pt relase rendering)
+          PACKAGE_GROUP_1: {{ template['packages']['PACKAGE_GROUP_1'] }}
+          package_group_2: *grp-2
+        package_aggregate_2: (cannot automatically detect package groups)
+          - *grp-1
+          - *grp-2
+
+    (w/ env PKG_GRP_1_PT_REL_SPEC=">1.2.3")
+    render_packages(template.packages.package_aggregate_1) renders to the following block:
+        package_1>1.2.3 \
+        package_2>1.2.3 \
+        package_3 \
+        package_4 \
+#}
+{% macro render_packages(package_spec,
+                         package_group='',
+                         render_point_release=true) %}
+    {% set packages = package_spec|render %} {# must explicitly render what we were passed #}
+    {% if packages == '' %}
+        {# do nothing if packages is unset #}
+    {% elif packages is mapping %} {# is likely a dict #}
+        {% for key, value in packages.items() %}
+            {% if value is mapping %}
+                {# If the value is another mapping, we've moved on to a new package group #}
+                {{- render_packages(value, key, render_point_release) -}}
+            {% else %}
+                {# If the value is a list or a string, we keep the same package group #}
+                {{- render_packages(value, package_group, render_point_release) -}}
+            {% endif %}
+        {% endfor %}
+    {% elif packages is string %}
+        {% set point_release_var =
+            template['packages']['point_release_src'][package_group]|default('', true) %}
+        {% set point_release_text = env[point_release_var]|default('', true) %}
+            {# RENDER PACKAGE #}
+            {{ packages }}{% if render_point_release %}{{ point_release_text }}{% endif %} \
+    {% elif packages is iterable %}
+        {# Do not render list directly, but recursively render on each item #}
+        {% for package in packages %}
+            {{- render_packages(package, package_group, render_point_release) -}}
+        {% endfor %}
+    {% endif %}
+{% endmacro %}
+
+
+{#
+    Render a series of nested key-value pairs as labels.
+#}
+{% macro render_labels(labels, label_group='') %}
+    {% if labels == '' %}
+        {# Do not render blank labels #}
+    {% elif labels is mapping %}
+        {% for label, value in labels.items() %}
+            {% if value is mapping %}
+                {{- render_labels(value, label_group=[label_group, label, '.']|join('')) -}}
+            {% elif value is string %}
+LABEL {{ [label_group, label]|join('') }}="{{ value }}"
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        {{ "render_labels only supports mappings, not lists or anything else"/0 }}
+    {% endif %}
+{% endmacro %}

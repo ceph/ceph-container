@@ -1,0 +1,9 @@
+template:
+  maintainer: src-root-maintainer "root@email.com"
+  src:
+    root: src-root-data
+  nested: |-
+    {{ template['maintainer'] }}
+        {{ template['os-codename'] }}
+        {{ template['bloc'] }} && \
+        echo 'hi mom'

@@ -1,0 +1,125 @@
+template:
+  maintainer: Sébastien Han <seb@redhat.com>
+  packages:
+    point_release_src:
+      # <package family>: <name of environment var from which to get the point release spec>
+      # For below, In an env w/ CEPH_POINT_RELEASE=">=12.2.0", render_packages may append ">=12.2.0"
+      # to all ceph packages on rendering.
+      ceph: CEPH_POINT_RELEASE
+    ceph:
+      common: ceph-common
+      mon: ceph-mon
+      osd: ceph-osd
+      mds: ceph-mds
+      mgr: ceph-mgr
+      rgw: radosgw
+      rbd-mirror: rbd-mirror
+    ganesha:
+      core: nfs-ganesha
+      ceph: nfs-ganesha-ceph
+      rgw: nfs-ganesha-rgw
+    image:
+      daemon-base:
+        # Packages in daemon-base image
+        ca-certs: ca-certificates
+        kmod: kmod
+        ceph: "{{ template['packages']['ceph'] }}"
+        ganesha: "{{ template['packages']['ganesha'] }}"
+# daemon:
+#   # Packages in daemon image
+#   - sharutils
+#   - lvm2
+#   - '{{ template.packages.kubectl }}'
+#   - '{{ template.packages.forego }}'
+#   - '{{ template.packages.s3cmd }}'
+#   - '{{ template.packages.etcd }}'
+#   - '{{ template.packages.confd }}'
+    confd: confd
+    etcd: etcd
+    forego: forego
+    kubectl: kubernetes-client
+    s3cmd: s3cmd
+
+
+  # Sane default: No preinstallation. This isn't always necessary
+  preinstall: ""
+
+  install:
+    packages: |-
+      # Must be implemented by each distro
+          # Typical workflow: add new repos; refresh repos; install packages
+          /bin/false
+    from-web: |-
+      # Sane default: do not install packages from web. It's most ideal to install packages, but
+          # sometimes they aren't available.
+          # Typical workflow: download package from web, extract, install, then clean unused files
+          /bin/true
+
+
+  cleanup:
+    packages: |-
+      # Sane default: do not do package cleanup.
+          # It is recommended that each distro implement this to clean package mgr remnants, etc.
+          /bin/true
+
+    common: |-
+      # Clean common files like /tmp, /var/lib, etc.
+          rm -rf \
+              /etc/{selinux,systemd,udev} \
+              /lib/{lsb,udev} \
+              /tmp/* \
+              /usr/lib{,64}/{locale,systemd,udev,dracut} \
+              /usr/share/{doc,info,locale,man} \
+              /usr/share/{bash-completion,pkgconfig/bash-completion.pc} \
+              /var/log/* \
+              /var/tmp/* && \
+          find  / -xdev -name "*.pyc" -o -name "*.pyo" -exec rm -f {} \; && \
+          # ceph-dencoder is only used for debugging, compressing it saves 10MB
+          # If needed it will be decompressed
+          # TODO: Is ceph-dencoder safe to remove as rook was trying to do?
+          # rm -f /usr/bin/ceph-dencoder && \
+          if [ -f /usr/bin/ceph-dencoder ]; then gzip -9 /usr/bin/ceph-dencoder; fi && \
+          # TODO: What other ceph stuff needs removed/stripped/zipped here?
+          # TODO: There was some overlap between this and the ceph clean? Where does it belong?
+          #       If it's idempotent, it can *always* live here, even if it doesn't always apply
+          # TODO: Should we even strip ceph libs at all?
+          bash -c " \
+            function ifstrip () { if compgen -g "$1"; then strip -s "$1"; fi } && \
+            ifstrip /usr/lib{,64}/ceph/erasure-code/* && \
+            ifstrip /usr/lib{,64}/rados-classes/* && \
+            ifstrip /usr/lib{,64}/python*/{dist,site}-packages/{rados,rbd,rgw}.*.so && \
+            ifstrip /usr/bin/{crushtool,monmaptool,osdmaptool}" && \
+          # Photoshop files inside a container ?
+          rm -f /usr/lib/ceph/mgr/dashboard/static/AdminLTE-*/plugins/datatables/extensions/TableTools/images/psd/* && \
+          # Some logfiles are not empty, there is no need to keep them
+          find /var/log/ -type f -exec truncate -s 0 {} \;
+
+  labels:
+    source:
+      repo      : https://github.com/ceph/ceph-container
+    build:
+      release   : "{{ env['RELEASE'] }}"
+      repo      : "{{ env['GIT_REPO'] }}"
+      branch    : "{{ env['GIT_BRANCH'] }}"
+      commit    : "{{ env['GIT_COMMIT'] }}"
+      clean     : "{{ env['GIT_CLEAN'] }}"
+      maintainer: "{{ template['maintainer'] }}"
+
+  # Use this 'render' section for inserting safe text into your files
+  # E.g., Use {{ template.render.packages.names_only }} to render a list of packages in the current
+  #   image without point-release text added.
+  render:
+    # Render all labels
+    labels: |-
+      {% from 'macros.jinja2' import render_labels with context %}
+      {{ render_labels(template['labels']) }}
+
+    packages:
+      # Render packages, one package per line, with escape char '\' following each line.
+      # Package renders can include point release info (for installs), or names only (for queries)
+      with_point_release: |-
+        {% from 'macros.jinja2' import render_packages with context %}
+        {{ render_packages(template['packages']['image']['this_image'], render_point_release=true) }}
+      names_only: |-
+        {% from 'macros.jinja2' import render_packages with context %}
+        {{ render_packages(template['packages']['image']['this_image'], render_point_release=false) }}

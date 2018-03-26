@@ -1,6 +1,5 @@
-Ceph version: luminous
-Maintainer: ubuntu Maintainer <ubuntu@maintainer.com>
-Stuff: # Do daemon-base stuff
-          hi mom
-Empty: 
-Nums: haxor
+Ceph version: STAGE_REPLACE_WITH_CEPH_VERSION
+Maintainer: __MAINTAINER__
+Stuff: __DO_STUFF__
+Empty: __EMPTY__
+Nums: __H4X0R__

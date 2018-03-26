@@ -1,0 +1,6 @@
+template:
+  ceph-releases:
+    all:
+      ubuntu:
+        '16.04':
+          daemon-base: cr-a-u-x-daemon-base-data

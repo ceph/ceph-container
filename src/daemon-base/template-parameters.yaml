@@ -1,0 +1,4 @@
+template:
+  packages:
+    image:
+      this_image: "{{ template['packages']['image']['daemon-base'] }}"
