@@ -39,12 +39,13 @@ def _filediff_intersects_sources(filediff, sources):
 VS_BRANCH = 'origin/master'
 if 'VS_BRANCH' in os.environ and not os.environ['VS_BRANCH'] == '':
     VS_BRANCH = os.environ['VS_BRANCH']
+VS_BRANCH_SPLIT = VS_BRANCH.split('/')
 
 # Get list of files different from VS_BRANCH
 try:
-    _ = _run_cmd(['git', 'fetch', 'origin', 'master', '--quiet'])
+    _ = _run_cmd(['git', 'fetch'] + VS_BRANCH_SPLIT + ['--quiet'])
 except subprocess.CalledProcessError:
-    _fatal("Could not fetch origin master. Is your remote named 'origin'?")
+    _fatal("Could not fetch {}! Check that the branch exists!".format(VS_BRANCH_SPLIT.join(' ')))
 
 try:
     filediff = _run_cmd(['git', 'diff', '--name-only', VS_BRANCH])
