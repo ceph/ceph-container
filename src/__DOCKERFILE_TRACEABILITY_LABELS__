@@ -1,14 +1,14 @@
 # What is the actual release ? If not defined, this equals the git branch name
-LABEL RELEASE="STAGE_REPLACE_WITH_RELEASE"
+LABEL RELEASE="__ENV_[RELEASE]__"
 
 # What was the url of the git repository
-LABEL GIT_REPO="STAGE_REPLACE_WITH_GIT_REPO"
+LABEL GIT_REPO="__ENV_[GIT_REPO]__"
 
 # What was the git branch used to build this container
-LABEL GIT_BRANCH="STAGE_REPLACE_WITH_GIT_BRANCH"
+LABEL GIT_BRANCH="__ENV_[GIT_BRANCH]__"
 
 # What was the commit ID of the current HEAD
-LABEL GIT_COMMIT="STAGE_REPLACE_WITH_GIT_COMMIT"
+LABEL GIT_COMMIT="__ENV_[GIT_COMMIT]__"
 
 # Was the repository clean when building ?
-LABEL GIT_CLEAN="STAGE_REPLACE_WITH_GIT_CLEAN"
+LABEL GIT_CLEAN="__ENV_[GIT_CLEAN]__"
