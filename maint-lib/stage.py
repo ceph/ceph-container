@@ -7,6 +7,8 @@ import shutil
 import sys
 import time
 
+from collections import OrderedDict
+
 from stagelib.envglobals import (verifyRequiredEnvVars, getEnvVar,
                                  exportGitInfoEnvVars, exportGoArchEnvVar)
 from stagelib.filetools import (list_files, mkdir_if_dne, copy_files, recursive_copy_dir,
@@ -78,7 +80,7 @@ def main(CORE_FILES_DIR, CEPH_RELEASES_DIR):
     ]
     logging.debug('Path search order: {}'.format(path_search_order))
 
-    files_copied = {}
+    files_copied = OrderedDict()
     # e.g., IMAGES_TO_BUILD = ['daemon-base', 'daemon']
     for image in IMAGES_TO_BUILD:
         logging.info('')
