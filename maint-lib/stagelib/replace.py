@@ -12,8 +12,8 @@ from stagelib.filetools import save_text_to_file, IOOSErrorGracefulFail
 VARIABLE_FILE_PATTERN = re.compile('\_\_[A-Z\_0-9]+\_\_')
 
 # Support global variable replacement for variables matching format
-# 'STAGE_REPLACE_WITH_<GLOBAL_VAR_NAME>'. Support only globals w/ capital letters and underscores
-GLOBAL_PATTERN = re.compile('STAGE_REPLACE_WITH_[A-Z\_0-9]+')
+# '__ENV_[<GLOBAL_VAR_NAME>]__'. Support only globals w/ capital letters and underscores
+GLOBAL_PATTERN = re.compile(r'\_\_ENV\_\[([A-Z\_0-9]+)\]\_\_')
 
 REPLACE_LOGTEXT = '        {:<30} <- {:<46}  :: {}'
 PARENTHETICAL_LOGTEXT = '        {:>80}     {}'
@@ -64,25 +64,25 @@ def _file_replace(template_text, file_path, variable_file_dir):
     return template_text
 
 
-# Perform STAGE_REPLACE_WITH_VAR replacement on text.
+# Perform __ENV_[VAR]__ replacement on text.
 def _env_var_replace(template_text, file_path):
     variable_matches = re.findall(GLOBAL_PATTERN, template_text)
     if not variable_matches:
         # logging.debug('        {:<80}  -> {}'.format('No GLOBAL_VARs', file_path))
         logging.debug(PARENTHETICAL_LOGTEXT.format(
-            '[No STAGE_REPLACE_WITH_VARs to replace]', file_path))
+            '[No __ENV_[VAR]__s to replace]', file_path))
         return template_text
-    for var in variable_matches:
-        var_name = var[len('STAGE_REPLACE_WITH_'):]  # strip STAGE_REPLACE_WITH_
+    for var_name in variable_matches:
+        text_to_replace = '__ENV_[' + var_name + ']__'
         try:
             var_value = os.environ[var_name]
         except KeyError:
             sys.stderr.write(
                 'Variable {} in {} could not be replaced, because the env var {} is unset'.format(
-                    var, file_path, var_name))
+                    text_to_replace, file_path, var_name))
             sys.exit(1)
-        logging.info(REPLACE_LOGTEXT.format(var, var_value, file_path))
-        template_text = template_text.replace(var, var_value)
+        logging.info(REPLACE_LOGTEXT.format(text_to_replace, var_value, file_path))
+        template_text = template_text.replace(text_to_replace, var_value)
     return template_text
 
 
@@ -92,11 +92,11 @@ def do_variable_replace(replace_root_dir):
      1. For each __VARIABLE__ in the file, look for a corresponding __VARIABLE__ file in the
         replace root dir, and replace the __VARIABLE__ in the file with the text from the
         corresponding __VARIABLE__ file.
-     2. For each STAGE_REPLACE_WITH_<ENV_VAR> variable in the file, replace the variable with
-        the content of the environment variable ENV_VAR.
-    __VARIABLE__ files are allowed to contain additional variables. Each file is processed multiple
-    times until there are no more __VARIABLES__ to be replaced. STAGE_REPLACE_WITH_<ENV_VAR>s are
-    not allowed to contain additional variables. They are only processed once.
+    2. For each __ENV_[<ENV_VAR>]__ variable in the file, replace the variable with the content of
+       the environment variable ENV_VAR.
+       __VARIABLE__ files are allowed to contain additional variables. Each file is processed
+       multiple times until there are no more __VARIABLES__ to be replaced. __ENV_[<ENV_VAR>]__s
+       are not allowed to contain additional variables. They are only processed once.
     """
     logging.info('    Replacing variables')
     for dirname, subdirs, files in os.walk(replace_root_dir, topdown=True):

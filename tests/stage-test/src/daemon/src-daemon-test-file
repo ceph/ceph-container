@@ -1,3 +1,3 @@
-Arch: STAGE_REPLACE_WITH_ARCH
+Arch: __ENV_[ARCH]__
 Maintainer: __MAINTAINER__
 Stuff: __DO_STUFF__

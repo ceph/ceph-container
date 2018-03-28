@@ -1,5 +1,5 @@
-Git repo: STAGE_REPLACE_WITH_GIT_REPO
-Git branch: STAGE_REPLACE_WITH_GIT_BRANCH
-Git commit: STAGE_REPLACE_WITH_GIT_COMMIT
-Git clean: STAGE_REPLACE_WITH_GIT_CLEAN
-Go arch: STAGE_REPLACE_WITH_GO_ARCH
+Git repo: __ENV_[GIT_REPO]__
+Git branch: __ENV_[GIT_BRANCH]__
+Git commit: __ENV_[GIT_COMMIT]__
+Git clean: __ENV_[GIT_CLEAN]__
+Go arch: __ENV_[GO_ARCH]__

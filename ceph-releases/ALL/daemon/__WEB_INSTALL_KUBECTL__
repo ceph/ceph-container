@@ -1,7 +1,7 @@
 echo 'Web install kubectl' && \
       KUBECTL_VERSION=v1.6.0 && \
       # Assume linux
-      KUBECTL_ARCH=STAGE_REPLACE_WITH_GO_ARCH && \
+      KUBECTL_ARCH=__ENV_[GO_ARCH]__ && \
       wget -q -O /usr/local/bin/kubectl \
         "https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/${KUBECTL_ARCH}/kubectl" && \
       chmod +x /usr/local/bin/kubectl

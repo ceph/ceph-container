@@ -8,7 +8,7 @@ bash -c ' \
   fi && \
   if [ -n "__ISCSI_PACKAGES__" ]; then \
     for repo in ceph-iscsi-config ceph-iscsi-cli tcmu-runner; do \
-      curl -L https://shaman.ceph.com/api/repos/$repo/master/latest/STAGE_REPLACE_WITH_OS_NAME/STAGE_REPLACE_WITH_OS_VERSION/repo > /etc/yum.repos.d/$repo.repo ; \
+      curl -L https://shaman.ceph.com/api/repos/$repo/master/latest/__ENV_[OS_NAME]__/__ENV_[OS_VERSION]__/repo > /etc/yum.repos.d/$repo.repo ; \
     done ; \
   fi' && \
 yum update -y && \

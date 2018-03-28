@@ -1,4 +1,4 @@
-Ceph version: STAGE_REPLACE_WITH_CEPH_VERSION
+Ceph version: __ENV_[CEPH_VERSION]__
 Maintainer: __MAINTAINER__
 Stuff: __DO_STUFF__
 Empty: __EMPTY__

@@ -59,9 +59,9 @@ src/FILE
 #### Basic templating in staging
 ##### Variable file replacements
 In any source file, a special variable in the form `__VAR_NAME__` (two leading and trailing
-underscores with capital letters and underscores between) can be placed. Once all files are staged,
-the `__VAR_NAME__` variable will be replaced with the raw contents of the file with the named
-`__VAR_NAME__`. Trailing whitespace is stripped from the variable file before insertion.
+underscores with capital letters, digits, and underscores between) can be placed. Once all files are
+staged, the `__VAR_NAME__` variable will be replaced with the raw contents of the file with the
+named `__VAR_NAME__`. Trailing whitespace is stripped from the variable file before insertion.
 `__VAR_NAME__` files are allowed to be empty, but they are not allowed to be nonexistent if a file
 declares them. A `__VAR_NAME__` definition file may contain nested `__OTHER_VAR_NAME__` variables.
 
@@ -71,15 +71,15 @@ return true. As an example, `echo 'first' && __DO_STUFF__ && echo 'last'` will p
 content `/bin/true`, as an empty file will cause an error.
 
 ##### Environment variable replacements
-In any source file, a special variable in the form `STAGE_REPLACE_WITH_ENV_VAR` (capital letters
-with underscores) can placed. Once all files are staged, the `STAGE_REPLACE_WITH_ENV_VAR` variable
-will be replaced with the raw contents of the environment variable named `ENV_VAR`.
+In any source file, a special variable in the form `__ENV_[ENV_VAR]__` can placed. Once all files
+are staged, the `__ENV_[ENV_VAR]__` variable will be replaced with the raw contents of the
+environment variable named `ENV_VAR`. Only environment variables with all-caps, underscores, and
+digits are supported. Staging will report an error if an environment variable's value is unset.
 
 Environment variable replacements **cannot** be nested inside of other environment variable
 replacements. `__VAR__` file definitions, however, may specify environment variable replacements.
 
-A typical usage is to use ``STAGE_REPLACE_WITH_ARCH`` when you need to specify the building
-architecture.
+A typical usage is to use ``__ENV_[ARCH]__`` when you need to specify the building architecture.
 
 #### Staging development aids
 To practically aid developers, helpful tools have been built for staging:
