@@ -79,17 +79,17 @@ if [[ "${#FLAVOR_ARRAY[@]}" -eq "1" ]]; then
   FLAVOR="${FLAVOR_ARRAY[0]}"
 else
   # if more than one release/distro is impacted then we test this in priority
-  FLAVOR="luminous,ubuntu,16.04"
+  FLAVOR="luminous,centos,7"
 fi
 
 CURRENT_CEPH_STABLE_RELEASE="$(echo $FLAVOR|awk -F ',' '{ print $1}')"
 
 # CEPH_STABLE_RELEASE is an info passed by the CI (see tox.ini)
 # if CEPH_STABLE_RELEASE does not match CURRENT_CEPH_STABLE_RELEASE then CEPH_STABLE_RELEASE wins
-# so we will build the desired CEPH_STABLE_RELEASE since the current patch didn't change the ceph version
+# so we will build the desired CEPH_STABLE_RELEASE since the current patch didn't change the Ceph version
 # Since we test all the Ceph releases, we will always test the impacted one
 if [[ "$CEPH_STABLE_RELEASE" != "$CURRENT_CEPH_STABLE_RELEASE" ]]; then
-  FLAVOR="$CEPH_STABLE_RELEASE,ubuntu,16.04"
+  FLAVOR="$CEPH_STABLE_RELEASE,centos,7"
 fi
 
 echo "Building flavor $FLAVOR"
