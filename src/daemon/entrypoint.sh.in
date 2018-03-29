@@ -163,22 +163,22 @@ case "$CEPH_DAEMON" in
       log "ERROR: tcmu_runner scenario is only available on Red Hat systems."
     fi
     ;;
-  iscsi_api)
-    # TAG: iscsi_api
+  rbd_target_api)
+    # TAG: rbd_target_api
     if is_redhat; then
       source start_rbd_target_api.sh
       start_rbd_target_api
     else
-      log "ERROR: iscsi_api scenario is only available on Red Hat systems."
+      log "ERROR: rbd_target_api scenario is only available on Red Hat systems."
     fi
     ;;
-  iscsi_gw)
-    # TAG: iscsi_gw
+  rbd_target_gw)
+    # TAG: rbd_target_gw
     if is_redhat; then
       source start_rbd_target_gw.sh
       start_rbd_target_gw
     else
-      log "ERROR: iscsi_gw scenario is only available on Red Hat systems."
+      log "ERROR: rbd_target_gw scenario is only available on Red Hat systems."
     fi
     ;;
   *)
