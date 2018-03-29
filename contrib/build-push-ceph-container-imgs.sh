@@ -73,7 +73,7 @@ function push_ceph_imgs_latest {
   fi
 
   for i in daemon-base daemon; do
-    tag=ceph/$i:${BRANCH}-${LATEST_COMMIT_SHA}-luminous-ubuntu-16.04-x86_64
+    tag=ceph/$i:${BRANCH}-${LATEST_COMMIT_SHA}-luminous-centos-7-x86_64
     # tag latest daemon-base and daemon images
     docker tag "$tag" ceph/$i:latest
 
