@@ -21,8 +21,11 @@ PARENTHETICAL_LOGTEXT = '        {:>80}     {}'
 
 # Read text from the file
 def _get_file_text(file_path):
-    with open(file_path, 'r') as txtfile:
-        return txtfile.read()
+    try:
+        with open(file_path, 'r') as txtfile:
+            return txtfile.read()
+    except (OSError, IOError) as o:
+        IOOSErrorGracefulFail(o, "Cannot read or decode {} \n".format(file_path))
 
 
 # Given a variable file, read the variable file, and replace it's corresponding
