@@ -1,1 +1,1 @@
-tcmu-runner ceph-iscsi-config ceph-iscsi-cli libtcmu
+tcmu-runner ceph-iscsi-config ceph-iscsi-cli
