@@ -33,6 +33,9 @@ REGISTRY ?= ceph
 # Could be overrided by user at build time
 RELEASE ?= $(shell git rev-parse --abbrev-ref HEAD)
 
+DAEMON_BASE_TAG ?= ""
+DAEMON_TAG ?= ""
+
 
 # ==============================================================================
 # Internal definitions
@@ -166,9 +169,15 @@ help:
 	@echo ''
 	@echo '  REGISTRY - The name of the registry to tag images with and to push images to.'
 	@echo '             Defaults to "ceph".'
+	@echo '             If specified as empty string, no registry will be prepended to the tag.'
 	@echo '    e.g., REGISTRY="myreg" will tag images "myreg/daemon{,-base}" and push to "myreg".'
 	@echo ''
 	@echo '  RELEASE - The release version to integrate in the tag. If omitted, set to the branch name.'
+	@echo ''
+	@echo '  DAEMON_BASE_TAG - Override the tag name for the daemon-base image'
+	@echo '  DAEMON_TAG - Override the tag name for the daemon image'
+	@echo '    For tags above, the final image tag will include the registry defined by "REGISTRY".'
+	@echo '    e.g., REGISTRY="myreg" DAEMON_TAG="mydaemontag" will tag the daemon "myreg/mydaemontag"'
 	@echo ''
 
 show.flavors:
