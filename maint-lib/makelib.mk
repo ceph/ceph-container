@@ -18,14 +18,21 @@ $(shell bash -c 'set -eu ; \
 	set_var BASEOS_TAG        "$(word 4, $(subst $(comma), , $(1)))" ; \
 	set_var BASEOS_REG        "_" ; \
 	set_var IMAGES_TO_BUILD   "$(IMAGES_TO_BUILD)" ; \
+
 	set_var STAGING_DIR       "staging/$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH" ; \
-	set_var BASE_IMAGE        "$$BASEOS_REG/$$BASEOS_REPO:$$BASEOS_TAG" ; \
-	set_var BASE_IMAGE        "$${BASE_IMAGE#_/}" ; \
-	set_var DAEMON_BASE_IMAGE \
-	  "$(REGISTRY)/daemon-base:$(RELEASE)-$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH" ; \
-	set_var DAEMON_IMAGE \
-	  "$(REGISTRY)/daemon:$(RELEASE)-$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH" ; \
-	set_var RELEASE           "$(RELEASE)" \
+	base_img="$$BASEOS_REG/$$BASEOS_REPO:$$BASEOS_TAG" ; \
+	set_var BASE_IMAGE        "$${base_img#_/}" ; \
+	set_var RELEASE           "$(RELEASE)" ; \
+	\
+	daemon_base_img="daemon-base:$(RELEASE)-$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH" ; \
+	if [ -n "$(DAEMON_BASE_TAG)" ] ; then daemon_base_img="$(DAEMON_BASE_TAG)" ; fi ; \
+	if [ -n "$(REGISTRY)" ]; then daemon_base_img="$(REGISTRY)/$$daemon_base_img" ; fi ; \
+	set_var DAEMON_BASE_IMAGE "$$daemon_base_img" ; \
+	\
+	daemon_img="daemon:$(RELEASE)-$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH" ; \
+	if [ -n "$(DAEMON_TAG)" ] ; then daemon_img="$(DAEMON_TAG)" ; fi ; \
+	if [ -n "$(REGISTRY)" ]; then daemon_img="$(REGISTRY)/$$daemon_img" ; fi ; \
+	set_var DAEMON_IMAGE      "$$daemon_img" ; \
 	'
 )
 endef
