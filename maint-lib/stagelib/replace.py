@@ -15,7 +15,7 @@ VARIABLE_FILE_PATTERN = re.compile('\_\_[A-Z\_0-9]+\_\_')
 # '__ENV_[<GLOBAL_VAR_NAME>]__'. Support only globals w/ capital letters and underscores
 GLOBAL_PATTERN = re.compile(r'\_\_ENV\_\[([A-Z\_0-9]+)\]\_\_')
 
-REPLACE_LOGTEXT = '        {:<30} <- {:<46}  :: {}'
+REPLACE_LOGTEXT = "        {:<30} <- '{:<44}'  :: {}"
 PARENTHETICAL_LOGTEXT = '        {:>80}     {}'
 
 

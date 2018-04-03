@@ -42,7 +42,7 @@ def _verifyRequiredEnvVar(varname):
     As these variables are required and excellent for viewing during program run, print them to
     stdout and to the log.
     """
-    if varname not in os.environ or not os.environ[varname].strip():
+    if varname not in os.environ:
         sys.stderr.write(_NOT_SET_TEXT.format(varname))
         sys.stderr.write(_REQUIRED_VAR_TEXT.format(varname))
         sys.exit(1)
