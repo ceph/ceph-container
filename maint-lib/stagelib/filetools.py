@@ -100,8 +100,10 @@ def save_files_copied(files_copied, save_filename, strip_prefix=' '):
                git.get_repo(), git.get_branch(), git.get_hash())
     filetext += printfmt.format('<staged file>', src_key)
     filetext += separator
-    for staged_file, source_file in files_copied.items():
+    staged_paths = sorted(list(files_copied.keys()))
+    for staged_path in staged_paths:
+        staged_file = staged_path
         if staged_file.startswith(strip_prefix):
             staged_file = staged_file[len(strip_prefix):]
-        filetext += printfmt.format(staged_file, source_file)
+        filetext += printfmt.format(staged_file, files_copied[staged_path])
     save_text_to_file(filetext, save_filename)
