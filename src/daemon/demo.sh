@@ -9,6 +9,11 @@ MGR_PATH="/var/lib/ceph/mgr/${CLUSTER}-$MGR_NAME"
 RESTAPI_IP=$MON_IP
 MGR_IP=$MON_IP
 : "${DEMO_DAEMONS:=all}"
+: "${RGW_ENABLE_USAGE_LOG:=true}"
+: "${RGW_USAGE_MAX_USER_SHARDS:=1}"
+: "${RGW_USAGE_MAX_SHARDS:=32}"
+: "${RGW_USAGE_LOG_FLUSH_THRESHOLD:=1}"
+: "${RGW_USAGE_LOG_TICK_INTERVAL:=1}"
 
 
 #######
@@ -69,7 +74,7 @@ function bootstrap_mds {
 function bootstrap_rgw {
   if [ ! -e "$RGW_PATH"/keyring ]; then
     # bootstrap RGW
-    mkdir -p "$RGW_PATH"
+    mkdir -p "$RGW_PATH" /var/log/ceph
     ceph "${CLI_OPTS[@]}" auth get-or-create client.rgw."$(uname -n)" osd 'allow rwx' mon 'allow rw' -o "$RGW_KEYRING"
     chown --verbose -R ceph. "$RGW_PATH"
 
@@ -78,11 +83,11 @@ function bootstrap_rgw {
 
 [client.rgw.${RGW_NAME}]
 rgw dns name = ${RGW_NAME}
-rgw enable usage log = true
-rgw usage log tick interval = 1
-rgw usage log flush threshold = 1
-rgw usage max shards = 32
-rgw usage max user shards = 1
+rgw enable usage log = ${RGW_ENABLE_USAGE_LOG}
+rgw usage log tick interval = ${RGW_USAGE_LOG_TICK_INTERVAL}
+rgw usage log flush threshold = ${RGW_USAGE_LOG_FLUSH_THRESHOLD}
+rgw usage max shards = ${RGW_USAGE_MAX_SHARDS}
+rgw usage max user shards = ${RGW_USAGE_MAX_USER_SHARDS}
 log file = /var/log/ceph/client.rgw.${RGW_NAME}.log
 
 ENDHERE
