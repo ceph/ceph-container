@@ -3,6 +3,8 @@ set -e
 
 unset "DAEMON_OPTS[${#DAEMON_OPTS[@]}-1]" # remove the last element of the array
 OSD_PATH="/var/lib/ceph/osd/${CLUSTER}-0"
+PREPARE_OSD=$OSD_PATH
+ACTIVATE_OSD=$OSD_PATH
 MDS_PATH="/var/lib/ceph/mds/${CLUSTER}-0"
 RGW_PATH="/var/lib/ceph/radosgw/${CLUSTER}-rgw.${RGW_NAME}"
 MGR_PATH="/var/lib/ceph/mgr/${CLUSTER}-$MGR_NAME"
@@ -20,6 +22,7 @@ MGR_IP=$MON_IP
 # MON #
 #######
 function bootstrap_mon {
+  # shellcheck disable=SC1091
   source start_mon.sh
   start_mon
 
@@ -37,8 +40,19 @@ function bootstrap_osd {
     # bootstrap OSD
     mkdir -p "$OSD_PATH"
     chown --verbose -R ceph. "$OSD_PATH"
-    ceph-disk -v prepare "${CLI_OPTS[@]}" --bluestore "$OSD_PATH"
-    ceph-disk -v activate --mark-init none --no-start-daemon "$OSD_PATH"
+    if [[ -n "$OSD_DEVICE" ]]; then
+      PREPARE_OSD=$OSD_DEVICE
+      if [[ -b "$OSD_DEVICE" ]]; then
+        ACTIVATE_OSD=${OSD_DEVICE}1
+      elif [[ -d "$OSD_DEVICE" ]]; then
+        ACTIVATE_OSD=${OSD_DEVICE}
+      else
+        echo "Invalid $OSD_DEVICE, only directory and block device are supported"
+      fi
+    fi
+    ceph-disk -v prepare "${CLI_OPTS[@]}" --bluestore "$PREPARE_OSD"
+    chown --verbose -R ceph. "$PREPARE_OSD"*
+    ceph-disk -v activate --mark-init none --no-start-daemon "$ACTIVATE_OSD"
   fi
 
   # start OSD
