@@ -24,6 +24,7 @@ $(shell bash -c 'set -eu ; \
 
 	set_var STAGING_DIR       "staging/$$CEPH_VERSION$$CEPH_POINT_RELEASE-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH" ; \
 	base_img="$$BASEOS_REG/$$BASEOS_REPO:$$BASEOS_TAG" ; \
+	if [ -n "$(BASE_IMAGE)" ] ; then base_img="$(BASE_IMAGE)" ; fi ; \
 	set_var BASE_IMAGE        "$${base_img#_/}" ; \
 	set_var RELEASE           "$(RELEASE)" ; \
 	\
