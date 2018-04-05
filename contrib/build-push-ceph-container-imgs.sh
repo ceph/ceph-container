@@ -10,6 +10,8 @@ set -ex
 BRANCH="${GIT_BRANCH#*/}"
 LATEST_COMMIT_SHA=$(git rev-parse --short HEAD)
 TAGGED_HEAD=false # does HEAD is on a tag ?
+CEPH_RELEASES="jewel kraken luminous"
+
 
 #############
 # FUNCTIONS #
@@ -65,20 +67,28 @@ function push_ceph_imgs {
 
 }
 
-function push_ceph_imgs_latest {
+function push_ceph_imgs_latests {
+  local latest_name
   # If we run on a tagged head, we should not push the 'latest' tag
   if $TAGGED_HEAD; then
     echo "Don't push latest as we run on a tagged head"
     return
   fi
 
-  for i in daemon-base daemon; do
-    tag=ceph/$i:${BRANCH}-${LATEST_COMMIT_SHA}-luminous-centos-7-x86_64
-    # tag latest daemon-base and daemon images
-    docker tag "$tag" ceph/$i:latest
+  for release in $CEPH_RELEASES latest; do
+    for i in daemon-base daemon; do
+      if [[ "$release" == "latest" ]]; then
+        latest_name="latest"
+      else
+        latest_name="latest-$release"
+      fi
+      tag=ceph/$i:${BRANCH}-${LATEST_COMMIT_SHA}-$release-centos-7-x86_64
+      # tag image
+      docker tag "$tag" ceph/$i:"$latest_name"
 
-    # push latest images to the Docker Hub
-    docker push ceph/$i:latest
+      # push image to the Docker Hub
+      docker push ceph/$i:"$latest_name"
+    done
   done
 }
 
@@ -93,4 +103,4 @@ login_docker_hub
 create_head_or_point_release
 build_ceph_imgs
 push_ceph_imgs
-push_ceph_imgs_latest
+push_ceph_imgs_latests
