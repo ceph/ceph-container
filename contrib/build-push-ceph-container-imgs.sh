@@ -10,7 +10,7 @@ set -ex
 BRANCH="${GIT_BRANCH#*/}"
 LATEST_COMMIT_SHA=$(git rev-parse --short HEAD)
 TAGGED_HEAD=false # does HEAD is on a tag ?
-CEPH_RELEASES="jewel kraken luminous"
+CEPH_RELEASES=(jewel kraken luminous)
 
 
 #############
@@ -75,13 +75,15 @@ function push_ceph_imgs_latests {
     return
   fi
 
-  for release in $CEPH_RELEASES latest; do
+  for release in "${CEPH_RELEASES[@]}" latest; do
+    if [[ "$release" == "latest" ]]; then
+      latest_name="latest"
+      # Use the last item in the array which corresponds to the latest stable Ceph version
+      release=${CEPH_RELEASES[-1]}
+    else
+      latest_name="latest-$release"
+    fi
     for i in daemon-base daemon; do
-      if [[ "$release" == "latest" ]]; then
-        latest_name="latest"
-      else
-        latest_name="latest-$release"
-      fi
       tag=ceph/$i:${BRANCH}-${LATEST_COMMIT_SHA}-$release-centos-7-x86_64
       # tag image
       docker tag "$tag" ceph/$i:"$latest_name"
