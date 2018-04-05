@@ -36,6 +36,8 @@ RELEASE ?= $(shell git rev-parse --abbrev-ref HEAD)
 DAEMON_BASE_TAG ?= ""
 DAEMON_TAG ?= ""
 
+BASE_IMAGE ?= ""
+
 
 # ==============================================================================
 # Internal definitions
@@ -182,6 +184,11 @@ help:
 	@echo '  DAEMON_TAG - Override the tag name for the daemon image'
 	@echo '    For tags above, the final image tag will include the registry defined by "REGISTRY".'
 	@echo '    e.g., REGISTRY="myreg" DAEMON_TAG="mydaemontag" will tag the daemon "myreg/mydaemontag"'
+	@echo ''
+	@echo '  BASE_IMAGE - Do not compute the base image to be used as container base from BASEOS_REPO'
+	@echo '               and BASEOS_TAG. Instead, use the base image specified. The BASEOS_ vars will'
+	@echo '               still be used to determine the ceph-container source files to use.'
+	@echo '               e.g., BASE_IMAGE="myrepo/mycustomubuntu:mytag"'
 	@echo ''
 
 show.flavors:
