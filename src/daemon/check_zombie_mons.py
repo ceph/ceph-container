@@ -23,6 +23,7 @@ def extract_mons_from_monmap():
             mons[m.group(2)] = m.group(1)
     return mons
 
+
 def extract_mons_from_kubeapi():
     kubemap = subprocess.check_output(kubectl_command, shell=True)
     return json.loads(kubemap)
