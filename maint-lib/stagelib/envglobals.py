@@ -8,7 +8,7 @@ from collections import OrderedDict
 
 import stagelib.git as git
 
-ALIGNED_NEWLINE = '\n' + ' '*21  # align second line to column
+ALIGNED_NEWLINE = '\n' + ' ' * 21  # align second line to column
 # Ordered dict with format
 # <var name>: <description>
 # Add new required variables simply by adding a new tuple to this setup
