@@ -92,7 +92,7 @@ def start_container(client, container, container_network):
     """
     try:
         client.start(container=container["Id"])
-    except Exception as err:
+    except Exception:
         teardown_container(client, container, container_network)
         raise
     else:
