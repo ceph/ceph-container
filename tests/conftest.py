@@ -13,8 +13,7 @@ def pytest_runtest_logreport(report):
         try:
             client = docker.Client('unix://var/run/docker.sock', version="auto")
         except DockerException as e:
-            raise pytest.UsageError(
-                    "Could not connect to a running docker socket: %s" % str(e))
+            raise pytest.UsageError("Could not connect to a running docker socket: %s" % str(e))
 
         test_containers = client.containers(
             all=True,
@@ -161,7 +160,7 @@ def create_mon_container(client, container_tag):
 
     # now map it as part of the networking configuration
     networking_config = client.create_networking_config({
-		'pytest_monitor': client.create_endpoint_config(ipv4_address=container_ip)
+        'pytest_monitor': client.create_endpoint_config(ipv4_address=container_ip)
 	})
 
     # "create" the container, which really doesn't create an actual image, it
@@ -201,8 +200,7 @@ def client():
         c.run = run(c)
         return c
     except DockerException as e:
-        raise pytest.UsageError(
-                "Could not connect to a running docker socket: %s" % str(e))
+        raise pytest.UsageError("Could not connect to a running docker socket: %s" % str(e))
 
 container_tags = [
     'ceph/daemon:tag-build-master-infernalis-centos-7',

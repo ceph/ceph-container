@@ -97,7 +97,7 @@ def save_files_copied(files_copied, save_filename, strip_prefix=' '):
     separator = '-' * (85 + len(src_key)) + '\n'
     filetext = separator
     filetext += 'Source version info:  repo [{}] - branch [{}] - commit hash [{}]\n\n'.format(
-               git.get_repo(), git.get_branch(), git.get_hash())
+        git.get_repo(), git.get_branch(), git.get_hash())
     filetext += printfmt.format('<staged file>', src_key)
     filetext += separator
     staged_paths = sorted(list(files_copied.keys()))

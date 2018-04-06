@@ -7,13 +7,13 @@ access_key = 'XXXXXXXXXXXXXXXXXXXX'
 secret_key = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
 
 conn = boto.connect_s3(
-        aws_access_key_id = access_key,
-        aws_secret_access_key = secret_key,
-        host = '0.0.0.0',
-        port = None,     # Leave as None to use default port 80 or 443
-        is_secure=False, # comment out or set to True if you are using ssl
-        calling_format = boto.s3.connection.OrdinaryCallingFormat(),
-        )
+    aws_access_key_id = access_key,
+    aws_secret_access_key = secret_key,
+    host = '0.0.0.0',
+    port = None,     # Leave as None to use default port 80 or 443
+    is_secure=False, # comment out or set to True if you are using ssl
+    calling_format = boto.s3.connection.OrdinaryCallingFormat(),
+)
 
 bucket = conn.create_bucket('my-s3-test-bucket')
 
