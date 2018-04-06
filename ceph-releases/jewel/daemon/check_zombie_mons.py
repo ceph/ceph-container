@@ -5,13 +5,20 @@ import subprocess
 import json
 
 MON_REGEX = r"^\d: ([0-9\.]*):\d+/\d* mon.([^ ]*)$"
-# kubctl_command = 'kubectl get pods --namespace=${CLUSTER} -l daemon=mon -o template --template="{ {{range .items}} \\"{{.metadata.name}}\\": \\"{{.status.podIP}}\\" ,   {{end}} }"'
+# kubctl_command = 'kubectl get pods --namespace=${CLUSTER} -l daemon=mon -o template --template="{ {{range .items}} \\"{{.metadata.name}}\\": \\"{{.status.podIP}}\\" ,   {{end}} }"'  # noqa E501
 if int(os.getenv('K8S_HOST_NETWORK', 0)) > 0:
-    kubectl_command = 'kubectl get pods --namespace=${CLUSTER} -l daemon=mon -o template --template="{ {{range  \$i, \$v  := .items}} {{ if \$i}} , {{ end }} \\"{{\$v.spec.nodeName}}\\": \\"{{\$v.status.podIP}}\\" {{end}} }"'
+    kubectl_command = 'kubectl get pods --namespace=${CLUSTER} '\
+        '-l daemon=mon ' \
+        '-o template ' \
+        '--template="{ {{range  \$i, \$v  := .items}} {{ if \$i}} , {{ end }} \\"{{\$v.spec.nodeName}}\\": \\"{{\$v.status.podIP}}\\" {{end}} }"'  # noqa E501
 else:
-    kubectl_command = 'kubectl get pods --namespace=${CLUSTER} -l daemon=mon -o template --template="{ {{range  \$i, \$v  := .items}} {{ if \$i}} , {{ end }} \\"{{\$v.metadata.name}}\\": \\"{{\$v.status.podIP}}\\" {{end}} }"'
+    kubectl_command = 'kubectl get pods --namespace=${CLUSTER} ' \
+        '-l daemon=mon ' \
+        '-o template ' \
+        '--template="{ {{range  \$i, \$v  := .items}} {{ if \$i}} , {{ end }} \\"{{\$v.metadata.name}}\\": \\"{{\$v.status.podIP}}\\" {{end}} }"'  # noqa E501
 
-monmap_command = "ceph --cluster=${CLUSTER} mon getmap > /tmp/monmap && monmaptool -f /tmp/monmap --print"
+monmap_command = "ceph --cluster=${CLUSTER} mon getmap > /tmp/monmap && ' \
+    'monmaptool -f /tmp/monmap --print"
 
 
 def extract_mons_from_monmap():
@@ -41,7 +48,8 @@ for mon in current_mons:
         print("removing zombie mon {}".format(mon))
         subprocess.call(["ceph", "--cluster", os.environ["CLUSTER"], "mon", "remove", mon])
         removed_mon = True
-    elif current_mons[mon] != expected_mons[mon]:  # check if for some reason the ip of the mon changed
+    # check if for some reason the ip of the mon changed
+    elif current_mons[mon] != expected_mons[mon]:
         print("ip change dedected for pod {}".format(mon))
         subprocess.call(["kubectl", "--namespace", os.environ["CLUSTER"], "delete", "pod", mon])
         removed_mon = True

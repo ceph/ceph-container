@@ -7,7 +7,8 @@ class TestAllContainers(object):
         assert len(result) == 3
 
     def test_initial_members_is_defined(self, mon_containers, client):
-        result = client.run(mon_containers, 'grep "mon initial members" /etc/ceph/ceph.conf').split()
+        config_file = "/etc/ceph/ceph.conf"
+        result = client.run(mon_containers, 'grep "mon initial members" ' + config_file).split()
         host_id = mon_containers['Id'][:12]
         assert result[-1] == host_id
 
