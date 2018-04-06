@@ -66,7 +66,6 @@ def generate_ips(start_ip, end_ip=None, offset=None):
         end = list(map(int, end_ip.split(".")))
     temp = start
 
-
     while temp != end:
         start[3] += 1
         for i in (3, 2, 1):
