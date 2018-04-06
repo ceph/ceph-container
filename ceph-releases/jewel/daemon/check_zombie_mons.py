@@ -37,7 +37,7 @@ print "expected mons:", expected_mons
 
 for mon in current_mons:
     removed_mon = False
-    if not mon in expected_mons:
+    if mon not in expected_mons:
         print "removing zombie mon ", mon
         subprocess.call(["ceph", "--cluster", os.environ["CLUSTER"], "mon", "remove", mon])
         removed_mon = True
