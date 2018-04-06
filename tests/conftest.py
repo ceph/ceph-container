@@ -203,6 +203,7 @@ def client():
     except DockerException as e:
         raise pytest.UsageError("Could not connect to a running docker socket: %s" % str(e))
 
+
 container_tags = [
     'ceph/daemon:tag-build-master-infernalis-centos-7',
     'ceph/daemon:tag-build-master-jewel-centos-7',
