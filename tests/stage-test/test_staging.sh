@@ -17,6 +17,8 @@ export IMAGES_TO_BUILD="daemon-base daemon"
 export RELEASE='test-release'
 export DAEMON_BASE_IMAGE=test-reg/daemon-base:test-release-1
 export DAEMON_IMAGE=test-reg/daemon:test-release-1
+export NESTED_ENV="__ENV_[CEPH_VERSION]__"
+export NESTED_FILE="__H4X0R__"
 
 run_stage=$(cat <<'EOF'
 import sys

@@ -55,16 +55,12 @@ def _save_with_backup(file_path, text):
 def _file_replace(template_text, file_path, variable_file_dir):
     variable_matches = re.findall(VARIABLE_FILE_PATTERN, template_text)
     if not variable_matches:
-        logging.debug(PARENTHETICAL_LOGTEXT.format('[No __VARIABLES__ to replace]', file_path))
-        return template_text
-    # Allow variable files to have their own variables in them
-    # by reprocessing until there are no more matches
-    while variable_matches:
-        for var in variable_matches:
-            template_text = _replace_file_in_text(os.path.join(variable_file_dir, var),
-                                                  template_text, file_path)
-        variable_matches = re.findall(VARIABLE_FILE_PATTERN, template_text)
-    return template_text
+        return 0, template_text
+    for var in variable_matches:
+        template_text = _replace_file_in_text(os.path.join(variable_file_dir, var),
+                                              template_text, file_path)
+    variable_matches = re.findall(VARIABLE_FILE_PATTERN, template_text)
+    return len(variable_matches), template_text
 
 
 # Perform __ENV_[VAR]__ replacement on text.
@@ -72,9 +68,7 @@ def _env_var_replace(template_text, file_path):
     variable_matches = re.findall(GLOBAL_PATTERN, template_text)
     if not variable_matches:
         # logging.debug('        {:<80}  -> {}'.format('No GLOBAL_VARs', file_path))
-        logging.debug(PARENTHETICAL_LOGTEXT.format(
-            '[No __ENV_[VAR]__s to replace]', file_path))
-        return template_text
+        return 0, template_text
     for var_name in variable_matches:
         text_to_replace = '__ENV_[' + var_name + ']__'
         try:
@@ -86,20 +80,40 @@ def _env_var_replace(template_text, file_path):
             sys.exit(1)
         logging.info(REPLACE_LOGTEXT.format(text_to_replace, var_value, file_path))
         template_text = template_text.replace(text_to_replace, var_value)
-    return template_text
+    return len(variable_matches), template_text
+
+
+# Given a file path, do file and env replacements on it repeatedly until no replacements are made
+# Return total number of replacements made, and rendered text
+def _do_replace_on_file(file_path, replace_root_dir):
+    rendered_text = _get_file_text(file_path)
+    total_file_replacements, total_env_replacements = 0, 0
+    while True:
+        file_replacements, rendered_text = _file_replace(
+            rendered_text, file_path, variable_file_dir=replace_root_dir)
+        env_replacements, rendered_text = _env_var_replace(rendered_text, file_path)
+        total_file_replacements += file_replacements
+        total_env_replacements += env_replacements
+        if file_replacements == 0 and env_replacements == 0:
+            break
+    if not total_file_replacements:
+        logging.debug(PARENTHETICAL_LOGTEXT.format(
+            '[No __VARIABLES__ to replace]', file_path))
+    if not total_env_replacements:
+        logging.debug(PARENTHETICAL_LOGTEXT.format(
+            '[No __ENV_[VAR]__s to replace]', file_path))
+    return (total_file_replacements + total_env_replacements), rendered_text
 
 
 def do_variable_replace(replace_root_dir):
     """
     For all files recursively in the replace root dir, do 2 things:
-     1. For each __VARIABLE__ in the file, look for a corresponding __VARIABLE__ file in the
-        replace root dir, and replace the __VARIABLE__ in the file with the text from the
+     1. For each __VARIABLE__ in the File, look for a corresponding __VARIABLE__ file in the
+        replace root dir, and replace the __VARIABLE__ in the File with the text from the
         corresponding __VARIABLE__ file.
-    2. For each __ENV_[<ENV_VAR>]__ variable in the file, replace the variable with the content of
-       the environment variable ENV_VAR.
-       __VARIABLE__ files are allowed to contain additional variables. Each file is processed
-       multiple times until there are no more __VARIABLES__ to be replaced. __ENV_[<ENV_VAR>]__s
-       are not allowed to contain additional variables. They are only processed once.
+     2. For each __ENV_[<ENV_VAR>]__ variable in the File, replace the variable in the File with
+        the content of the environment variable ENV_VAR.
+    Variables are allowed to contain nested variables of either type.
     """
     logging.info('    Replacing variables')
     for dirname, subdirs, files in os.walk(replace_root_dir, topdown=True):
@@ -109,9 +123,7 @@ def do_variable_replace(replace_root_dir):
                     '[Skip __VARIABLE__ replace]', os.path.join(dirname, f)))
                 continue
             file_path = os.path.join(dirname, f)
-            template_text = _get_file_text(file_path)
-            text = _file_replace(template_text, file_path, variable_file_dir=replace_root_dir)
-            text = _env_var_replace(text, file_path)
-            if not text == template_text:
+            total_replacements, rendered_text = _do_replace_on_file(file_path, replace_root_dir)
+            if total_replacements > 0:
                 # Only save if there have been changes
-                _save_with_backup(os.path.join(dirname, f), text)
+                _save_with_backup(file_path, rendered_text)
