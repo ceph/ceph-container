@@ -39,7 +39,7 @@ for mon in current_mons:
         print "removing zombie mon ", mon
         subprocess.call(["ceph", "--cluster", os.environ["CLUSTER"], "mon", "remove", mon])
         removed_mon = True
-    elif current_mons[mon] != expected_mons[mon]: # check if for some reason the ip of the mon changed
+    elif current_mons[mon] != expected_mons[mon]:  # check if for some reason the ip of the mon changed
         print "ip change dedected for pod ", mon
         subprocess.call(["kubectl", "--namespace", os.environ["CLUSTER"], "delete", "pod", mon])
         removed_mon = True
