@@ -18,10 +18,7 @@ conn = boto.connect_s3(
 bucket = conn.create_bucket('my-s3-test-bucket')
 
 for bucket in conn.get_all_buckets():
-    print "{name}\t{created}".format(
-        name=bucket.name,
-        created=bucket.creation_date,
-    )
+    print("{name}\t{created}".format(name=bucket.name, created=bucket.creation_date))
 
 key = bucket.new_key('hello.txt')
 key.set_contents_from_string('Hello World!\n')
@@ -37,8 +34,8 @@ plans_key.set_canned_acl('private')
 
 hello_key = bucket.get_key('hello.txt')
 hello_url = hello_key.generate_url(0, query_auth=False, force_http=False)
-print hello_url
+print("{}".format(hello_url))
 
 plans_key = bucket.get_key('secret_plans.txt')
 plans_url = plans_key.generate_url(3600, query_auth=True, force_http=False)
-print plans_url
+print("{}".format(plans_url))
