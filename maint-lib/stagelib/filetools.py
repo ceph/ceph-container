@@ -81,7 +81,7 @@ def recursive_copy_dir(src_path, dst_path, files_copied={}):
         return
     for dirname, subdirs, files in os.walk(src_path, topdown=True):
         # Remove src_path (and '/' immediately following) from our dirname
-        dst_path_offset = dirname[len(src_path)+1:]
+        dst_path_offset = dirname[len(src_path) + 1:]
         copy_files(filenames=files, src_path=dirname,
                    dst_path=os.path.join(dst_path, dst_path_offset),
                    files_copied=files_copied)

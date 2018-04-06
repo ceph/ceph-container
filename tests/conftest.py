@@ -73,7 +73,7 @@ def generate_ips(start_ip, end_ip=None, offset=None):
         for i in (3, 2, 1):
             if temp[i] == 256:
                 temp[i] = 0
-                temp[i-1] += 1
+                temp[i - 1] += 1
         ip_range.append(".".join(map(str, temp)))
 
     return ip_range
