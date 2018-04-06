@@ -32,21 +32,21 @@ def extract_mons_from_kubeapi():
 current_mons = extract_mons_from_monmap()
 expected_mons = extract_mons_from_kubeapi()
 
-print "current mons:", current_mons
-print "expected mons:", expected_mons
+print('current mons:{}'.format(current_mons))
+print('expected mons:{}'.format(expected_mons))
 
 for mon in current_mons:
     removed_mon = False
     if mon not in expected_mons:
-        print "removing zombie mon ", mon
+        print("removing zombie mon {}".format(mon))
         subprocess.call(["ceph", "--cluster", os.environ["CLUSTER"], "mon", "remove", mon])
         removed_mon = True
     elif current_mons[mon] != expected_mons[mon]:  # check if for some reason the ip of the mon changed
-        print "ip change dedected for pod ", mon
+        print("ip change dedected for pod {}".format(mon))
         subprocess.call(["kubectl", "--namespace", os.environ["CLUSTER"], "delete", "pod", mon])
         removed_mon = True
-        print "deleted mon %s via the kubernetes api" % mon
+        print("deleted mon {} via the kubernetes api".format(mon))
 
 
 if not removed_mon:
-    print "no zombie mons found ..."
+    print("no zombie mons found ...")
