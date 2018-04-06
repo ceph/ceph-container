@@ -63,7 +63,8 @@ underscores with capital letters, digits, and underscores between) can be placed
 staged, the `__VAR_NAME__` variable will be replaced with the raw contents of the file with the
 named `__VAR_NAME__`. Trailing whitespace is stripped from the variable file before insertion.
 `__VAR_NAME__` files are allowed to be empty, but they are not allowed to be nonexistent if a file
-declares them. A `__VAR_NAME__` definition file may contain nested `__OTHER_VAR_NAME__` variables.
+declares them. A `__VAR_NAME__` definition file may contain nested `__OTHER_VAR_NAME__` variables as
+well as nested `__ENV_[ENV_VAR]__` variables (documented below).
 
 If the `__DO_STUFF__` file is supposed to contain actions that need done it generally needs to
 return true. As an example, `echo 'first' && __DO_STUFF__ && echo 'last'` will print 'first' and
@@ -76,8 +77,9 @@ are staged, the `__ENV_[ENV_VAR]__` variable will be replaced with the raw conte
 environment variable named `ENV_VAR`. Only environment variables with all-caps, underscores, and
 digits are supported. Staging will report an error if an environment variable's value is unset.
 
-Environment variable replacements **cannot** be nested inside of other environment variable
-replacements. `__VAR__` file definitions, however, may specify environment variable replacements.
+Environment variable replacements can also be nested inside of other environment variable
+replacements. both `__ENV_[]__` definitions and `__VAR__` file definitions may specify environment
+variable replacements.
 
 A typical usage is to use ``__ENV_[HOST_ARCH]__`` when you need to specify the building
 architecture.
