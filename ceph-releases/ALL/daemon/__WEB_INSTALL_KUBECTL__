@@ -1,5 +1,5 @@
 echo 'Web install kubectl' && \
-      KUBECTL_VERSION=v1.6.0 && \
+      KUBECTL_VERSION=v1.8.11 && \
       # Assume linux
       KUBECTL_ARCH=__ENV_[GO_ARCH]__ && \
       wget -q -O /usr/local/bin/kubectl \
