@@ -102,7 +102,7 @@ def start_container(client, container, container_network):
                 return container
 
         if client.inspect_container(container)['State']['ExitCode'] > 0:
-            print "[ERROR][setup] failed to setup container for %s" %  request.param
+            print "[ERROR][setup] failed to setup container for %s" % request.param
             for line in client.logs(container, stream=True):
                 print "[ERROR][setup]", line.strip('\n')
             raise RuntimeError()
