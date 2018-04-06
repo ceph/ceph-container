@@ -1,5 +1,5 @@
 echo 'Web install etcdctl' && \
-    ETCDCTL_VERSION=v2.2.4 && \
+    ETCDCTL_VERSION=v3.2.18 && \
     # Assume linux
     ETCDCTL_ARCH=linux-__ENV_[GO_ARCH]__ && \
     wget -q -O- \
