@@ -158,9 +158,11 @@ def create_mon_container(client, container_tag):
     )
 
     # now map it as part of the networking configuration
-    networking_config = client.create_networking_config({
-        'pytest_monitor': client.create_endpoint_config(ipv4_address=container_ip)
-	})
+    networking_config = client.create_networking_config(
+        {
+            'pytest_monitor': client.create_endpoint_config(ipv4_address=container_ip)
+        }
+    )
 
     # "create" the container, which really doesn't create an actual image, it
     # basically constructs the object needed to start one. This is a 2-step
