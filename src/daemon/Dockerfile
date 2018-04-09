@@ -58,4 +58,4 @@ VOLUME ["/etc/ceph","/var/lib/ceph", "/etc/ganesha"]
 
 # Execute the entrypoint
 WORKDIR /
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/tini", "--", "/entrypoint.sh"]

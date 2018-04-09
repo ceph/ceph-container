@@ -9,6 +9,11 @@
     echo "deb http://download.ceph.com/debian-$CEPH_VERSION/ __OS_CODENAME__ main" | \
       tee /etc/apt/sources.list.d/ceph-$CEPH_VERSION.list && \
     DEBIAN_FRONTEND=noninteractive apt-get update && \
-    # TODO: What are 'ca-certificates', 'kmod' needed for?
+    # ca-certificates is required for wget to auth https://github
+    DEBIAN_FRONTEND=noninteractive apt-get install -yy --force-yes --no-install-recommends \
+      wget ca-certificates && \
+    __WEB_INSTALL_TINI__ && \
+    # Don't bloat the image by permanently installing wget reqs
+    DEBIAN_FRONTEND=noninteractive apt-get purge -yy wget ca-certificates && \
     DEBIAN_FRONTEND=noninteractive apt-get install -yy --force-yes --no-install-recommends \
         __CEPH_BASE_PACKAGES__
