@@ -64,17 +64,18 @@ function build_ceph_imgs {
 function push_ceph_imgs {
   echo "Push Ceph container image(s) to the Docker Hub registry"
   make RELEASE="$RELEASE" push.parallel
+}
 
+function build_and_push_latest_bis {
+  # latest-bis is needed by ceph-ansible so it can test the restart handlers on an image ID change
+  # rebuild latest again to get a different image ID
+  make RELEASE="$BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,7 build
+  docker tag ceph/daemon:"$BRANCH"-bis-"${CEPH_RELEASES[-1]}"-centos-7-x86_64 ceph/daemon:latest-bis
+  docker push ceph/daemon:latest-bis
 }
 
 function push_ceph_imgs_latests {
   local latest_name
-  # If we run on a tagged head, we should not push the 'latest' tag
-  if $TAGGED_HEAD; then
-    echo "Don't push latest as we run on a tagged head"
-    return
-  fi
-
   for release in "${CEPH_RELEASES[@]}" latest; do
     if [[ "$release" == "latest" ]]; then
       latest_name="latest"
@@ -105,4 +106,10 @@ login_docker_hub
 create_head_or_point_release
 build_ceph_imgs
 push_ceph_imgs
+# If we run on a tagged head, we should not push the 'latest' tag
+if $TAGGED_HEAD; then
+  echo "Don't push latest as we run on a tagged head"
+  return
+fi
 push_ceph_imgs_latests
+build_and_push_latest_bis
