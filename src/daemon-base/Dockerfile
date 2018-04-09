@@ -6,7 +6,7 @@ MAINTAINER __DOCKERFILE_MAINTAINER__
 __DOCKERFILE_TRACEABILITY_LABELS__
 
 ENV CEPH_VERSION __ENV_[CEPH_VERSION]__
-ENV CEPH_POINT_RELEASE __ENV_[CEPH_POINT_RELEASE]__
+ENV CEPH_POINT_RELEASE "__ENV_[CEPH_POINT_RELEASE]__"
 
 #======================================================
 # Install ceph and dependencies, and clean up
