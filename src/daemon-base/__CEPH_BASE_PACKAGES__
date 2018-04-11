@@ -1,5 +1,6 @@
 \
         ca-certificates \
+        e2fsprogs \
         ceph-common__ENV_[CEPH_POINT_RELEASE]__  \
         ceph-mon__ENV_[CEPH_POINT_RELEASE]__  \
         ceph-osd__ENV_[CEPH_POINT_RELEASE]__ \
