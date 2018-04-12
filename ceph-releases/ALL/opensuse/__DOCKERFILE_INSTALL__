@@ -5,4 +5,4 @@
         __PACKAGES__ && \
     __ZYPPER__ info __PACKAGES__ && \
     __REMOVE_REPOS__ ) || \
-    ( retval=$? && tail --lines=300 /var/log/zypper.log && exit $retval )
+    ( retval=$? && cat /var/log/zypper.log && exit $retval )
