@@ -27,6 +27,8 @@ RUN \
     #
     # Perform any final cleanup actions like package manager cleaning, etc.
     __DOCKERFILE_POSTINSTALL_CLEANUP__ && \
+    # Tweak some configuration files on the container system
+    __DOCKERFILE_POSTINSTALL_TWEAKS__ && \
     # Clean common files like /tmp, /var/lib, etc.
     __DOCKERFILE_CLEAN_COMMON__ && \
     #
