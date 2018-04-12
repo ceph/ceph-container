@@ -109,7 +109,7 @@ push_ceph_imgs
 # If we run on a tagged head, we should not push the 'latest' tag
 if $TAGGED_HEAD; then
   echo "Don't push latest as we run on a tagged head"
-  return
+  exit 0
 fi
 push_ceph_imgs_latests
 build_and_push_latest_bis
