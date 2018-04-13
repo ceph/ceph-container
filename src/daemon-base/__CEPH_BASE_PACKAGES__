@@ -8,6 +8,7 @@
         rbd-mirror__ENV_[CEPH_POINT_RELEASE]__  \
         __CEPH_MGR_PACKAGE__\
         kmod \
+        lvm2 \
         __RADOSGW_PACKAGE__ \
         __GANESHA_PACKAGES__ \
         __ISCSI_PACKAGES__
