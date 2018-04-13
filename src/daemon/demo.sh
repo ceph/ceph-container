@@ -2,7 +2,7 @@
 set -e
 
 unset "DAEMON_OPTS[${#DAEMON_OPTS[@]}-1]" # remove the last element of the array
-OSD_PATH="/var/lib/ceph/osd/${CLUSTER}-0"
+: "${OSD_PATH:=/var/lib/ceph/osd/${CLUSTER}-0}"
 PREPARE_OSD=$OSD_PATH
 ACTIVATE_OSD=$OSD_PATH
 MDS_PATH="/var/lib/ceph/mds/${CLUSTER}-0"
@@ -34,24 +34,25 @@ function bootstrap_mon {
 # OSD #
 #######
 function bootstrap_osd {
+  if [[ -n "$OSD_DEVICE" ]]; then
+    PREPARE_OSD=$OSD_DEVICE
+    if [[ -b "$OSD_DEVICE" ]]; then
+      ACTIVATE_OSD=${OSD_DEVICE}1
+    else
+      log "Invalid $OSD_DEVICE, only block device is supported"
+      exit 1
+    fi
+  fi
+
   if [ ! -e "$OSD_PATH"/keyring ]; then
+    if ! grep -qE "osd data = $OSD_PATH" /etc/ceph/"${CLUSTER}".conf; then
+      echo "osd data = $OSD_PATH" >> /etc/ceph/"${CLUSTER}".conf
+    fi
     # bootstrap OSD
     mkdir -p "$OSD_PATH"
     chown --verbose -R ceph. "$OSD_PATH"
-    if [[ -n "$OSD_DEVICE" ]]; then
-      PREPARE_OSD=$OSD_DEVICE
-      if [[ -b "$OSD_DEVICE" ]]; then
-        ACTIVATE_OSD=${OSD_DEVICE}1
-      elif [[ -d "$OSD_DEVICE" ]]; then
-        if ! grep -qE "osd data = $OSD_DEVICE" /etc/ceph/"${CLUSTER}".conf; then
-          echo "osd data = $OSD_DEVICE" >> /etc/ceph/"${CLUSTER}".conf
-        fi
-        ACTIVATE_OSD=${OSD_DEVICE}
-      else
-        echo "Invalid $OSD_DEVICE, only directory and block device are supported"
-      fi
-    fi
     ceph-disk -v prepare "${CLI_OPTS[@]}" --bluestore "$PREPARE_OSD"
+    # this second chown will chown the partition created by ceph-disk e.g: /dev/sda1 and /dev/sda2
     chown --verbose -R ceph. "$PREPARE_OSD"*
     ceph-disk -v activate --mark-init none --no-start-daemon "$ACTIVATE_OSD"
   fi
