@@ -1,6 +1,5 @@
 \
           sharutils \
-          lvm2 \
           __CONFD_PACKAGE__ \
           __FOREGO_PACKAGE__ \
           __KUBECTL_PACKAGE__ \
