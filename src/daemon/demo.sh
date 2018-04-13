@@ -43,6 +43,9 @@ function bootstrap_osd {
       if [[ -b "$OSD_DEVICE" ]]; then
         ACTIVATE_OSD=${OSD_DEVICE}1
       elif [[ -d "$OSD_DEVICE" ]]; then
+        if ! grep -qE "osd data = $OSD_DEVICE" /etc/ceph/"${CLUSTER}".conf; then
+          echo "osd data = $OSD_DEVICE" >> /etc/ceph/"${CLUSTER}".conf
+        fi
         ACTIVATE_OSD=${OSD_DEVICE}
       else
         echo "Invalid $OSD_DEVICE, only directory and block device are supported"
