@@ -26,8 +26,6 @@ function bootstrap_mon {
   source start_mon.sh
   start_mon
 
-  # change replica size
-  ceph "${CLI_OPTS[@]}" osd pool set rbd size 1 || true # in Luminous this pool won't exist anymore and this patch runs on Luminous rc
   chown --verbose ceph. /etc/ceph/*
 }
 
