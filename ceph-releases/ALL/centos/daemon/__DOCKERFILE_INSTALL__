@@ -1,7 +1,6 @@
 echo 'Install packages' && \
       yum install -y wget unzip uuid-runtime python-setuptools udev dmsetup && \
       yum install -y __DAEMON_PACKAGES__ && \
-      rpm -q __DAEMON_PACKAGES__ && \
     # Centos 7 doesn't have confd/forego packages, so install them from web
     __WEB_INSTALL_CONFD__ && \
     __WEB_INSTALL_FOREGO__

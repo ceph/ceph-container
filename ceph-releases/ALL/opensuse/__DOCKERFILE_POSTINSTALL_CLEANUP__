@@ -1,2 +1,3 @@
 __ZYPPER__ clean --all && \
+__ZYPPER__ info __PACKAGES__ && \
     rm -f /var/log/zypper.log
