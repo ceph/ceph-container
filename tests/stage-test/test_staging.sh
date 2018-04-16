@@ -9,7 +9,7 @@ export CEPH_VERSION
 CEPH_POINT_RELEASE=$(maint-lib/ceph_version.sh "${CEPH_VERSION_SPEC}" "CEPH_POINT_RELEASE")
 export CEPH_POINT_RELEASE
 export HOST_ARCH=x86_64
-export BASEOS_REG=_
+export BASEOS_REGISTRY=_
 export BASEOS_REPO=ubuntu
 export BASEOS_TAG=16.04
 export STAGING_DIR=tests/stage-test/staging/${CEPH_VERSION}${CEPH_POINT_RELEASE}-${BASEOS_REPO}-${BASEOS_TAG}-${HOST_ARCH}
