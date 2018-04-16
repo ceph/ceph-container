@@ -27,7 +27,7 @@ FLAVORS ?= \
 	jewel,centos,7 \
 	kraken,centos,7 \
 
-REGISTRY ?= ceph
+TAG_REGISTRY ?= ceph
 
 # By default the RELEASE version is the git branch name
 # Could be overrided by user at build time
@@ -102,7 +102,7 @@ clean.all: clean.nones
 	@rm -rf staging/
 	# Don't mess with other registries for some semblance of a safe clean.
 	@docker rmi -f \
-		$(shell docker images | egrep "^$(REGISTRY)/daemon(-base)? " | \
+		$(shell docker images | egrep "^$(TAG_REGISTRY)/daemon(-base)? " | \
 		  awk '{print $$3}' | uniq) || true
 
 clean.nuke: clean.all
@@ -142,8 +142,8 @@ help:
 	@echo '    clean             Remove images and staging dirs for the current flavors.'
 	@echo '    clean.nones       Remove all image artifacts tagged <none>.'
 	@echo '    clean.all         Remove all images and all staging dirs. Implies "clean.nones".'
-	@echo '                      Will only delete images in the specified REGISTRY for safety.'
-	@echo '    clean.nuke        Same as "clean.all" but will not be limited to specified REGISTRY.'
+	@echo '                      Will only delete images in the specified TAG_REGISTRY for safety.'
+	@echo '    clean.nuke        Same as "clean.all" but will not be limited to specified TAG_REGISTRY.'
 	@echo '                      USE AT YOUR OWN RISK! This may remove non-project images.'
 	@echo ''
 	@echo '  Testing:'
@@ -173,17 +173,17 @@ help:
 	@echo '                      sourced from ceph-container (e.g., ubuntu:"16.04", centos:"7")'
 	@echo '    e.g., FLAVORS="luminous,ubuntu,16.04 jewel,ubuntu,14.04"'
 	@echo ''
-	@echo '  REGISTRY - The name of the registry to tag images with and to push images to.'
+	@echo '  TAG_REGISTRY - The name of the registry to tag images with and to push images to.'
 	@echo '             Defaults to "ceph".'
 	@echo '             If specified as empty string, no registry will be prepended to the tag.'
-	@echo '    e.g., REGISTRY="myreg" will tag images "myreg/daemon{,-base}" and push to "myreg".'
+	@echo '    e.g., TAG_REGISTRY="myreg" will tag images "myreg/daemon{,-base}" and push to "myreg".'
 	@echo ''
 	@echo '  RELEASE - The release version to integrate in the tag. If omitted, set to the branch name.'
 	@echo ''
 	@echo '  DAEMON_BASE_TAG - Override the tag name for the daemon-base image'
 	@echo '  DAEMON_TAG - Override the tag name for the daemon image'
-	@echo '    For tags above, the final image tag will include the registry defined by "REGISTRY".'
-	@echo '    e.g., REGISTRY="myreg" DAEMON_TAG="mydaemontag" will tag the daemon "myreg/mydaemontag"'
+	@echo '    For tags above, the final image tag will include the registry defined by "TAG_REGISTRY".'
+	@echo '    e.g., TAG_REGISTRY="myreg" DAEMON_TAG="mydaemontag" will tag daemon "myreg/mydaemontag"'
 	@echo ''
 	@echo '  BASE_IMAGE - Do not compute the base image to be used as container base from BASEOS_REPO'
 	@echo '               and BASEOS_TAG. Instead, use the base image specified. The BASEOS_ vars will'
