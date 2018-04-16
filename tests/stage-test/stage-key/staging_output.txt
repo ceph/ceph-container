@@ -2,7 +2,7 @@
   CEPH_VERSION      : luminous
   CEPH_POINT_RELEASE: -12.2.1-0
   HOST_ARCH         : x86_64
-  BASEOS_REG        : _
+  BASEOS_REGISTRY   : _
   BASEOS_REPO       : ubuntu
   BASEOS_TAG        : 16.04
   IMAGES_TO_BUILD   : daemon-base daemon
