@@ -15,5 +15,4 @@ yum update -y && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
 rpm -Uvh http://download.ceph.com/rpm-${CEPH_VERSION}/el7/noarch/ceph-release-1-1.el7.noarch.rpm && \
 yum install -y epel-release && \
-yum install -y __CEPH_BASE_PACKAGES__ && \
-rpm -q __CEPH_BASE_PACKAGES__
+yum install -y __CEPH_BASE_PACKAGES__

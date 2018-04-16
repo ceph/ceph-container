@@ -1,1 +1,2 @@
-yum clean all
+yum clean all && \
+rpm -q __DAEMON_PACKAGES__

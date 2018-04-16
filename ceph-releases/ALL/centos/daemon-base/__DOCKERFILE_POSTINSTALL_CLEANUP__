@@ -1,4 +1,5 @@
 echo 'Postinstall cleanup' && \
  ( rm -rf "/usr/bin/hyperkube /usr/bin/etcd /usr/bin/systemd-analyze /usr/share/hwdata/{iab.txt,oui.txt}" && \
    yum clean all && \
-   rpmdb --rebuilddb )
+   rpmdb --rebuilddb && \
+   rpm -q __CEPH_BASE_PACKAGES__)

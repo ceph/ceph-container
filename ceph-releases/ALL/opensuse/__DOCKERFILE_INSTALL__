@@ -3,6 +3,5 @@
     __ZYPPER__ --gpg-auto-import-keys refresh && \
     __ZYPPER__ install --no-recommends --auto-agree-with-licenses --replacefiles --details \
         __PACKAGES__ && \
-    __ZYPPER__ info __PACKAGES__ && \
     __REMOVE_REPOS__ ) || \
     ( retval=$? && echo ' = zypper log = ' && cat /var/log/zypper.log && exit $retval )

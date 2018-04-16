@@ -4,7 +4,6 @@ echo 'Install packages' && \
         wget unzip uuid-runtime python-setuptools udev dmsetup && \
       apt-get update && \
       apt-get install -y  --no-install-recommends --force-yes __DAEMON_PACKAGES__ && \
-      dpkg -s __DAEMON_PACKAGES__ && \
       apt-get clean && \
     # Neither 14.04 nor 16.04 have confd/forego/kubectl packages, so install from web
     __WEB_INSTALL_CONFD__ && \
