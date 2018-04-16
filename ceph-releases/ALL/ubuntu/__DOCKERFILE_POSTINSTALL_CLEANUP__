@@ -1,6 +1,5 @@
 echo 'Postinstall cleanup' && \
      ( echo "apt clean" && DEBIAN_FRONTEND=noninteractive apt-get clean && \
-      echo "apt autoremove" && DEBIAN_FRONTEND=noninteractive apt-get autoremove && \
       echo "apt autoclean" && DEBIAN_FRONTEND=noninteractive apt-get autoclean ) || \
       ( retval=$? && cat /var/log/apt/history.log && exit $retval ) && \
     echo 'remove unneeded apt, deb, dpkg data' && \
