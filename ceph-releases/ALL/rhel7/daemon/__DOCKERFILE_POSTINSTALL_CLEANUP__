@@ -1,0 +1,2 @@
+yum clean all && \
+sed -i 's/enabled=.*/enabled=1/g' /etc/yum/pluginconf.d/subscription-manager.conf

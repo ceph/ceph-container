@@ -1,0 +1,3 @@
+
+yum update -y && \
+yum install -y __CEPH_BASE_PACKAGES__
