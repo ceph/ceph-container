@@ -6,3 +6,4 @@ Empty:
 Nums: haxor
 Nested env: luminous
 Nested file: haxor
+Base image: myregistry/ubuntu:16.04

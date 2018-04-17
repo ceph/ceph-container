@@ -4,6 +4,7 @@
   HOST_ARCH         : x86_64
   BASEOS_REPO       : ubuntu
   BASEOS_TAG        : 16.04
+  BASE_IMAGE        : myregistry/ubuntu:16.04
   IMAGES_TO_BUILD   : daemon-base daemon
   STAGING_DIR       : tests/stage-test/staging/luminous-12.2.1-0-ubuntu-16.04-x86_64
   RELEASE           : test-release
