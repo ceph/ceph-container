@@ -1,1 +1,1 @@
-zypper --non-interactive
+zypper --non-interactive --gpg-auto-import-keys
