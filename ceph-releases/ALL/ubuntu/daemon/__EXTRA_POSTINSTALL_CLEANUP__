@@ -15,4 +15,4 @@ echo "purge unneeded packages" && \
              /var/cache/debconf/* \
              /var/log/apt/ \
              /var/log/dpkg.log &&\
-    dpkg -s __DAEMON_PACKAGES__
+    apt-cache show __DAEMON_PACKAGES__
