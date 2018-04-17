@@ -18,7 +18,9 @@ function start_mgr {
   fi
 
   log "SUCCESS"
-  ceph -v
+
+  # Add the mgr keyring to the command line instead of using client.admin
+  CLI_OPTS+=(-n mgr."$MGR_NAME" -k "$MGR_KEYRING")
 
   # Env. variables matching the pattern "<module>_" will be
   # found and parsed for config-key settings by
