@@ -54,6 +54,7 @@ ALL_BUILDABLE_FLAVORS := \
 	jewel,centos,7 \
 	kraken,centos,7 \
 	luminous,opensuse,42.3 \
+	luminous,rhel7,7-released \
 
 # ==============================================================================
 # Build targets
