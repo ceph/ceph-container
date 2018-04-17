@@ -53,9 +53,6 @@ RUN bash "/generate_entrypoint.sh" && \
   rm -f /generate_entrypoint.sh && \
   bash -n /*.sh
 
-# Add volumes for Ceph config and data
-VOLUME ["/etc/ceph","/var/lib/ceph", "/etc/ganesha"]
-
 # Execute the entrypoint
 WORKDIR /
 ENTRYPOINT ["/entrypoint.sh"]
