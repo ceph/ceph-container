@@ -36,6 +36,7 @@ RELEASE ?= $(shell git rev-parse --abbrev-ref HEAD)
 DAEMON_BASE_TAG ?= ""
 DAEMON_TAG ?= ""
 
+BASEOS_REGISTRY ?= "_"
 BASE_IMAGE ?= ""
 
 
@@ -173,6 +174,9 @@ help:
 	@echo '                      sourced from ceph-container (e.g., ubuntu:"16.04", centos:"7")'
 	@echo '    e.g., FLAVORS="luminous,ubuntu,16.04 jewel,ubuntu,14.04"'
 	@echo ''
+	@echo '  REGISTRY - The url of the registry to pull images from.'
+	@echo '             Default to "_" which means the default docker registry'
+	@echo ''
 	@echo '  TAG_REGISTRY - The name of the registry to tag images with and to push images to.'
 	@echo '             Defaults to "ceph".'
 	@echo '             If specified as empty string, no registry will be prepended to the tag.'
@@ -188,7 +192,7 @@ help:
 	@echo '  BASE_IMAGE - Do not compute the base image to be used as container base from BASEOS_REPO'
 	@echo '               and BASEOS_TAG. Instead, use the base image specified. The BASEOS_ vars will'
 	@echo '               still be used to determine the ceph-container source files to use.'
-	@echo '               e.g., BASE_IMAGE="myrepo/mycustomubuntu:mytag"'
+	@echo '               e.g., BASE_IMAGE="mycustomubuntu:mytag"'
 	@echo ''
 
 show.flavors:

@@ -19,11 +19,11 @@ $(shell bash -c 'set -eu ; \
 	set_var CEPH_POINT_RELEASE "$$(bash maint-lib/ceph_version.sh "$$ceph_version_spec" CEPH_POINT_RELEASE)" ; \
 	set_var BASEOS_REPO        "$(word 3, $(subst $(comma), , $(1)))" ; \
 	set_var BASEOS_TAG         "$(word 4, $(subst $(comma), , $(1)))" ; \
-	set_var BASEOS_REGISTRY    "_" ; \
+	set_var BASEOS_REGISTRY    "$(BASEOS_REGISTRY)" ; \
 	set_var IMAGES_TO_BUILD    "$(IMAGES_TO_BUILD)" ; \
 
 	set_var STAGING_DIR       "staging/$$CEPH_VERSION$$CEPH_POINT_RELEASE-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH" ; \
-	base_img="$$BASEOS_REGISTRY/$$BASEOS_REPO:$$BASEOS_TAG" ; \
+	base_img="$$BASEOS_REPO:$$BASEOS_TAG" ; \
 	if [ -n "$(BASE_IMAGE)" ] ; then base_img="$(BASE_IMAGE)" ; fi ; \
 	set_var BASE_IMAGE        "$${base_img#_/}" ; \
 	set_var RELEASE           "$(RELEASE)" ; \
