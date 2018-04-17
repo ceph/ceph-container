@@ -88,7 +88,7 @@ build.all:
 
 # ==============================================================================
 # Clean targets
-.PHONY: clean clean.nones clean.all clean.nuke
+.PHONY: clean clean.nones clean.all
 
 clean.image.%: do.image.%
 	@$(call set_env_vars); rm -rf $$STAGING_DIR
@@ -96,18 +96,19 @@ clean.image.%: do.image.%
 clean: $(foreach p, $(FLAVORS), clean.image.$(HOST_ARCH),$(p))
 
 clean.nones:
-	@docker rmi -f $(shell docker images | egrep "^<none> " | awk '{print $$3}' | uniq) || true
+	@if [ -n "$(shell docker images --quiet --filter "dangling=true")" ] ; then \
+		docker rmi -f $(shell docker images --quiet --filter "dangling=true") || true ; \
+	fi
 
 clean.all: clean.nones
 	@rm -rf staging/
-	# Don't mess with other registries for some semblance of a safe clean.
-	@docker rmi -f \
-		$(shell docker images | egrep "^$(TAG_REGISTRY)/daemon(-base)? " | \
-		  awk '{print $$3}' | uniq) || true
-
-clean.nuke: clean.all
-	@docker rmi -f \
-		$(shell docker images | egrep "^.*/daemon(-base)? " | awk '{print $$3}' | uniq) || true
+	@# Inspect each image, and if we find 'CEPH_POINT_RELEASE' we can be pretty sure it's a
+	@# ceph-container image and safe to delete
+	@for image in $(shell docker images --quiet); do \
+		if docker inspect "$$image" | grep -q 'CEPH_POINT_RELEASE'; then \
+			docker rmi -f "$$image" || true ; \
+		fi ; \
+	done
 
 
 # ==============================================================================
@@ -142,9 +143,8 @@ help:
 	@echo '    clean             Remove images and staging dirs for the current flavors.'
 	@echo '    clean.nones       Remove all image artifacts tagged <none>.'
 	@echo '    clean.all         Remove all images and all staging dirs. Implies "clean.nones".'
-	@echo '                      Will only delete images in the specified TAG_REGISTRY for safety.'
-	@echo '    clean.nuke        Same as "clean.all" but will not be limited to specified TAG_REGISTRY.'
-	@echo '                      USE AT YOUR OWN RISK! This may remove non-project images.'
+	@echo '                      WARNING: Could be unsafe. Deletes all images w/ the text'
+	@echo '                               "CEPH_POINT_RELEASE" anywhere in the container metadata.'
 	@echo ''
 	@echo '  Testing:'
 	@echo '    lint              Lint the source code.'
