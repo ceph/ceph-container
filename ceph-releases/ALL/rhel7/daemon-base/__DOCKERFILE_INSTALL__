@@ -1,3 +1,4 @@
 
 yum update -y && \
+yum install -y wget unzip uuid-runtime python-setuptools udev dmsetup && \
 yum install -y __CEPH_BASE_PACKAGES__
