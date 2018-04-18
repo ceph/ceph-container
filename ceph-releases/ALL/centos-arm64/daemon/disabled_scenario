@@ -1,0 +1,4 @@
+# You can find the complete list of scenario by looking at the 'case' statement
+# in the entrypoint.sh.in file.
+ 
+EXCLUDED_TAGS="populate_kvstore kv_type_etcd kv_type_k8s nfs tcmu_runner rbd_target_api rbd_target_gw"
