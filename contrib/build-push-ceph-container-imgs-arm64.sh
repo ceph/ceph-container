@@ -27,7 +27,7 @@ function build_and_push_latest_bis {
   # latest-bis is needed by ceph-ansible so it can test the restart handlers on an image ID change
   # rebuild latest again to get a different image ID
   make RELEASE="$RELEASE"-bis FLAVORS="${CEPH_RELEASES[-1]},centos-arm64,7" BASE_IMAGE=centos:7 build
-  docker tag ceph/daemon:"$BRANCH"-bis-"${CEPH_RELEASES[-1]}"-centos-7-x86_64 ceph/daemon:latest-bis
+  docker tag ceph/daemon:"$BRANCH"-bis-"${CEPH_RELEASES[-1]}"-centos-7-arm64 ceph/daemon:latest-bis
   docker push ceph/daemon:latest-bis
 }
 
