@@ -10,7 +10,7 @@ set -ex
 BRANCH="${GIT_BRANCH#*/}"
 LATEST_COMMIT_SHA=$(git rev-parse --short HEAD)
 TAGGED_HEAD=false # does HEAD is on a tag ?
-CEPH_RELEASES=(jewel kraken luminous)
+if [ -z "$CEPH_RELEASES" ]; then CEPH_RELEASES=(jewel kraken luminous); fi
 
 
 #############
@@ -55,17 +55,20 @@ function create_head_or_point_release {
   fi
 }
 
+declare -F build_ceph_imgs  ||
 function build_ceph_imgs {
   echo "Build Ceph container image(s)"
   make RELEASE="$RELEASE" build.parallel
   docker images
 }
 
+declare -F push_ceph_imgs ||
 function push_ceph_imgs {
   echo "Push Ceph container image(s) to the Docker Hub registry"
   make RELEASE="$RELEASE" push.parallel
 }
 
+declare -F build_and_push_latest_bis ||
 function build_and_push_latest_bis {
   # latest-bis is needed by ceph-ansible so it can test the restart handlers on an image ID change
   # rebuild latest again to get a different image ID
