@@ -4,7 +4,7 @@
   DISTRO            : ubuntu
   DISTRO_VERSION    : 16.04
   HOST_ARCH         : x86_64
-  BASEOS_REGISTRY   : _
+  BASEOS_REGISTRY   : 
   BASEOS_REPO       : ubuntu.repo
   BASEOS_TAG        : ubuntu.tag
   IMAGES_TO_BUILD   : daemon-base daemon
@@ -12,4 +12,7 @@
   RELEASE           : test-release
   DAEMON_BASE_IMAGE : test-reg/daemon-base:test-release-1
   DAEMON_IMAGE      : test-reg/daemon:test-release-1
+
+Computed:
+  BASE_IMAGE        : ubuntu.repo:ubuntu.tag
 

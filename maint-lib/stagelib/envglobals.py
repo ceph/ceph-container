@@ -41,7 +41,7 @@ _NOT_SET_TEXT = """
 ERROR: Expected environment variable '{}' to be set."""
 
 
-def _verifyRequiredEnvVar(varname):
+def verifyRequiredEnvVar(varname):
     """
     Verify that an environment variable is set. Return the value of the variable if it exists.
     As these variables are required and excellent for viewing during program run, print them to
@@ -61,7 +61,7 @@ def _verifyRequiredEnvVar(varname):
 def verifyRequiredEnvVars():
     """Verify that all required environment variables are set. Error and exit if one is not set."""
     for var in REQUIRED_ENV_VARS:
-        _verifyRequiredEnvVar(var)
+        verifyRequiredEnvVar(var)
 
 
 def getEnvVar(varname):
@@ -70,6 +70,13 @@ def getEnvVar(varname):
         sys.stderr.write(_NOT_SET_TEXT.format(varname))
         sys.exit(1)
     return os.environ[varname]
+
+
+def exportBaseImageEnvVar():
+    BASE_IMAGE = "{}:{}".format(getEnvVar('BASEOS_REPO'), getEnvVar('BASEOS_TAG'))
+    if getEnvVar('BASEOS_REGISTRY'):
+        BASE_IMAGE = "{}/{}".format(getEnvVar('BASEOS_REGISTRY'), BASE_IMAGE)
+    os.environ['BASE_IMAGE'] = BASE_IMAGE
 
 
 def exportGitInfoEnvVars():

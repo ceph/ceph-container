@@ -9,8 +9,8 @@ import time
 
 from collections import OrderedDict
 
-from stagelib.envglobals import (verifyRequiredEnvVars, getEnvVar,
-                                 exportGitInfoEnvVars, exportGoArchEnvVar)
+from stagelib.envglobals import (verifyRequiredEnvVars, verifyRequiredEnvVar, getEnvVar,
+                                 exportGitInfoEnvVars, exportGoArchEnvVar, exportBaseImageEnvVar)
 from stagelib.filetools import (list_files, mkdir_if_dne, copy_files, recursive_copy_dir,
                                 IOOSErrorGracefulFail, save_files_copied)
 from stagelib.replace import do_variable_replace
@@ -53,8 +53,15 @@ def main(CORE_FILES_DIR, CEPH_RELEASES_DIR):
     verifyRequiredEnvVars()
     print('')
 
+    # Treat BASE_IMAGE as required var
+    print('Computed:')
+    logging.info('Computed:')
+    exportBaseImageEnvVar()
+    verifyRequiredEnvVar('BASE_IMAGE')
+    print('')
+
     exportGitInfoEnvVars()
-    logging.info('GIT_REPO:    {}'.format(getEnvVar('GIT_REPO')))
+    logging.info('GIT_REPO:   {}'.format(getEnvVar('GIT_REPO')))
     logging.info('GIT_BRANCH: {}'.format(getEnvVar('GIT_BRANCH')))
     logging.info('GIT_COMMIT: {}'.format(getEnvVar('GIT_COMMIT')))
     logging.info('GIT_CLEAN:  {}'.format(getEnvVar('GIT_CLEAN')))

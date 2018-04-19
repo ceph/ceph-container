@@ -13,32 +13,31 @@ comma := ,
 define set_env_vars
 $(shell bash -c 'set -eu ; \
 	function set_var () { export $$1="$$2" ; echo -n $$1="\"$$2\" " ; } ; \
+	function val_or_default () { if [ -n "$$1" ]; then echo "$$1" ; else echo "$$2" ; fi ; } ; \
 	set_var HOST_ARCH          "$(word 1, $(subst $(comma), ,$(1)))" ; \
 	ceph_version_spec="$(word 2, $(subst $(comma), ,$(1)))" ; \
 	set_var CEPH_VERSION       "$$(bash maint-lib/ceph_version.sh "$$ceph_version_spec" CEPH_VERSION)" ; \
 	set_var CEPH_POINT_RELEASE "$$(bash maint-lib/ceph_version.sh "$$ceph_version_spec" CEPH_POINT_RELEASE)" ; \
 	set_var DISTRO             "$(word 3, $(subst $(comma), , $(1)))" ; \
 	set_var DISTRO_VERSION     "$(word 4, $(subst $(comma), , $(1)))" ; \
-	set_var BASEOS_REGISTRY    "_" ; \
-	set_var BASEOS_REPO        "$$DISTRO" ; \
-	set_var BASEOS_TAG         "$$DISTRO_VERSION" ; \
+	\
+	set_var BASEOS_REGISTRY    "$(BASEOS_REGISTRY)" ; \
+	set_var BASEOS_REPO        "$$(val_or_default "$(BASEOS_REPO)" "$$DISTRO")" ; \
+	set_var BASEOS_TAG         "$$(val_or_default "$(BASEOS_TAG)" "$$DISTRO_VERSION")" ; \
+	\
 	set_var IMAGES_TO_BUILD    "$(IMAGES_TO_BUILD)" ; \
-	set_var STAGING_DIR       "staging/$$CEPH_VERSION$$CEPH_POINT_RELEASE-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH" ; \
+	set_var STAGING_DIR        "staging/$$CEPH_VERSION$$CEPH_POINT_RELEASE--$$DISTRO-$$DISTRO_VERSION-$$HOST_ARCH" ; \
+	set_var RELEASE            "$(RELEASE)" ; \
 	\
-	base_img="$$BASEOS_REGISTRY/$$BASEOS_REPO:$$BASEOS_TAG" ; \
-	if [ -n "$(BASE_IMAGE)" ] ; then base_img="$(BASE_IMAGE)" ; fi ; \
-	set_var BASE_IMAGE        "$${base_img#_/}" ; \
-	set_var RELEASE           "$(RELEASE)" ; \
-	\
-	daemon_base_img="daemon-base:$(RELEASE)-$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH" ; \
-	if [ -n "$(DAEMON_BASE_TAG)" ] ; then daemon_base_img="$(DAEMON_BASE_TAG)" ; fi ; \
+	daemon_base_img="$$(val_or_default "$(DAEMON_BASE_TAG)" \
+		"daemon-base:$(RELEASE)-$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH")" ; \
 	if [ -n "$(TAG_REGISTRY)" ]; then daemon_base_img="$(TAG_REGISTRY)/$$daemon_base_img" ; fi ; \
-	set_var DAEMON_BASE_IMAGE "$$daemon_base_img" ; \
+	set_var DAEMON_BASE_IMAGE  "$$daemon_base_img" ; \
 	\
-	daemon_img="daemon:$(RELEASE)-$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH" ; \
-	if [ -n "$(DAEMON_TAG)" ] ; then daemon_img="$(DAEMON_TAG)" ; fi ; \
+	daemon_img="$$(val_or_default "$(DAEMON_TAG)" \
+		"daemon:$(RELEASE)-$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH")" ; \
 	if [ -n "$(TAG_REGISTRY)" ]; then daemon_img="$(TAG_REGISTRY)/$$daemon_img" ; fi ; \
-	set_var DAEMON_IMAGE      "$$daemon_img" ; \
+	set_var DAEMON_IMAGE       "$$daemon_img" ; \
 	'
 )
 endef

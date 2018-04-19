@@ -35,7 +35,10 @@ RELEASE ?= $(shell git rev-parse --abbrev-ref HEAD)
 DAEMON_BASE_TAG ?= ""
 DAEMON_TAG ?= ""
 
-BASE_IMAGE ?= ""
+# These values are given sane defaults if they are unset. Otherwise, they get the value specified.
+BASEOS_REGISTRY ?= ""
+BASEOS_REPO ?= ""
+BASEOS_TAG ?= ""
 
 
 # ==============================================================================
@@ -123,70 +126,80 @@ test.staging:
 # Help
 .PHONY: help show.flavors flavors.modified
 
+# Aligned to 100 chars
+define HELPTEXT
+
+Usage: make [OPTIONS] ... <TARGETS>
+
+TARGETS:
+
+  Building:
+    stage             Form staging dirs for all images. Dirs are reformed if they exist.
+    build             Build all images. Staging dirs are reformed if they exist.
+    build.parallel    Build default flavors in parallel.
+    build.all         Build all buildable flavors with build.parallel
+    push              Push release images to registry.
+    push.parallel     Push release images to registy in parallel
+
+  Clean:
+    clean             Remove images and staging dirs for the current flavors.
+    clean.nones       Remove all image artifacts tagged <none>.
+    clean.all         Remove all images and all staging dirs. Implies "clean.nones".
+                      WARNING: Could be unsafe. Deletes all images w/ the text
+                               "CEPH_POINT_RELEASE" anywhere in the container metadata.
+
+  Testing:
+    lint              Lint the source code.
+    test.staging      Perform stageing integration test.
+
+  Help:
+    help              Print this help message.
+    show.flavors      Show all flavor options to FLAVORS.
+    flavors.modified  Show the flavors impacted by this branch's changes vs origin/master.
+                      All buildable flavors are staged for this test.
+                      The env var VS_BRANCH can be set to compare vs a different branch.
+
+OPTIONS:
+
+  FLAVORS - ceph-container images to operate on in the form below:
+              <CEPH_VERSION>[CEPH_POINT_RELEASE],<DISTRO>,<DISTRO_VERSION>
+            Multiple forms can be separated by spaces.
+      CEPH_VERSION - Ceph version name part of the ceph-releases source path (e.g., luminous, mimic)
+      CEPH_POINT_RELEASE - Optional field to select a particular version of Ceph
+                           Regarding the package manager the version separator may vary:
+                             yum/dnf/zypper are using dash (e.g -12.2.2)
+                             apt is using an equal (e.g =12.2.2)
+      DISTRO - Distro part of the ceph-releases source path (e.g., ubuntu, centos)
+      DISTRO_VERSION - Distro version part of the ceph-releases source path
+                       (e.g., ubuntu/"16.04", centos/"7")
+    e.g., make FLAVORS="luminous,ubuntu,16.04 jewel,ubuntu,14.04" ...
+
+  RELEASE - The release version to integrate in the tag. If omitted, set to the branch name.
+
+
+ADVANCED OPTIONS:
+    It is advised only to use the below options for builds of a single flavor. These options are
+    global overrides that affect builds of all target flavors.
+
+  TAG_REGISTRY - Registry name to tag images with and to push images to.  Default: "ceph"
+                 If specified as empty string, no registry will be prepended to the tag.
+                 e.g., TAG_REGISTRY="myreg" tags images "myreg/daemon{,-base}" & pushes to "myreg".
+
+  DAEMON_BASE_TAG - Override the tag name for the daemon-base image.
+  DAEMON_TAG      - Override the tag name for the daemon image.
+    For tags above, the final image tag will include the registry defined by "TAG_REGISTRY".
+    e.g., TAG_REGISTRY="myreg" DAEMON_TAG="mydaemontag" will tag daemon "myreg/mydaemontag"
+
+  BASEOS_REGISTRY - Registry part of the build's base image.  Default: none (empty)
+  BASEOS_REPO     - Repo part of the build's base image.  Default: value from DISTRO
+  BASEOS_TAG      - Tag part of the build's base image.  Default: value from DISTRO_VERSION
+    e.g., BASEOS_REPO=debian BASEOS_TAG=jessie will use "debian:jessie" as a base image
+          BASEOS_REGISTRY with above will use "myreg/debian:jessie" as a base image
+
+endef
+export HELPTEXT
 help:
-	@echo ''
-	@echo 'Usage: make [OPTIONS] ... <TARGETS>'
-	@echo ''
-	@echo 'TARGETS:'
-	@echo ''
-	@echo '  Building:'
-	@echo '    stage             Form staging dirs for all images. Dirs are reformed if they exist.'
-	@echo '    build             Build all images. Staging dirs are reformed if they exist.'
-	@echo '    build.parallel    Build default flavors in parallel.'
-	@echo '    build.all         Build all buildable flavors with build.parallel'
-	@echo '    push              Push release images to registry.'
-	@echo '    push.parallel     Push release images to registy in parallel'
-	@echo ''
-	@echo '  Clean:'
-	@echo '    clean             Remove images and staging dirs for the current flavors.'
-	@echo '    clean.nones       Remove all image artifacts tagged <none>.'
-	@echo '    clean.all         Remove all images and all staging dirs. Implies "clean.nones".'
-	@echo '                      WARNING: Could be unsafe. Deletes all images w/ the text'
-	@echo '                               "CEPH_POINT_RELEASE" anywhere in the container metadata.'
-	@echo ''
-	@echo '  Testing:'
-	@echo '    lint              Lint the source code.'
-	@echo '    test.staging      Perform stageing integration test.'
-	@echo ''
-	@echo '  Help:'
-	@echo '    help              Print this help message.'
-	@echo '    show.flavors      Show all flavor options to FLAVORS.'
-	@echo "    flavors.modified  Show the flavors impacted by this branch's changes vs origin/master."
-	@echo '                      All buildable flavors are staged for this test.'
-	@echo '                      The env var VS_BRANCH can be set to compare vs a different branch.'
-	@echo ''
-	@echo 'OPTIONS:'
-	@echo ''
-	@echo '  FLAVORS - ceph-container images to operate on in the form'
-	@echo '    <CEPH_VERSION>[CEPH_POINT_RELEASE],<DISTRO>,<DISTRO_VERSION>'
-	@echo '    and multiple forms may be separated by spaces.'
-	@echo '      CEPH_VERSION - Ceph named version part of the ceph-releases source path (e.g., luminous, mimic)'
-	@echo '      CEPH_POINT_RELEASE - Optional field to select a particular version of Ceph'
-	@echo '                           Regarding the package manager the version separator may vary:'
-	@echo '                             yum/dnf/zypper are using dash (e.g -12.2.2)'
-	@echo '                             apt is using an equal (e.g =12.2.2)'
-	@echo '      DISTRO - Distro part of the ceph-releases source path (e.g., ubuntu, centos)'
-	@echo '      DISTRO_VERSION - Distro version part of the ceph-releases source path'
-	@echo '                       (e.g., ubuntu/"16.04", centos/"7")'
-	@echo '    e.g., FLAVORS="luminous,ubuntu,16.04 jewel,ubuntu,14.04"'
-	@echo ''
-	@echo '  TAG_REGISTRY - The name of the registry to tag images with and to push images to.'
-	@echo '             Defaults to "ceph".'
-	@echo '             If specified as empty string, no registry will be prepended to the tag.'
-	@echo '    e.g., TAG_REGISTRY="myreg" will tag images "myreg/daemon{,-base}" and push to "myreg".'
-	@echo ''
-	@echo '  RELEASE - The release version to integrate in the tag. If omitted, set to the branch name.'
-	@echo ''
-	@echo '  DAEMON_BASE_TAG - Override the tag name for the daemon-base image'
-	@echo '  DAEMON_TAG - Override the tag name for the daemon image'
-	@echo '    For tags above, the final image tag will include the registry defined by "TAG_REGISTRY".'
-	@echo '    e.g., TAG_REGISTRY="myreg" DAEMON_TAG="mydaemontag" will tag daemon "myreg/mydaemontag"'
-	@echo ''
-	@echo '  BASE_IMAGE - Do not compute the base image to be used as container base from BASEOS_REPO'
-	@echo '               and BASEOS_TAG. Instead, use the base image specified. The BASEOS_ vars will'
-	@echo '               still be used to determine the ceph-container source files to use.'
-	@echo '               e.g., BASE_IMAGE="myrepo/mycustomubuntu:mytag"'
-	@echo ''
+	@echo "$$HELPTEXT"
 
 show.flavors:
 	@echo $(ALL_BUILDABLE_FLAVORS)
