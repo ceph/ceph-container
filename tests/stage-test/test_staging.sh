@@ -11,7 +11,7 @@ export CEPH_POINT_RELEASE
 export DISTRO=ubuntu
 export DISTRO_VERSION=16.04
 export HOST_ARCH=x86_64
-export BASEOS_REGISTRY=_
+export BASEOS_REGISTRY=""
 export BASEOS_REPO=ubuntu.repo
 export BASEOS_TAG=ubuntu.tag
 export STAGING_DIR=tests/stage-test/staging/${CEPH_VERSION}${CEPH_POINT_RELEASE}-${BASEOS_REPO}-${BASEOS_TAG}-${HOST_ARCH}

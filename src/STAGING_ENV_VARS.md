@@ -17,6 +17,9 @@ See `ceph-container/maint-lib/stagelib/envglobals.py` for most updated list and 
  - DAEMON_IMAGE
 
 ## Generated during staging
+### Container image
+ - BASE_IMAGE
+
 ### Git tracking
  - GIT_REPO
  - GIT_BRANCH
