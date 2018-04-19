@@ -17,7 +17,6 @@
 # Build tunables
 
 # When updating these defaults, be sure to check that ALL_BUILDABLE_FLAVORS is updated
-# CEPH_VERSION,BASEOS_REPO,BASEOS_TAG
 FLAVORS ?= \
 	luminous,ubuntu,16.04 \
 	jewel,ubuntu,16.04 \
@@ -44,7 +43,6 @@ BASE_IMAGE ?= ""
 include maint-lib/makelib.mk
 
 # All flavor options that can be passed to FLAVORS
-# CEPH_VERSION,BASEOS_REPO,BASEOS_TAG
 ALL_BUILDABLE_FLAVORS := \
 	luminous,ubuntu,16.04 \
 	jewel,ubuntu,16.04 \
@@ -160,17 +158,16 @@ help:
 	@echo 'OPTIONS:'
 	@echo ''
 	@echo '  FLAVORS - ceph-container images to operate on in the form'
-	@echo '    <CEPH_VERSION>[CEPH_POINT_RELEASE],<BASEOS_REPO>,<BASEOS_TAG>'
+	@echo '    <CEPH_VERSION>[CEPH_POINT_RELEASE],<DISTRO>,<DISTRO_VERSION>'
 	@echo '    and multiple forms may be separated by spaces.'
-	@echo '      CEPH_VERSION - named ceph version (e.g., luminous, mimic)'
+	@echo '      CEPH_VERSION - Ceph named version part of the ceph-releases source path (e.g., luminous, mimic)'
 	@echo '      CEPH_POINT_RELEASE - Optional field to select a particular version of Ceph'
-	@echo '                           Regarding the package manager the version separator may vary :'
+	@echo '                           Regarding the package manager the version separator may vary:'
 	@echo '                             yum/dnf/zypper are using dash (e.g -12.2.2)'
 	@echo '                             apt is using an equal (e.g =12.2.2)'
-	@echo '      BASEOS_REPO  - The base image to use for the daemon-base container. This is also'
-	@echo '                      the distro path sourced from ceph-container (e.g., ubuntu, centos)'
-	@echo '      BASEOS_TAG   - Tagged version of the base repo to use. Also the distro version'
-	@echo '                      sourced from ceph-container (e.g., ubuntu:"16.04", centos:"7")'
+	@echo '      DISTRO - Distro part of the ceph-releases source path (e.g., ubuntu, centos)'
+	@echo '      DISTRO_VERSION - Distro version part of the ceph-releases source path'
+	@echo '                       (e.g., ubuntu/"16.04", centos/"7")'
 	@echo '    e.g., FLAVORS="luminous,ubuntu,16.04 jewel,ubuntu,14.04"'
 	@echo ''
 	@echo '  TAG_REGISTRY - The name of the registry to tag images with and to push images to.'

@@ -63,8 +63,8 @@ def main(CORE_FILES_DIR, CEPH_RELEASES_DIR):
     logging.info('GO_ARCH: {}'.format(getEnvVar('GO_ARCH')))
 
     CEPH_VERSION = getEnvVar('CEPH_VERSION')
-    BASEOS_REPO = getEnvVar('BASEOS_REPO')
-    BASEOS_TAG = getEnvVar('BASEOS_TAG')
+    DISTRO = getEnvVar('DISTRO')
+    DISTRO_VERSION = getEnvVar('DISTRO_VERSION')
     IMAGES_TO_BUILD = getEnvVar('IMAGES_TO_BUILD').split(' ')
     # STAGING_DIR is gotten globally
 
@@ -72,11 +72,11 @@ def main(CORE_FILES_DIR, CEPH_RELEASES_DIR):
     path_search_order = [
         "{}".format(CORE_FILES_DIR),
         os.path.join(CEPH_RELEASES_DIR, 'ALL'),
-        os.path.join(CEPH_RELEASES_DIR, 'ALL', BASEOS_REPO),
-        os.path.join(CEPH_RELEASES_DIR, 'ALL', BASEOS_REPO, BASEOS_TAG),
+        os.path.join(CEPH_RELEASES_DIR, 'ALL', DISTRO),
+        os.path.join(CEPH_RELEASES_DIR, 'ALL', DISTRO, DISTRO_VERSION),
         os.path.join(CEPH_RELEASES_DIR, CEPH_VERSION),
-        os.path.join(CEPH_RELEASES_DIR, CEPH_VERSION, BASEOS_REPO),
-        os.path.join(CEPH_RELEASES_DIR, CEPH_VERSION, BASEOS_REPO, BASEOS_TAG),
+        os.path.join(CEPH_RELEASES_DIR, CEPH_VERSION, DISTRO),
+        os.path.join(CEPH_RELEASES_DIR, CEPH_VERSION, DISTRO, DISTRO_VERSION),
     ]
     logging.debug('Path search order: {}'.format(path_search_order))
 

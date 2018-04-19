@@ -5,7 +5,7 @@ HOST_ARCH ?= $(shell uname --machine)
 
 
 # Export all relevant environment variables from a flavor spec in the format:
-#   HOST_ARCH,CEPH_VERSION_SPEC,BASEOS_REPO,BASEOS_TAG
+#   HOST_ARCH,CEPH_VERSION_SPEC,DISTRO,DISTRO_VERSION
 # Note that CEPH_VERSION_SPEC is split into CEPH_VERSION and CEPH_POINT_RELEASE
 # Note that this format is the same as the FLAVORS spec format with HOST_ARCH prepended; it's
 #   necessary to pass HOST_ARCH in so we can do parallel cross-builds of different arches later.
@@ -17,12 +17,14 @@ $(shell bash -c 'set -eu ; \
 	ceph_version_spec="$(word 2, $(subst $(comma), ,$(1)))" ; \
 	set_var CEPH_VERSION       "$$(bash maint-lib/ceph_version.sh "$$ceph_version_spec" CEPH_VERSION)" ; \
 	set_var CEPH_POINT_RELEASE "$$(bash maint-lib/ceph_version.sh "$$ceph_version_spec" CEPH_POINT_RELEASE)" ; \
-	set_var BASEOS_REPO        "$(word 3, $(subst $(comma), , $(1)))" ; \
-	set_var BASEOS_TAG         "$(word 4, $(subst $(comma), , $(1)))" ; \
+	set_var DISTRO             "$(word 3, $(subst $(comma), , $(1)))" ; \
+	set_var DISTRO_VERSION     "$(word 4, $(subst $(comma), , $(1)))" ; \
 	set_var BASEOS_REGISTRY    "_" ; \
+	set_var BASEOS_REPO        "$$DISTRO" ; \
+	set_var BASEOS_TAG         "$$DISTRO_VERSION" ; \
 	set_var IMAGES_TO_BUILD    "$(IMAGES_TO_BUILD)" ; \
-
 	set_var STAGING_DIR       "staging/$$CEPH_VERSION$$CEPH_POINT_RELEASE-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH" ; \
+	\
 	base_img="$$BASEOS_REGISTRY/$$BASEOS_REPO:$$BASEOS_TAG" ; \
 	if [ -n "$(BASE_IMAGE)" ] ; then base_img="$(BASE_IMAGE)" ; fi ; \
 	set_var BASE_IMAGE        "$${base_img#_/}" ; \

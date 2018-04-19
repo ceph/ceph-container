@@ -1,0 +1,13 @@
+CEPH_VERSION: luminous
+CEPH_POINT_RELEASE: -12.2.1-0
+DISTRO: ubuntu
+DISTRO_VERSION: 16.04
+HOST_ARCH: x86_64
+BASEOS_REGISTRY: _
+BASEOS_REPO: ubuntu.repo
+BASEOS_TAG: ubuntu.tag
+IMAGES_TO_BUILD: daemon-base daemon
+STAGING_DIR: tests/stage-test/staging/luminous-12.2.1-0-ubuntu.repo-ubuntu.tag-x86_64
+RELEASE: test-release
+DAEMON_BASE_IMAGE: test-reg/daemon-base:test-release-1
+DAEMON_IMAGE: test-reg/daemon:test-release-1
