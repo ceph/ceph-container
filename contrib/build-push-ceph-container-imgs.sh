@@ -11,7 +11,7 @@ BRANCH="${GIT_BRANCH#*/}"
 LATEST_COMMIT_SHA=$(git rev-parse --short HEAD)
 TAGGED_HEAD=false # does HEAD is on a tag ?
 if [ -z "$CEPH_RELEASES" ]; then CEPH_RELEASES=(jewel kraken luminous); fi
-
+HOST_ARCH=$(uname -m)
 
 #############
 # FUNCTIONS #
@@ -73,7 +73,7 @@ function build_and_push_latest_bis {
   # latest-bis is needed by ceph-ansible so it can test the restart handlers on an image ID change
   # rebuild latest again to get a different image ID
   make RELEASE="$BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,7 build
-  docker tag ceph/daemon:"$BRANCH"-bis-"${CEPH_RELEASES[-1]}"-centos-7-x86_64 ceph/daemon:latest-bis
+  docker tag ceph/daemon:"$BRANCH"-bis-"${CEPH_RELEASES[-1]}"-centos-7-${HOST_ARCH} ceph/daemon:latest-bis
   docker push ceph/daemon:latest-bis
 }
 
@@ -88,7 +88,7 @@ function push_ceph_imgs_latests {
       latest_name="latest-$release"
     fi
     for i in daemon-base daemon; do
-      tag=ceph/$i:${BRANCH}-${LATEST_COMMIT_SHA}-$release-centos-7-x86_64
+      tag=ceph/$i:${BRANCH}-${LATEST_COMMIT_SHA}-$release-centos-7-${HOST_ARCH}
       # tag image
       docker tag "$tag" ceph/$i:"$latest_name"
 
