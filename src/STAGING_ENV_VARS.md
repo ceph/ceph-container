@@ -5,9 +5,9 @@ See `ceph-container/maint-lib/stagelib/envglobals.py` for most updated list and 
  - CEPH_VERSION
  - CEPH_POINT_RELEASE
  - HOST_ARCH
- - BASEOS_REGISTRY
  - BASEOS_REPO
  - BASEOS_TAG
+ - BASE_IMAGE
  - IMAGES_TO_BUILD
  - STAGING_DIR
  - RELEASE

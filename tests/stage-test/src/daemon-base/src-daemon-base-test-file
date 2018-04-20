@@ -5,3 +5,4 @@ Empty: __EMPTY__
 Nums: __H4X0R__
 Nested env: __ENV_[NESTED_ENV]__
 Nested file: __ENV_[NESTED_FILE]__
+Base image: __ENV_[BASE_IMAGE]__
