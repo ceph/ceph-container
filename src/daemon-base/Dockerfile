@@ -21,8 +21,8 @@ RUN \
     #   download and install packages from web, cleaning any files as you go.
     # Installs should support install of ganesha for luminous without installing for jewel/kraken.
     __DOCKERFILE_INSTALL__ && \
-    # Clean container, starting with record of current size
-    INITIAL_SIZE=$(du -sm / 2>/dev/null | awk '{print $1}') && \
+    # Clean container, starting with record of current size (strip / from end)
+    INITIAL_SIZE="$(bash -c 'sz="$(du -sm --exclude=/proc /)" ; echo "${sz%*/}"')" && \
     #
     #
     # Perform any final cleanup actions like package manager cleaning, etc.
@@ -33,8 +33,8 @@ RUN \
     __DOCKERFILE_CLEAN_COMMON__ && \
     #
     #
-    # Report size savings
-    FINAL_SIZE=$(du -sm / 2>/dev/null | awk '{print $1}') && \
+    # Report size savings (strip / from end)
+    FINAL_SIZE="$(bash -c 'sz="$(du -sm --exclude=/proc /)" ; echo "${sz%*/}"')" && \
     REMOVED_SIZE=$((INITIAL_SIZE - FINAL_SIZE)) && \
     echo "Cleaning process removed ${REMOVED_SIZE}MB" && \
     echo "Dropped container size from ${INITIAL_SIZE}MB to ${FINAL_SIZE}MB"
