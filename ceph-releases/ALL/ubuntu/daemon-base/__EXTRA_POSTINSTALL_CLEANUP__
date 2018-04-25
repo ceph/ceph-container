@@ -1,1 +1,1 @@
-apt-cache show __CEPH_BASE_PACKAGES__
+/bin/true

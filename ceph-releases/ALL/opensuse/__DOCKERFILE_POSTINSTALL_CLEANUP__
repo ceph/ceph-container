@@ -1,2 +1,1 @@
-__ZYPPER__ info __PACKAGES__ && \
-    rm -f /var/log/zypper.log
+rm -f /var/log/zypper.log
