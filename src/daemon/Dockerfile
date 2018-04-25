@@ -32,7 +32,10 @@ RUN \
     FINAL_SIZE="$(bash -c 'sz="$(du -sm --exclude=/proc /)" ; echo "${sz%*/}"')" && \
     REMOVED_SIZE=$((INITIAL_SIZE - FINAL_SIZE)) && \
     echo "Cleaning process removed ${REMOVED_SIZE}MB" && \
-    echo "Dropped container size from ${INITIAL_SIZE}MB to ${FINAL_SIZE}MB"
+    echo "Dropped container size from ${INITIAL_SIZE}MB to ${FINAL_SIZE}MB" && \
+    #
+    # Verify that the packages installed haven't been accidentally cleaned
+    __DOCKERFILE_VERIFY_PACKAGES__
 
 #======================================================
 # Add ceph-container files
