@@ -8,5 +8,6 @@
     __ZYPPER__ install --no-recommends --auto-agree-with-licenses --replacefiles --details \
         __PACKAGES__ && \
     echo 'zypper remove repos' && \
-    __REMOVE_REPOS__ ) || \
+    __REMOVE_REPOS__ && \
+    __ZYPPER__ clean --all ) || \
     ( retval=$? && echo ' = zypper log = ' && cat /var/log/zypper.log && exit $retval )
