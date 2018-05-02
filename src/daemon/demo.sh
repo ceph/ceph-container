@@ -16,6 +16,7 @@ MGR_IP=$MON_IP
 : "${RGW_USAGE_MAX_SHARDS:=32}"
 : "${RGW_USAGE_LOG_FLUSH_THRESHOLD:=1}"
 : "${RGW_USAGE_LOG_TICK_INTERVAL:=1}"
+CEPH_DISK_CLI_OPTS=()
 
 
 #######
@@ -48,10 +49,13 @@ function bootstrap_osd {
     if ! grep -qE "osd data = $OSD_PATH" /etc/ceph/"${CLUSTER}".conf; then
       echo "osd data = $OSD_PATH" >> /etc/ceph/"${CLUSTER}".conf
     fi
+    if [[ "$CEPH_VERSION" != "jewel" ]]; then
+      CEPH_DISK_CLI_OPTS=(--bluestore)
+    fi
     # bootstrap OSD
     mkdir -p "$OSD_PATH"
     chown --verbose -R ceph. "$OSD_PATH"
-    ceph-disk -v prepare "${CLI_OPTS[@]}" --bluestore "$PREPARE_OSD"
+    ceph-disk -v prepare "${CLI_OPTS[@]}" "${CEPH_DISK_CLI_OPTS[@]}" "$PREPARE_OSD"
     # this second chown will chown the partition created by ceph-disk e.g: /dev/sda1 and /dev/sda2
     chown --verbose -R ceph. "$PREPARE_OSD"*
     ceph-disk -v activate --mark-init none --no-start-daemon "$ACTIVATE_OSD"
