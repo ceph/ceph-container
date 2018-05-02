@@ -215,7 +215,9 @@ function build_bootstrap {
   # this is will prevent someone writing daemons in the wrong order
   # once both mon and mgr are up we don't care about the order
   bootstrap_mon
-  bootstrap_mgr
+  if [[ "$CEPH_VERSION" != "jewel" ]]; then
+    bootstrap_mgr
+  fi
 
   if [[ "$DEMO_DAEMONS" == "all" ]]; then
     daemons_list="osd mds rgw nfs rbd_mirror rest_api"
