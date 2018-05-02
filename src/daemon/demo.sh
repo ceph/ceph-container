@@ -49,7 +49,7 @@ function bootstrap_osd {
     if ! grep -qE "osd data = $OSD_PATH" /etc/ceph/"${CLUSTER}".conf; then
       echo "osd data = $OSD_PATH" >> /etc/ceph/"${CLUSTER}".conf
     fi
-    if [[ "$CEPH_VERSION" != "jewel" ]]; then
+    if [[ "$CEPH_VERSION" != "jewel" && "$CEPH_VERSION" != "kraken" ]]; then
       CEPH_DISK_CLI_OPTS=(--bluestore)
     fi
     # bootstrap OSD
@@ -64,6 +64,9 @@ function bootstrap_osd {
   # start OSD
   chown --verbose -R ceph. "$OSD_PATH"
   ceph-osd "${DAEMON_OPTS[@]}" -i 0
+  if [[ "$CEPH_VERSION" == "jewel" || "$CEPH_VERSION" == "kraken" ]]; then
+    ceph "${CLI_OPTS[@]}" osd crush add 0 1 root=default host="$(uname -n)"
+  fi
 }
 
 
@@ -219,7 +222,7 @@ function build_bootstrap {
   # this is will prevent someone writing daemons in the wrong order
   # once both mon and mgr are up we don't care about the order
   bootstrap_mon
-  if [[ "$CEPH_VERSION" != "jewel" ]]; then
+  if [[ "$CEPH_VERSION" != "jewel" && "$CEPH_VERSION" != "kraken" ]]; then
     bootstrap_mgr
   fi
 
