@@ -167,6 +167,10 @@ function start_mon {
   fi
 
   # start MON
-  log "SUCCESS"
-  exec /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}:6789"
+  if [[ "$CEPH_DAEMON" == demo ]]; then
+    /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}:6789"
+  else
+    log "SUCCESS"
+    exec /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}:6789"
+  fi
 }
