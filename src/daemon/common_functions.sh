@@ -346,14 +346,14 @@ function detect_ceph_files {
     log "This looks like a restart, processing."
     return 0
   fi
-    if [ -d /var/lib/ceph ] || [ -d /etc/ceph ]; then
-      # For /etc/ceph, it always contains a 'rbdmap' file so we must check for length > 1
-      if [[ "$(find /var/lib/ceph/ -mindepth 3 -maxdepth 3 -type f | wc -l)" != 0 ]] || [[ "$(find /etc/ceph -mindepth 1 -type f| wc -l)" -gt "1" ]]; then
-        log "I can see existing Ceph files, please remove them!"
-        log "To run the demo container, remove the content of /var/lib/ceph/ and /etc/ceph/"
-        log "Before doing this, make sure you are removing any sensitive data."
-        exit 1
-      fi
+  if [ -d /var/lib/ceph ] || [ -d /etc/ceph ]; then
+    # For /etc/ceph, it always contains a 'rbdmap' file so we must check for length > 1
+    if [[ "$(find /var/lib/ceph/ -mindepth 3 -maxdepth 3 -type f | wc -l)" != 0 ]] || [[ "$(find /etc/ceph -mindepth 1 -type f| wc -l)" -gt "1" ]]; then
+      log "I can see existing Ceph files, please remove them!"
+      log "To run the demo container, remove the content of /var/lib/ceph/ and /etc/ceph/"
+      log "Before doing this, make sure you are removing any sensitive data."
+      exit 1
+    fi
   fi
 }
 
