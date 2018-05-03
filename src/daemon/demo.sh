@@ -16,6 +16,9 @@ MGR_IP=$MON_IP
 : "${RGW_USAGE_MAX_SHARDS:=32}"
 : "${RGW_USAGE_LOG_FLUSH_THRESHOLD:=1}"
 : "${RGW_USAGE_LOG_TICK_INTERVAL:=1}"
+: "${EXPOSED_IP:=127.0.0.1}"
+: "${SREE_PORT:=5000}"
+
 CEPH_DISK_CLI_OPTS=()
 
 
@@ -241,6 +244,35 @@ function bootstrap_mgr {
 }
 
 
+########
+# SREE #
+########
+function bootstrap_sree {
+  if [ -z "$SREE_VERSION" ]; then
+    sree_latest=$(curl -s 'https://api.github.com/repos/leseb/Sree/releases/latest' | grep tarball_url | cut -d '"' -f 4)
+    curl -L "$sree_latest" -o sree.tar.gz
+  else
+    curl -L https://github.com/leseb/Sree/archive/"SREE_VERSION".tar.gz -o sree.tar.gz
+  fi
+  mkdir sree && tar xzvf sree.tar.gz -C sree --strip-components 1
+
+
+  ACCESS_KEY=$(awk '/Access key/ {print $3}' /ceph-demo-user)
+  SECRET_KEY=$(awk '/Secret key/ {print $3}' /ceph-demo-user)
+
+  cd sree
+  sed -i "s|ENDPOINT|http://${EXPOSED_IP}:${RGW_CIVETWEB_PORT}|" static/js/base.js
+  sed -i "s/ACCESS_KEY/$ACCESS_KEY/" static/js/base.js
+  sed -i "s/SECRET_KEY/$SECRET_KEY/" static/js/base.js
+  mv sree.cfg.sample sree.cfg
+  sed -i "s/RGW_CIVETWEB_PORT_VALUE/$RGW_CIVETWEB_PORT/" sree.cfg
+  sed -i "s/SREE_PORT_VALUE/$SREE_PORT/" sree.cfg
+
+  # start Sree
+  python app.py &
+}
+
+
 ###################
 # BUILD BOOTSTRAP #
 ###################
@@ -286,6 +318,7 @@ function build_bootstrap {
       rgw)
         bootstrap_rgw
         bootstrap_demo_user
+        bootstrap_sree
         ;;
       nfs)
         bootstrap_nfs
