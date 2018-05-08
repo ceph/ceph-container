@@ -18,36 +18,6 @@ function start_mgr {
   fi
 
   log "SUCCESS"
-
-  # Add the mgr keyring to the command line instead of using client.admin
-  CLI_OPTS+=(-n mgr."$MGR_NAME" -k "$MGR_KEYRING")
-
-  # Env. variables matching the pattern "<module>_" will be
-  # found and parsed for config-key settings by
-  # ceph config-key set mgr/<module>/<key> <value>
-  MODULES_TO_DISABLE=$(ceph "${CLI_OPTS[@]}" mgr dump | python -c "import json, sys; print ' '.join(json.load(sys.stdin)['modules'])")
-
-  for module in ${ENABLED_MODULES}; do
-    # This module may have been enabled in the past
-    # remove it from the disable list if present
-    MODULES_TO_DISABLE=${MODULES_TO_DISABLE/$module/}
-
-    options=$(env | grep ^"${module}"_ || true)
-    for option in ${options}; do
-      #strip module name
-      option=${option/${module}_/}
-      key=$(echo "$option" | cut -d= -f1)
-      value=$(echo "$option" | cut -d= -f2)
-      ceph "${CLI_OPTS[@]}" config-key set mgr/"$module"/"$key" "$value"
-    done
-    ceph "${CLI_OPTS[@]}" mgr module enable "${module}" --force
-  done
-
-  for module in $MODULES_TO_DISABLE; do
-    ceph "${CLI_OPTS[@]}" mgr module disable "${module}"
-  done
-
-  log "SUCCESS"
   # start ceph-mgr
   exec /usr/bin/ceph-mgr "${DAEMON_OPTS[@]}" -i "$MGR_NAME"
 }
