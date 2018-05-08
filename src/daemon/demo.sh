@@ -34,6 +34,28 @@ function bootstrap_mon {
 #######
 # OSD #
 #######
+function parse_size {
+  # Taken from https://stackoverflow.com/questions/17615881/simplest-method-to-convert-file-size-with-suffix-to-bytes
+  local SUFFIXES=('' K M G T P E Z Y)
+  local MULTIPLIER=1
+
+  shopt -s nocasematch
+
+  for SUFFIX in "${SUFFIXES[@]}"; do
+    local REGEX="^([0-9]+)(${SUFFIX}i?B?)?\$"
+
+    if [[ $1 =~ $REGEX ]]; then
+      echo $((BASH_REMATCH[1] * MULTIPLIER))
+      return 0
+    fi
+
+    ((MULTIPLIER *= 1024))
+  done
+
+  echo "$0: invalid size \`$1'" >&2
+  return 1
+}
+
 function bootstrap_osd {
   if [[ -n "$OSD_DEVICE" ]]; then
     PREPARE_OSD=$OSD_DEVICE
@@ -55,6 +77,12 @@ function bootstrap_osd {
     # bootstrap OSD
     mkdir -p "$OSD_PATH"
     chown --verbose -R ceph. "$OSD_PATH"
+    if [ -n "$BLUESTORE_BLOCK_SIZE" ]; then
+      size=$(parse_size "$BLUESTORE_BLOCK_SIZE")
+      if ! grep -qE "bluestore_block_size = $size" /etc/ceph/"${CLUSTER}".conf; then
+        echo "bluestore_block_size = $size" >> /etc/ceph/"${CLUSTER}".conf
+      fi
+    fi
     ceph-disk -v prepare "${CLI_OPTS[@]}" "${CEPH_DISK_CLI_OPTS[@]}" "$PREPARE_OSD"
     # this second chown will chown the partition created by ceph-disk e.g: /dev/sda1 and /dev/sda2
     chown --verbose -R ceph. "$PREPARE_OSD"*
