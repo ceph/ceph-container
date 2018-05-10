@@ -24,11 +24,11 @@ function push_ceph_imgs {
 }
 
 function build_and_push_latest_bis {
-  True
+  return
 }
 
 function push_ceph_imgs_latests {
-  True
+  return
 }
 
 
