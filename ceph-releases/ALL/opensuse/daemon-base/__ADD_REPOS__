@@ -1,1 +1,2 @@
-__ZYPPER__ addrepo http://download.opensuse.org/repositories/filesystems:/ceph:/${CEPH_VERSION}/__OS_REPO__/ ceph-${CEPH_VERSION}
+__ZYPPER__ addrepo http://download.opensuse.org/repositories/filesystems:/ceph/__OS_REPO__/ build-deps && \
+    __ZYPPER__ addrepo http://download.opensuse.org/repositories/filesystems:/ceph:/${CEPH_VERSION}/__OS_REPO__/ ceph-${CEPH_VERSION}

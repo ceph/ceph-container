@@ -1,14 +1,15 @@
 \
         ca-certificates \
         e2fsprogs \
-        ceph-common__ENV_[CEPH_POINT_RELEASE]__  \
+        ceph-common__ENV_[CEPH_POINT_RELEASE]__ \
         ceph-mon__ENV_[CEPH_POINT_RELEASE]__  \
         ceph-osd__ENV_[CEPH_POINT_RELEASE]__ \
         ceph-mds__ENV_[CEPH_POINT_RELEASE]__ \
-        rbd-mirror__ENV_[CEPH_POINT_RELEASE]__  \
-        __CEPH_MGR_PACKAGE__\
+        rbd-mirror__ENV_[CEPH_POINT_RELEASE]__ \
+        __CEPH_MGR_PACKAGE__ \
         kmod \
         lvm2 \
         __RADOSGW_PACKAGE__ \
         __GANESHA_PACKAGES__ \
-        __ISCSI_PACKAGES__
+        __ISCSI_PACKAGES__ \
+        __TINI_PACKAGE__

@@ -55,4 +55,4 @@ RUN bash "/generate_entrypoint.sh" && \
 
 # Execute the entrypoint
 WORKDIR /
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/tini", "--", "/entrypoint.sh"]

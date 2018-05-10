@@ -14,5 +14,9 @@ bash -c ' \
 yum update -y && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
 rpm -Uvh http://download.ceph.com/rpm-${CEPH_VERSION}/el7/noarch/ceph-release-1-1.el7.noarch.rpm && \
+yum install -y wget && \
+__WEB_INSTALL_TINI__ && \
+# Don't bloat the image by permanently installing wget
+yum remove -y wget && \
 yum install -y epel-release && \
 yum install -y __CEPH_BASE_PACKAGES__

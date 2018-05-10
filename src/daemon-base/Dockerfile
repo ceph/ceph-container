@@ -38,3 +38,5 @@ RUN \
     REMOVED_SIZE=$((INITIAL_SIZE - FINAL_SIZE)) && \
     echo "Cleaning process removed ${REMOVED_SIZE}MB" && \
     echo "Dropped container size from ${INITIAL_SIZE}MB to ${FINAL_SIZE}MB"
+
+ENTRYPOINT ["/tini", "--"]

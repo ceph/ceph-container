@@ -1,0 +1,6 @@
+echo 'Web install tini' && \
+      TINI_VERSION=v0.16.1 && \
+      TINI_ARCH=__ENV_[GO_ARCH]__ && \
+      wget -O /tini \
+        "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-${TINI_ARCH}" && \
+      chmod +x /tini
