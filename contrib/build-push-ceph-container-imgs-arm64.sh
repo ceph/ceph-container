@@ -14,13 +14,13 @@ CEPH_RELEASES=(luminous)
 
 function build_ceph_imgs {
   echo "Build Ceph container image(s)"
-  make DAEMON_BASE_TAG=daemon-base:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-7-aarch64 DAEMON_TAG=daemon:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-7-aarch64 RELEASE="$RELEASE" FLAVORS="${CEPH_RELEASES[-1]},centos-arm64,7" BASE_IMAGE=centos:7 build
+  make DAEMON_BASE_TAG=daemon-base:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-7-aarch64 DAEMON_TAG=daemon:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-7-aarch64 RELEASE="$RELEASE" FLAVORS="${CEPH_RELEASES[-1]},centos-arm64,7" BASEOS_REPO=centos build
   docker images
 }
 
 function push_ceph_imgs {
   echo "Push Ceph container image(s) to the Docker Hub registry"
-  make DAEMON_BASE_TAG=daemon-base:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-7-aarch64 DAEMON_TAG=daemon:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-7-aarch64 RELEASE="$RELEASE" FLAVORS="${CEPH_RELEASES[-1]},centos-arm64,7" BASE_IMAGE=centos:7 push
+  make DAEMON_BASE_TAG=daemon-base:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-7-aarch64 DAEMON_TAG=daemon:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-7-aarch64 RELEASE="$RELEASE" FLAVORS="${CEPH_RELEASES[-1]},centos-arm64,7" BASEOS_REPO=centos push
 }
 
 function build_and_push_latest_bis {
