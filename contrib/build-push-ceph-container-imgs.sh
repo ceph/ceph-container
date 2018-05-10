@@ -77,6 +77,7 @@ function build_and_push_latest_bis {
   docker push ceph/daemon:latest-bis
 }
 
+declare -F push_ceph_imgs_latests ||
 function push_ceph_imgs_latests {
   local latest_name
   for release in "${CEPH_RELEASES[@]}" latest; do
