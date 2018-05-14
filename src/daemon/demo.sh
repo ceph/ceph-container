@@ -248,28 +248,32 @@ function bootstrap_mgr {
 # SREE #
 ########
 function bootstrap_sree {
-  if [ -z "$SREE_VERSION" ]; then
-    sree_latest=$(curl -s 'https://api.github.com/repos/leseb/Sree/releases/latest' | grep tarball_url | cut -d '"' -f 4)
-    curl -L "$sree_latest" -o sree.tar.gz
-  else
-    curl -L https://github.com/leseb/Sree/archive/"SREE_VERSION".tar.gz -o sree.tar.gz
+  if [ ! -f sree.tar.gz ]; then
+    if [ -z "$SREE_VERSION" ]; then
+      sree_latest=$(curl -s 'https://api.github.com/repos/leseb/Sree/releases/latest' | grep tarball_url | cut -d '"' -f 4)
+      curl -L "$sree_latest" -o sree.tar.gz
+    else
+      curl -L https://github.com/leseb/Sree/archive/"SREE_VERSION".tar.gz -o sree.tar.gz
+    fi
+    mkdir sree && tar xzvf sree.tar.gz -C sree --strip-components 1
+
+    ACCESS_KEY=$(awk '/Access key/ {print $3}' /ceph-demo-user)
+    SECRET_KEY=$(awk '/Secret key/ {print $3}' /ceph-demo-user)
+
+    pushd sree
+    sed -i "s|ENDPOINT|http://${EXPOSED_IP}:${RGW_CIVETWEB_PORT}|" static/js/base.js
+    sed -i "s/ACCESS_KEY/$ACCESS_KEY/" static/js/base.js
+    sed -i "s/SECRET_KEY/$SECRET_KEY/" static/js/base.js
+    mv sree.cfg.sample sree.cfg
+    sed -i "s/RGW_CIVETWEB_PORT_VALUE/$RGW_CIVETWEB_PORT/" sree.cfg
+    sed -i "s/SREE_PORT_VALUE/$SREE_PORT/" sree.cfg
+    popd
   fi
-  mkdir sree && tar xzvf sree.tar.gz -C sree --strip-components 1
-
-
-  ACCESS_KEY=$(awk '/Access key/ {print $3}' /ceph-demo-user)
-  SECRET_KEY=$(awk '/Secret key/ {print $3}' /ceph-demo-user)
-
-  cd sree
-  sed -i "s|ENDPOINT|http://${EXPOSED_IP}:${RGW_CIVETWEB_PORT}|" static/js/base.js
-  sed -i "s/ACCESS_KEY/$ACCESS_KEY/" static/js/base.js
-  sed -i "s/SECRET_KEY/$SECRET_KEY/" static/js/base.js
-  mv sree.cfg.sample sree.cfg
-  sed -i "s/RGW_CIVETWEB_PORT_VALUE/$RGW_CIVETWEB_PORT/" sree.cfg
-  sed -i "s/SREE_PORT_VALUE/$SREE_PORT/" sree.cfg
 
   # start Sree
+  pushd sree
   python app.py &
+  popd
 }
 
 
