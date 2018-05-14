@@ -7,7 +7,7 @@ bash -c ' \
     echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
   fi && \
   if [ -n "__ISCSI_PACKAGES__" ]; then \
-    for repo in ceph-iscsi-config ceph-iscsi-cli tcmu-runner; do \
+    for repo in ceph-iscsi-config ceph-iscsi-cli tcmu-runner python-rtslib; do \
       curl -L https://shaman.ceph.com/api/repos/$repo/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo > /etc/yum.repos.d/$repo.repo ; \
     done ; \
   fi' && \
