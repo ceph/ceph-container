@@ -1,1 +1,1 @@
-tcmu-runner ceph-iscsi-config ceph-iscsi-cli
+tcmu-runner ceph-iscsi-config ceph-iscsi-cli python-rtslib
