@@ -35,7 +35,7 @@ RUN \
     echo "Dropped container size from ${INITIAL_SIZE}MB to ${FINAL_SIZE}MB" && \
     #
     # Verify that the packages installed haven't been accidentally cleaned
-    __DOCKERFILE_VERIFY_PACKAGES__
+    __DOCKERFILE_VERIFY_PACKAGES__ && echo 'Packages verified successfully'
 
 #======================================================
 # Add ceph-container files
