@@ -126,8 +126,8 @@ function create_registry_manifest {
 
 install_docker
 cleanup_previous_run
-enable_experimental_docker_cli
 login_docker_hub
+enable_experimental_docker_cli
 create_head_or_point_release
 build_ceph_imgs
 push_ceph_imgs
