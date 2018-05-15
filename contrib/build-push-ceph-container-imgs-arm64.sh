@@ -12,6 +12,13 @@ CEPH_RELEASES=(luminous)
 # FUNCTIONS #
 #############
 
+function install_docker {
+  sudo apt-get install -y --force-yes docker-ce
+  sudo systemctl start docker
+  sudo systemctl status docker
+  sudo chgrp "$(whoami)" /var/run/docker.sock
+}
+
 function build_ceph_imgs {
   echo "Build Ceph container image(s)"
   make DAEMON_BASE_TAG=daemon-base:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-7-aarch64 DAEMON_TAG=daemon:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-7-aarch64 RELEASE="$RELEASE" FLAVORS="${CEPH_RELEASES[-1]},centos-arm64,7" BASEOS_REPO=centos build
