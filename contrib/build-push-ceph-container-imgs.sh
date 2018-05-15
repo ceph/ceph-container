@@ -70,14 +70,14 @@ function create_head_or_point_release {
 declare -F build_ceph_imgs  ||
 function build_ceph_imgs {
   echo "Build Ceph container image(s)"
-  make RELEASE="$RELEASE" build.parallel
+  make RELEASE="$RELEASE" build.all
   docker images
 }
 
 declare -F push_ceph_imgs ||
 function push_ceph_imgs {
   echo "Push Ceph container image(s) to the Docker Hub registry"
-  make RELEASE="$RELEASE" push.parallel
+  make RELEASE="$RELEASE" push.all
 }
 
 declare -F build_and_push_latest_bis ||

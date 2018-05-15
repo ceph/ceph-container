@@ -80,6 +80,9 @@ push:  $(foreach p, $(FLAVORS), do.image.$(HOST_ARCH),$(p)) ;
 push.parallel:
 	@$(MAKE) $(PARALLEL) push
 
+push.all:
+  @$(MAKE) FLAVORS="$(ALL_BUILDABLE_FLAVORS)" push.parallel
+
 build.parallel:
 	@$(MAKE) $(PARALLEL) build
 
