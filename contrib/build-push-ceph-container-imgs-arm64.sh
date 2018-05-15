@@ -31,6 +31,10 @@ function push_ceph_imgs_latests {
   return
 }
 
+function create_registry_manifest {
+  return
+}
+
 
 ########
 # MAIN #
