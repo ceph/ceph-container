@@ -37,6 +37,15 @@ function login_docker_hub {
   docker login -u "$DOCKER_HUB_USERNAME" -p "$DOCKER_HUB_PASSWORD"
 }
 
+function enable_experimental_docker_cli {
+  cat <<EOF  > "$HOME/.docker/daemon.json"
+{
+  "debug" : true,
+  "experimental" : true
+}
+EOF
+}
+
 function create_head_or_point_release {
   # We test if we are running on a tagged commit
   # if so, we build images with this particular tag
@@ -121,6 +130,7 @@ function create_registry_manifest {
 
 install_docker
 cleanup_previous_run
+enable_experimental_docker_cli
 login_docker_hub
 create_head_or_point_release
 build_ceph_imgs
