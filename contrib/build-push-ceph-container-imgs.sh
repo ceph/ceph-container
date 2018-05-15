@@ -39,8 +39,9 @@ function login_docker_hub {
 }
 
 function enable_experimental_docker_cli {
-  mkdir -p "$HOME/.docker"
-  sed -i '$i,"experimental": "enabled"' .docker/config.json
+  if ! grep "experimental" "$HOME"/.docker/config.json; then
+    sed -i '$i,"experimental": "enabled"' "$HOME"/.docker/config.json
+  fi
 }
 
 function create_head_or_point_release {
@@ -112,6 +113,7 @@ function push_ceph_imgs_latests {
 
 declare -F create_registry_manifest ||
 function create_registry_manifest {
+  enable_experimental_docker_cli
   # This should normally work, by the time we get here the arm64 image should have been built and pushed
   # IIRC docker manisfest will fail if the image does not exist
   for image in daemon-base daemon; do
@@ -131,7 +133,6 @@ login_docker_hub
 create_head_or_point_release
 build_ceph_imgs
 push_ceph_imgs
-enable_experimental_docker_cli
 create_registry_manifest
 # If we run on a tagged head, we should not push the 'latest' tag
 if $TAGGED_HEAD; then
