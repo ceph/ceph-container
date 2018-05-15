@@ -38,6 +38,7 @@ function login_docker_hub {
 }
 
 function enable_experimental_docker_cli {
+  mkdir -p "$HOME/.docker"
   cat <<EOF  > "$HOME/.docker/daemon.json"
 {
   "debug" : true,
