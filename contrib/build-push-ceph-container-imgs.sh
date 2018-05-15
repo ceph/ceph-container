@@ -39,12 +39,7 @@ function login_docker_hub {
 
 function enable_experimental_docker_cli {
   mkdir -p "$HOME/.docker"
-  cat <<EOF  > "$HOME/.docker/daemon.json"
-{
-  "debug" : true,
-  "experimental" : true
-}
-EOF
+  sed -i '$i,"experimental": "enabled"' .docker/config.json
 }
 
 function create_head_or_point_release {
