@@ -127,10 +127,10 @@ function create_registry_manifest {
 install_docker
 cleanup_previous_run
 login_docker_hub
-enable_experimental_docker_cli
 create_head_or_point_release
 build_ceph_imgs
 push_ceph_imgs
+enable_experimental_docker_cli
 create_registry_manifest
 # If we run on a tagged head, we should not push the 'latest' tag
 if $TAGGED_HEAD; then
