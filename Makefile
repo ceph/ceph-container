@@ -58,7 +58,7 @@ ALL_BUILDABLE_FLAVORS := \
 
 # ==============================================================================
 # Build targets
-.PHONY: all stage build build.parallel build.all push
+.PHONY: all stage build build.parallel build.all push push.parallel push.all
 
 stage.%:
 	@$(call set_env_vars,$*) sh -c maint-lib/stage.py
@@ -81,7 +81,7 @@ push.parallel:
 	@$(MAKE) $(PARALLEL) push
 
 push.all:
-  @$(MAKE) FLAVORS="$(ALL_BUILDABLE_FLAVORS)" push.parallel
+	@$(MAKE) FLAVORS="$(ALL_BUILDABLE_FLAVORS)" push.parallel
 
 build.parallel:
 	@$(MAKE) $(PARALLEL) build
