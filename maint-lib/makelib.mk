@@ -26,7 +26,7 @@ $(shell bash -c 'set -eu ; \
 	set_var BASEOS_TAG         "$$(val_or_default "$(BASEOS_TAG)" "$$DISTRO_VERSION")" ; \
 	\
 	set_var IMAGES_TO_BUILD    "$(IMAGES_TO_BUILD)" ; \
-	set_var STAGING_DIR        "staging/$$CEPH_VERSION$$CEPH_POINT_RELEASE--$$DISTRO-$$DISTRO_VERSION-$$HOST_ARCH" ; \
+	set_var STAGING_DIR        "staging/$$CEPH_VERSION$$CEPH_POINT_RELEASE-$$DISTRO-$$DISTRO_VERSION-$$HOST_ARCH" ; \
 	set_var RELEASE            "$(RELEASE)" ; \
 	\
 	daemon_base_img="$$(val_or_default "$(DAEMON_BASE_TAG)" \
