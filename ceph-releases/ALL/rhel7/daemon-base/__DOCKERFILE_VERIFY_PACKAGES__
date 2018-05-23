@@ -1,1 +1,1 @@
-rpm -q __CEPH_BASE_PACKAGES__
+rpm -q __CEPH_BASE_PACKAGES__ __ROOK_PACKAGES__
