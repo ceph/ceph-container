@@ -4,4 +4,5 @@
           __FOREGO_PACKAGE__ \
           __KUBECTL_PACKAGE__ \
           __ETCD_PACKAGE__ \
+          __ROOK_PACKAGES__ \
           __S3CMD_PACKAGE__
