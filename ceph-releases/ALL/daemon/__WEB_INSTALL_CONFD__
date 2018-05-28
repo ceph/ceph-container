@@ -1,5 +1,5 @@
 echo 'Web install confd' && \
-      CONFD_VERSION=0.15.0 && \
+      CONFD_VERSION=0.16.0 && \
       # Assume linux
       CONFD_ARCH=linux-__ENV_[GO_ARCH]__ && \
       wget -q -O /usr/local/bin/confd \
