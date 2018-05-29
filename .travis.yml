@@ -18,7 +18,7 @@ before_install:
 
 install:
   - sudo ./travis-builds/prepare_osd_fs.sh
-  - docker run -d --name ceph-demo -e BLUESTORE_BLOCK_SIZE=15GB -e DEBUG=verbose -e RGW_CIVETWEB_PORT=8000 -e CLUSTER=test -e NETWORK_AUTO_DETECT=4 -e CEPH_DEMO_UID=demo -e CEPH_DEMO_ACCESS_KEY=G1EZ5R4K6IJ7XUQKMAED -e CEPH_DEMO_SECRET_KEY=cNmUrqpBKjCMzcfqG8fg4Qk07Xkoyau52OmvnSsz -e CEPH_DEMO_BUCKET=foobar ceph/daemon:HEAD-luminous-centos-7-x86_64 demo
+  - docker run -d --name ceph-demo -e BLUESTORE_BLOCK_SIZE=15GB -e DEBUG=verbose -e RGW_CIVETWEB_PORT=8000 -e CLUSTER=test -e NETWORK_AUTO_DETECT=4 -e CEPH_DEMO_UID=demo -e CEPH_DEMO_ACCESS_KEY=G1EZ5R4K6IJ7XUQKMAED -e CEPH_DEMO_SECRET_KEY=cNmUrqpBKjCMzcfqG8fg4Qk07Xkoyau52OmvnSsz -e CEPH_DEMO_BUCKET=foobar -e SREE_VERSION=v0.1  ceph/daemon:HEAD-luminous-centos-7-x86_64 demo
   - sleep 5  # let's give the container 5sec to create its Ceph config file
 
 script:
