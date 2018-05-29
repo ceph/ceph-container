@@ -253,7 +253,7 @@ function bootstrap_sree {
       sree_latest=$(curl -s 'https://api.github.com/repos/leseb/Sree/releases/latest' | grep tarball_url | cut -d '"' -f 4)
       curl -L "$sree_latest" -o sree.tar.gz
     else
-      curl -L https://github.com/leseb/Sree/archive/"SREE_VERSION".tar.gz -o sree.tar.gz
+      curl -L https://github.com/leseb/Sree/archive/"$SREE_VERSION".tar.gz -o sree.tar.gz
     fi
     mkdir sree && tar xzvf sree.tar.gz -C sree --strip-components 1
 
