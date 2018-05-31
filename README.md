@@ -30,7 +30,7 @@ Core Components
 ---------------
 
 - [`ceph/daemon-base`](src/daemon-base/): Base container image containing Ceph core components.
-- [`ceph/daemon`](daemon/): All-in-one container containing all Ceph daemons.
+- [`ceph/daemon`](src/daemon/): All-in-one container containing all Ceph daemons.
 
 See README files in subdirectories for instructions on using containers.
 
