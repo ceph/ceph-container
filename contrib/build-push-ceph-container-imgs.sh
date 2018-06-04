@@ -10,7 +10,7 @@ set -ex
 BRANCH="${GIT_BRANCH#*/}"
 LATEST_COMMIT_SHA=$(git rev-parse --short HEAD)
 TAGGED_HEAD=false # does HEAD is on a tag ?
-if [ -z "$CEPH_RELEASES" ]; then CEPH_RELEASES=(jewel kraken luminous); fi
+if [ -z "$CEPH_RELEASES" ]; then CEPH_RELEASES=(jewel kraken luminous mimic); fi
 HOST_ARCH=$(uname -m)
 
 
@@ -117,8 +117,10 @@ function create_registry_manifest {
   # This should normally work, by the time we get here the arm64 image should have been built and pushed
   # IIRC docker manisfest will fail if the image does not exist
   for image in daemon-base daemon; do
-    docker manifest create ceph/"$image":"$RELEASE"-luminous-centos-7 ceph/"$image":"$RELEASE"-luminous-centos-7-x86_64 ceph/"$image":"$RELEASE"-luminous-centos-7-aarch64
-    docker manifest push ceph/"$image":"$RELEASE"-luminous-centos-7
+    for ceph_release in luminous mimic; do
+      docker manifest create ceph/"$image":"$RELEASE"-"$ceph_release"-centos-7 ceph/"$image":"$RELEASE"-"$ceph_release"-centos-7-x86_64 ceph/"$image":"$RELEASE"-"$ceph_release"-centos-7-aarch64
+      docker manifest push ceph/"$image":"$RELEASE"-"$ceph_release"-centos-7
+    done
   done
 }
 
