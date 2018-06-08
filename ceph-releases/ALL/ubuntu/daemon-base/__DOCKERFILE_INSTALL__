@@ -2,7 +2,7 @@
     # TODO: Not sure if deb-V2.5-stable is the right repo for ganesha in mimic. Revisit for mimic.
     bash -c ' \
       if [ -n "__GANESHA_PACKAGES__" ]; then \
-        echo "deb http://download.ceph.com/nfs-ganesha/deb-V2.5-stable/$CEPH_VERSION/ __OS_CODENAME__ main" \
+        echo "deb http://download.ceph.com/nfs-ganesha/deb-V2.6-stable/$CEPH_VERSION/ __OS_CODENAME__ main" \
           | tee /etc/apt/sources.list.d/nfs-ganesha.list ; \
       fi' && \
     apt-key add /tmp/ceph-release.asc && \

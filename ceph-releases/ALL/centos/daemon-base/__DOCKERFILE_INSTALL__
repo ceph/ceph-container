@@ -2,7 +2,7 @@ bash -c ' \
   if [ -n "__GANESHA_PACKAGES__" ]; then \
     echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
     echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
-    echo "baseurl=http://download.ceph.com/nfs-ganesha/rpm-V2.5-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
+    echo "baseurl=http://download.ceph.com/nfs-ganesha/rpm-V2.6-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
     echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
     echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
   fi && \
