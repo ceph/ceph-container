@@ -25,7 +25,6 @@ FLAVORS ?= \
 	luminous,centos,7 \
 	jewel,centos,7 \
 	kraken,centos,7 \
-	mimic,ubuntu,16.04 \
 	mimic,centos,7 \
 
 TAG_REGISTRY ?= ceph
