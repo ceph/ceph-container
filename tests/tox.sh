@@ -78,8 +78,9 @@ fi
 if [[ "${#FLAVOR_ARRAY[@]}" -eq "1" ]]; then
   FLAVOR="${FLAVOR_ARRAY[0]}"
 else
-  # if more than one release/distro is impacted then we test this in priority
-  FLAVOR="luminous,centos,7"
+  # if more than one release/distro is impacted
+  # then we test the latest stable release of Ceph in priority
+  FLAVOR="mimic,centos,7"
 fi
 
 CURRENT_CEPH_STABLE_RELEASE="$(echo $FLAVOR|awk -F ',' '{ print $1}')"
