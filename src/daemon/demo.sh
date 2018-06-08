@@ -5,8 +5,15 @@ unset "DAEMON_OPTS[${#DAEMON_OPTS[@]}-1]" # remove the last element of the array
 : "${OSD_PATH:=/var/lib/ceph/osd/${CLUSTER}-0}"
 PREPARE_OSD=$OSD_PATH
 ACTIVATE_OSD=$OSD_PATH
-MDS_PATH="/var/lib/ceph/mds/${CLUSTER}-0"
+# the following ceph version can start with a numerical value where the new ones need a proper name
+if [[ "$CEPH_VERSION" == "jewel" || "$CEPH_VERSION" == "kraken" || "$CEPH_VERSION" == "luminous" ]]; then
+  MDS_NAME=0
+else
+  MDS_NAME=demo
+fi
+MDS_PATH="/var/lib/ceph/mds/${CLUSTER}-$MDS_NAME"
 RGW_PATH="/var/lib/ceph/radosgw/${CLUSTER}-rgw.${RGW_NAME}"
+# shellcheck disable=SC2153
 MGR_PATH="/var/lib/ceph/mgr/${CLUSTER}-$MGR_NAME"
 RESTAPI_IP=$MON_IP
 MGR_IP=$MON_IP
@@ -113,12 +120,12 @@ function bootstrap_mds {
 
     # bootstrap MDS
     mkdir -p "$MDS_PATH"
-    ceph "${CLI_OPTS[@]}" auth get-or-create mds.0 mds 'allow' osd 'allow *' mon 'allow profile mds' -o "$MDS_PATH"/keyring
+    ceph "${CLI_OPTS[@]}" auth get-or-create mds."$MDS_NAME" mds 'allow' osd 'allow *' mon 'allow profile mds' -o "$MDS_PATH"/keyring
     chown --verbose -R ceph. "$MDS_PATH"
   fi
 
   # start MDS
-  ceph-mds "${DAEMON_OPTS[@]}" -i 0
+  ceph-mds "${DAEMON_OPTS[@]}" -i "$MDS_NAME"
 }
 
 
