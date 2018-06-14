@@ -46,6 +46,10 @@ function create_registry_manifest {
   return
 }
 
+function wait_for_arm_images {
+  return
+}
+
 
 ########
 # MAIN #
