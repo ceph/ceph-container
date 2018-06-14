@@ -119,6 +119,17 @@ function push_ceph_imgs_latests {
   done
 }
 
+declare -F wait_for_arm_images ||
+function wait_for_arm_images {
+  echo "Waiting for ARM64 images to be ready"
+  set -e
+  until docker pull ceph/daemon:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-7-aarch64; do
+    echo -n .
+    sleep 1
+  done
+  set +e
+}
+
 declare -F create_registry_manifest ||
 function create_registry_manifest {
   enable_experimental_docker_cli
@@ -143,6 +154,7 @@ login_docker_hub
 create_head_or_point_release
 build_ceph_imgs
 push_ceph_imgs
+wait_for_arm_images
 create_registry_manifest
 # If we run on a tagged head, we should not push the 'latest' tag
 if $TAGGED_HEAD; then
