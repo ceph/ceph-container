@@ -86,7 +86,7 @@ function build_and_push_latest_bis {
   # rebuild latest again to get a different image ID
   # shellcheck disable=SC2043
   for ceph_release in luminous; do  # I know it's a loop with one element, I'm preparing the ground for the next release
-    make RELEASE="$BRANCH"-bis-"$ceph_release" FLAVORS="${ceph_release}",centos,7 build
+    make RELEASE="$BRANCH"-bis FLAVORS="${ceph_release}",centos,7 build
     docker tag ceph/daemon:"$BRANCH"-bis-"${ceph_release}"-centos-7-"${HOST_ARCH}" ceph/daemon:latest-bis-"$ceph_release"
     docker push ceph/daemon:latest-bis-"$ceph_release"
   done
