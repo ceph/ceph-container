@@ -30,7 +30,7 @@ function start_rgw {
 
   local rgw_frontends="civetweb port=$RGW_CIVETWEB_IP:$RGW_CIVETWEB_PORT"
 
-  if [ ! -e "$RGW_SSL_CERTIFICATE" ]; then
+  if [ ! -f "$RGW_SSL_CERTIFICATE" ]; then
     # Suffix 's' on port required for SSL
     rgw_frontends="${rgw_frontends}s ssl_certificate=${RGW_SSL_CERTIFICATE}"
   else
@@ -39,6 +39,8 @@ function start_rgw {
     fi
   fi
 
+  log "Command line is:"
+  log "/usr/bin/radosgw \"${DAEMON_OPTS[@]}\" -n client.rgw.\"${RGW_NAME}\" -k \"$RGW_KEYRING\" --rgw-socket-path=\"\" --rgw-zonegroup=\"$RGW_ZONEGROUP\" --rgw-zone=\"$RGW_ZONE\" --rgw-frontends=\"$rgw_frontends\""
   exec /usr/bin/radosgw "${DAEMON_OPTS[@]}" -n client.rgw."${RGW_NAME}" -k "$RGW_KEYRING" --rgw-socket-path="" --rgw-zonegroup="$RGW_ZONEGROUP" --rgw-zone="$RGW_ZONE" --rgw-frontends="$rgw_frontends"
 }
 
