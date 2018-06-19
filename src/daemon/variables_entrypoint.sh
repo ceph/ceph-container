@@ -51,6 +51,7 @@ HOSTNAME=$(uname -n | cut -d'.' -f1)
 : "${RGW_REMOTE_CGI:=0}"
 : "${RGW_REMOTE_CGI_PORT:=9000}"
 : "${RGW_REMOTE_CGI_HOST:=0.0.0.0}"
+: "${RGW_SSL_CERTIFICATE:=}"
 : "${RGW_USER:="cephnfs"}"
 : "${RESTAPI_IP:=0.0.0.0}"
 : "${RESTAPI_PORT:=5000}"
