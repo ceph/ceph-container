@@ -192,6 +192,20 @@ function bootstrap_demo_user {
 }
 
 
+################
+# IMPORT IN S3 #
+################
+function import_in_s3 {
+  if [[ -d "$DATA_TO_SYNC" ]]; then
+    log "Syncing $DATA_TO_SYNC in S3!"
+    s3cmd mb s3://"$DATA_TO_SYNC_BUCKET"
+    s3cmd sync "$DATA_TO_SYNC" s3://"$DATA_TO_SYNC_BUCKET"
+  else
+    log "$DATA_TO_SYNC is not a directory, nothing to do!"
+  fi
+}
+
+
 #######
 # NFS #
 #######
@@ -330,6 +344,9 @@ function build_bootstrap {
         bootstrap_rgw
         bootstrap_demo_user
         bootstrap_sree
+        if [[ -n "$DATA_TO_SYNC" ]] && [[ -n "$DATA_TO_SYNC_BUCKET" ]]; then
+          import_in_s3
+        fi
         ;;
       nfs)
         bootstrap_nfs
