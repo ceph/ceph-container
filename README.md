@@ -30,6 +30,7 @@ Stable images
 Since everyone doesn't use Docker Hub API and Docker Hub WebUI doesn't paginate. It's hard to see all available stable images.
 
 Here is a list of available stable Ceph images
+
 ```
 ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7
 ceph/daemon:v3.0.5-stable-3.0-jewel-centos-7-x86_64
