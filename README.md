@@ -25,6 +25,47 @@ $ curl -s https://registry.hub.docker.com/v2/repositories/ceph/daemon/tags/ | jq
 Be careful, by default the Docker API returns the first page with its 10 elements.
 To improve your `curl` you can pass the `https://registry.hub.docker.com/v2/repositories/ceph/daemon/tags/?page=2`
 
+Stable images
+-------------
+Since everyone doesn't use Docker Hub API and Docker Hub WebUI doesn't paginate. It's hard to see all available stable images.
+
+Here is a list of available stable Ceph images
+
+```
+ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7
+ceph/daemon:v3.0.5-stable-3.0-jewel-centos-7-x86_64
+ceph/daemon:v3.0.5-stable-3.0-kraken-centos-7-x86_64
+ceph/daemon:v3.0.5-stable-3.0-kraken-ubuntu-16.04-x86_64
+ceph/daemon:v3.0.5-stable-3.0-jewel-ubuntu-16.04-x86_64
+ceph/daemon:v3.0.5-stable-3.0-jewel-ubuntu-14.04-x86_64
+ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7-x86_64
+ceph/daemon:v3.0.5-stable-3.0-luminous-ubuntu-16.04-x86_64
+ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7-aarch64
+ceph/daemon:v3.0.3-stable-3.0-kraken-ubuntu-16.04-x86_64
+ceph/daemon:v3.0.3-stable-3.0-jewel-centos-7-x86_64
+ceph/daemon:v3.0.3-stable-3.0-jewel-ubuntu-16.04-x86_64
+ceph/daemon:v3.0.3-stable-3.0-jewel-ubuntu-14.04-x86_64
+ceph/daemon:v3.0.3-stable-3.0-luminous-centos-7-x86_64
+ceph/daemon:v3.0.3-stable-3.0-luminous-ubuntu-16.04-x86_64
+ceph/daemon:v3.0.3-stable-3.0-kraken-centos-7-x86_64
+ceph/daemon:v3.0.2-stable-3.0-jewel-ubuntu-14.04-x86_64
+ceph/daemon:v3.0.2-stable-3.0-kraken-centos-7-x86_64
+ceph/daemon:v3.0.2-stable-3.0-jewel-ubuntu-16.04-x86_64
+ceph/daemon:v3.0.2-stable-3.0-kraken-ubuntu-16.04-x86_64
+ceph/daemon:v3.0.2-stable-3.0-luminous-centos-7-x86_64
+ceph/daemon:v3.0.2-stable-3.0-luminous-ubuntu-16.04-x86_64
+ceph/daemon:v3.0.2-stable-3.0-jewel-centos-7-x86_64
+ceph/daemon:v3.0.1-stable-3.0-jewel-ubuntu-16.04-x86_64
+ceph/daemon:v3.0.1-stable-3.0-kraken-centos-7-x86_64
+ceph/daemon:v3.0.1-stable-3.0-jewel-ubuntu-14.04-x86_64
+ceph/daemon:v3.0.1-stable-3.0-kraken-ubuntu-16.04-x86_64
+ceph/daemon:v3.0.1-stable-3.0-luminous-centos-7-x86_64
+ceph/daemon:v3.0.1-stable-3.0-luminous-ubuntu-16.04-x86_64
+ceph/daemon:v3.0.1-stable-3.0-jewel-centos-7-x86_64
+ceph/daemon:tag-stable-3.0-luminous-ubuntu-16.04
+ceph/daemon:tag-stable-3.0-luminous-centos-7
+ceph/daemon:tag-stable-3.0-jewel-centos-7
+```
 
 Core Components
 ---------------
