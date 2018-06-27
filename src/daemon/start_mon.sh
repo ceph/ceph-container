@@ -156,10 +156,10 @@ function start_mon {
       fi
       # Be sure that the mon name of the current monitor in the monmap is equal to ${MON_NAME}.
       # Names can be different in case of full qualifed hostnames
-      MON_ID=$(monmaptool --print ${MONMAP} | sed -n "s/^.*${MON_IP}:6789.*mon\.//p")
+      MON_ID=$(monmaptool --print "${MONMAP}" | sed -n "s/^.*${MON_IP}:6789.*mon\\.//p")
       if [[ -n "$MON_ID" && "$MON_ID" != "$MON_NAME" ]]; then
-        monmaptool --rm $MON_ID $MONMAP >/dev/null
-        monmaptool --add $MON_NAME $MON_IP $MONMAP >/dev/null
+        monmaptool --rm "$MON_ID" "$MONMAP" >/dev/null
+        monmaptool --add "$MON_NAME" "$MON_IP" "$MONMAP" >/dev/null
       fi
       ceph-mon --setuser ceph --setgroup ceph --cluster "${CLUSTER}" -i "${MON_NAME}" --inject-monmap "$MONMAP" --keyring "$MON_KEYRING" --mon-data "$MON_DATA_DIR"
     fi
