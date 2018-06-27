@@ -170,6 +170,12 @@ function start_mon {
   if [[ "$CEPH_DAEMON" == demo ]]; then
     /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}:6789"
   else
+    # enable cluster/audit/mon logs on the same stream
+    if [[ "$CEPH_VERSION" != "jewel" && "$CEPH_VERSION" != "kraken" ]]; then
+      # Mind the extra space after 'debug'
+      # DO NOT TOUCH IT, IT MUST BE PRESENT
+      DAEMON_OPTS+=(--mon-cluster-log-to-stderr "--log-stderr-prefix=debug ")
+    fi
     log "SUCCESS"
     exec /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}:6789"
   fi
