@@ -45,22 +45,67 @@ function enable_experimental_docker_cli {
   fi
 }
 
+function grep_sort_tags {
+  "$@" | grep -oE 'v[3-9].[0-9]*.[0-9]*$' | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n
+}
+
+function compare_docker_hub_and_github_tags {
+  # build an array with the list of tags from github
+  for tag_github in $(grep_sort_tags "git ls-remote --tags"); do
+    tags_github_array+=("$tag_github")
+  done
+
+  # download cn to list docker hub images, it's easier than building the logic in bash...
+  # and cn is only 10MB so it doesn't hurt
+  curl -L https://github.com/ceph/cn/releases/download/v1.7.0/cn-v1.7.0-cc5ad52-linux-amd64 -o cn
+  chmod +x cn
+
+  # build an array with the list of tag from docker hub
+  tags_docker_hub="$(grep_sort_tags "./cn image ls -a" | uniq)"
+  for tag_docker_hub in $tags_docker_hub; do
+    tags_docker_hub_array+=("$tag_docker_hub")
+  done
+
+  # we now look into each array and find a possible missing tag
+  # the idea is to find if a tag present on github is not present on docker hub
+  for i in "${tags_github_array[@]}"; do
+    echo "${tags_docker_hub_array[@]}" | grep -q "$i" || tag_to_build+=("$i")
+  done
+
+  # if there is an entry we activate TAGGED_HEAD which tells the script to build a release image
+  # we must find a single tag only
+  if [[ ${#tag_to_build[@]} -eq "1" ]]; then
+    TAGGED_HEAD=true
+    echo "${tag_to_build[*]} not found! Building it."
+  fi
+
+  # if we find more than one release, we should fail and report the problem
+  if [[ ${#tag_to_build[@]} -gt "1" ]]; then
+    echo "ERROR: it looks like more than one tag are not built, see ${tag_to_build[*]}."
+  fi
+}
+
 function create_head_or_point_release {
-  # We test if we are running on a tagged commit
+  # We test if there is a new tag available
   # if so, we build images with this particular tag
   # otherwise we just build using the branch name and the latest commit sha1
   # We use the commit sha1 on the devel image so we can have multiple tags
   # instead of overriding the previous one.
-  set +e
-  LATEST_TAG=$(git describe --exact-match HEAD --tags 2>/dev/null)
+
+  # call compare tags to determine if we need to build a release
+  compare_docker_hub_and_github_tags
+
   # shellcheck disable=SC2181
-  if [ "$?" -eq 0 ]; then
-    TAGGED_HEAD=true # Let's remember we run on a tagged head for a later use
-    set -e
+  if $TAGGED_HEAD; then
+    # checkout tag's code
+    # using [*] but [0] would work too, also the array's length should be 1 anyway
+    # this code is only activated if length is 1 so we are safe
+    git checkout refs/tags/"${tag_to_build[*]}"
+
     # find branch associated to that tag
-    BRANCH=$(git branch -r --contains tags/"$LATEST_TAG" | grep -Eo 'stable-[0-9].[0-9]')
-    echo "Building a release Ceph container image based on branch $BRANCH and tag $LATEST_TAG"
-    RELEASE="$LATEST_TAG-$BRANCH"
+    BRANCH=$(git branch -r --contains tags/"${tag_to_build[*]}" | grep -Eo 'stable-[0-9].[0-9]')
+    echo "Building a release Ceph container image based on branch $BRANCH and tag ${tag_to_build[*]}"
+    RELEASE="${tag_to_build[*]}-$BRANCH"
   else
     set -e
     echo "Building a devel Ceph container image based on branch $BRANCH and commit $LATEST_COMMIT_SHA"
