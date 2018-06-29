@@ -44,6 +44,35 @@ function enable_experimental_docker_cli {
   fi
 }
 
+function grep_sort_tags {
+  "$@" | grep -oE 'v[3-9].[0-9]*.[0-9]*$' | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n
+}
+
+function find_latest_ceph_release {
+  # looking through the repo to determine the latest stable version number
+  # since the build pull the latest packages, this will help us adding
+  # the release number as part of the image name
+
+  local release_passed=$1
+
+  if [[ "$release_passed" == jewel ]]; then
+    release_number=10.2
+  elif [[ "$release_passed" == kraken ]]; then
+    release_number=11.2
+  elif [[ "$release_passed" == luminous ]]; then
+    release_number=12.2
+  elif [[ "$release_passed" == mimic ]]; then
+    release_number=13.2
+  elif [[ "$release_passed" == nautilus ]]; then
+    release_number=14.2
+  else
+    echo "Wrong release name: $release_passed"
+    exit 1
+  fi
+
+  curl -s http://download.ceph.com/rpm-"${release_passed}"/el7/SRPMS/ | grep -Eo "ceph-${release_number}.?.?" | uniq | tail -1
+}
+
 function create_head_or_point_release {
   # We test if we are running on a tagged commit
   # if so, we build images with this particular tag
@@ -70,7 +99,10 @@ function create_head_or_point_release {
 declare -F build_ceph_imgs  ||
 function build_ceph_imgs {
   echo "Build Ceph container image(s)"
-  make RELEASE="$RELEASE" build.parallel
+  for release in "${CEPH_RELEASES[@]}"; do
+    release_number="$(find_latest_ceph_release "$release")"
+    make RELEASE="$RELEASE-${release_number}" build
+  done
   docker images
 }
 
