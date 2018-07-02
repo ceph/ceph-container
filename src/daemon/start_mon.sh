@@ -33,8 +33,10 @@ function get_ip {
         # We don't want local scope, so let's remove field 4 if not 00
         local ip
         ip=$(flat_to_ipv6 "$(grep "$nic" /proc/net/if_inet6 | awk '$4==00 {print $1}')")
-        # IPv6 IPs should be surrounded by brackets to let ceph-monmap being happy
-        echo "[$ip]"
+        if [ -n "$ip" ]; then
+          # IPv6 IPs should be surrounded by brackets to let ceph-monmap being happy
+          echo "[$ip]"
+        fi
         ;;
       *)
         grep -o "$IPV4_REGEXP" /proc/net/fib_trie | grep -vEw "^127|255$|0$" | head -1
@@ -95,7 +97,7 @@ function start_mon {
       CEPH_PUBLIC_NETWORK=$(get_network "${nic_more_traffic}" "${NETWORK_AUTO_DETECT}")
       ip_version=${NETWORK_AUTO_DETECT}
     else # Means -eq 1
-      MON_IP="[$(get_ip "${nic_more_traffic}" 6)]"
+      MON_IP="$(get_ip "${nic_more_traffic}" 6)"
       CEPH_PUBLIC_NETWORK=$(get_network "${nic_more_traffic}" 6)
       ip_version=6
       if [ -z "$MON_IP" ]; then
