@@ -511,15 +511,3 @@ function ami_privileged {
   # lsblk is not able to get device mappers path and is complaining.
   # That's why stderr is suppressed in /dev/null
 }
-
-function ami_privileged {
-  if ! blkid > /dev/null || ! stat /dev/disk/ > /dev/null; then
-    log "ERROR: I don't have enough privileges, I can't discover devices on that machine."
-    log "ERROR: run me as a privileged container with the following options"
-    log "ERROR: --privileged=true -v /dev/:/dev/"
-    exit 1
-  fi
-  # NOTE (leseb): when not running with --privileged=true -v /dev/:/dev/
-  # lsblk is not able to get device mappers path and is complaining.
-  # That's why stderr is suppressed in /dev/null
-}
