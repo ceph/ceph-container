@@ -72,6 +72,7 @@ if [[ "${#FLAVOR_ARRAY[@]}" -eq "0" ]]; then
   echo "The ceph-container code has not changed."
   echo "Nothing to test here."
   echo "SUCCESS"
+  sudo make clean.all
   exit 0
 fi
 
@@ -127,4 +128,5 @@ testinfra -n 4 --sudo -v --connection=ansible --ansible-inventory="$CEPH_ANSIBLE
 
 # teardown
 #################################################################################
+sudo make clean.all
 bash "$TOXINIDIR"/tests/teardown.sh
