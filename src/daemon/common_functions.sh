@@ -14,6 +14,17 @@ function log {
   return 0
 }
 
+function check_device {
+  if [[ -z "${OSD_DEVICE}" ]]; then
+    log "ERROR: you must declare OSD_DEVICE with a device e.g: /dev/sdb."
+    exit 1
+  fi
+  if [[ ! -b "${OSD_DEVICE}" ]]; then
+    log "ERROR: ${OSD_DEVICE} is not a block device!"
+    exit 1
+  fi
+}
+
 # ceph config file exists or die
 function check_config {
   if [[ ! -e /etc/ceph/${CLUSTER}.conf ]]; then
