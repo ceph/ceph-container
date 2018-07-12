@@ -91,6 +91,13 @@ case "$CEPH_DAEMON" in
     OSD_TYPE="activate_journal"
     start_osd
     ;;
+  osd_ceph_volume_activate)
+    ami_privileged
+    # shellcheck disable=SC1091
+    # TAG: osd_ceph_volume_activate
+    source osd_volume_activate.sh
+    osd_volume_activate
+    ;;
   mds)
     # TAG: mds
     source start_mds.sh
