@@ -2,11 +2,7 @@
 set -e
 
 function osd_volume_activate {
-  if [[ -z "${OSD_DEVICE}" ]] || [[ ! -b "${OSD_DEVICE}" ]]; then
-    log "ERROR: you either provided a non-existing device or no device at all."
-    log "You must provide a device to build your OSD ie: /dev/sdb"
-    exit 1
-  fi
+  check_device
 
   # Verify the device is a valid ceph-volume device
   # If not the following command will return 1 with "No valid Ceph devices found"
