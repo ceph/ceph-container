@@ -46,10 +46,10 @@ fi
 rm -rf "$WORKSPACE"/ceph-ansible || true
 git clone -b "$CEPH_ANSIBLE_BRANCH" --single-branch https://github.com/ceph/ceph-ansible.git ceph-ansible
 
-if [[ "$CEPH_ANSIBLE_BRANCH" == 'stable-2.2' ]] || [[ "$CEPH_ANSIBLE_BRANCH" == 'stable-3.0' ]]; then
-  REQUIREMENTS=requirements2.2.txt
-else
+if [[ "$CEPH_ANSIBLE_BRANCH" != 'master' ]]; then
   REQUIREMENTS=requirements2.4.txt
+else
+  REQUIREMENTS=requirements.txt
 fi
 
 pip install -r "$TOXINIDIR"/ceph-ansible/tests/"$REQUIREMENTS"
