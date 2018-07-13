@@ -128,5 +128,6 @@ testinfra -n 4 --sudo -v --connection=ansible --ansible-inventory="$CEPH_ANSIBLE
 
 # teardown
 #################################################################################
+cd "$WORKSPACE"
 sudo make clean.all
 bash "$TOXINIDIR"/tests/teardown.sh
