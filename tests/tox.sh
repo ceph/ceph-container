@@ -64,24 +64,24 @@ if [ "${containers_to_remove}" ]; then
 fi
 
 cd "$WORKSPACE"
+# we test the latest stable release of Ceph in priority
+FLAVOR="mimic,centos,7"
 
 # build everything that was touched to make sure build succeeds
 mapfile -t FLAVOR_ARRAY < <(sudo make flavors.modified)
 
-if [[ "${#FLAVOR_ARRAY[@]}" -eq "0" ]]; then
-  echo "The ceph-container code has not changed."
-  echo "Nothing to test here."
-  echo "SUCCESS"
-  sudo make clean.all
-  exit 0
-fi
+if [[ "$NIGHTLY" != 'TRUE' ]]; then
+  if [[ "${#FLAVOR_ARRAY[@]}" -eq "0" ]]; then
+    echo "The ceph-container code has not changed."
+    echo "Nothing to test here."
+    echo "SUCCESS"
+    sudo make clean.all
+    exit 0
+  fi
 
-if [[ "${#FLAVOR_ARRAY[@]}" -eq "1" ]]; then
-  FLAVOR="${FLAVOR_ARRAY[0]}"
-else
-  # if more than one release/distro is impacted
-  # then we test the latest stable release of Ceph in priority
-  FLAVOR="mimic,centos,7"
+  if [[ "${#FLAVOR_ARRAY[@]}" -eq "1" ]]; then
+    FLAVOR="${FLAVOR_ARRAY[0]}"
+  fi
 fi
 
 CURRENT_CEPH_STABLE_RELEASE="$(echo $FLAVOR|awk -F ',' '{ print $1}')"
