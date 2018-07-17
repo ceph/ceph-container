@@ -11,6 +11,7 @@ BRANCH="${GIT_BRANCH#*/}"
 LATEST_COMMIT_SHA=$(git rev-parse --short HEAD)
 TAGGED_HEAD=false # does HEAD is on a tag ?
 if [ -z "$CEPH_RELEASES" ]; then CEPH_RELEASES=(jewel kraken luminous mimic); fi
+CEPH_RELEASES_BIS=(jewel luminous) # list of releases that need a "bis" image for ceph-ansible
 HOST_ARCH=$(uname -m)
 
 
@@ -84,8 +85,7 @@ declare -F build_and_push_latest_bis ||
 function build_and_push_latest_bis {
   # latest-bis-$ceph_release is needed by ceph-ansible so it can test the restart handlers on an image ID change
   # rebuild latest again to get a different image ID
-  # shellcheck disable=SC2043
-  for ceph_release in luminous; do  # I know it's a loop with one element, I'm preparing the ground for the next release
+  for ceph_release in "${CEPH_RELEASES_BIS[@]}"; do
     make RELEASE="$BRANCH"-bis FLAVORS="${ceph_release}",centos,7 build
     docker tag ceph/daemon:"$BRANCH"-bis-"${ceph_release}"-centos-7-"${HOST_ARCH}" ceph/daemon:latest-bis-"$ceph_release"
     docker push ceph/daemon:latest-bis-"$ceph_release"
