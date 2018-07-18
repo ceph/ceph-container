@@ -6,7 +6,10 @@ function osd_volume_activate {
 
   # Verify the device is a valid ceph-volume device
   # If not the following command will return 1 with "No valid Ceph devices found"
-  ceph-volume lvm list "${OSD_DEVICE}"
+  if ! ceph-volume lvm list "${OSD_DEVICE}"; then
+    cat /var/log/ceph
+    exit 1
+  fi
 
   # Find the OSD ID
   OSD_ID="$(ceph-volume lvm list "$OSD_DEVICE" --format json | python -c 'import sys, json; print(json.load(sys.stdin).keys()[0])')"
