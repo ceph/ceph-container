@@ -9,5 +9,6 @@ keys = [
  "/osd/",
  "/mds/",
  "/client/",
- "client_host/"
+ "/client_host/"
 ]
+
