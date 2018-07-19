@@ -105,8 +105,10 @@ function zap_device {
   fi
   # testing all the devices first so we just don't do anything if one device is wrong
   for device in $(comma_to_space "${OSD_DEVICE}"); do
-    # Check if ${device} is well a block device
-    [[ -b "${device}" ]] || log "Provided device ${device} does not exist or is not a valid block device."
+    if [ ! -b "${device}" ]; then
+      log "Provided device ${device} is not a block special file."
+      exit 1
+    fi
 
     partitions=$(get_child_partitions "${device}")
     # if the disk passed is a raw device AND the boot system disk
