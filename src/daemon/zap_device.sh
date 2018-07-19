@@ -105,8 +105,10 @@ function zap_device {
   fi
 
   for device in $(comma_to_space "${OSD_DEVICE}"); do
-    # Check if ${device} is well a block device
-    [[ -b "${device}" ]] || log "Provided device ${device} does not exist or is not a valid block device."
+    if [ ! -b "${device}" ]; then
+      log "Provided device ${device} is not a block special file."
+      exit 1
+    fi
 
     pkname=$(lsblk --nodeps -no PKNAME "${device}")
     if [ -z "$pkname" ]; then
