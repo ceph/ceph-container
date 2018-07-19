@@ -103,33 +103,46 @@ function zap_device {
   if [[ "${OSD_DEVICE}" == "all_ceph_disks" ]]; then
     OSD_DEVICE=$(get_all_ceph_devices)
   fi
-  # testing all the devices first so we just don't do anything if one device is wrong
+
   for device in $(comma_to_space "${OSD_DEVICE}"); do
     # Check if ${device} is well a block device
     [[ -b "${device}" ]] || log "Provided device ${device} does not exist or is not a valid block device."
 
-    partitions=$(get_child_partitions "${device}")
-    # if the disk passed is a raw device AND the boot system disk
-    [[ $(lsblk --nodeps -no LABEL "${device}") == "boot" ]] && log "Looks like ${device} has a boot partition," &&
-      log "if you want to delete specific partitions point to the partition instead of the raw device" &&
-      log "Do not use your system disk!" &&
-      exit 1
-    if is_dmcrypt "${device}"; then
-    # If dmcrypt partitions detected, loop over all uuid found and check whether they are still opened.
-      ceph_dm=$(get_dmcrypt_uuid_part "${device}")
-      opened_dm=$(get_opened_dmcrypt "${device}")
-      zap_dmcrypt_device "$ceph_dm" "$opened_dm"
+    pkname=$(lsblk --nodeps -no PKNAME "${device}")
+    if [ -z "$pkname" ]; then
+    # are we zapping an entire block device or just a partition?
+    # if pkname is empty then yes
+      partitions=$(get_child_partitions "${device}")
+      # if the disk passed is a raw device AND the boot system disk
+      [[ $(lsblk --nodeps -no LABEL "${device}") == "boot" ]] && log "Looks like ${device} has a boot partition," &&
+        log "if you want to delete specific partitions point to the partition instead of the raw device" &&
+        log "Do not use your system disk!" &&
+        exit 1
+      if is_dmcrypt "${device}"; then
+      # If dmcrypt partitions detected, loop over all uuid found and check whether they are still opened.
+        ceph_dm=$(get_dmcrypt_uuid_part "${device}")
+        opened_dm=$(get_opened_dmcrypt "${device}")
+        zap_dmcrypt_device "$ceph_dm" "$opened_dm"
+      fi
+      log "Zapping the entire device ${device}"
+      for part in $partitions; do
+        wipefs --all "${part}"
+        dd if=/dev/zero of="${part}" bs=1 count=4096
+      done
+      sgdisk --zap-all --clear --mbrtogpt -g -- "${device}"
+      dd if=/dev/zero of="${device}" bs=1M count=10
+      parted -s "${device}" mklabel gpt
+      log "Executing partprobe on ${device}"
+      partprobe "${device}"
+      udevadm settle
+    else
+      # seems to be a partition
+      log "Zapping partition $device"
+      wipefs --all "${device}"
+      dd if=/dev/zero of="${device}" bs=1M count=10
+      local partition_nb
+      partition_nb=$(echo "$device" | grep -oE '[0-9]{1,2}$')
+      sgdisk --delete "$partition_nb" /dev/"$pkname"
     fi
-    log "Zapping the entire device ${device}"
-    for part in $partitions; do
-      wipefs --all "${part}"
-      dd if=/dev/zero of="${part}" bs=1 count=4096
-    done
-    sgdisk --zap-all --clear --mbrtogpt -g -- "${device}"
-    dd if=/dev/zero of="${device}" bs=1M count=10
-    parted -s "${device}" mklabel gpt
-    log "Executing partprobe on ${device}"
-    partprobe "${device}"
-    udevadm settle
   done
 }
