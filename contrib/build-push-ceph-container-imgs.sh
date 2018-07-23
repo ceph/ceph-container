@@ -49,6 +49,16 @@ function grep_sort_tags {
   "$@" | grep -oE 'v[3-9].[0-9]*.[0-9]' | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n
 }
 
+function download_cn {
+  local cn_link
+  cn_link="https://github.com/ceph/cn/releases/download/v1.8.0/cn-v1.8.0-bb92a8e-linux-amd64"
+  if [[ $(arch) == "aarch64" ]]; then
+    cn_link="https://github.com/ceph/cn/releases/download/v1.8.0/cn-v1.8.0-bb92a8e-linux-arm64"
+  fi
+  curl -L "$cn_link" -o cn
+  chmod +x cn
+}
+
 function compare_docker_hub_and_github_tags {
   # build an array with the list of tags from github
   for tag_github in $(grep_sort_tags git ls-remote --tags 2>/dev/null); do
@@ -57,8 +67,7 @@ function compare_docker_hub_and_github_tags {
 
   # download cn to list docker hub images, it's easier than building the logic in bash...
   # and cn is only 10MB so it doesn't hurt
-  curl -L https://github.com/ceph/cn/releases/download/v1.7.0/cn-v1.7.0-cc5ad52-linux-amd64 -o cn
-  chmod +x cn
+  download_cn
 
   # build an array with the list of tag from docker hub
   tags_docker_hub="$(grep_sort_tags ./cn image ls -a | uniq)"
