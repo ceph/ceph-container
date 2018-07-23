@@ -46,12 +46,12 @@ function enable_experimental_docker_cli {
 }
 
 function grep_sort_tags {
-  "$@" | grep -oE 'v[3-9].[0-9]*.[0-9]*$' | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n
+  "$@" | grep -oE 'v[3-9].[0-9]*.[0-9]' | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n
 }
 
 function compare_docker_hub_and_github_tags {
   # build an array with the list of tags from github
-  for tag_github in $(grep_sort_tags "git ls-remote --tags"); do
+  for tag_github in $(grep_sort_tags git ls-remote --tags 2>/dev/null); do
     tags_github_array+=("$tag_github")
   done
 
@@ -61,7 +61,7 @@ function compare_docker_hub_and_github_tags {
   chmod +x cn
 
   # build an array with the list of tag from docker hub
-  tags_docker_hub="$(grep_sort_tags "./cn image ls -a" | uniq)"
+  tags_docker_hub="$(grep_sort_tags ./cn image ls -a | uniq)"
   for tag_docker_hub in $tags_docker_hub; do
     tags_docker_hub_array+=("$tag_docker_hub")
   done
