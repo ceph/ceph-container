@@ -155,7 +155,7 @@ ENDHERE
   fi
 
   # start RGW
-  radosgw "${DAEMON_OPTS[@]}" -n client.rgw."$(uname -n)" -k "$RGW_KEYRING" --rgw-socket-path="" --rgw-frontends="civetweb port=${RGW_CIVETWEB_PORT}"
+  radosgw "${DAEMON_OPTS[@]}" -n client.rgw."$(uname -n)" -k "$RGW_KEYRING" --rgw-socket-path="" --rgw-frontends="$RGW_FRONTEND"
 }
 
 function bootstrap_demo_user {

@@ -28,12 +28,11 @@ function start_rgw {
 
   log "SUCCESS"
 
-  local rgw_frontends="civetweb port=$RGW_CIVETWEB_IP:$RGW_CIVETWEB_PORT"
   if [ "$RGW_REMOTE_CGI" -eq 1 ]; then
-    rgw_frontends="fastcgi socket_port=$RGW_REMOTE_CGI_PORT socket_host=$RGW_REMOTE_CGI_HOST"
+    RGW_FRONTEND="fastcgi socket_port=$RGW_REMOTE_CGI_PORT socket_host=$RGW_REMOTE_CGI_HOST"
   fi
 
-  exec /usr/bin/radosgw "${DAEMON_OPTS[@]}" -n client.rgw."${RGW_NAME}" -k "$RGW_KEYRING" --rgw-socket-path="" --rgw-zonegroup="$RGW_ZONEGROUP" --rgw-zone="$RGW_ZONE" --rgw-frontends="$rgw_frontends"
+  exec /usr/bin/radosgw "${DAEMON_OPTS[@]}" -n client.rgw."${RGW_NAME}" -k "$RGW_KEYRING" --rgw-socket-path="" --rgw-zonegroup="$RGW_ZONEGROUP" --rgw-zone="$RGW_ZONE" --rgw-frontends="$RGW_FRONTEND"
 }
 
 function create_rgw_user {
