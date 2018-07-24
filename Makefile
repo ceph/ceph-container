@@ -25,6 +25,7 @@ FLAVORS ?= \
 	luminous,centos,7 \
 	jewel,centos,7 \
 	kraken,centos,7 \
+	mimic,centos,7 \
 
 TAG_REGISTRY ?= ceph
 
@@ -54,7 +55,9 @@ ALL_BUILDABLE_FLAVORS := \
 	luminous,centos,7 \
 	jewel,centos,7 \
 	kraken,centos,7 \
-	luminous,opensuse,42.3
+	luminous,opensuse,42.3 \
+	mimic,ubuntu,16.04 \
+	mimic,centos,7
 
 # ==============================================================================
 # Build targets
