@@ -23,6 +23,8 @@ install:
 
 script:
   - sudo ./travis-builds/validate_demo_cluster.sh
+  - docker exec ceph-demo ps fauwwwx
+  - docker exec ceph-demo ss -ntlp
 
 
 after_failure:
