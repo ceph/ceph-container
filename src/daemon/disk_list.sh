@@ -97,7 +97,14 @@ function start_disk_list () {
     # usually after a reboot they don't go created
     udevadm trigger
 
-    lockbox_uuid=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 5)")
+    # latest versions of ceph-disk (after bluestore) put the lockbox partition on 5
+    # where already deployed clusters with an earlier version of ceph-disk will do that
+    # on partition 3
+    local lock_partition_num=5
+    if [ ! -b "$(dev_part "${OSD_DEVICE}" $lock_partition_num)" ]; then
+      lock_partition_num=3
+    fi
+    lockbox_uuid=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" $lock_partition_num)")
     data_uuid=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
     data_part=$(dev_part "${OSD_DEVICE}" 1)
     mount_lockbox "$data_uuid" "$lockbox_uuid" 1> /dev/null
