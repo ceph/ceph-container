@@ -13,12 +13,19 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 #########################
 
 HOSTNAME=$(uname -n | cut -d'.' -f1)
+HOST_FQDN=$(hostname -f)
+: "${CLUSTER:=ceph}"
+for daemon in mon mgr mds radosgw; do
+  if [ -d "/var/lib/ceph/${daemon}/${CLUSTER}-${HOST_FQDN}" ]; then
+    echo "Found an FQDN configuration, keep the value of '$HOSTNAME'."
+    HOSTNAME=$HOST_FQDN
+  fi
+done
 : "${MON_NAME:=${HOSTNAME}}"
 : "${RGW_NAME:=${HOSTNAME}}"
 : "${RBD_MIRROR_NAME:=${HOSTNAME}}"
 : "${MGR_NAME:=${HOSTNAME}}"
 : "${MDS_NAME:=${HOSTNAME}}"
-: "${CLUSTER:=ceph}"
 : "${MON_DATA_DIR:=/var/lib/ceph/mon/${CLUSTER}-${MON_NAME}}"
 : "${CLUSTER_PATH:=ceph-config/${CLUSTER}}" # For KV config
 : "${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}"
