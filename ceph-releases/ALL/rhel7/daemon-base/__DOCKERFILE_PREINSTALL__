@@ -18,5 +18,4 @@ LABEL description="Red Hat Ceph Storage 3"
 LABEL summary="Provides the latest Red Hat Ceph Storage 3 on RHEL 7 in a fully featured and supported base image."
 LABEL io.k8s.display-name="Red Hat Ceph Storage 3 on RHEL 7"
 LABEL io.openshift.tags="rhceph ceph"
-LABEL io.openshift.expose-services
 LABEL maintainer="Erwan Velu <evelu@redhat.com>"
