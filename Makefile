@@ -22,6 +22,7 @@ FLAVORS ?= \
 	jewel,ubuntu,16.04 \
 	jewel,ubuntu,14.04 \
 	kraken,ubuntu,16.04 \
+	luminous,opensuse,42.3 \
 	luminous,centos,7 \
 	jewel,centos,7 \
 	kraken,centos,7 \
