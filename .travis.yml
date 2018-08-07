@@ -12,19 +12,26 @@ services:
 
 before_install:
   - docker --version
+  - docker login -u leseb -p "$DOCKER_HUB_PASSWORD"
   - sudo apt-get install -y --force-yes xfsprogs
   - sudo ./travis-builds/purge_cluster.sh
-  - sudo make FLAVORS="luminous,centos,7" build
+  - export RELEASE="travis-build-$TRAVIS_BRANCH-$TRAVIS_COMMIT"
+  - sudo make RELEASE="$RELEASE" FLAVORS="mimic,centos,7" build
 
 install:
   - sudo ./travis-builds/prepare_osd_fs.sh
-  - docker run -d --name ceph-demo -e DEBUG=verbose -e RGW_CIVETWEB_PORT=8000 -e CLUSTER=test -e NETWORK_AUTO_DETECT=4 -e CEPH_DEMO_UID=demo -e CEPH_DEMO_ACCESS_KEY=G1EZ5R4K6IJ7XUQKMAED -e CEPH_DEMO_SECRET_KEY=cNmUrqpBKjCMzcfqG8fg4Qk07Xkoyau52OmvnSsz -e CEPH_DEMO_BUCKET=foobar ceph/daemon:HEAD-luminous-centos-7-x86_64 demo
+  - docker run -d --name ceph-demo -v /etc/modprobe.d:/etc/modprobe.d -e RGW_FRONTEND_TYPE=beast -e RGW_CIVETWEB_OPTIONS="num_threads=100" -e BLUESTORE_BLOCK_SIZE=15GB -e DEBUG=verbose -e RGW_CIVETWEB_PORT=8000 -e CLUSTER=test -e NETWORK_AUTO_DETECT=4 -e CEPH_DEMO_UID=demo -e CEPH_DEMO_ACCESS_KEY=G1EZ5R4K6IJ7XUQKMAED -e CEPH_DEMO_SECRET_KEY=cNmUrqpBKjCMzcfqG8fg4Qk07Xkoyau52OmvnSsz -e CEPH_DEMO_BUCKET=foobar -e SREE_VERSION=v0.1 -e DATA_TO_SYNC=/etc/modprobe.d -e DATA_TO_SYNC_BUCKET=travis ceph/daemon:"travis-build-$TRAVIS_BRANCH-$TRAVIS_COMMIT"-mimic-centos-7-x86_64 demo
   - sleep 5  # let's give the container 5sec to create its Ceph config file
 
 script:
   - sudo ./travis-builds/validate_demo_cluster.sh
   - docker exec ceph-demo ps fauwwwx
   - docker exec ceph-demo ss -ntlp
+  - docker exec ceph-demo cat /etc/ceph/test.conf
+  # - curl -L https://github.com/ceph/cn/releases/download/v1.8.0/cn-v1.8.0-bb92a8e-linux-amd64 -o cn
+  # - chmod +x cn
+  # - ./cn cluster start "$RELEASE" -i ceph/daemon:"$RELEASE"-mimic-centos-7-x86_64
+  - sudo make RELEASE="$RELEASE" FLAVORS="mimic,centos,7" push
 
 
 after_failure:
@@ -33,3 +40,7 @@ after_failure:
   - docker ps -a
   - docker logs ceph-demo
   - docker exec ceph-demo ceph --cluster test -s
+
+env:
+  global:
+    secure: Q7ilx50Ch5DPNiSfTpEwrlrzGOXTFaKVoaGdKWHoxj5zf2+G3/pggCtW3ZTeuof0AtHjsnfG0f20Y+S+pwo9q+ksTa52UdUIBOXZZVeovGfQAaH23E+gxJwxHYdWwhSJAzpRzFKgr7XoZO+lwMFYun0sBCTk8lLG/nEMw37t3ks=

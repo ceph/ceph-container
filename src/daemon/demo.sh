@@ -16,6 +16,38 @@ MGR_IP=$MON_IP
 : "${RGW_USAGE_MAX_SHARDS:=32}"
 : "${RGW_USAGE_LOG_FLUSH_THRESHOLD:=1}"
 : "${RGW_USAGE_LOG_TICK_INTERVAL:=1}"
+: "${EXPOSED_IP:=127.0.0.1}"
+: "${SREE_PORT:=5000}"
+
+# rgw options
+: "${RGW_CIVETWEB_IP:=0.0.0.0}"
+: "${RGW_CIVETWEB_PORT:=8080}"
+: "${RGW_FRONTEND_IP:=$RGW_CIVETWEB_IP}"
+: "${RGW_FRONTEND_PORT:=$RGW_CIVETWEB_PORT}"
+: "${RGW_FRONTEND_TYPE:="civetweb"}"
+
+RGW_CIVETWEB_OPTIONS="$RGW_CIVETWEB_OPTIONS port=$RGW_CIVETWEB_IP:$RGW_CIVETWEB_PORT"
+RGW_BEAST_OPTIONS="$RGW_BEAST_OPTIONS endpoint=$RGW_FRONTEND_IP:$RGW_FRONTEND_PORT"
+
+if [[ "$RGW_FRONTEND_TYPE" == "civetweb" ]]; then
+  RGW_FRONTED_OPTIONS="$RGW_CIVETWEB_OPTIONS"
+elif [[ "$RGW_FRONTEND_TYPE" == "beast" ]]; then
+  RGW_FRONTED_OPTIONS="$RGW_BEAST_OPTIONS"
+else
+  log "ERROR: unsupported rgw backend type $RGW_FRONTEND_TYPE"
+  exit 1
+fi
+
+: "${RGW_FRONTEND:="$RGW_FRONTEND_TYPE $RGW_FRONTED_OPTIONS"}"
+
+if [[ "$RGW_FRONTEND_TYPE" == "beast" ]]; then
+  if [[ "$CEPH_VERSION" == "jewel" || "$CEPH_VERSION" == "kraken" || "$CEPH_VERSION" == "luminous" ]]; then
+    RGW_FRONTEND_TYPE=beast
+    log "ERROR: unsupported rgw backend type $RGW_FRONTEND_TYPE for your Ceph release $CEPH_VERSION, use at least the Mimic version."
+    exit 1
+  fi
+fi
+
 CEPH_DISK_CLI_OPTS=()
 
 
@@ -112,12 +144,13 @@ rgw usage log flush threshold = ${RGW_USAGE_LOG_FLUSH_THRESHOLD}
 rgw usage max shards = ${RGW_USAGE_MAX_SHARDS}
 rgw usage max user shards = ${RGW_USAGE_MAX_USER_SHARDS}
 log file = /var/log/ceph/client.rgw.${RGW_NAME}.log
+rgw frontends = ${RGW_FRONTEND}
 
 ENDHERE
   fi
 
   # start RGW
-  radosgw "${DAEMON_OPTS[@]}" -n client.rgw."$(uname -n)" -k "$RGW_KEYRING" --rgw-socket-path="" --rgw-frontends="$RGW_FRONTEND"
+  radosgw "${DAEMON_OPTS[@]}" -n client.rgw."$(uname -n)" -k "$RGW_KEYRING"
 }
 
 function bootstrap_demo_user {
