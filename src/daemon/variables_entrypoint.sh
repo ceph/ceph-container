@@ -51,8 +51,6 @@ done
 : "${CEPHFS_DATA_POOL_PG:=8}"
 : "${CEPHFS_METADATA_POOL:=${CEPHFS_NAME}_metadata}"
 : "${CEPHFS_METADATA_POOL_PG:=8}"
-: "${RGW_ZONEGROUP:=}"
-: "${RGW_ZONE:=}"
 : "${RGW_USER:="cephnfs"}"
 : "${RESTAPI_IP:=0.0.0.0}"
 : "${RESTAPI_PORT:=5000}"
@@ -65,38 +63,6 @@ done
 : "${GANESHA_OPTIONS:=""}"
 : "${GANESHA_EPOCH:=""}" # For restarting
 : "${MGR_IP:=0.0.0.0}"
-
-# rgw options
-: "${RGW_CIVETWEB_IP:=0.0.0.0}"
-: "${RGW_CIVETWEB_PORT:=8080}"
-: "${RGW_REMOTE_CGI:=0}"
-: "${RGW_REMOTE_CGI_PORT:=9000}"
-: "${RGW_REMOTE_CGI_HOST:=0.0.0.0}"
-: "${RGW_FRONTEND_IP:=$RGW_CIVETWEB_IP}"
-: "${RGW_FRONTEND_PORT:=$RGW_CIVETWEB_PORT}"
-: "${RGW_FRONTEND_TYPE:="civetweb"}"
-
-RGW_CIVETWEB_OPTIONS="$RGW_CIVETWEB_OPTIONS port=$RGW_CIVETWEB_IP:$RGW_CIVETWEB_PORT"
-RGW_BEAST_OPTIONS="$RGW_BEAST_OPTIONS endpoint=$RGW_FRONTEND_IP:$RGW_FRONTEND_PORT"
-
-if [[ "$RGW_FRONTEND_TYPE" == "civetweb" ]]; then
-  RGW_FRONTED_OPTIONS="$RGW_CIVETWEB_OPTIONS"
-elif [[ "$RGW_FRONTEND_TYPE" == "beast" ]]; then
-  RGW_FRONTED_OPTIONS="$RGW_BEAST_OPTIONS"
-else
-  log "ERROR: unsupported rgw backend type $RGW_FRONTEND_TYPE"
-  exit 1
-fi
-
-: "${RGW_FRONTEND:="$RGW_FRONTEND_TYPE $RGW_FRONTED_OPTIONS"}"
-
-if [[ "$RGW_FRONTEND_TYPE" == "beast" ]]; then
-  if [[ "$CEPH_VERSION" == "jewel" || "$CEPH_VERSION" == "kraken" || "$CEPH_VERSION" == "luminous" ]]; then
-    RGW_FRONTEND_TYPE=beast
-    log "ERROR: unsupported rgw backend type $RGW_FRONTEND_TYPE for your Ceph release $CEPH_VERSION, use at least the Mimic version."
-    exit 1
-  fi
-fi
 
 # Make sure to change the value of one another if user changes some of the default values
 while read -r line; do
