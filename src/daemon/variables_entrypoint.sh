@@ -15,12 +15,14 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 HOSTNAME=$(uname -n | cut -d'.' -f1)
 HOST_FQDN=$(</proc/sys/kernel/hostname) # read a potential FQDN configuration, if a FQDN is configured this file will contain it instead of the shortname
 : "${CLUSTER:=ceph}"
-for daemon in mon mgr mds radosgw; do
-  if [ -d "/var/lib/ceph/${daemon}/${CLUSTER}-${HOST_FQDN}" ]; then
-    echo "Found an FQDN configuration, keep the value of '$HOSTNAME'."
-    HOSTNAME=$HOST_FQDN
-  fi
-done
+if [[ "$HOSTNAME" != "$HOST_FQDN" ]]; then
+  for daemon in mon mgr mds radosgw; do
+    if [ -d "/var/lib/ceph/${daemon}/${CLUSTER}-${HOST_FQDN}" ]; then
+      echo "Found an FQDN configuration, keep the value of '$HOSTNAME'."
+      HOSTNAME=$HOST_FQDN
+    fi
+  done
+fi
 : "${MON_NAME:=${HOSTNAME}}"
 : "${RGW_NAME:=${HOSTNAME}}"
 : "${RBD_MIRROR_NAME:=${HOSTNAME}}"
