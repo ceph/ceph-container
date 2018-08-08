@@ -13,7 +13,7 @@ ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_c
 #########################
 
 HOSTNAME=$(uname -n | cut -d'.' -f1)
-HOST_FQDN=$(hostname -f)
+HOST_FQDN=$(</proc/sys/kernel/hostname) # read a potential FQDN configuration, if a FQDN is configured this file will contain it instead of the shortname
 : "${CLUSTER:=ceph}"
 for daemon in mon mgr mds radosgw; do
   if [ -d "/var/lib/ceph/${daemon}/${CLUSTER}-${HOST_FQDN}" ]; then
