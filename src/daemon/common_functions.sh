@@ -472,9 +472,7 @@ function mount_lockbox {
   mkdir -p /var/lib/ceph/osd-lockbox/"${1}"
   mount /dev/disk/by-partuuid/"${2}" /var/lib/ceph/osd-lockbox/"${1}" || true
   local ceph_fsid
-  local cluster_name
-  cluster_name=$(basename "$(grep -R fsid /etc/ceph/ | grep -oE '^[^.]*')")
-  ceph_fsid=$(ceph-conf --lookup fsid -c /etc/ceph/"$cluster_name".conf)
+  ceph_fsid=$(ceph-conf --lookup fsid -c /etc/ceph/"$CLUSTER".conf)
   echo "$ceph_fsid" > /var/lib/ceph/osd-lockbox/"${1}"/ceph_fsid
   chown "${CHOWN_OPT[@]}" ceph. /var/lib/ceph/osd-lockbox/"${1}"/ceph_fsid
 }
