@@ -1,3 +1,6 @@
+# Who is the maintainer ?
+LABEL maintainer="__DOCKERFILE_MAINTAINER__"
+
 # What is the actual release ? If not defined, this equals the git branch name
 LABEL RELEASE="__ENV_[RELEASE]__"
 
