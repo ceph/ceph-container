@@ -1,5 +1,18 @@
 echo 'Install packages' && \
-      yum install -y wget unzip util-linux python-setuptools udev device-mapper && \
+    bash -c ' \
+      if [ -n "__GANESHA_PACKAGES__" ]; then \
+        echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
+        echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
+        echo "baseurl=http://download.ceph.com/nfs-ganesha/rpm-V2.6-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
+        echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
+        echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
+      fi && \
+      if [ -n "__ISCSI_PACKAGES__" ]; then \
+        for repo in ceph-iscsi-config ceph-iscsi-cli tcmu-runner python-rtslib; do \
+          curl -L https://shaman.ceph.com/api/repos/$repo/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo > /etc/yum.repos.d/$repo.repo ; \
+        done ; \
+      fi' && \
+    yum install -y wget unzip util-linux python-setuptools udev device-mapper && \
       yum install -y __DAEMON_PACKAGES__ && \
     # Centos 7 doesn't have confd/forego packages, so install them from web
     __WEB_INSTALL_CONFD__ && \

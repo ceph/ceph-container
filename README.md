@@ -70,7 +70,10 @@ ceph/daemon:tag-stable-3.0-jewel-centos-7
 Core Components
 ---------------
 
-- [`ceph/daemon-base`](src/daemon-base/): Base container image containing Ceph core components.
+- [`ceph/daemon-base`](src/daemon-base/): Base container image containing all Ceph core components.
+  - `ceph/daemon-base` contractually defines the contents contained within so that users may rely
+    on its contents with certainty. The daemon-base image, from a base operating system image,
+    installs *all* of the Ceph binaries with nothing extra or unnecessary installed in addition.
 - [`ceph/daemon`](src/daemon/): All-in-one container containing all Ceph daemons.
 
 See README files in subdirectories for instructions on using containers.

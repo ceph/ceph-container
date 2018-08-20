@@ -1,16 +1,3 @@
-bash -c ' \
-  if [ -n "__GANESHA_PACKAGES__" ]; then \
-    echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
-    echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
-    echo "baseurl=http://download.ceph.com/nfs-ganesha/rpm-V2.6-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
-    echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
-    echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
-  fi && \
-  if [ -n "__ISCSI_PACKAGES__" ]; then \
-    for repo in ceph-iscsi-config ceph-iscsi-cli tcmu-runner python-rtslib; do \
-      curl -L https://shaman.ceph.com/api/repos/$repo/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo > /etc/yum.repos.d/$repo.repo ; \
-    done ; \
-  fi' && \
 yum update -y && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
 rpm -Uvh http://download.ceph.com/rpm-${CEPH_VERSION}/el7/noarch/ceph-release-1-1.el7.noarch.rpm && \

@@ -1,6 +1,12 @@
 echo 'Install packages' && \
-      DEBIAN_FRONTEND=noninteractive apt-get update && \
-      DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    # TODO: Not sure if deb-V2.5-stable is the right repo for ganesha in mimic. Revisit for mimic.
+    bash -c ' \
+      if [ -n "__GANESHA_PACKAGES__" ]; then \
+        echo "deb http://download.ceph.com/nfs-ganesha/deb-V2.6-stable/$CEPH_VERSION/ __OS_CODENAME__ main" \
+          | tee /etc/apt/sources.list.d/nfs-ganesha.list ; \
+      fi' && \
+    DEBIAN_FRONTEND=noninteractive apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
         wget unzip uuid-runtime python-setuptools udev dmsetup && \
       apt-get update && \
       apt-get install -y  --no-install-recommends --force-yes __DAEMON_PACKAGES__ && \
