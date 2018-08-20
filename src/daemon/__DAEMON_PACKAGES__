@@ -1,7 +1,13 @@
 \
-          sharutils \
+          ca-certificates \
           __CONFD_PACKAGE__ \
-          __FOREGO_PACKAGE__ \
-          __KUBECTL_PACKAGE__ \
+          e2fsprogs \
           __ETCD_PACKAGE__ \
-          __S3CMD_PACKAGE__
+          __FOREGO_PACKAGE__ \
+          __GANESHA_PACKAGES__ \
+          __ISCSI_PACKAGES__ \
+          kmod \
+          __KUBECTL_PACKAGE__ \
+          lvm2 \
+          __S3CMD_PACKAGE__ \
+          sharutils \
