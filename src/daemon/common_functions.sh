@@ -206,15 +206,7 @@ function comma_to_space {
 function get_package_manager {
   if is_available rpm; then
     OS_VENDOR=redhat
-  elif is_available dpkg; then
-    OS_VENDOR=ubuntu
   fi
-}
-
-# Determine if current distribution is an Ubuntu-based distribution
-function is_ubuntu {
-  get_package_manager
-  [[ "$OS_VENDOR" == "ubuntu" ]]
 }
 
 # Determine if current distribution is a RedHat-based distribution

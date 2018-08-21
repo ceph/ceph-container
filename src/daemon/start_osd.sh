@@ -3,8 +3,6 @@ set -e
 
 if is_redhat; then
   source /etc/sysconfig/ceph
-elif is_ubuntu; then
-  source /etc/default/ceph
 fi
 
 function start_osd {
