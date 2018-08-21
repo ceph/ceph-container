@@ -18,10 +18,6 @@
 
 # When updating these defaults, be sure to check that ALL_BUILDABLE_FLAVORS is updated
 FLAVORS ?= \
-	luminous,ubuntu,16.04 \
-	jewel,ubuntu,16.04 \
-	jewel,ubuntu,14.04 \
-	kraken,ubuntu,16.04 \
 	luminous,opensuse,42.3 \
 	luminous,centos,7 \
 	jewel,centos,7 \
@@ -49,15 +45,10 @@ include maint-lib/makelib.mk
 
 # All flavor options that can be passed to FLAVORS
 ALL_BUILDABLE_FLAVORS := \
-	luminous,ubuntu,16.04 \
-	jewel,ubuntu,16.04 \
-	jewel,ubuntu,14.04 \
-	kraken,ubuntu,16.04 \
 	luminous,centos,7 \
 	jewel,centos,7 \
 	kraken,centos,7 \
 	luminous,opensuse,42.3 \
-	mimic,ubuntu,16.04 \
 	mimic,centos,7
 
 # ==============================================================================
@@ -176,10 +167,10 @@ OPTIONS:
                            Regarding the package manager the version separator may vary:
                              yum/dnf/zypper are using dash (e.g -12.2.2)
                              apt is using an equal (e.g =12.2.2)
-      DISTRO - Distro part of the ceph-releases source path (e.g., ubuntu, centos)
+      DISTRO - Distro part of the ceph-releases source path (e.g., opensuse, centos)
       DISTRO_VERSION - Distro version part of the ceph-releases source path
-                       (e.g., ubuntu/"16.04", centos/"7")
-    e.g., make FLAVORS="luminous,ubuntu,16.04 jewel,ubuntu,14.04" ...
+                       (e.g., opensuse/"42.3", centos/"7")
+    e.g., make FLAVORS="luminous,opensuse,42.3" ...
 
   RELEASE - The release version to integrate in the tag. If omitted, set to the branch name.
 
