@@ -1,18 +1,18 @@
 
   CEPH_VERSION      : luminous
   CEPH_POINT_RELEASE: -12.2.1-0
-  DISTRO            : ubuntu
-  DISTRO_VERSION    : 16.04
+  DISTRO            : centos
+  DISTRO_VERSION    : 7
   HOST_ARCH         : x86_64
   BASEOS_REGISTRY   : 
-  BASEOS_REPO       : ubuntu.repo
-  BASEOS_TAG        : ubuntu.tag
+  BASEOS_REPO       : centos.repo
+  BASEOS_TAG        : centos.tag
   IMAGES_TO_BUILD   : daemon-base daemon
-  STAGING_DIR       : tests/stage-test/staging/luminous-12.2.1-0-ubuntu.repo-ubuntu.tag-x86_64
+  STAGING_DIR       : tests/stage-test/staging/luminous-12.2.1-0-centos.repo-centos.tag-x86_64
   RELEASE           : test-release
   DAEMON_BASE_IMAGE : test-reg/daemon-base:test-release-1
   DAEMON_IMAGE      : test-reg/daemon:test-release-1
 
 Computed:
-  BASE_IMAGE        : ubuntu.repo:ubuntu.tag
+  BASE_IMAGE        : centos.repo:centos.tag
 

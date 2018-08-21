@@ -1,5 +1,5 @@
 Ceph version: luminous
-Maintainer: ubuntu Maintainer <ubuntu@maintainer.com>
+Maintainer: centos Maintainer <centos@maintainer.com>
 Stuff: # Do daemon-base stuff
           hi mom
 Empty: 
