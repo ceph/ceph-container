@@ -18,15 +18,11 @@
 
 # When updating these defaults, be sure to check that ALL_BUILDABLE_FLAVORS is updated
 FLAVORS ?= \
-	luminous,ubuntu,16.04 \
-	jewel,ubuntu,16.04 \
-	jewel,ubuntu,14.04 \
-	kraken,ubuntu,16.04 \
 	luminous,opensuse,42.3 \
 	luminous,centos,7 \
 	jewel,centos,7 \
 	kraken,centos,7 \
-	mimic,centos,7 \
+	mimic,centos,7
 
 TAG_REGISTRY ?= ceph
 
@@ -34,6 +30,7 @@ TAG_REGISTRY ?= ceph
 # Could be overrided by user at build time
 RELEASE ?= $(shell git rev-parse --abbrev-ref HEAD)
 
+CEPH_TAG ?= ""
 DAEMON_BASE_TAG ?= ""
 DAEMON_TAG ?= ""
 
@@ -49,15 +46,10 @@ include maint-lib/makelib.mk
 
 # All flavor options that can be passed to FLAVORS
 ALL_BUILDABLE_FLAVORS := \
-	luminous,ubuntu,16.04 \
-	jewel,ubuntu,16.04 \
-	jewel,ubuntu,14.04 \
-	kraken,ubuntu,16.04 \
 	luminous,centos,7 \
 	jewel,centos,7 \
 	kraken,centos,7 \
 	luminous,opensuse,42.3 \
-	mimic,ubuntu,16.04 \
 	mimic,centos,7
 
 # ==============================================================================
@@ -67,7 +59,11 @@ ALL_BUILDABLE_FLAVORS := \
 stage.%:
 	@$(call set_env_vars,$*) sh -c maint-lib/stage.py
 
-daemon-base.%: stage.%
+ceph.%: stage.%
+	@$(call set_env_vars,$*); $(MAKE) -C $$STAGING_DIR/ceph \
+		$(call set_env_vars,$*) $(MAKECMDGOALS)
+
+daemon-base.%: ceph.%
 	@$(call set_env_vars,$*); $(MAKE) -C $$STAGING_DIR/daemon-base \
 	  $(call set_env_vars,$*) $(MAKECMDGOALS)
 

@@ -1,0 +1,6 @@
+\
+        ca-certificates \
+        e2fsprogs \
+        kmod \
+        __GANESHA_PACKAGES__ \
+        __ISCSI_PACKAGES__

@@ -1,1 +1,1 @@
-__ZYPPER__ addrepo http://download.opensuse.org/repositories/filesystems:/ceph:/${CEPH_VERSION}/__OS_REPO__/ ceph-${CEPH_VERSION}
+../ceph/__ADD_REPOS__
