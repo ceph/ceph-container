@@ -129,10 +129,7 @@ The `ceph-releases/All/` directory contains code that is generic to all Ceph rel
 specific than `src/`. Source that is shared between distros (but is not part of ceph-container's
 core functionality) can be placed in this directory.
 
-Distro-specific source is placed in `ceph-releases/ALL/<distro>` and is yet more specific. As an
-example, since all Ubuntu releases use `apt` as their package manager, the
-`ceph-releases/ALL/ubuntu` dir is able to provide definitions for package installation using `apt`
-for all Ubuntu-based flavors.
+Distro-specific source is placed in `ceph-releases/ALL/<distro>` and is yet more specific.
 
 #### Source specific to a single Ceph release - `ceph-releases/<ceph release>`
 A `ceph-releases/<ceph release>` directory is more specific than `ceph-releases/ALL` and contains

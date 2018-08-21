@@ -4,9 +4,9 @@ ceph-container
 ![Ceph Daemon Stars](https://img.shields.io/docker/stars/ceph/daemon.svg)
 ![Ceph Daemon Pulls](https://img.shields.io/docker/pulls/ceph/daemon.svg)
 
-Build Ceph into container images with upstream support for the latest few Ceph releases on
-Ubuntu-based containers. ceph-container also supports builds for multiple distributions but does not
-support the containers non-Ubuntu released images.
+Build Ceph into container images with upstream support for the latest few Ceph
+releases on Centos ceph-container also supports builds for multiple
+distributions.
 
 
 Find available container image tags
@@ -29,40 +29,26 @@ Stable images
 -------------
 Since everyone doesn't use Docker Hub API and Docker Hub WebUI doesn't paginate. It's hard to see all available stable images.
 
+` Starting August 22th 2018, Ubuntu images are no longer supported.
+Only OpenSuse and Centos images will be shipped.`
+
 Here is a list of available stable Ceph images
 
 ```
 ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7
 ceph/daemon:v3.0.5-stable-3.0-jewel-centos-7-x86_64
 ceph/daemon:v3.0.5-stable-3.0-kraken-centos-7-x86_64
-ceph/daemon:v3.0.5-stable-3.0-kraken-ubuntu-16.04-x86_64
-ceph/daemon:v3.0.5-stable-3.0-jewel-ubuntu-16.04-x86_64
-ceph/daemon:v3.0.5-stable-3.0-jewel-ubuntu-14.04-x86_64
 ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7-x86_64
-ceph/daemon:v3.0.5-stable-3.0-luminous-ubuntu-16.04-x86_64
 ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7-aarch64
-ceph/daemon:v3.0.3-stable-3.0-kraken-ubuntu-16.04-x86_64
 ceph/daemon:v3.0.3-stable-3.0-jewel-centos-7-x86_64
-ceph/daemon:v3.0.3-stable-3.0-jewel-ubuntu-16.04-x86_64
-ceph/daemon:v3.0.3-stable-3.0-jewel-ubuntu-14.04-x86_64
 ceph/daemon:v3.0.3-stable-3.0-luminous-centos-7-x86_64
-ceph/daemon:v3.0.3-stable-3.0-luminous-ubuntu-16.04-x86_64
 ceph/daemon:v3.0.3-stable-3.0-kraken-centos-7-x86_64
-ceph/daemon:v3.0.2-stable-3.0-jewel-ubuntu-14.04-x86_64
 ceph/daemon:v3.0.2-stable-3.0-kraken-centos-7-x86_64
-ceph/daemon:v3.0.2-stable-3.0-jewel-ubuntu-16.04-x86_64
-ceph/daemon:v3.0.2-stable-3.0-kraken-ubuntu-16.04-x86_64
 ceph/daemon:v3.0.2-stable-3.0-luminous-centos-7-x86_64
-ceph/daemon:v3.0.2-stable-3.0-luminous-ubuntu-16.04-x86_64
 ceph/daemon:v3.0.2-stable-3.0-jewel-centos-7-x86_64
-ceph/daemon:v3.0.1-stable-3.0-jewel-ubuntu-16.04-x86_64
 ceph/daemon:v3.0.1-stable-3.0-kraken-centos-7-x86_64
-ceph/daemon:v3.0.1-stable-3.0-jewel-ubuntu-14.04-x86_64
-ceph/daemon:v3.0.1-stable-3.0-kraken-ubuntu-16.04-x86_64
 ceph/daemon:v3.0.1-stable-3.0-luminous-centos-7-x86_64
-ceph/daemon:v3.0.1-stable-3.0-luminous-ubuntu-16.04-x86_64
 ceph/daemon:v3.0.1-stable-3.0-jewel-centos-7-x86_64
-ceph/daemon:tag-stable-3.0-luminous-ubuntu-16.04
 ceph/daemon:tag-stable-3.0-luminous-centos-7
 ceph/daemon:tag-stable-3.0-jewel-centos-7
 ```
@@ -97,7 +83,7 @@ make FLAVORS=luminous,centos,7 build
 Multiple flavors are specified by separating each flavor by a space and surrounding the entire
 specification in quotes and built the same as a single flavor:
 ```
-make FLAVORS="luminous,centos,7 kraken,ubuntu,16.04"  build
+make FLAVORS="luminous,centos,7 kraken,opensuse,42.3"  build
 ```
 
 Flavors can be built in parallel easily with the `build.parallel` target:

@@ -17,14 +17,14 @@ REQUIRED_ENV_VARS = OrderedDict([
     ('CEPH_VERSION',       'Ceph named version part of the ceph-releases source path' +  # noqa: E241,E501
                             ALIGNED_NEWLINE + '(e.g., luminous, mimic)'),  # noqa: E241
     ('CEPH_POINT_RELEASE', 'Points to specific version of Ceph (e.g -12.2.0) or empty'),  # noqa: E241,E501
-    ('DISTRO',             'Distro part of the ceph-releases source path (e.g., ubuntu, centos)'),  # noqa: E241,E501
+    ('DISTRO',             'Distro part of the ceph-releases source path (e.g., opensuse, centos)'),  # noqa: E241,E501
     ('DISTRO_VERSION',     'Distro version part of the ceph-releases source path' +  # noqa: E241,E501
-                            ALIGNED_NEWLINE + '(e.g. in quotes, ubuntu/"16.04", centos/"7")'),
+                            ALIGNED_NEWLINE + '(e.g. in quotes, opensuse/"42.3", centos/"7")'),
     ('HOST_ARCH',          'Architecture of binaries being built (e.g., amd64, arm32, arm64)'),  # noqa: E241,E501
     ('BASEOS_REGISTRY',    'Registry for the container base image (e.g., _ (x86_64), arm64v8 (aarch64))' +  # noqa: E241,E501
                             ALIGNED_NEWLINE + 'There is a relation between HOST_ARCH and this value'),  # noqa: E241,E501
-    ('BASEOS_REPO',        'Repository for the container base image (e.g., ubuntu, opensuse)'),  # noqa: E241,E501
-    ('BASEOS_TAG',         'Tagged version of BASEOS_REPO container (e.g., 16.04, 42.3 respectively)'),  # noqa: E241,E501
+    ('BASEOS_REPO',        'Repository for the container base image (e.g., centos, opensuse)'),  # noqa: E241,E501
+    ('BASEOS_TAG',         'Tagged version of BASEOS_REPO container (e.g., 7, 42.3 respectively)'),  # noqa: E241,E501
     ('IMAGES_TO_BUILD',    'Container images to be built (usually should be "dockerfile daemon")'),  # noqa: E241,E501
     ('STAGING_DIR',        'Dir into which files will be staged' + ALIGNED_NEWLINE +  # noqa: E241
                            'This dir will be overwritten if it already exists'),  # noqa: E241
