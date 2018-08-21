@@ -1,6 +1,6 @@
 Arch: x86_64
-Maintainer: ubuntu Maintainer <ubuntu@maintainer.com>
+Maintainer: centos Maintainer <centos@maintainer.com>
 Stuff: # Do daemon stuff
 # This should test nested variables
-    Codename: xenial
+    Codename: 7
     Some stuff

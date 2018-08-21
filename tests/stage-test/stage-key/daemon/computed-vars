@@ -4,4 +4,4 @@ Git commit: testhash
 Git clean: False
 Go arch: amd64
 CEPH_POINT_RELEASE: -12.2.1-0
-Base image: ubuntu.repo:ubuntu.tag
+Base image: centos.repo:centos.tag

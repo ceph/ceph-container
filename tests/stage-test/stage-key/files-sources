@@ -3,34 +3,34 @@ Source version info:  repo [testrepo] - branch [testbranch] - commit hash [testh
 
 <staged file>                                                                     <-   <source file> (preceding * indicates file is modified in git without a commit)
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-daemon-base/__DO_STUFF__                                                          <-   tests/stage-test/ceph-releases/ALL/ubuntu/16.04/daemon-base/__DO_STUFF__
+daemon-base/__DO_STUFF__                                                          <-   tests/stage-test/ceph-releases/ALL/centos/7/daemon-base/__DO_STUFF__
 daemon-base/__EMPTY__                                                             <-   tests/stage-test/src/daemon-base/__EMPTY__
 daemon-base/__H4X0R__                                                             <-   tests/stage-test/src/daemon-base/__H4X0R__
-daemon-base/__MAINTAINER__                                                        <-   tests/stage-test/ceph-releases/ALL/ubuntu/__MAINTAINER__
-daemon-base/__OS_CODENAME__                                                       <-   tests/stage-test/ceph-releases/ALL/ubuntu/16.04/__OS_CODENAME__
+daemon-base/__MAINTAINER__                                                        <-   tests/stage-test/ceph-releases/ALL/centos/__MAINTAINER__
+daemon-base/__OS_CODENAME__                                                       <-   tests/stage-test/ceph-releases/ALL/centos/7/__OS_CODENAME__
+daemon-base/centos-mimic-override                                                 <-   tests/stage-test/ceph-releases/luminous/centos/7/centos-mimic-override
 daemon-base/l-daemon-base-test-file                                               <-   tests/stage-test/ceph-releases/luminous/daemon-base/l-daemon-base-test-file
 daemon-base/l-test-file                                                           <-   tests/stage-test/ceph-releases/luminous/l-test-file
-daemon-base/lu-daemon-base-test-file                                              <-   tests/stage-test/ceph-releases/luminous/ubuntu/daemon-base/lu-daemon-base-test-file
-daemon-base/lu-test-file                                                          <-   tests/stage-test/ceph-releases/luminous/ubuntu/lu-test-file
-daemon-base/lum-daemon-base-test-file                                             <-   tests/stage-test/ceph-releases/luminous/ubuntu/16.04/daemon-base/lum-daemon-base-test-file
-daemon-base/lum-test-file                                                         <-   tests/stage-test/ceph-releases/luminous/ubuntu/16.04/lum-test-file
+daemon-base/lu-daemon-base-test-file                                              <-   tests/stage-test/ceph-releases/luminous/centos/daemon-base/lu-daemon-base-test-file
+daemon-base/lu-test-file                                                          <-   tests/stage-test/ceph-releases/luminous/centos/lu-test-file
+daemon-base/lum-daemon-base-test-file                                             <-   tests/stage-test/ceph-releases/luminous/centos/7/daemon-base/lum-daemon-base-test-file
+daemon-base/lum-test-file                                                         <-   tests/stage-test/ceph-releases/luminous/centos/7/lum-test-file
 daemon-base/required-env-vars                                                     <-   tests/stage-test/src/required-env-vars
 daemon-base/src-daemon-base-test-file                                             <-   tests/stage-test/src/daemon-base/src-daemon-base-test-file
-daemon-base/ubuntu-mimic-override                                                 <-   tests/stage-test/ceph-releases/luminous/ubuntu/16.04/ubuntu-mimic-override
-daemon/__DO_STUFF__                                                               <-   tests/stage-test/ceph-releases/ALL/ubuntu/16.04/daemon/__DO_STUFF__
-daemon/__MAINTAINER__                                                             <-   tests/stage-test/ceph-releases/ALL/ubuntu/__MAINTAINER__
-daemon/__OS_CODENAME__                                                            <-   tests/stage-test/ceph-releases/ALL/ubuntu/16.04/__OS_CODENAME__
+daemon/__DO_STUFF__                                                               <-   tests/stage-test/ceph-releases/ALL/centos/7/daemon/__DO_STUFF__
+daemon/__MAINTAINER__                                                             <-   tests/stage-test/ceph-releases/ALL/centos/__MAINTAINER__
+daemon/__OS_CODENAME__                                                            <-   tests/stage-test/ceph-releases/ALL/centos/7/__OS_CODENAME__
+daemon/centos-mimic-override                                                      <-   tests/stage-test/ceph-releases/luminous/centos/7/centos-mimic-override
 daemon/computed-vars                                                              <-   tests/stage-test/src/daemon/computed-vars
 daemon/l-daemon-test-dir/l-daemon-test-dir-test-file                              <-   tests/stage-test/ceph-releases/luminous/daemon/l-daemon-test-dir/l-daemon-test-dir-test-file
 daemon/l-daemon-test-file                                                         <-   tests/stage-test/ceph-releases/luminous/daemon/l-daemon-test-file
 daemon/l-test-file                                                                <-   tests/stage-test/ceph-releases/luminous/l-test-file
-daemon/lu-daemon-test-dir/lu-daemon-test-dir-test-file                            <-   tests/stage-test/ceph-releases/luminous/ubuntu/daemon/lu-daemon-test-dir/lu-daemon-test-dir-test-file
-daemon/lu-daemon-test-file                                                        <-   tests/stage-test/ceph-releases/luminous/ubuntu/daemon/lu-daemon-test-file
-daemon/lu-test-file                                                               <-   tests/stage-test/ceph-releases/luminous/ubuntu/lu-test-file
-daemon/lum-daemon-test-dir/lum-daemon-test-dir-test-file                          <-   tests/stage-test/ceph-releases/luminous/ubuntu/16.04/daemon/lum-daemon-test-dir/lum-daemon-test-dir-test-file
-daemon/lum-daemon-test-file                                                       <-   tests/stage-test/ceph-releases/luminous/ubuntu/16.04/daemon/lum-daemon-test-file
-daemon/lum-test-file                                                              <-   tests/stage-test/ceph-releases/luminous/ubuntu/16.04/lum-test-file
+daemon/lu-daemon-test-dir/lu-daemon-test-dir-test-file                            <-   tests/stage-test/ceph-releases/luminous/centos/daemon/lu-daemon-test-dir/lu-daemon-test-dir-test-file
+daemon/lu-daemon-test-file                                                        <-   tests/stage-test/ceph-releases/luminous/centos/daemon/lu-daemon-test-file
+daemon/lu-test-file                                                               <-   tests/stage-test/ceph-releases/luminous/centos/lu-test-file
+daemon/lum-daemon-test-dir/lum-daemon-test-dir-test-file                          <-   tests/stage-test/ceph-releases/luminous/centos/7/daemon/lum-daemon-test-dir/lum-daemon-test-dir-test-file
+daemon/lum-daemon-test-file                                                       <-   tests/stage-test/ceph-releases/luminous/centos/7/daemon/lum-daemon-test-file
+daemon/lum-test-file                                                              <-   tests/stage-test/ceph-releases/luminous/centos/7/lum-test-file
 daemon/required-env-vars                                                          <-   tests/stage-test/src/required-env-vars
 daemon/src-daemon-test-dir/src-daemon-test-dir-test-file                          <-   tests/stage-test/src/daemon/src-daemon-test-dir/src-daemon-test-dir-test-file
 daemon/src-daemon-test-file                                                       <- * tests/stage-test/src/daemon/src-daemon-test-file
-daemon/ubuntu-mimic-override                                                      <-   tests/stage-test/ceph-releases/luminous/ubuntu/16.04/ubuntu-mimic-override

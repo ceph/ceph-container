@@ -207,11 +207,6 @@ def client():
 container_tags = [
     'ceph/daemon:tag-build-master-infernalis-centos-7',
     'ceph/daemon:tag-build-master-jewel-centos-7',
-    'ceph/daemon:tag-build-master-infernalis-ubuntu-16.04',
-    'ceph/daemon:tag-build-master-jewel-ubuntu-16.04',
-    'ceph/daemon:tag-build-master-infernalis-ubuntu-14.04',
-    'ceph/daemon:tag-build-master-jewel-ubuntu-14.04',
-    'ceph/daemon:tag-build-master-jewel-fedora-24'
 ]
 
 jewel_tags = [t for t in container_tags if 'jewel' in t]
