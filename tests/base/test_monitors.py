@@ -37,10 +37,10 @@ class TestAll(object):
             raise AssertionError(result)
 
 
-class TestJewel(object):
+class TestCurrentVersion(object):
 
-    def test_socket_dir_is_owned_by_ceph(self, jewel_containers, client):
-        command = client.exec_create(jewel_containers, cmd='ls -ld /var/run/ceph')
+    def test_socket_dir_is_owned_by_ceph(self, current_version_container, client):
+        command = client.exec_create(current_version_container, cmd='ls -ld /var/run/ceph')
         result = client.exec_start(command)
         if client.exec_inspect(command)['ExitCode'] != 0:
             raise AssertionError(result)
