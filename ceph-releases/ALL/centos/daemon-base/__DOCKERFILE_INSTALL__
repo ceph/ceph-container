@@ -13,6 +13,6 @@ bash -c ' \
   fi' && \
 yum update -y && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
-rpm -Uvh http://download.ceph.com/rpm-${CEPH_VERSION}/el7/noarch/ceph-release-1-1.el7.noarch.rpm && \
+rpm -Uvh http://download.ceph.com/rpm-${CEPH_VERSION}/el__ENV_[BASEOS_TAG]__/noarch/ceph-release-1-1.el__ENV_[BASEOS_TAG]__.noarch.rpm && \
 yum install -y epel-release && \
 yum install -y __CEPH_BASE_PACKAGES__
