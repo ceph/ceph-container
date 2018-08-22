@@ -35,6 +35,8 @@ Only OpenSuse and Centos images will be shipped.`
 Here is a list of available stable Ceph images
 
 ```
+ceph/daemon:v3.1.0rc1-stable-3.1-mimic-centos-7-x86_64
+ceph/daemon:v3.0.7-stable-3.0-mimic-centos-7-x86_64
 ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7
 ceph/daemon:v3.0.5-stable-3.0-jewel-centos-7-x86_64
 ceph/daemon:v3.0.5-stable-3.0-kraken-centos-7-x86_64
