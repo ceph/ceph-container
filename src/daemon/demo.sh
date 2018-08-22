@@ -33,6 +33,9 @@ MGR_IP=$MON_IP
 : "${RGW_FRONTEND_PORT:=$RGW_CIVETWEB_PORT}"
 : "${RGW_FRONTEND_TYPE:="civetweb"}"
 
+: "${RBD_POOL:="rbd"}"
+
+
 RGW_CIVETWEB_OPTIONS="$RGW_CIVETWEB_OPTIONS port=$RGW_CIVETWEB_IP:$RGW_CIVETWEB_PORT"
 RGW_BEAST_OPTIONS="$RGW_BEAST_OPTIONS endpoint=$RGW_FRONTEND_IP:$RGW_FRONTEND_PORT"
 
@@ -134,6 +137,7 @@ function bootstrap_osd {
   if [[ "$CEPH_VERSION" == "jewel" || "$CEPH_VERSION" == "kraken" ]]; then
     ceph "${CLI_OPTS[@]}" osd crush add 0 1 root=default host="$(uname -n)"
   fi
+  ceph "${CLI_OPTS[@]}" osd pool create "$RBD_POOL" 8
 }
 
 
