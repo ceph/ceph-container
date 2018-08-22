@@ -18,7 +18,7 @@ RUN \
     # Install all components for the image, whether from packages or web downloads.
     # Typical workflow: add new repos; refresh repos; install packages; package-manager clean;
     #   download and install packages from web, cleaning any files as you go.
-    # Installs should support install of ganesha for luminous without installing for jewel/kraken.
+    # Installs should support install of ganesha for luminous without installing for kraken.
     __DOCKERFILE_INSTALL__ && \
     # Clean container, starting with record of current size (strip / from end)
     INITIAL_SIZE="$(bash -c 'sz="$(du -sm --exclude=/proc /)" ; echo "${sz%*/}"')" && \

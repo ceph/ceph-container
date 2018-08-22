@@ -32,25 +32,20 @@ Since everyone doesn't use Docker Hub API and Docker Hub WebUI doesn't paginate.
 ` Starting August 22th 2018, Ubuntu images are no longer supported.
 Only OpenSuse and Centos images will be shipped.`
 
-Here is a list of available stable Ceph images
+Here is an example list of available stable Ceph images
 
 ```
 ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7
-ceph/daemon:v3.0.5-stable-3.0-jewel-centos-7-x86_64
 ceph/daemon:v3.0.5-stable-3.0-kraken-centos-7-x86_64
 ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7-x86_64
 ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7-aarch64
-ceph/daemon:v3.0.3-stable-3.0-jewel-centos-7-x86_64
 ceph/daemon:v3.0.3-stable-3.0-luminous-centos-7-x86_64
 ceph/daemon:v3.0.3-stable-3.0-kraken-centos-7-x86_64
 ceph/daemon:v3.0.2-stable-3.0-kraken-centos-7-x86_64
 ceph/daemon:v3.0.2-stable-3.0-luminous-centos-7-x86_64
-ceph/daemon:v3.0.2-stable-3.0-jewel-centos-7-x86_64
 ceph/daemon:v3.0.1-stable-3.0-kraken-centos-7-x86_64
 ceph/daemon:v3.0.1-stable-3.0-luminous-centos-7-x86_64
-ceph/daemon:v3.0.1-stable-3.0-jewel-centos-7-x86_64
 ceph/daemon:tag-stable-3.0-luminous-centos-7
-ceph/daemon:tag-stable-3.0-jewel-centos-7
 ```
 
 Core Components

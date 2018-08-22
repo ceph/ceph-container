@@ -223,11 +223,11 @@ Commit guidelines
 - Add a best-effort scope designation to commit subjects. This could be a directory name, file name,
   or the name of a logical grouping of code. Examples:
   - **[dir]** ceph-releases: change flavor specification(s) in the `ceph-container` dir
-  - **[dir]** jewel: change flavor spec for jewel
+  - **[dir]** mimic: change flavor spec for mimic
   - **[dir]** kubernetes: edit a Kubernetes example in `examples/kubernetes`
   - **[file]** osd_disk_activate: edit the `src/daemon/osd_scenarios/osd_disk_activate.sh` file
   - **[logical group]** osd prep: change how OSDs are prepared, with changes in multiple files
-  - **[combinations]** jewel osd prep: change how OSDs are prepared only in jewel
+  - **[combinations]** mimic osd prep: change how OSDs are prepared only in mimic
 
 Suggested reading: https://chris.beams.io/posts/git-commit/
 

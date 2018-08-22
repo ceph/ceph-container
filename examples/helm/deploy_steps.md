@@ -44,4 +44,4 @@ Note: when flanned is used, the network should be set to: '10.244.0.0/16'. If it
 
 # ceph docker images tags one may want to test:
 tag-build-master-luminous-centos-7 (new image)   
-tag-build-master-jewel-centos-7 (new image)    
+tag-build-master-mimic-centos-7 (new image)    
