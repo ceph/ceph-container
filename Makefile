@@ -22,7 +22,7 @@ FLAVORS ?= \
 	luminous,centos,7 \
 	jewel,centos,7 \
 	kraken,centos,7 \
-	mimic,centos,7 \
+	mimic,centos,7
 
 TAG_REGISTRY ?= ceph
 
@@ -30,6 +30,7 @@ TAG_REGISTRY ?= ceph
 # Could be overrided by user at build time
 RELEASE ?= $(shell git rev-parse --abbrev-ref HEAD)
 
+CEPH_TAG ?= ""
 DAEMON_BASE_TAG ?= ""
 DAEMON_TAG ?= ""
 
@@ -58,7 +59,11 @@ ALL_BUILDABLE_FLAVORS := \
 stage.%:
 	@$(call set_env_vars,$*) sh -c maint-lib/stage.py
 
-daemon-base.%: stage.%
+ceph.%: stage.%
+	@$(call set_env_vars,$*); $(MAKE) -C $$STAGING_DIR/ceph \
+		$(call set_env_vars,$*) $(MAKECMDGOALS)
+
+daemon-base.%: ceph.%
 	@$(call set_env_vars,$*); $(MAKE) -C $$STAGING_DIR/daemon-base \
 	  $(call set_env_vars,$*) $(MAKECMDGOALS)
 

@@ -1,5 +1,5 @@
 # Container images built for each flavor
-IMAGES_TO_BUILD := daemon-base daemon
+IMAGES_TO_BUILD := ceph daemon-base daemon
 
 HOST_ARCH ?= $(shell uname --machine)
 
@@ -28,6 +28,11 @@ $(shell bash -c 'set -eu ; \
 	set_var IMAGES_TO_BUILD    "$(IMAGES_TO_BUILD)" ; \
 	set_var STAGING_DIR        "staging/$$CEPH_VERSION$$CEPH_POINT_RELEASE-$$DISTRO-$$DISTRO_VERSION-$$HOST_ARCH" ; \
 	set_var RELEASE            "$(RELEASE)" ; \
+	\
+	ceph_img="$$(val_or_default "$(CEPH_TAG)" \
+		"ceph:$(RELEASE)-$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH")" ; \
+	if [ -n "$(TAG_REGISTRY)" ]; then ceph_img="$(TAG_REGISTRY)/$$ceph_img" ; fi ; \
+	set_var CEPH_IMAGE    "$$ceph_img" ; \
 	\
 	daemon_base_img="$$(val_or_default "$(DAEMON_BASE_TAG)" \
 		"daemon-base:$(RELEASE)-$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH")" ; \
