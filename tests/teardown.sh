@@ -5,5 +5,5 @@
 cd "$CEPH_ANSIBLE_SCENARIO_PATH" || exit 1
 vagrant destroy --force
 # see https://github.com/ceph/ceph-container/issues/1048
-sudo chown -R "$(whoami)" ./staging || true
+sudo make clean
 cd "$WORKSPACE" || exit
