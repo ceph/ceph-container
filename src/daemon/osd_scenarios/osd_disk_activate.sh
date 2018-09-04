@@ -77,7 +77,7 @@ function osd_activate {
   # - having the cleaning code just next to the concerned function in the same file is nice.
   function sigterm_cleanup_post {
     local ceph_mnt
-    ceph_mnt=$(findmnt --nofsroot --noheadings --output SOURCE --submounts --target /var/lib/ceph/osd/ | tail -n +2)
+    ceph_mnt=$(findmnt --nofsroot --noheadings --output SOURCE --submounts --target /var/lib/ceph/osd/ | grep '^/')
     for mnt in $ceph_mnt; do
       log "osd_disk_activate: Unmounting $mnt"
       umount "$mnt" || (log "osd_disk_activate: Failed to umount $mnt"; lsof $mnt)
