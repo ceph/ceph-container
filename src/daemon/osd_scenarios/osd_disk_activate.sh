@@ -79,8 +79,8 @@ function osd_activate {
     local ceph_mnt
     ceph_mnt=$(findmnt --nofsroot --noheadings --output SOURCE --submounts --target /var/lib/ceph/osd/ | tail -n +2)
     for mnt in $ceph_mnt; do
-      log "Unmounting $mnt"
-      umount "$mnt" || log "Failed to umount $mnt"
+      log "osd_disk_activate: Unmounting $mnt"
+      umount "$mnt" || (log "osd_disk_activate: Failed to umount $mnt"; lsof $mnt)
     done
   }
   exec /usr/bin/ceph-osd "${CLI_OPTS[@]}" -f -i "${OSD_ID}" --setuser ceph --setgroup disk
