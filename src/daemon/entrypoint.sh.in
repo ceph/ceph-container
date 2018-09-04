@@ -1,5 +1,8 @@
 #!/bin/bash
-set -e
+
+# We need the -m to track child process in docker_exec.sh
+# It is expected to receive some SIGCHLD, so -m is mandatory
+set -me
 export LC_ALL=C
 
 source variables_entrypoint.sh
