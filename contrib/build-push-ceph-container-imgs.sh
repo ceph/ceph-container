@@ -78,7 +78,10 @@ function compare_docker_hub_and_github_tags {
   # we now look into each array and find a possible missing tag
   # the idea is to find if a tag present on github is not present on docker hub
   for i in "${tags_github_array[@]}"; do
-    echo "${tags_docker_hub_array[@]}" | grep -q "$i" || tag_to_build+=("$i")
+    # the grep has a conditionnal on either the explicit match last character is the end of the line OR
+    # it has a space after it so we cover the case where the tag that matches is placed at the end
+    # of the line or the first one
+    echo "${tags_docker_hub_array[@]}" | grep -qoE "${i}$|${i} " || tag_to_build+=("$i")
   done
 
   # if there is an entry we activate TAGGED_HEAD which tells the script to build a release image
