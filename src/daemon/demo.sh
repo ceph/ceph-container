@@ -171,7 +171,7 @@ function bootstrap_rgw {
   if [ ! -e "$RGW_PATH"/keyring ]; then
     # bootstrap RGW
     mkdir -p "$RGW_PATH" /var/log/ceph
-    ceph "${CLI_OPTS[@]}" auth get-or-create client.rgw."${RGW_NAME}" osd 'allow rwx' mon 'allow rw' -o "$RGW_KEYRING"
+    ceph "${CLI_OPTS[@]}" auth get-or-create client.rgw."$(uname -n)" osd 'allow rwx' mon 'allow rw' -o "$RGW_KEYRING"
     chown --verbose -R ceph. "$RGW_PATH"
 
     #configure rgw dns name
@@ -191,7 +191,7 @@ ENDHERE
   fi
 
   # start RGW
-  radosgw "${DAEMON_OPTS[@]}" -n client.rgw."${RGW_NAME}" -k "$RGW_KEYRING"
+  radosgw "${DAEMON_OPTS[@]}" -n client.rgw."$(uname -n)" -k "$RGW_KEYRING"
 }
 
 function bootstrap_demo_user {
