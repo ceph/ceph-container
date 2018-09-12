@@ -73,7 +73,14 @@ def getEnvVar(varname):
 
 
 def exportBaseImageEnvVar():
-    BASE_IMAGE = "{}:{}".format(getEnvVar('BASEOS_REPO'), getEnvVar('BASEOS_TAG'))
+    """
+    Computed from BASEOS_REGISTRY, BASEOS_REPO and BASEOS_TAG. There is a special treatment to
+    support base images containing slashes: If BASEOS_REPO contains a double underscore, it's
+    being replaced with a slash in the resulting BASE_IMAGE. I.e. if BASEOS_REPO is set to
+    `opensuse__leap`, BASE_IMAGE will contain `opensuse/leap`.
+    """
+    BASE_IMAGE = "{}:{}".format(getEnvVar('BASEOS_REPO').replace('__', '/'),
+                                getEnvVar('BASEOS_TAG'))
     if getEnvVar('BASEOS_REGISTRY'):
         BASE_IMAGE = "{}/{}".format(getEnvVar('BASEOS_REGISTRY'), BASE_IMAGE)
     os.environ['BASE_IMAGE'] = BASE_IMAGE

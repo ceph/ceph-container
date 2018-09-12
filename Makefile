@@ -48,8 +48,9 @@ ALL_BUILDABLE_FLAVORS := \
 	luminous,centos,7 \
 	jewel,centos,7 \
 	kraken,centos,7 \
-	luminous,opensuse,42.3 \
-	mimic,centos,7
+	luminous,opensuse__leap,42.3 \
+	mimic,centos,7 \
+	mimic,opensuse__leap,15.0
 
 # ==============================================================================
 # Build targets
