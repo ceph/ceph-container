@@ -44,7 +44,7 @@ function osd_volume_activate {
     ceph_mnt=$(findmnt --nofsroot --noheadings --output SOURCE --submounts --target /var/lib/ceph/osd/ | grep '^/')
     for mnt in $ceph_mnt; do
       log "osd_volume_activate: Unmounting $mnt"
-      umount "$mnt" || (log "osd_volume_activate: Failed to umount $mnt"; lsof $mnt)
+      umount "$mnt" || (log "osd_volume_activate: Failed to umount $mnt"; lsof "$mnt")
     done
   }
   exec /usr/bin/ceph-osd "${CLI_OPTS[@]}" -f -i "${OSD_ID}"
