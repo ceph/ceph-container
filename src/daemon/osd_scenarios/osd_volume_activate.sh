@@ -2,20 +2,10 @@
 set -e
 
 function osd_volume_activate {
-  check_device
+  : "${OSD_ID:?Give me an OSD ID to activate, eg: -e OSD_ID=0}"
 
-  # Verify the device is a valid ceph-volume device
-  # If not the following command will return 1 with "No valid Ceph devices found"
-  if ! ceph-volume lvm list "${OSD_DEVICE}"; then
-    cat /var/log/ceph
-    exit 1
-  fi
-
-  # Find the OSD ID
-  OSD_ID="$(ceph-volume lvm list "$OSD_DEVICE" --format json | python -c 'import sys, json; print(json.load(sys.stdin).keys()[0])')"
-
-  # Find the OSD FSID
-  OSD_FSID="$(ceph-volume lvm list "$OSD_DEVICE" --format json | python -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"][0][\"tags\"][\"ceph.osd_fsid\"])")"
+  # Find the OSD FSID from the OSD ID
+  OSD_FSID="$(ceph-volume lvm list --format json | python -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"][0][\"tags\"][\"ceph.osd_fsid\"])")"
 
   # Discover the objectstore
   if [[ "OSD_FILESTORE" -eq 1 ]]; then
