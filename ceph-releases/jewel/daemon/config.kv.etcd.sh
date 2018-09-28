@@ -92,7 +92,7 @@ function get_mon_config {
 
   # Remove lock for other clients to install
   log "Removing lock for ${MON_NAME}."
-  etcdctl "${ETCDCTL_OPTS[@]}" "${KV_TLS[@]}" rm "${CLUSTER_PATH}"/lock
+  etcdctl "${ETCDCTL_OPTS[@]}" "${KV_TLS[@]}" rm "${CLUSTER_PATH}"/lock || true
 }
 
 function import_bootstrap_keyrings {
