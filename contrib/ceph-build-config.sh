@@ -522,6 +522,11 @@ EOF
 # Misc helpers
 #===================================================================================================
 
+# Clean the content of the previous run if any
+function do_clean {
+  make clean.all || true
+}
+
 # Return the sorted intersection of 2 single-line, space-delimited lists
 function intersect_lists () {
   local list_a="${1}" list_b="${2}"

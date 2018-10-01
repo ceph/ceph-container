@@ -20,6 +20,8 @@ trap 'exit $?' ERR
 
 flavors_to_build="$(get_flavors_to_build "${ARCH}")"
 
+do_clean
+
 echo ''
 info "BUILDING CEPH-${ARCH} IMAGES FOR FLAVORS:"
 info "  ${flavors_to_build}"
