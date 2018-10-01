@@ -471,7 +471,7 @@ function add_tag () {
 # Manifests
 #===================================================================================================
 
-MANIFEST_TOOL_VERSION="v0.7.0"
+MANIFEST_TOOL_VERSION="v0.8.0"
 MANIFEST_TOOL_LOCATION="/tmp/manifest-tool-${MANIFEST_TOOL_VERSION}"
 # Manifest tool: https://github.com/estesp/manifest-tool
 # `docker manifest` command exists but is experiemental and not present in all environments;
