@@ -433,6 +433,7 @@ function do_push () {
   local image_library_repo_tag="${1}"
   local push_cmd="docker push ${image_library_repo_tag}"
   if [ -z "${DRY_RUN:-}" ]; then
+    docker login -u "$DOCKER_HUB_USERNAME" -p "$DOCKER_HUB_PASSWORD"
     ${push_cmd}
   else
     # just echo what we would've executed if this is a dry run
