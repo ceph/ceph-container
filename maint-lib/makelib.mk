@@ -1,6 +1,5 @@
 # Container images built for each flavor
-# Can be overridden, but don't change the ordering, because the images are built atop each other
-IMAGES_TO_BUILD ?= daemon-base daemon
+IMAGES_TO_BUILD := daemon-base daemon
 
 HOST_ARCH ?= $(shell uname --machine)
 

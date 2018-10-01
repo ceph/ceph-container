@@ -58,18 +58,15 @@ ALL_BUILDABLE_FLAVORS := \
 stage.%:
 	@$(call set_env_vars,$*) sh -c maint-lib/stage.py
 
-# Target for daemon-base image; delegate build/clean/push goals to target makefile
-daemon-base.%:
+daemon-base.%: stage.%
 	@$(call set_env_vars,$*); $(MAKE) -C $$STAGING_DIR/daemon-base \
 	  $(call set_env_vars,$*) $(MAKECMDGOALS)
 
-# Target for daemon image; delegate build/clean/push goals to target makefile
-daemon.%:
+daemon.%: daemon-base.%
 	@$(call set_env_vars,$*); $(MAKE) $(call set_env_vars,$*) -C $$STAGING_DIR/daemon \
 	  $(call set_env_vars,$*) $(MAKECMDGOALS)
 
-# Make daemon-base.% and/or daemon.% target based on IMAGES_TO_BUILD setting
-do.image.%: | stage.% $(foreach i, $(IMAGES_TO_BUILD), $(i).% ) ;
+do.image.%: daemon.% ;
 
 stage: $(foreach p, $(FLAVORS), stage.$(HOST_ARCH),$(p)) ;
 build: $(foreach p, $(FLAVORS), do.image.$(HOST_ARCH),$(p)) ;
@@ -196,11 +193,6 @@ ADVANCED OPTIONS:
   BASEOS_TAG      - Tag part of the build's base image.  Default: value from DISTRO_VERSION
     e.g., BASEOS_REPO=debian BASEOS_TAG=jessie will use "debian:jessie" as a base image
           BASEOS_REGISTRY with above will use "myreg/debian:jessie" as a base image
-
-  IMAGES_TO_BUILD - Change which images to build. Primarily useful for building daemon-base only,
-                    but could be used to rebuild the daemon for local dev when base hasn't changed.
-                    Default: "daemon-base daemon". Do NOT list specify images out of order!
-                    e.g., IMAGES_TO_BUILD=daemon-base or IMAGES_TO_BUILD=daemon
 
 endef
 export HELPTEXT
