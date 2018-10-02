@@ -20,6 +20,7 @@ trap 'exit $?' ERR
 
 flavors_to_build="$(get_flavors_to_build "${ARCH}")"
 
+install_docker
 do_clean
 
 echo ''

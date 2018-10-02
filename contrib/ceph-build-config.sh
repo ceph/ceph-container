@@ -536,3 +536,10 @@ function intersect_lists () {
   # Use sorted_a and _b as inputs to comm, which effectively returns the intersection of the lists
   comm -12 <(echo "${sorted_a}") <(echo "${sorted_b}")
 }
+
+function install_docker {
+  sudo apt-get install -y --force-yes docker.io
+  sudo systemctl start docker
+  sudo systemctl status docker
+  sudo chgrp "$(whoami)" /var/run/docker.sock
+}
