@@ -11,7 +11,7 @@ AARCH64_FLAVORS_TO_BUILD="luminous,centos,7 mimic,centos,7"
 # Allow running this script with the env var ARCH='aarch64' to build arm images
 # ARCH='x86_64'
 # ARCH='aarch64'
-ARCH=${ARCH}  # This is here to prevent shellcheck errors about ARCH not being defined
+: "${ARCH:?must be declared with either x86_64 or aarch64!}"
 
 # Use the ceph library by default
 PUSH_LIBRARY="ceph"
