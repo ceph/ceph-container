@@ -155,9 +155,14 @@ case "$CEPH_DAEMON" in
       log "Make sure KV_TYPE equals either k8s or kubernetes"
     fi
     ;;
+  nano)
+    # TAG: nano
+    source nano.sh
+    ;;
   demo)
     # TAG: demo
-    source demo.sh
+    log "'demo' is still supported for backward compatiblity, please use the keywork 'nano' instead."
+    source nano.sh
     ;;
   disk_list)
     # TAG: disk_list

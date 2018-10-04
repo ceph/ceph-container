@@ -17,7 +17,7 @@ function get_mon_config {
   if [ ! -e /etc/ceph/"${CLUSTER}".conf ]; then
     local fsid
 		fsid=$(uuidgen)
-    if [[ "$CEPH_DAEMON" == demo ]]; then
+    if [[ "$CEPH_DAEMON" == demo ]] || [[ "$CEPH_DAEMON" == nano ]]; then
       fsid=$(uuidgen)
       cat <<ENDHERE >/etc/ceph/"${CLUSTER}".conf
 [global]

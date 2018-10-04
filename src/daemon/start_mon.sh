@@ -167,7 +167,7 @@ function start_mon {
   fi
 
   # start MON
-  if [[ "$CEPH_DAEMON" == demo ]]; then
+  if [[ "$CEPH_DAEMON" == demo ]] || [[ "$CEPH_DAEMON" == nano ]]; then
     /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}:6789"
   else
     # enable cluster/audit/mon logs on the same stream
