@@ -58,16 +58,18 @@ stage.%:
 
 # Target for daemon-base image; delegate build/clean/push goals to target makefile
 daemon-base.%:
-	@$(call set_env_vars,$*); $(MAKE) -C $$STAGING_DIR/daemon-base \
-	  $(call set_env_vars,$*) $(MAKECMDGOALS)
+	$(call set_env_vars,$*); $(MAKE) -C $$STAGING_DIR/daemon-base \
+	  $(call set_env_vars,$*) $(filter-out daemon-base.$*,$(MAKECMDGOALS))
 
 # Target for daemon image; delegate build/clean/push goals to target makefile
 daemon.%:
 	@$(call set_env_vars,$*); $(MAKE) $(call set_env_vars,$*) -C $$STAGING_DIR/daemon \
-	  $(call set_env_vars,$*) $(MAKECMDGOALS)
+	  $(call set_env_vars,$*) $(filter-out daemon.$*,$(MAKECMDGOALS))
 
 # Make daemon-base.% and/or daemon.% target based on IMAGES_TO_BUILD setting
-do.image.%: | stage.% $(foreach i, $(IMAGES_TO_BUILD), $(i).% ) ;
+#do.image.%: | stage.% $(foreach i, $(IMAGES_TO_BUILD), $(i).% ) ;
+do.image.%: stage.%
+	@set -eux ; for image in $(IMAGES_TO_BUILD); do $(MAKE) $${image}.$* build ; done
 
 stage: $(foreach p, $(FLAVORS), stage.$(HOST_ARCH),$(p)) ;
 build: $(foreach p, $(FLAVORS), do.image.$(HOST_ARCH),$(p)) ;
