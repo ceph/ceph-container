@@ -51,3 +51,10 @@ PARALLEL := --jobs $(nproc) --output-sync
 else
 PARALLEL := --jobs $(nproc)
 endif
+
+
+# define a newline
+define \n
+
+
+endef
