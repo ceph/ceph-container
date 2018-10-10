@@ -538,6 +538,10 @@ function intersect_lists () {
 }
 
 function install_docker {
+  # When we DRY_RUN there is no need to install packages
+  if [ -n "${DRY_RUN:-}" ]; then
+    return
+  fi
   sudo apt-get install -y --force-yes docker.io
   sudo systemctl start docker
   sudo systemctl status docker
