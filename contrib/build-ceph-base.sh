@@ -75,7 +75,7 @@ for flavor in $flavors_to_build; do
     make_cmd="make --directory="${SCRIPT_DIR}/.." \
         FLAVORS="${ceph_codename}-${version_without_build},${ceph_container_distro_dir},${distro_release}" \
         IMAGES_TO_BUILD=daemon-base \
-        TAG_REGISTRY="${PUSH_LIBRARY}" \
+        TAG_REGISTRY="" \
         DAEMON_BASE_TAG="${full_build_tag}" \
         BASEOS_REGISTRY="${baseos_registry_setting}" \
         BASEOS_REPO="${baseos_repo_setting}" \
