@@ -10,7 +10,7 @@ set -ex
 BRANCH="${GIT_BRANCH#*/}"
 LATEST_COMMIT_SHA=$(git rev-parse --short HEAD)
 TAGGED_HEAD=false # does HEAD is on a tag ?
-if [ -z "$CEPH_RELEASES" ]; then CEPH_RELEASES=(kraken luminous mimic); fi
+if [ -z "$CEPH_RELEASES" ]; then CEPH_RELEASES=(luminous mimic); fi
 CEPH_RELEASES_BIS=(luminous) # list of releases that need a "bis" image for ceph-ansible
 HOST_ARCH=$(uname -m)
 

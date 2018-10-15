@@ -6,7 +6,7 @@ unset "DAEMON_OPTS[${#DAEMON_OPTS[@]}-1]" # remove the last element of the array
 PREPARE_OSD=$OSD_PATH
 ACTIVATE_OSD=$OSD_PATH
 # the following ceph version can start with a numerical value where the new ones need a proper name
-if [[ "$CEPH_VERSION" == "kraken" || "$CEPH_VERSION" == "luminous" ]]; then
+if [[ "$CEPH_VERSION" == "luminous" ]]; then
   MDS_NAME=0
 else
   MDS_NAME=demo
@@ -51,7 +51,7 @@ fi
 : "${RGW_FRONTEND:="$RGW_FRONTEND_TYPE $RGW_FRONTED_OPTIONS"}"
 
 if [[ "$RGW_FRONTEND_TYPE" == "beast" ]]; then
-  if [[ "$CEPH_VERSION" == "kraken" || "$CEPH_VERSION" == "luminous" ]]; then
+  if [[ "$CEPH_VERSION" == "luminous" ]]; then
     RGW_FRONTEND_TYPE=beast
     log "ERROR: unsupported rgw backend type $RGW_FRONTEND_TYPE for your Ceph release $CEPH_VERSION, use at least the Mimic version."
     exit 1
@@ -113,9 +113,8 @@ function bootstrap_osd {
     if ! grep -qE "osd data = $OSD_PATH" /etc/ceph/"${CLUSTER}".conf; then
       echo "osd data = $OSD_PATH" >> /etc/ceph/"${CLUSTER}".conf
     fi
-    if [[ "$CEPH_VERSION" != "kraken" ]]; then
-      CEPH_DISK_CLI_OPTS=(--bluestore)
-    fi
+    CEPH_DISK_CLI_OPTS=(--bluestore)
+
     # bootstrap OSD
     mkdir -p "$OSD_PATH"
     chown --verbose -R ceph. "$OSD_PATH"
@@ -134,9 +133,6 @@ function bootstrap_osd {
   # start OSD
   chown --verbose -R ceph. "$OSD_PATH"
   ceph-osd "${DAEMON_OPTS[@]}" -i 0
-  if [[ "$CEPH_VERSION" == "kraken" ]]; then
-    ceph "${CLI_OPTS[@]}" osd crush add 0 1 root=default host="$(uname -n)"
-  fi
   ceph "${CLI_OPTS[@]}" osd pool create "$RBD_POOL" 8
 }
 
@@ -341,9 +337,7 @@ function build_bootstrap {
   # this is will prevent someone writing daemons in the wrong order
   # once both mon and mgr are up we don't care about the order
   bootstrap_mon
-  if [[ "$CEPH_VERSION" != "kraken" ]]; then
-    bootstrap_mgr
-  fi
+  bootstrap_mgr
 
   if [[ "$DEMO_DAEMONS" == "all" ]]; then
     daemons_list="osd mds rgw nfs rbd_mirror rest_api"

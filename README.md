@@ -36,14 +36,10 @@ Here is an example list of available stable Ceph images
 
 ```
 ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7
-ceph/daemon:v3.0.5-stable-3.0-kraken-centos-7-x86_64
 ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7-x86_64
 ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7-aarch64
 ceph/daemon:v3.0.3-stable-3.0-luminous-centos-7-x86_64
-ceph/daemon:v3.0.3-stable-3.0-kraken-centos-7-x86_64
-ceph/daemon:v3.0.2-stable-3.0-kraken-centos-7-x86_64
 ceph/daemon:v3.0.2-stable-3.0-luminous-centos-7-x86_64
-ceph/daemon:v3.0.1-stable-3.0-kraken-centos-7-x86_64
 ceph/daemon:v3.0.1-stable-3.0-luminous-centos-7-x86_64
 ceph/daemon:tag-stable-3.0-luminous-centos-7
 ```
@@ -78,7 +74,7 @@ make FLAVORS=luminous,centos,7 build
 Multiple flavors are specified by separating each flavor by a space and surrounding the entire
 specification in quotes and built the same as a single flavor:
 ```
-make FLAVORS="luminous,centos,7 kraken,opensuse,42.3"  build
+make FLAVORS="luminous,centos,7 mimic,opensuse,42.3"  build
 ```
 
 Flavors can be built in parallel easily with the `build.parallel` target:

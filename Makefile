@@ -20,7 +20,6 @@
 FLAVORS ?= \
 	luminous,opensuse,42.3 \
 	luminous,centos,7 \
-	kraken,centos,7 \
 	mimic,centos,7 \
 
 TAG_REGISTRY ?= ceph
@@ -45,7 +44,6 @@ include maint-lib/makelib.mk
 # All flavor options that can be passed to FLAVORS
 ALL_BUILDABLE_FLAVORS := \
 	luminous,centos,7 \
-	kraken,centos,7 \
 	luminous,opensuse,42.3 \
 	mimic,centos,7
 

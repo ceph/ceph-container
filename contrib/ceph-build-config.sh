@@ -5,7 +5,7 @@ set -uo pipefail
 # These build scripts don't need to have the aarch64 part of the distro specified
 # I.e., specifying 'luminous,centos-arm64,7' is not necessary for aarch64 builds; these scripts
 #       will do the right build. See configurable CENTOS_AARCH64_FLAVOR_DISTRO below
-X86_64_FLAVORS_TO_BUILD="kraken,centos,7 luminous,centos,7 mimic,centos,7"
+X86_64_FLAVORS_TO_BUILD="luminous,centos,7 mimic,centos,7"
 AARCH64_FLAVORS_TO_BUILD="luminous,centos,7 mimic,centos,7"
 
 # Allow running this script with the env var ARCH='aarch64' to build arm images
