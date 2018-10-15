@@ -17,13 +17,13 @@ REQUIRED_ENV_VARS = OrderedDict([
     ('CEPH_VERSION',       'Ceph named version part of the ceph-releases source path' +  # noqa: E241,E501
                             ALIGNED_NEWLINE + '(e.g., luminous, mimic)'),  # noqa: E241
     ('CEPH_POINT_RELEASE', 'Points to specific version of Ceph (e.g -12.2.0) or empty'),  # noqa: E241,E501
-    ('DISTRO',             'Distro part of the ceph-releases source path (e.g., opensuse, centos)'),  # noqa: E241,E501
+    ('DISTRO',             'Distro part of the ceph-releases source path (e.g., opensuse__leap, centos)'),  # noqa: E241,E501
     ('DISTRO_VERSION',     'Distro version part of the ceph-releases source path' +  # noqa: E241,E501
-                            ALIGNED_NEWLINE + '(e.g. in quotes, opensuse/"42.3", centos/"7")'),
+                            ALIGNED_NEWLINE + '(e.g. in quotes, opensuse__leap/"42.3", centos/"7")'),
     ('HOST_ARCH',          'Architecture of binaries being built (e.g., amd64, arm32, arm64)'),  # noqa: E241,E501
     ('BASEOS_REGISTRY',    'Registry for the container base image (e.g., _ (x86_64), arm64v8 (aarch64))' +  # noqa: E241,E501
                             ALIGNED_NEWLINE + 'There is a relation between HOST_ARCH and this value'),  # noqa: E241,E501
-    ('BASEOS_REPO',        'Repository for the container base image (e.g., centos, opensuse)'),  # noqa: E241,E501
+    ('BASEOS_REPO',        'Repository for the container base image (e.g., centos, opensuse__leap)'),  # noqa: E241,E501
     ('BASEOS_TAG',         'Tagged version of BASEOS_REPO container (e.g., 7, 42.3 respectively)'),  # noqa: E241,E501
     ('IMAGES_TO_BUILD',    'Container images to be built (usually should be "dockerfile daemon")'),  # noqa: E241,E501
     ('STAGING_DIR',        'Dir into which files will be staged' + ALIGNED_NEWLINE +  # noqa: E241
@@ -73,7 +73,14 @@ def getEnvVar(varname):
 
 
 def exportBaseImageEnvVar():
-    BASE_IMAGE = "{}:{}".format(getEnvVar('BASEOS_REPO'), getEnvVar('BASEOS_TAG'))
+    """
+    Computed from BASEOS_REGISTRY, BASEOS_REPO and BASEOS_TAG. There is a special treatment to
+    support base images containing slashes: If BASEOS_REPO contains a double underscore, it's
+    being replaced with a slash in the resulting BASE_IMAGE. I.e. if BASEOS_REPO is set to
+    `opensuse__leap`, BASE_IMAGE will contain `opensuse/leap`.
+    """
+    BASE_IMAGE = "{}:{}".format(getEnvVar('BASEOS_REPO').replace('__', '/'),
+                                getEnvVar('BASEOS_TAG'))
     if getEnvVar('BASEOS_REGISTRY'):
         BASE_IMAGE = "{}/{}".format(getEnvVar('BASEOS_REGISTRY'), BASE_IMAGE)
     os.environ['BASE_IMAGE'] = BASE_IMAGE
@@ -117,3 +124,10 @@ def exportGoArchEnvVar():
         os.environ['GO_ARCH'] = _CEPH_ARCH_TO_GOLANG_ARCH_CONVERSIONS[arch]
     else:
         os.environ['GO_ARCH'] = arch
+
+if __name__ == '__main__':
+    print(_REQUIRED_VAR_TEXT)
+    print('\nComputed while staging')
+    print('\nContainer image: BASE_IMAGE\n{}'.format(exportBaseImageEnvVar.__doc__))
+    print('\nGit info\n{}'.format(exportGitInfoEnvVars.__doc__))
+    print('\nArchitecture: GO_ARCH\n{}'.format(exportGoArchEnvVar.__doc__))

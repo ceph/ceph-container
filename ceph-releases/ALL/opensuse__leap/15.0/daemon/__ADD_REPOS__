@@ -1,0 +1,3 @@
+__ZYPPER__ addrepo http://download.opensuse.org/repositories/filesystems:/ceph/__OS_REPO__/ build-deps && \
+    __ZYPPER__ addrepo http://download.opensuse.org/repositories/Cloud:/Tools/__OS_REPO__/ cloud-tools && \
+    __ZYPPER__ addrepo https://download.opensuse.org/repositories/devel:CaaSP:Head:ControllerNode/__OS_REPO__/devel:CaaSP:Head:ControllerNode.repo
