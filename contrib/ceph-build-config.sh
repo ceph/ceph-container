@@ -409,7 +409,7 @@ function get_base_image_id () {
   # Docker history gives all the image IDs which built the given image with recent images first
   # The earliest layers can be ID'ed '<missing>', so filter this out with grep
   # Of the remaining non-missing IDs, the last one should be the base image
-  if [ -n "${TEST_RUN}" ]; then
+  if [ -n "${TEST_RUN:-}" ]; then
     test_info "get_base_image_id - Returning base image ID 000000000000"
     echo "000000000000"
     return
