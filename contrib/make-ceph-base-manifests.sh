@@ -108,7 +108,11 @@ for flavor in $flavors_to_build; do
                                  "${full_minor_tag}" "${PUSH_REPOSITORY}")"
     minor_push_image_tag="$(construct_full_push_image_tag "${minor_version_tag}" \
                               "${PUSH_REPOSITORY}" '')"   # No build number for minor tag
-    add_tag "${latest_server_image_tag}" "${minor_push_image_tag}"
+    if [ -z "${latest_server_image_tag}" ]; then
+      info "No manifest image to apply ${minor_push_image_tag} to"
+    else
+      add_tag "${latest_server_image_tag}" "${minor_push_image_tag}"
+    fi
   done
 
   # The last image we apply a minor version tag to should be the image that we apply a major version
@@ -117,6 +121,10 @@ for flavor in $flavors_to_build; do
   major_version_tag="$(convert_version_tag_to_major_tag "${full_minor_tag}")"
   major_push_image_tag="$(construct_full_push_image_tag "${major_version_tag}" \
                             "${PUSH_REPOSITORY}" '')"   # No build num for major tag
-  add_tag "${latest_server_image_tag}" "${major_push_image_tag}"
+  if [ -z "${latest_server_image_tag}" ]; then
+    info "No manifest image to apply ${major_push_image_tag} to"
+  else
+    add_tag "${latest_server_image_tag}" "${major_push_image_tag}"
+  fi
 
 done  # for flavor in $flavors_to_build
