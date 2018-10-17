@@ -48,16 +48,14 @@ for flavor in $flavors_to_build; do
       # Pull the last image and the base image to see if the base images match
       do_pull "${latest_server_image_tag}"
       do_pull "${base_image_full_tag}"
-      latest_image_base_id="$(get_base_image_id "${latest_server_image_tag}")"
-      base_image_id="$(get_image_id "${base_image_full_tag}")"
-      if [ "${latest_image_base_id}" = "${base_image_id}" ]; then
+      if image_base_changed "${latest_server_image_tag}" "${base_image_full_tag}"; then
+        info "Base container ${base_image_full_tag} has an update for Ceph release ${version}-${ARCH}"
+        # Build a new container
+      else
         # The last ceph image's base ID is the same as the latest centos image's ID
         info "No base container update for Ceph release ${version}-${ARCH}"
         info "Image will remain at tag ${latest_server_image_tag}"
         continue  # Go to the next loop item without building
-      else
-        info "Base container ${base_image_full_tag} has an update for Ceph release ${version}-${ARCH}"
-        # Build a new container
       fi
     else
       info "No tag exists matching Ceph release ${version}-${ARCH}"
