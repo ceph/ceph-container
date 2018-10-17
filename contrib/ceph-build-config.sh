@@ -403,25 +403,19 @@ function full_tag_exists () {
 # Local image information
 #===================================================================================================
 
-# For an image on the local host, given the full tag (lib/repo:tag), echo ID of the base image
-function get_base_image_id () {
-  local image_library_repo_tag="${1}"
-  # Docker history gives all the image IDs which built the given image with recent images first
-  # The earliest layers can be ID'ed '<missing>', so filter this out with grep
-  # Of the remaining non-missing IDs, the last one should be the base image
-  if [ -n "${TEST_RUN:-}" ]; then
-    test_info "get_base_image_id - Returning base image ID 000000000000"
-    echo "000000000000"
-    return
-  fi
-  docker history --format '{{.ID}}' "${image_library_repo_tag}" | grep --invert-match '<missing>' | tail -1
-}
-
-# For an image on the local host, given the full tag (lib/repo:tag), echo ID of the image
-function get_image_id () {
-  local image_library_repo_tag="${1}"
-  # The newest (top) layer in the history is the ID that other images will see as the base ID
-  docker history --format '{{.ID}}' "${image_library_repo_tag}" | head -1
+# For a given image and its base image, inspect the local pulls of each image to determine if
+# the base image has been updated, suggesting that the image should be updated.
+# Return 0 if the base image has changed (needs updated), nonzero otherwise
+function image_base_changed () {
+    local image="${1}"
+    local base_image="${2}"
+    image_base_line="$(docker history "${image}" | tail -1 | tr -s ' ')"
+    base_base_line="$(docker history "${base_image}" | tail -1 | tr -s ' ')"
+    [[ "${image_base_line}" != "${base_base_line}" ]]
+    # Basically what is going on here is that we are comparing the basest layer of both the image
+    # in question and the base image. The main item helping to determine whether the images are the
+    # same is the "CREATED BY" column where we expect the "ADD file:<hash>..." lines to match. There
+    # is no reason not to also check the rest of the text as well just in case.
 }
 
 #===================================================================================================
