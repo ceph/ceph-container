@@ -21,6 +21,7 @@ FLAVORS ?= \
 	luminous,opensuse,42.3 \
 	luminous,centos,7 \
 	mimic,centos,7 \
+	master,centos,7
 
 TAG_REGISTRY ?= ceph
 
@@ -45,7 +46,8 @@ include maint-lib/makelib.mk
 ALL_BUILDABLE_FLAVORS := \
 	luminous,centos,7 \
 	luminous,opensuse,42.3 \
-	mimic,centos,7
+	mimic,centos,7 \
+	master,centos,7
 
 # ==============================================================================
 # Build targets
@@ -164,6 +166,10 @@ OPTIONS:
       DISTRO_VERSION - Distro version part of the ceph-releases source path
                        (e.g., opensuse/"42.3", centos/"7")
     e.g., make FLAVORS="luminous,opensuse,42.3" ...
+
+	It is also possible to build a container running the latest development release (master).
+	This is only available on centos with the following command :
+		make FLAVORS="master,centos,7"
 
   RELEASE - The release version to integrate in the tag. If omitted, set to the branch name.
 

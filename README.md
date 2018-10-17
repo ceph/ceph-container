@@ -44,6 +44,15 @@ ceph/daemon:v3.0.1-stable-3.0-luminous-centos-7-x86_64
 ceph/daemon:tag-stable-3.0-luminous-centos-7
 ```
 
+Development images
+------------------
+It is possible to build a container running the latest development release (master). It also includes the latest development packages from the nfs-ganesha project.
+
+This is only available on centos with the following command :
+`make FLAVORS="master,centos,7"`
+
+
+
 Core Components
 ---------------
 
