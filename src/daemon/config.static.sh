@@ -70,32 +70,24 @@ ENDHERE
     ceph-authtool "$ADMIN_KEYRING" --create-keyring -n client.admin "${CLI[@]}" --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow' --cap mgr 'allow *'
   fi
 
-  if [ ! -e "$MON_KEYRING" ]; then
-    # Generate the mon. key
-    ceph-authtool "$MON_KEYRING" --create-keyring --gen-key -n mon. --cap mon 'allow *'
-  fi
+  # Generate the mon. key
+  ceph-authtool "$MON_KEYRING" --create-keyring --gen-key -n mon. --cap mon 'allow *'
 
-  if [ ! -e "$OSD_BOOTSTRAP_KEYRING" ]; then
-    # Generate the OSD bootstrap key
-    ceph-authtool "$OSD_BOOTSTRAP_KEYRING" --create-keyring --gen-key -n client.bootstrap-osd --cap mon 'allow profile bootstrap-osd'
-  fi
+  for daemon_key in osd mds rgw rbd; do
+    daemon=$(to_uppercase $daemon_key)
+    if [[ "$daemon_key" == "rbd" ]]; then
+      combined=${daemon}_MIRROR_BOOTSTRAP_KEYRING
+    else
+      combined=${daemon}_BOOTSTRAP_KEYRING
+    fi
+    ceph-authtool "${!combined}" --create-keyring --gen-key -n client.bootstrap-"$daemon_key" --cap mon "allow profile bootstrap-$daemon_key" &
+    pid=$!
+    pid_array+=("$pid")
+  done
+  wait "${pid_array[@]}"
 
-  if [ ! -e "$MDS_BOOTSTRAP_KEYRING" ]; then
-    # Generate the MDS bootstrap key
-    ceph-authtool "$MDS_BOOTSTRAP_KEYRING" --create-keyring --gen-key -n client.bootstrap-mds --cap mon 'allow profile bootstrap-mds'
-  fi
-
-  if [ ! -e "$RGW_BOOTSTRAP_KEYRING" ]; then
-    # Generate the RGW bootstrap key
-    ceph-authtool "$RGW_BOOTSTRAP_KEYRING" --create-keyring --gen-key -n client.bootstrap-rgw --cap mon 'allow profile bootstrap-rgw'
-  fi
-
-  if [ ! -e "$RBD_MIRROR_BOOTSTRAP_KEYRING" ]; then
-    # Generate the RBD Mirror bootstrap key
-    ceph-authtool "$RBD_MIRROR_BOOTSTRAP_KEYRING" --create-keyring --gen-key -n client.bootstrap-rbd --cap mon 'allow profile bootstrap-rbd'
-  fi
-    # Apply proper permissions to the keys
-    chown "${CHOWN_OPT[@]}" ceph. "$MON_KEYRING" "$OSD_BOOTSTRAP_KEYRING" "$MDS_BOOTSTRAP_KEYRING" "$RGW_BOOTSTRAP_KEYRING" "$RBD_MIRROR_BOOTSTRAP_KEYRING"
+  # Apply proper permissions to the keys
+  chown "${CHOWN_OPT[@]}" ceph. "$MON_KEYRING" "$OSD_BOOTSTRAP_KEYRING" "$MDS_BOOTSTRAP_KEYRING" "$RGW_BOOTSTRAP_KEYRING" "$RBD_MIRROR_BOOTSTRAP_KEYRING"
 
   if [ ! -e "$MONMAP" ]; then
     if [ -e /etc/ceph/monmap ]; then
