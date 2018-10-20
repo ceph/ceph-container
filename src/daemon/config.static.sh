@@ -59,6 +59,10 @@ ENDHERE
     fsid=$(grep "fsid" /etc/ceph/"${CLUSTER}".conf | awk '{print $NF}')
   fi
 
+  if [[ "$CEPH_VERSION" == "luminous" ]] || [[ "$CEPH_VERSION" == "mimic" ]]; then
+    CLI+=("--set-uid=0")
+  fi
+
   if [ ! -e "$ADMIN_KEYRING" ]; then
     if [ -z "$ADMIN_SECRET" ]; then
       # Automatically generate administrator key
@@ -67,7 +71,7 @@ ENDHERE
       # Generate custom provided administrator key
       CLI+=("--add-key=$ADMIN_SECRET")
     fi
-    ceph-authtool "$ADMIN_KEYRING" --create-keyring -n client.admin "${CLI[@]}" --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow' --cap mgr 'allow *'
+    ceph-authtool "$ADMIN_KEYRING" --create-keyring -n client.admin "${CLI[@]}" --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow' --cap mgr 'allow *'
   fi
 
   if [ ! -e "$MON_KEYRING" ]; then
