@@ -30,6 +30,8 @@ PUSH_REGISTRY_URL="https://registry.hub.docker.com"
 # The distro part of the ceph-releases/<ceph>/<DISTRO> path for centos' aarch64 build
 CENTOS_AARCH64_FLAVOR_DISTRO='centos-arm64'
 
+# This is the arch version of build server
+: "${BUILD_SERVER_GOARCH:=amd64}"
 
 #===================================================================================================
 # Logging
@@ -471,7 +473,6 @@ MANIFEST_TOOL_LOCATION="/tmp/manifest-tool-${MANIFEST_TOOL_VERSION}"
 # `docker manifest` command exists but is experiemental and not present in all environments;
 #   use manifest tool until `docker manifest` is mainline
 function download_manifest_tool () {
-  BUILD_SERVER_GOARCH="amd64"  # We assume below the build server is x86_64 (amd64)
   if [[ ! -x "${MANIFEST_TOOL_LOCATION}" ]]; then
     info "Manifest tool is not downloaded. Downloading it now."
     curl --silent --location \
