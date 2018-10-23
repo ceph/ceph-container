@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
+# -E option is 'errtrace' and is needed for -e to fail properly from subshell failures
 
 # Allow running this script with the env var DRY_RUN="<something>" to do a dry run of the
 # script. Dry runs will output commands that they would have executed as info messages.
@@ -7,11 +8,6 @@ set -euo pipefail
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 # shellcheck disable=SC1090  # sourcing from a variable here does indeed work
 source "${SCRIPT_DIR}/ceph-build-config.sh"
-
-# As a note, bash functions which return strings do so by echo'ing the result. When the function
-# is called like 'var="$(fxn)"', var will get the return string. Trapping on ERR and returning
-# the exit code will make the script exit as expected.
-trap 'exit $?' ERR
 
 
 #
