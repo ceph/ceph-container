@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
+# -E option is 'errtrace' and is needed for -e to fail properly from subshell failures
 
 # Allow running this script with the env var DRY_RUN="<something>" to do a dry run of the
 # script. Dry runs will output commands that they would have executed as info messages.

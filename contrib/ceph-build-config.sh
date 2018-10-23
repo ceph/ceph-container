@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
+# Make subshells use '-uo pipefail'
+export SHELLOPTS
+
+# As a note, bash functions which return strings do so by echo'ing the result. When the function
+# is called like 'var="$(fxn)"', var will get the return string. Trapping on ERR and returning
+# the exit code will make the script exit as expected.
+trap 'exit $?' ERR
+
 # This is mostly an internal representation of 'FLAVORS_TO_BUILD'.
 # These build scripts don't need to have the aarch64 part of the distro specified
 # I.e., specifying 'luminous,centos-arm64,7' is not necessary for aarch64 builds; these scripts
