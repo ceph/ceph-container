@@ -13,6 +13,9 @@ function start_rbd_target_gw {
 
   ceph_health client.admin /etc/ceph/"$CLUSTER".client.admin.keyring
 
+  # mount configfs at /sys/kernel/config
+  mount -t configfs none /sys/kernel/config
+
   log "SUCCESS"
   # start rbd-target-gw
   exec /usr/bin/rbd-target-gw

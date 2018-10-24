@@ -13,6 +13,9 @@ function start_tcmu_runner {
 
   ceph_health client.admin /etc/ceph/"$CLUSTER".client.admin.keyring
 
+  # mount configfs at /sys/kernel/config
+  mount -t configfs none /sys/kernel/config
+
   log "SUCCESS"
   # start tcmu-runner
   exec tcmu-runner
