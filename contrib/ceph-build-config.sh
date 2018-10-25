@@ -461,7 +461,7 @@ function add_tag () {
   local existing_image_full_tag="${1}" full_tag_to_add="${2}"
   info "add_tag - adding tag ${full_tag_to_add} to ${existing_image_full_tag}"
   local tag_cmd="docker tag ${existing_image_full_tag} ${full_tag_to_add}"
-  if [ -z "${DRY_RUN}" ]; then
+  if [ -z "${DRY_RUN:-}" ]; then
     ${tag_cmd}
   else
     # Just echo the make command we would've executed if this is a dry run
