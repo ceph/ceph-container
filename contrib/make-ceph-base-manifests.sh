@@ -38,13 +38,16 @@ for flavor in $flavors_to_build; do
   # The intersection will return versions numbers with both x86 and arm builds available
   paired_versions="$(intersect_lists "${x86_version_list}" "${arm_version_list}")"
 
-  # We are going to note the last version we see of a particular minor version for later use tagging
-  # most recent minor images for this major version
-  latest_minor_version_tags_list=''
+  # We want to loop through the versions with lookahead to the next version so we know when to apply
+  # minor tags to the current version.
+  # 1st in paired list is the first version we look at
+  version="$(echo "${paired_versions}" | head -1)"  # first line in paired_versions
+  # build list of next versions
+  next_versions="$(echo "${paired_versions}" | tail -n +2)"  # remove first line in paired_versions
+  next_versions="${next_versions}
+done"  # add 'done' to end of next_versions list so for loop will continue one past the last version
 
-  last_minor_number=0
-  last_version_tag=''
-  for version in ${paired_versions}; do
+  for next_version in ${next_versions}; do
     version_tag="$(convert_version_to_version_tag "${version}")"
 
     x86_arch_image_repo="$(get_arch_image_repo 'x86_64')"
@@ -71,60 +74,33 @@ for flavor in $flavors_to_build; do
     newest_build_number="$(latest_build_number "${x86_build_number}" "${arm_build_number}")"
     manifest_image_tag="$(construct_full_push_image_tag "${version_tag}" \
                                        "${PUSH_REPOSITORY}" "${newest_build_number}")"
-    if ! full_tag_exists "${manifest_image_tag}"; then
+
+    # Apply tags for the minor versions (and major version)
+    additional_tags=()
+    minor_number="$(extract_minor_version "${version_tag}")"
+    next_minor_number=''
+    if [ "${next_version}" == "done" ]; then
+      # If the version is the last version, we should apply major tags to this manifest
+      additional_tags+=("$(convert_version_tag_to_major_tag "${version_tag}")")
+      # leave next minor number as empty
+    else
+      next_version_tag="$(convert_version_to_version_tag "${next_version}")"
+      next_minor_number="$(extract_minor_version "${next_version_tag}")"
+    fi
+    if [ -z "${next_minor_number}" ] || [ "${next_minor_number}" -gt "${minor_number}" ]; then
+      # If there is not next minor number (i.e., this is the last version) or if the next minor
+      # number is higher, apply minor tag to this manifest
+      additional_tags+=("$(convert_version_tag_to_major_minor_tag "${version_tag}")")
+    fi
+
+    if ! full_tag_exists "${manifest_image_tag}" || [ -n "${FORCE_MANIFEST_CREATION:-}" ]; then
       # If the image doesn't exist in the repo, push it
       push_manifest_image "${manifest_image_tag}" \
-        "${x86_latest_server_image_tag}" "${arm_latest_server_image_tag}"
+        "${x86_latest_server_image_tag}" "${arm_latest_server_image_tag}" "${additional_tags[*]}"
     fi
-    # Don't push the image if it does exist
+    # Don't push the image if it already exists
 
-    # Record latest minor versions except for images which are skipped
-    minor_number="$(extract_minor_version "${version_tag}")"
-    if [ "${minor_number}" -gt "${last_minor_number}" ] && [ -n "${last_version_tag}" ]; then
-      # If our minor number has gone up since last time, the last version tag is the latest image
-      # for that minor version. Record it.
-      latest_minor_version_tags_list="${latest_minor_version_tags_list} ${last_version_tag}"
-    fi
-    last_version_tag="${version_tag}"
-    last_minor_number="${minor_number}"
-
+    version="${next_version}"
   done  # for version in ${paired_versions}
-
-  # Record latest minor version finally outside the loop since the most recent version tag is also
-  # the most recent tag for a minor version
-  if [ -n "${last_version_tag}" ]; then
-    # Once we finish looping over versions, the most recent value in 'last_version_tag' is the
-    # latest image for its minor version. Record it.
-    latest_minor_version_tags_list="${latest_minor_version_tags_list} ${last_version_tag}"
-  fi
-
-  # Tag each of the most recent minor images for this flavor with minor version tag
-  # in form 'v<major>.<minor>'
-  full_minor_tag=''  # use later for major tag
-  latest_server_image_tag=''  # use later for major tag
-  for full_minor_tag in $latest_minor_version_tags_list; do
-    minor_version_tag="$(convert_version_tag_to_major_minor_tag "${full_minor_tag}")"
-    latest_server_image_tag="$(get_latest_full_semver_tag \
-                                 "${full_minor_tag}" "${PUSH_REPOSITORY}")"
-    minor_push_image_tag="$(construct_full_push_image_tag "${minor_version_tag}" \
-                              "${PUSH_REPOSITORY}" '')"   # No build number for minor tag
-    if [ -z "${latest_server_image_tag}" ]; then
-      info "No manifest image to apply ${minor_push_image_tag} to"
-    else
-      add_tag "${latest_server_image_tag}" "${minor_push_image_tag}"
-    fi
-  done
-
-  # The last image we apply a minor version tag to should be the image that we apply a major version
-  # tag to in the form 'v<major>'; in other words, the latest image for the highest minor version
-  # is also the latest image for the major version of the flavor
-  major_version_tag="$(convert_version_tag_to_major_tag "${full_minor_tag}")"
-  major_push_image_tag="$(construct_full_push_image_tag "${major_version_tag}" \
-                            "${PUSH_REPOSITORY}" '')"   # No build num for major tag
-  if [ -z "${latest_server_image_tag}" ]; then
-    info "No manifest image to apply ${major_push_image_tag} to"
-  else
-    add_tag "${latest_server_image_tag}" "${major_push_image_tag}"
-  fi
 
 done  # for flavor in $flavors_to_build

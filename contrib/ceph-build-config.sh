@@ -487,10 +487,25 @@ function download_manifest_tool () {
 # the manifest image tag will not overwrite an existing tag
 function push_manifest_image () {
   local manifest_image_full_tag="${1}" x86_64_image_full_tag="${2}" aarch64_image_full_tag="${3}"
+  local additional_tags="${4}"
   # Replace '/' in the tag with '_' for the file
   local manifest_spec_file="/tmp/${manifest_image_full_tag//\//_}.yaml"
+  # Start file off by recording the image
   cat > "${manifest_spec_file}" <<EOF
 image: "${manifest_image_full_tag}"
+EOF
+  # Add additional tags if they are specified
+  if [ -n "${additional_tags}" ]; then
+    quoted_tags="$(printf '"%s"\n' "${additional_tags[@]}")"  # put quotes around each tag
+    # shellcheck disable=2116,2086  # disable errors for below line that don't apply to this case
+    one_line="$(echo ${quoted_tags})"  # make one line, and remove leading/trailing space
+    comma_delimited="${one_line// /, }"  # add comma-space between quoted tags
+    cat >> "${manifest_spec_file}" << EOF
+tags: [${comma_delimited}]
+EOF
+  fi
+  # Always add manifests
+  cat >> "${manifest_spec_file}" <<EOF
 manifests:
   - image: "${x86_64_image_full_tag}"
     platform:
@@ -501,6 +516,9 @@ manifests:
       architecture: arm64
       os: linux
 EOF
+  info "manifest file:
+$(cat "${manifest_spec_file}")
+"
   download_manifest_tool
   local manifest_cmd="${MANIFEST_TOOL_LOCATION} push from-spec ${manifest_spec_file}"
   if [ -z "${DRY_RUN:-}" ]; then
@@ -528,7 +546,9 @@ function intersect_lists () {
   local sorted_a ; sorted_a="$(echo "${list_a// /$'\n'}" | sort --version-sort)"
   local sorted_b ; sorted_b="$(echo "${list_b// /$'\n'}" | sort --version-sort)"
   # Use sorted_a and _b as inputs to comm, which effectively returns the intersection of the lists
-  comm -12 <(echo "${sorted_a}") <(echo "${sorted_b}")
+  intersected="$(comm -12 <(echo "${sorted_a}") <(echo "${sorted_b}"))"
+  intersected="${intersected/#$'\n'}"  # remove leading newline
+  echo "${intersected%$'\n'}"  # return w/ trailing newline removed
 }
 
 function install_docker {
