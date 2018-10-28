@@ -2,9 +2,8 @@
 set -e
 
 unset "DAEMON_OPTS[${#DAEMON_OPTS[@]}-1]" # remove the last element of the array
-: "${OSD_PATH:=/var/lib/ceph/osd/${CLUSTER}-0}"
-PREPARE_OSD=$OSD_PATH
-ACTIVATE_OSD=$OSD_PATH
+OSD_ID=0
+: "${OSD_PATH:=/var/lib/ceph/osd/${CLUSTER}-$OSD_ID}"
 # the following ceph version can start with a numerical value where the new ones need a proper name
 if [[ "$CEPH_VERSION" == "luminous" ]]; then
   MDS_NAME=0
@@ -58,8 +57,6 @@ if [[ "$RGW_FRONTEND_TYPE" == "beast" ]]; then
   fi
 fi
 
-CEPH_DISK_CLI_OPTS=()
-
 
 #######
 # MON #
@@ -100,9 +97,13 @@ function parse_size {
 
 function bootstrap_osd {
   if [[ -n "$OSD_DEVICE" ]]; then
-    PREPARE_OSD=$OSD_DEVICE
     if [[ -b "$OSD_DEVICE" ]]; then
-      ACTIVATE_OSD=${OSD_DEVICE}1
+      if [ -n "$BLUESTORE_BLOCK_SIZE" ]; then
+        size=$(parse_size "$BLUESTORE_BLOCK_SIZE")
+        if ! grep -qE "bluestore_block_size = $size" /etc/ceph/"${CLUSTER}".conf; then
+          echo "bluestore_block_size = $size" >> /etc/ceph/"${CLUSTER}".conf
+        fi
+      fi
     else
       log "Invalid $OSD_DEVICE, only block device is supported"
       exit 1
@@ -112,27 +113,32 @@ function bootstrap_osd {
   if [ ! -e "$OSD_PATH"/keyring ]; then
     if ! grep -qE "osd data = $OSD_PATH" /etc/ceph/"${CLUSTER}".conf; then
       echo "osd data = $OSD_PATH" >> /etc/ceph/"${CLUSTER}".conf
+      echo "osd objectstore = bluestore" >> /etc/ceph/"${CLUSTER}".conf
     fi
-    CEPH_DISK_CLI_OPTS=(--bluestore)
 
     # bootstrap OSD
     mkdir -p "$OSD_PATH"
     chown --verbose -R ceph. "$OSD_PATH"
-    if [ -n "$BLUESTORE_BLOCK_SIZE" ]; then
-      size=$(parse_size "$BLUESTORE_BLOCK_SIZE")
-      if ! grep -qE "bluestore_block_size = $size" /etc/ceph/"${CLUSTER}".conf; then
-        echo "bluestore_block_size = $size" >> /etc/ceph/"${CLUSTER}".conf
-      fi
+
+    # if $OSD_DEVICE exists we deploy with ceph-volume
+    if [[ -n "$OSD_DEVICE" ]]; then
+      ceph-volume lvm prepare --data "$OSD_DEVICE"
+    else
+      # we go for a 'manual' bootstrap
+      ceph "${CLI_OPTS[@]}" auth get-or-create osd."$OSD_ID" mon 'allow profile osd' osd 'allow *' mgr 'allow profile osd' -o "$OSD_PATH"/keyring
+      ceph-osd --conf /etc/ceph/"${CLUSTER}".conf --osd-data "$OSD_PATH" --mkfs -i "$OSD_ID"
     fi
-    ceph-disk -v prepare "${CLI_OPTS[@]}" "${CEPH_DISK_CLI_OPTS[@]}" "$PREPARE_OSD"
-    # this second chown will chown the partition created by ceph-disk e.g: /dev/sda1 and /dev/sda2
-    chown --verbose -R ceph. "$PREPARE_OSD"*
-    ceph-disk -v activate --mark-init none --no-start-daemon "$ACTIVATE_OSD"
+  fi
+
+  # activate OSD
+  if [[ -n "$OSD_DEVICE" ]]; then
+    OSD_FSID="$(ceph-volume lvm list --format json | python -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"][0][\"tags\"][\"ceph.osd_fsid\"])")"
+    ceph-volume lvm activate --no-systemd --bluestore "${OSD_ID}" "${OSD_FSID}"
   fi
 
   # start OSD
   chown --verbose -R ceph. "$OSD_PATH"
-  ceph-osd "${DAEMON_OPTS[@]}" -i 0
+  ceph-osd "${DAEMON_OPTS[@]}" -i "$OSD_ID"
   ceph "${CLI_OPTS[@]}" osd pool create "$RBD_POOL" 8
 }
 
