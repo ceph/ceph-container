@@ -41,7 +41,7 @@ function test_demo_mon {
 
 function test_demo_osd {
   # shellcheck disable=SC2046
-  return $(wait_for_daemon "$DOCKER_COMMAND -s | grep -sq '1 osds: 1 up, 1 in'")
+  return $(wait_for_daemon "$DOCKER_COMMAND -s | grep -sq '1 osds: 1 up.*., 1 in.*.'")
 }
 
 function test_demo_rgw {
