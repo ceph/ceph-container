@@ -505,7 +505,8 @@ image: "${manifest_image_full_tag}"
 EOF
   # Add additional tags if they are specified
   if [ -n "${additional_tags}" ]; then
-    quoted_tags="$(printf '"%s"\n' "${additional_tags[@]}")"  # put quotes around each tag
+    # shellcheck disable=2086  # quoting additional_tags below quotes the entire string
+    quoted_tags="$(printf '"%s"\n' ${additional_tags})"  # put quotes around each tag
     # shellcheck disable=2116,2086  # disable errors for below line that don't apply to this case
     one_line="$(echo ${quoted_tags})"  # make one line, and remove leading/trailing space
     comma_delimited="${one_line// /, }"  # add comma-space between quoted tags
