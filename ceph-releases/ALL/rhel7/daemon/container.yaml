@@ -1,0 +1,17 @@
+compose:
+  packages:
+  - ceph-common
+  - ceph-mon
+  - ceph-osd
+  - ceph-mds
+  - rbd-mirror
+  - ceph-mgr
+  - ceph-radosgw
+  - libradosstriper1
+  - nfs-ganesha
+  - nfs-ganesha-ceph
+  - nfs-ganesha-rgw
+  - tcmu-runner
+  - ceph-iscsi-config
+  - ceph-iscsi-cli
+  pulp_repos: true
