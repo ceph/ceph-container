@@ -173,6 +173,10 @@ function start_mon {
   # start MON
   if [[ "$CEPH_DAEMON" == demo ]]; then
     /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}:6789"
+
+    if [ -n "$NEW_USER_KEYRING" ]; then
+      echo "$NEW_USER_KEYRING" | ceph "${CLI_OPTS[@]}" auth import -i -
+    fi
   else
     # enable cluster/audit/mon logs on the same stream
     # Mind the extra space after 'debug'

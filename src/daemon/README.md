@@ -94,6 +94,7 @@ List of available options:
 - `CEPH_CLUSTER_NETWORK`: CIDR of a secondary interface of the host running Docker. Used for the OSD replication traffic
 - `MON_IP`: IP address of the host running Docker
 - `NETWORK_AUTO_DETECT`: Whether and how to attempt IP and network autodetection. Meant to be used without `--net=host`.
+- `NEW_USER_KEYRING`: if specified, it will be imported to keyrings. Works in demo mode only.
 
   - 0 = Do not detect (default)
   - 1 = Detect IPv6, fallback to IPv4 (if no globally-routable IPv6 address detected)
