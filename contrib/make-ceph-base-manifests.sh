@@ -97,7 +97,7 @@ done"  # add 'done' to end of next_versions list so for loop will continue one p
     if ! full_tag_exists "${manifest_image_tag}" || [ -n "${FORCE_MANIFEST_CREATION:-}" ]; then
       # If the image doesn't exist in the repo, push it
       push_manifest_image "${manifest_image_tag}" \
-        "${x86_latest_server_image_tag}" "${arm_latest_server_image_tag}" "${additional_tags[*]}"
+        "${x86_latest_server_image_tag}" "${arm_latest_server_image_tag}" "${additional_tags[*]:-}"
     fi
     # Don't push the image if it already exists
 
