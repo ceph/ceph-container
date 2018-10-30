@@ -40,6 +40,11 @@ CEPH_DAEMON=$(to_lowercase "${CEPH_DAEMON}")
 
 create_mandatory_directories
 
+if [[ ! "x86_64 aarch64" =~ $CEPH_ARCH  ]] ; then
+    echo "$CEPH_DAEMON is not supported on $CEPH_ARCH" >&2
+    exit 1
+fi
+
 # If we are given a valid first argument, set the
 # CEPH_DAEMON variable from it
 case "$CEPH_DAEMON" in
