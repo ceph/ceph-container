@@ -118,6 +118,11 @@ def do_variable_replace(replace_root_dir):
     logging.info('    Replacing variables')
     for dirname, subdirs, files in os.walk(replace_root_dir, topdown=True):
         for f in files:
+            # do not process the tarball
+            # this prevents the following error:
+            # UnicodeDecodeError: 'utf-8' codec can't decode byte 0x8b in position 1: invalid start byte
+            if "Sree-" in f:
+                continue
             if re.match(VARIABLE_FILE_PATTERN, f):
                 logging.debug(PARENTHETICAL_LOGTEXT.format(
                     '[Skip __VARIABLE__ replace]', os.path.join(dirname, f)))

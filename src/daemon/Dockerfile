@@ -50,6 +50,10 @@ ADD ./confd/conf.d/* /etc/confd/conf.d/
 # Add bootstrap script, ceph defaults key/values for KV store
 ADD *.sh ceph.defaults check_zombie_mons.py ./osd_scenarios/* entrypoint.sh.in disabled_scenario /
 
+# Copye sree web interface for cn
+# We use COPY instead of ADD for tarball so that it does not get extracted automatically at build time
+COPY Sree-0.1.tar.gz /sree.tar.gz
+
 # Modify the entrypoint
 RUN bash "/generate_entrypoint.sh" && \
   rm -f /generate_entrypoint.sh && \
