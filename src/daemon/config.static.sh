@@ -96,10 +96,15 @@ ENDHERE
 
   if [ ! -e "$RBD_MIRROR_BOOTSTRAP_KEYRING" ]; then
     # Generate the RBD Mirror bootstrap key
-    ceph-authtool "$RBD_MIRROR_BOOTSTRAP_KEYRING" --create-keyring --gen-key -n client.bootstrap-rbd --cap mon 'allow profile bootstrap-rbd'
+    ceph-authtool "$RBD_MIRROR_BOOTSTRAP_KEYRING" --create-keyring --gen-key -n client.bootstrap-rbd-mirror --cap mon 'allow profile bootstrap-rbd-mirror'
   fi
-    # Apply proper permissions to the keys
-    chown "${CHOWN_OPT[@]}" ceph. "$MON_KEYRING" "$OSD_BOOTSTRAP_KEYRING" "$MDS_BOOTSTRAP_KEYRING" "$RGW_BOOTSTRAP_KEYRING" "$RBD_MIRROR_BOOTSTRAP_KEYRING"
+
+  if [ ! -e "$RBD_BOOTSTRAP_KEYRING" ]; then
+    # Generate the RBD Mirror bootstrap key
+    ceph-authtool "$RBD_BOOTSTRAP_KEYRING" --create-keyring --gen-key -n client.bootstrap-rbd --cap mon 'allow profile bootstrap-rbd'
+  fi
+  # Apply proper permissions to the keys
+  chown "${CHOWN_OPT[@]}" ceph. "$MON_KEYRING" "$OSD_BOOTSTRAP_KEYRING" "$MDS_BOOTSTRAP_KEYRING" "$RGW_BOOTSTRAP_KEYRING" "$RBD_MIRROR_BOOTSTRAP_KEYRING"
 
   if [ ! -e "$MONMAP" ]; then
     if [ -e /etc/ceph/monmap ]; then
