@@ -75,32 +75,8 @@ ENDHERE
     ceph-authtool "$MON_KEYRING" --create-keyring --gen-key -n mon. --cap mon 'allow *'
   fi
 
-  if [ ! -e "$OSD_BOOTSTRAP_KEYRING" ]; then
-    # Generate the OSD bootstrap key
-    ceph-authtool "$OSD_BOOTSTRAP_KEYRING" --create-keyring --gen-key -n client.bootstrap-osd --cap mon 'allow profile bootstrap-osd'
-  fi
-
-  if [ ! -e "$MDS_BOOTSTRAP_KEYRING" ]; then
-    # Generate the MDS bootstrap key
-    ceph-authtool "$MDS_BOOTSTRAP_KEYRING" --create-keyring --gen-key -n client.bootstrap-mds --cap mon 'allow profile bootstrap-mds'
-  fi
-
-  if [ ! -e "$RGW_BOOTSTRAP_KEYRING" ]; then
-    # Generate the RGW bootstrap key
-    ceph-authtool "$RGW_BOOTSTRAP_KEYRING" --create-keyring --gen-key -n client.bootstrap-rgw --cap mon 'allow profile bootstrap-rgw'
-  fi
-
-  if [ ! -e "$RBD_MIRROR_BOOTSTRAP_KEYRING" ]; then
-    # Generate the RBD Mirror bootstrap key
-    ceph-authtool "$RBD_MIRROR_BOOTSTRAP_KEYRING" --create-keyring --gen-key -n client.bootstrap-rbd-mirror --cap mon 'allow profile bootstrap-rbd-mirror'
-  fi
-
-  if [ ! -e "$RBD_BOOTSTRAP_KEYRING" ]; then
-    # Generate the RBD Mirror bootstrap key
-    ceph-authtool "$RBD_BOOTSTRAP_KEYRING" --create-keyring --gen-key -n client.bootstrap-rbd --cap mon 'allow profile bootstrap-rbd'
-  fi
   # Apply proper permissions to the keys
-  chown "${CHOWN_OPT[@]}" ceph. "$MON_KEYRING" "$OSD_BOOTSTRAP_KEYRING" "$MDS_BOOTSTRAP_KEYRING" "$RGW_BOOTSTRAP_KEYRING" "$RBD_MIRROR_BOOTSTRAP_KEYRING"
+  chown "${CHOWN_OPT[@]}" ceph. "$MON_KEYRING" "$ADMIN_KEYRING"
 
   if [ ! -e "$MONMAP" ]; then
     if [ -e /etc/ceph/monmap ]; then
