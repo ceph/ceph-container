@@ -21,7 +21,7 @@ function start_rbd_mirror {
     ceph_health client.bootstrap-rbd-mirror "$RBD_MIRROR_BOOTSTRAP_KEYRING"
 
     # Generate the rbd mirror key
-    ceph "${CLI_OPTS[@]}" --name client.bootstrap-rbd-mirror --keyring "$RBD_MIRROR_BOOTSTRAP_KEYRING" auth get-or-create client.rbd-mirror."${RBD_MIRROR_NAME}" mon 'profile rbd-mirror' -o "$RBD_MIRROR_KEYRING"
+    ceph "${CLI_OPTS[@]}" --name client.bootstrap-rbd-mirror --keyring "$RBD_MIRROR_BOOTSTRAP_KEYRING" auth get-or-create client.rbd-mirror."${RBD_MIRROR_NAME}" mon 'profile rbd-mirror' osd 'profile rbd' -o "$RBD_MIRROR_KEYRING"
     chown "${CHOWN_OPT[@]}" ceph. "$RBD_MIRROR_KEYRING"
     chmod 0600 "$RBD_MIRROR_KEYRING"
   fi
