@@ -381,7 +381,12 @@ function build_bootstrap {
         bootstrap_rbd_mirror
         ;;
       rest_api)
-        bootstrap_rest_api
+        if [[ "$CEPH_VERSION" == "jewel" ]] || [[ "$CEPH_VERSION" == "kraken" ]] || [[ "$CEPH_VERSION" == "luminous" ]] || [[ "$CEPH_VERSION" == "mimic" ]]; then
+          bootstrap_rest_api
+        else
+          log "ERROR: ceph-rest-api is only available before Nautilus"
+          exit 1
+        fi
         ;;
       *)
         log "ERROR: unknown scenario!"

@@ -118,8 +118,13 @@ case "$CEPH_DAEMON" in
     ;;
   restapi)
     # TAG: restapi
-    source start_restapi.sh
-    start_restapi
+    if [[ "$CEPH_VERSION" == "jewel" ]] || [[ "$CEPH_VERSION" == "kraken" ]] || [[ "$CEPH_VERSION" == "luminous" ]] || [[ "$CEPH_VERSION" == "mimic" ]]; then
+      source start_restapi.sh
+      start_restapi
+    else
+      log "ERROR: ceph-rest-api is only available before Nautilus"
+      exit 1
+    fi
     ;;
   rbd_mirror)
     # TAG: rbd_mirror
