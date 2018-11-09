@@ -59,9 +59,7 @@ ENDHERE
     fsid=$(grep "fsid" /etc/ceph/"${CLUSTER}".conf | awk '{print $NF}')
   fi
 
-  if [[ "$CEPH_VERSION" == "luminous" ]] || [[ "$CEPH_VERSION" == "mimic" ]]; then
-    CLI+=("--set-uid=0")
-  fi
+  CLI+=("--set-uid=0")
 
   if [ ! -e "$ADMIN_KEYRING" ]; then
     if [ -z "$ADMIN_SECRET" ]; then
