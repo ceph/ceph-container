@@ -137,6 +137,7 @@ Options for OSDs (TODO: consolidate these options between the types):
 - `JOURNAL` - if provided, the new OSD will be bootstrapped to use the specified journal file (if you do not wish to use the default). This is currently only supported by the `directory` OSD type
 - `OSD_DEVICE` - mandatory for `activate` and `disk` OSD types; this specifies which block device to use as the OSD
 - `OSD_JOURNAL` - optional override of the OSD journal file. this only applies to the `activate` and `disk` OSD types
+- `OSD_FORCE_EXT4` - in case the osd data on ext4 is not automatically recognized (i.e. hidden by overlayfs) you can force them by settings this to `yes`.
 
 ### Without OSD_TYPE
 

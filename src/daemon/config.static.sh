@@ -33,7 +33,7 @@ osd pool default size = 1
 ENDHERE
 
       # For ext4
-      if [ "$(findmnt -n -o FSTYPE -T /var/lib/ceph)" = "ext4" ]; then
+      if [ "$(findmnt -n -o FSTYPE -T /var/lib/ceph)" = "ext4" -o "$OSD_FORCE_EXT4" == "yes" ]; then
       cat <<ENDHERE >> /etc/ceph/"${CLUSTER}".conf
 osd max object name len = 256
 osd max object namespace len = 64
