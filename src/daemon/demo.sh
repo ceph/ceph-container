@@ -58,6 +58,19 @@ if [[ "$RGW_FRONTEND_TYPE" == "beast" ]]; then
 fi
 
 
+function fetch_initial_keys {
+  # This is only valid starting from nautilus
+  if [[ "$CEPH_VERSION" == "luminous" || "$CEPH_VERSION" == "mimic" ]]; then
+      return
+  fi
+
+  for keyring in /var/lib/ceph/mon/*/keyring; do
+    for key in $(ceph -n mon. -k "$keyring"  auth list |& grep ^client); do
+      ceph -n mon. -k "$keyring" auth get "$key" -o "$key"
+    done
+  done
+}
+
 #######
 # MON #
 #######
@@ -67,6 +80,7 @@ function bootstrap_mon {
   start_mon
 
   chown --verbose ceph. /etc/ceph/*
+  fetch_initial_keys
 }
 
 
