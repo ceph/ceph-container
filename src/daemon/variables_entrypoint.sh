@@ -114,3 +114,4 @@ OSD_PATH_BASE=/var/lib/ceph/osd/${CLUSTER}
 MONMAP=/etc/ceph/monmap-${CLUSTER}
 MGR_KEYRING=/var/lib/ceph/mgr/${CLUSTER}-${MGR_NAME}/keyring
 RBD_MIRROR_KEYRING=/etc/ceph/${CLUSTER}.client.rbd-mirror.${HOSTNAME}.keyring
+STAYALIVE=
