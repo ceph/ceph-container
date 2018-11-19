@@ -55,7 +55,7 @@ for option in $(comma_to_space "${DEBUG}"); do
       ;;
     stayalive)
       log "STAYALIVE: container will not die if a command fails."
-      set_trap_err
+      STAYALIVE=True
       ;;
     *)
       log "$option is not a valid debug option."

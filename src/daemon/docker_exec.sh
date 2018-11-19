@@ -1,41 +1,34 @@
 #!/bin/bash
 
-function set_trap_err {
-  # Let's propagate traps to all functions
-  set -E
+function do_stayalive {
+  if [ -z "$STAYALIVE" ]; then
+    return
+  fi
 
-  # Let's call trap_error if we catch an ERR
-  trap 'trap_error' ERR
-}
-
-NOTRAP=
-function trap_error {
   set +x
   declare -F err_cleanup && err_cleanup
-  if [ -z "$NOTRAP" ]; then
-    echo "An issue occured and you asked me to stay alive."
-    echo "You can connect to me with: sudo docker exec -i -t $HOSTNAME /bin/bash"
-    echo "The current environment variables will be reloaded by this bash to be in a similar context."
-    echo "When debugging is over stop me with: pkill sleep"
-    echo "I'll sleep for 365 days waiting for you darling, bye bye"
 
-    # exporting current environement so the next bash will be in the same setup
-    env | while IFS= read -r value; do
-      echo "export $value" >> /root/.bashrc
-    done
+  CONTAINER_ID=$(sed -n 's|.*/[docker|libpod]*-\(.*\).scope$|\1|p' /proc/self/cgroup |uniq)
 
-    sleep 365d
-  else
-    # If NOTRAP is defined, we need to return true to avoid triggering an ERR
-    true
-  fi
+  echo "An issue occured and you asked me to stay alive."
+  echo "You can connect to me with: sudo docker exec -i -t $CONTAINER_ID /bin/bash"
+  echo "The current environment variables will be reloaded by this bash to be in a similar context."
+  echo "When debugging is over stop me with: pkill sleep"
+  echo "I'll sleep endlessly waiting for you darling, bye bye"
+
+  # exporting current environement so the next bash will be in the same setup
+  env | while IFS= read -r value; do
+    echo "export $value" >> /root/.bashrc
+  done
+
+  sleep infinity
 }
 
 child_for_exec=1
 
 function teardown {
   # Disabling the traps to avoid a cascading
-  trap - SIGINT SIGILL SIGABRT SIGFPE SIGSEGV SIGTERM SIGBUS SIGCHLD SIGKILL
+  trap - SIGINT SIGILL SIGABRT SIGFPE SIGSEGV SIGTERM SIGBUS SIGCHLD SIGKILL ERR
 
   # This function is called when we got a signal reporting something died
   # It will check the child_for_exec process exited
@@ -43,11 +36,6 @@ function teardown {
   local signal_name=$1
   local exit_code=$2
   echo "teardown: managing teardown after $signal_name"
-
-  # Disabling the ERR trap before killing the process
-  # That's an expected failure so don't handle it
-  # Doing "trap ERR" or "trap - ERR" didn't worked :/
-  NOTRAP="yes"
 
   # If we receive SIGTERM, it means the process is supposed to still be alive
   # So let's call sigterm_cleanup_pre if any defined
@@ -84,6 +72,8 @@ function teardown {
     # Execute some user defined code if the exec'd process fails
     declare -F trap_exec_failure && trap_exec_failure
   fi
+
+  do_stayalive
 
   echo "teardown: Bye Bye, container will die with return code $exit_code"
   exit $exit_code
@@ -125,6 +115,10 @@ function _kill {
   teardown "SIGKILL" -1
 }
 
+function _err {
+  teardown "ERR" -1
+}
+
 function exec {
   # This function overrides the built-in exec() call
   # It starts the process in background to catch ERR but
@@ -138,6 +132,7 @@ function exec {
   trap _bus SIGBUS
   trap _chld SIGCHLD
   trap _kill SIGKILL
+  trap _err ERR
 
   # Running the program in background and save the pid in child_for_exec
   "$@" &
