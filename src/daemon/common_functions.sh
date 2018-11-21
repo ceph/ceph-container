@@ -284,6 +284,7 @@ function apply_ceph_ownership_to_disks {
             "$part_code" == "30cd0809-c2b2-499c-8879-2d6b78529876" ||
             "$part_code" == "89c57f98-2fe5-4dc0-89c1-f3ad0ceff2be" ||
             "$part_code" == "cafecafe-9b03-4f30-b4c6-b4b80ceff106" ]]; then
+        wait_for_file "$partition"
         chown "${CHOWN_OPT[@]}" ceph. "$partition"
       fi
     done
