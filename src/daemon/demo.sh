@@ -220,9 +220,9 @@ function bootstrap_demo_user {
 
     if [ -n "$CEPH_DEMO_BUCKET" ]; then
       log "Creating bucket..."
-      # waiting for rgw to be ready, 5 seconds is usually enough
-      sleep 5
-      s3cmd mb s3://"$CEPH_DEMO_BUCKET"
+
+      # Trying to create a s3cmd within 5 seconds
+      timeout 5 bash -c "until s3cmd mb s3://$CEPH_DEMO_BUCKET; do sleep .1; done"
     fi
   fi
 }
