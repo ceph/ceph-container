@@ -20,7 +20,7 @@ before_install:
   - sudo apt-get install -y --force-yes xfsprogs
   - sudo ./travis-builds/purge_cluster.sh
   - export RELEASE="travis-build-$TRAVIS_BRANCH-$TRAVIS_COMMIT"
-  - sudo make RELEASE="$RELEASE" FLAVORS="mimic,centos,7" build
+  - sudo make RELEASE="$RELEASE" FLAVORS="master,centos,7" build
 
 install:
   - sudo ./travis-builds/prepare_osd_fs.sh
