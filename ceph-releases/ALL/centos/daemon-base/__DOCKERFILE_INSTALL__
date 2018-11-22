@@ -1,3 +1,4 @@
+yum-config-manager --enable cr && \
 yum install -y epel-release && \
 yum install -y jq && \
 bash -c ' \
