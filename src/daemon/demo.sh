@@ -63,7 +63,7 @@ fi
 #######
 function bootstrap_mon {
   # shellcheck disable=SC1091
-  source start_mon.sh
+  source /opt/ceph-container/bin/start_mon.sh
   start_mon
 
   chown --verbose ceph. /etc/ceph/*
@@ -195,22 +195,26 @@ ENDHERE
 }
 
 function bootstrap_demo_user {
-  if [ -f /ceph-demo-user ]; then
+  CEPH_DEMO_USER="/opt/ceph-container/tmp/ceph-demo-user"
+  if [ -f "$CEPH_DEMO_USER" ]; then
     log "Demo user already exists with credentials:"
-    cat /ceph-demo-user
+    cat "$CEPH_DEMO_USER"
   else
     log "Setting up a demo user..."
     if [ -n "$CEPH_DEMO_UID" ] && [ -n "$CEPH_DEMO_ACCESS_KEY" ] && [ -n "$CEPH_DEMO_SECRET_KEY" ]; then
       radosgw-admin "${CLI_OPTS[@]}" user create --uid="$CEPH_DEMO_UID" --display-name="Ceph demo user" --access-key="$CEPH_DEMO_ACCESS_KEY" --secret-key="$CEPH_DEMO_SECRET_KEY"
     else
-      radosgw-admin "${CLI_OPTS[@]}" user create --uid="$CEPH_DEMO_UID" --display-name="Ceph demo user" > "${CEPH_DEMO_UID}_user_details"
-      CEPH_DEMO_ACCESS_KEY=$(grep -Po '(?<="access_key": ")[^"]*' "${CEPH_DEMO_UID}_user_details")
-      CEPH_DEMO_SECRET_KEY=$(grep -Po '(?<="secret_key": ")[^"]*' "${CEPH_DEMO_UID}_user_details")
+      radosgw-admin "${CLI_OPTS[@]}" user create --uid="$CEPH_DEMO_UID" --display-name="Ceph demo user" > "/opt/ceph-container/tmp/${CEPH_DEMO_UID}_user_details"
+      # Until mimic is supported let's link the file to its original place not to break cn.
+      # When mimic will be EOL, cn will only have containers having the fil in the /opt directory and so this symlink could be removed
+      ln -sf /opt/ceph-container/tmp/"${CEPH_DEMO_UID}_user_details" /
+      CEPH_DEMO_ACCESS_KEY=$(grep -Po '(?<="access_key": ")[^"]*' /opt/ceph-container/tmp/"${CEPH_DEMO_UID}_user_details")
+      CEPH_DEMO_SECRET_KEY=$(grep -Po '(?<="secret_key": ")[^"]*' /opt/ceph-container/tmp/"${CEPH_DEMO_UID}_user_details")
     fi
     sed -i s/AWS_ACCESS_KEY_PLACEHOLDER/"$CEPH_DEMO_ACCESS_KEY"/ /root/.s3cfg
     sed -i s/AWS_SECRET_KEY_PLACEHOLDER/"$CEPH_DEMO_SECRET_KEY"/ /root/.s3cfg
-    echo "Access key: $CEPH_DEMO_ACCESS_KEY" > /ceph-demo-user
-    echo "Secret key: $CEPH_DEMO_SECRET_KEY" >> /ceph-demo-user
+    echo "Access key: $CEPH_DEMO_ACCESS_KEY" > "$CEPH_DEMO_USER"
+    echo "Secret key: $CEPH_DEMO_SECRET_KEY" >> "$CEPH_DEMO_USER"
 
     radosgw-admin "${CLI_OPTS[@]}" caps add --caps="buckets=*;users=*;usage=*;metadata=*" --uid="$CEPH_DEMO_UID"
 
@@ -302,14 +306,15 @@ function bootstrap_mgr {
 # SREE #
 ########
 function bootstrap_sree {
-  if [ ! -d sree ]; then
-    mkdir sree
-    tar xzvf sree.tar.gz -C sree --strip-components 1
+  SREE_DIR="/opt/ceph-container/sree"
+  if [ ! -d "$SREE_DIR" ]; then
+    mkdir -p "$SREE_DIR"
+    tar xzvf /opt/ceph-container/tmp/sree.tar.gz -C "$SREE_DIR" --strip-components 1
 
-    ACCESS_KEY=$(awk '/Access key/ {print $3}' /ceph-demo-user)
-    SECRET_KEY=$(awk '/Secret key/ {print $3}' /ceph-demo-user)
+    ACCESS_KEY=$(awk '/Access key/ {print $3}' /opt/ceph-container/tmp/ceph-demo-user)
+    SECRET_KEY=$(awk '/Secret key/ {print $3}' /opt/ceph-container/tmp/ceph-demo-user)
 
-    pushd sree
+    pushd "$SREE_DIR"
     sed -i "s|ENDPOINT|http://${EXPOSED_IP}:${RGW_CIVETWEB_PORT}|" static/js/base.js
     sed -i "s/ACCESS_KEY/$ACCESS_KEY/" static/js/base.js
     sed -i "s/SECRET_KEY/$SECRET_KEY/" static/js/base.js
@@ -320,7 +325,7 @@ function bootstrap_sree {
   fi
 
   # start Sree
-  pushd sree
+  pushd "$SREE_DIR"
   python app.py &
   popd
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-source disk_list.sh
+source /opt/ceph-container/bin/disk_list.sh
 
 # log arguments with timestamp
 function log {
@@ -143,11 +143,11 @@ function osd_trying_to_determine_scenario {
   : "${OSD_DEVICE:=none}"
   if [[ ${OSD_DEVICE} == "none" ]]; then
     log "Bootstrapped OSD(s) found; using OSD directory"
-    source osd_directory.sh
+    source /opt/ceph-container/bin/osd_directory.sh
     osd_directory
   elif parted --script "${OSD_DEVICE}" print | grep -sqE '^ 1.*ceph data'; then
     log "Bootstrapped OSD found; activating ${OSD_DEVICE}"
-    source osd_disk_activate.sh
+    source /opt/ceph-container/bin/osd_disk_activate.sh
     osd_activate
   else
     log "Device detected, assuming ceph-disk scenario is desired"

@@ -1,18 +1,18 @@
 #!/bin/bash
 set -e
 
-source variables_entrypoint.sh
+source /opt/ceph-container/bin/variables_entrypoint.sh
 
 # FUNCTIONS
 function moving_on {
   echo "INFO: moving on, using default entrypoint.sh.in file as is."
-  mv /entrypoint.sh.in /entrypoint.sh
+  mv /opt/ceph-container/bin/entrypoint.sh.in /opt/ceph-container/bin/entrypoint.sh
   exit 0
 }
 
 function check_scenario_file {
-  if [ -s /disabled_scenario ]; then
-    source /disabled_scenario
+  if [ -s /opt/ceph-container/bin/disabled_scenario ]; then
+    source /opt/ceph-container/bin/disabled_scenario
     if [[ -z "$EXCLUDED_TAGS" ]]; then
       echo "INFO: the variable EXCLUDED_TAGS is missing from the disabled_scenario file."
       moving_on
@@ -41,9 +41,9 @@ function build_sed_regex {
 check_scenario_file
 build_sed_regex
 
-sed -i "s/ALL_SCENARIOS=.*/ALL_SCENARIOS='${ALL_SCENARIOS}'/" variables_entrypoint.sh
-sed "${SED_LINE}" /entrypoint.sh.in > /entrypoint.sh
+sed -i "s/ALL_SCENARIOS=.*/ALL_SCENARIOS='${ALL_SCENARIOS}'/" /opt/ceph-container/bin/variables_entrypoint.sh
+sed "${SED_LINE}" /opt/ceph-container/bin/entrypoint.sh.in > /opt/ceph-container/bin/entrypoint.sh
 echo "INFO: entrypoint.sh successfully generated."
 echo "INFO: the following scenario(s) was/were disabled: $EXCLUDED_TAGS."
-chmod +x /entrypoint.sh
-rm -f /entrypoint.sh.in /disabled_scenario
+chmod +x /opt/ceph-container/bin/entrypoint.sh
+rm -f /opt/ceph-container/bin/entrypoint.sh.in /opt/ceph-container/bin/disabled_scenario
