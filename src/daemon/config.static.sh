@@ -76,7 +76,7 @@ ENDHERE
   fi
 
   # Apply proper permissions to the keys
-  chown "${CHOWN_OPT[@]}" ceph. "$MON_KEYRING"
+  chown "${CHOWN_OPT[@]}" ceph. "$MON_KEYRING" "$ADMIN_KEYRING"
 
   if [ ! -e "$MONMAP" ]; then
     if [ -e /etc/ceph/monmap ]; then
