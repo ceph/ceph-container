@@ -5,10 +5,10 @@
 set -me
 export LC_ALL=C
 
-source variables_entrypoint.sh
-source common_functions.sh
-source docker_exec.sh
-source debug.sh
+source /opt/ceph-container/bin/variables_entrypoint.sh
+source /opt/ceph-container/bin/common_functions.sh
+source /opt/ceph-container/bin/docker_exec.sh
+source /opt/ceph-container/bin/debug.sh
 
 ###########################
 # CONFIGURATION GENERATOR #
@@ -19,14 +19,14 @@ source debug.sh
 case "$KV_TYPE" in
   etcd)
     # TAG: kv_type_etcd
-    source /config.kv.etcd.sh
+    source /opt/ceph-container/bin/config.kv.etcd.sh
     ;;
   k8s|kubernetes)
     # TAG: kv_type_k8s
-    source /config.k8s.sh
+    source /opt/ceph-container/bin/config.k8s.sh
     ;;
   *)
-    source /config.static.sh
+    source /opt/ceph-container/bin/config.static.sh
     ;;
 esac
 
@@ -45,52 +45,52 @@ create_mandatory_directories
 case "$CEPH_DAEMON" in
   populate_kvstore)
     # TAG: populate_kvstore
-    source populate_kv.sh
+    source /opt/ceph-container/bin/populate_kv.sh
     populate_kv
     ;;
   mon)
     # TAG: mon
-    source start_mon.sh
+    source /opt/ceph-container/bin/start_mon.sh
     start_mon
     ;;
   osd)
     # TAG: osd
-    source start_osd.sh
+    source /opt/ceph-container/bin/start_osd.sh
     start_osd
     ;;
   osd_directory)
     # TAG: osd_directory
-    source start_osd.sh
+    source /opt/ceph-container/bin/start_osd.sh
     OSD_TYPE="directory"
     start_osd
     ;;
   osd_directory_single)
     # TAG: osd_directory_single
-    source start_osd.sh
+    source /opt/ceph-container/bin/start_osd.sh
     OSD_TYPE="directory_single"
     start_osd
     ;;
   osd_ceph_disk)
     # TAG: osd_ceph_disk
-    source start_osd.sh
+    source /opt/ceph-container/bin/start_osd.sh
     OSD_TYPE="disk"
     start_osd
     ;;
   osd_ceph_disk_prepare)
     # TAG: osd_ceph_disk_prepare
-    source start_osd.sh
+    source /opt/ceph-container/bin/start_osd.sh
     OSD_TYPE="prepare"
     start_osd
     ;;
   osd_ceph_disk_activate)
     # TAG: osd_ceph_disk_activate
-    source start_osd.sh
+    source /opt/ceph-container/bin/start_osd.sh
     OSD_TYPE="activate"
     start_osd
     ;;
   osd_ceph_activate_journal)
     # TAG: osd_ceph_activate_journal
-    source start_osd.sh
+    source /opt/ceph-container/bin/start_osd.sh
     OSD_TYPE="activate_journal"
     start_osd
     ;;
@@ -98,58 +98,58 @@ case "$CEPH_DAEMON" in
     ami_privileged
     # shellcheck disable=SC1091
     # TAG: osd_ceph_volume_activate
-    source osd_volume_activate.sh
+    source /opt/ceph-container/bin/osd_volume_activate.sh
     osd_volume_activate
     ;;
   mds)
     # TAG: mds
-    source start_mds.sh
+    source /opt/ceph-container/bin/start_mds.sh
     start_mds
     ;;
   rgw)
     # TAG: rgw
-    source start_rgw.sh
+    source /opt/ceph-container/bin/start_rgw.sh
     start_rgw
     ;;
   rgw_user)
     # TAG: rgw_user
-    source start_rgw.sh
+    source /opt/ceph-container/bin/start_rgw.sh
     create_rgw_user
     ;;
   restapi)
     # TAG: restapi
-    source start_restapi.sh
+    source /opt/ceph-container/bin/start_restapi.sh
     start_restapi
     ;;
   rbd_mirror)
     # TAG: rbd_mirror
-    source start_rbd_mirror.sh
+    source /opt/ceph-container/bin/start_rbd_mirror.sh
     start_rbd_mirror
     ;;
   nfs)
     # TAG: nfs
-    source start_nfs.sh
+    source /opt/ceph-container/bin/start_nfs.sh
     start_nfs
     ;;
   zap_device)
     # TAG: zap_device
-    source zap_device.sh
+    source /opt/ceph-container/bin/zap_device.sh
     zap_device
     ;;
   mon_health)
     # TAG: mon_health
-    source watch_mon_health.sh
+    source /opt/ceph-container/bin/watch_mon_health.sh
     watch_mon_health
     ;;
   mgr)
     # TAG: mgr
-    source start_mgr.sh
+    source /opt/ceph-container/bin/start_mgr.sh
     start_mgr
     ;;
   disk_introspection)
     # TAG: disk_introspection
     if [[ "$KV_TYPE" =~ k8s|kubernetes ]]; then
-      source disk_introspection.sh
+      source /opt/ceph-container/bin/disk_introspection.sh
     else
       log "You can not use the disk introspection method outside a Kubernetes environment"
       log "Make sure KV_TYPE equals either k8s or kubernetes"
@@ -157,17 +157,17 @@ case "$CEPH_DAEMON" in
     ;;
   demo)
     # TAG: demo
-    source demo.sh
+    source /opt/ceph-container/bin/demo.sh
     ;;
   disk_list)
     # TAG: disk_list
-    source disk_list.sh
+    source /opt/ceph-container/bin/disk_list.sh
     start_disk_list
     ;;
   tcmu_runner)
     # TAG: tcmu_runner
     if is_redhat; then
-      source start_tcmu_runner.sh
+      source /opt/ceph-container/bin/start_tcmu_runner.sh
       start_tcmu_runner
     else
       log "ERROR: tcmu_runner scenario is only available on Red Hat systems."
@@ -176,7 +176,7 @@ case "$CEPH_DAEMON" in
   rbd_target_api)
     # TAG: rbd_target_api
     if is_redhat; then
-      source start_rbd_target_api.sh
+      source /opt/ceph-container/bin/start_rbd_target_api.sh
       start_rbd_target_api
     else
       log "ERROR: rbd_target_api scenario is only available on Red Hat systems."
@@ -185,7 +185,7 @@ case "$CEPH_DAEMON" in
   rbd_target_gw)
     # TAG: rbd_target_gw
     if is_redhat; then
-      source start_rbd_target_gw.sh
+      source /opt/ceph-container/bin/start_rbd_target_gw.sh
       start_rbd_target_gw
     else
       log "ERROR: rbd_target_gw scenario is only available on Red Hat systems."

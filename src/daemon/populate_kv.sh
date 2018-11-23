@@ -23,7 +23,7 @@ function populate_kv {
         local defaults_path="/etc/ceph/ceph.defaults"
       else
         # else use defaults
-        defaults_path="/ceph.defaults"
+        defaults_path="/opt/ceph-container/etc/ceph.defaults"
       fi
       # read defaults file, grab line with key<space>value without comment #
       grep '^.* .*' "$defaults_path" | grep -v '#' | while read -r line; do

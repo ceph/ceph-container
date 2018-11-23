@@ -48,17 +48,19 @@ ADD ./confd/templates/* /etc/confd/templates/
 ADD ./confd/conf.d/* /etc/confd/conf.d/
 
 # Add bootstrap script, ceph defaults key/values for KV store
-ADD *.sh ceph.defaults check_zombie_mons.py ./osd_scenarios/* entrypoint.sh.in disabled_scenario /
+ADD *.sh check_zombie_mons.py ./osd_scenarios/* entrypoint.sh.in disabled_scenario /opt/ceph-container/bin/
+ADD ceph.defaults /opt/ceph-container/etc/
+# ADD *.sh ceph.defaults check_zombie_mons.py ./osd_scenarios/* entrypoint.sh.in disabled_scenario /
 
 # Copye sree web interface for cn
 # We use COPY instead of ADD for tarball so that it does not get extracted automatically at build time
-COPY Sree-0.1.tar.gz /sree.tar.gz
+COPY Sree-0.1.tar.gz /opt/ceph-container/tmp/sree.tar.gz
 
 # Modify the entrypoint
-RUN bash "/generate_entrypoint.sh" && \
-  rm -f /generate_entrypoint.sh && \
-  bash -n /*.sh
+RUN bash "/opt/ceph-container/bin/generate_entrypoint.sh" && \
+  rm -f /opt/ceph-container/bin/generate_entrypoint.sh && \
+  bash -n /opt/ceph-container/bin/*.sh
 
 # Execute the entrypoint
 WORKDIR /
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/opt/ceph-container/bin/entrypoint.sh"]

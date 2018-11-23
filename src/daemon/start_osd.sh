@@ -16,33 +16,33 @@ function start_osd {
 
   case "$OSD_TYPE" in
     directory)
-      source osd_directory.sh
-      source osd_common.sh
+      source /opt/ceph-container/bin/osd_directory.sh
+      source /opt/ceph-container/bin/osd_common.sh
       osd_directory
       ;;
     directory_single)
-      source osd_directory_single.sh
+      source /opt/ceph-container/bin/osd_directory_single.sh
       osd_directory_single
       ;;
     disk)
       osd_disk
       ;;
     prepare)
-      source osd_disk_prepare.sh
+      source /opt/ceph-container/bin/osd_disk_prepare.sh
       osd_disk_prepare
       ;;
     activate)
-      source osd_disk_activate.sh
+      source /opt/ceph-container/bin/osd_disk_activate.sh
       osd_activate
       ;;
     devices)
-      source osd_disks.sh
-      source osd_common.sh
+      source /opt/ceph-container/bin/osd_disks.sh
+      source /opt/ceph-container/bin/osd_common.sh
       osd_disks
       ;;
     activate_journal)
-      source osd_activate_journal.sh
-      source osd_common.sh
+      source /opt/ceph-container/bin/osd_activate_journal.sh
+      source /opt/ceph-container/bin/osd_common.sh
       osd_activate_journal
       ;;
     *)
@@ -52,8 +52,8 @@ function start_osd {
 }
 
 function osd_disk {
-  source osd_disk_prepare.sh
-  source osd_disk_activate.sh
+  source /opt/ceph-container/bin/osd_disk_prepare.sh
+  source /opt/ceph-container/bin/osd_disk_activate.sh
   osd_disk_prepare
   osd_activate
 }
