@@ -20,7 +20,6 @@
 FLAVORS ?= \
 	luminous,opensuse,42.3 \
 	luminous,centos,7 \
-	luminous,debian,9 \
 	mimic,centos,7 \
 	master,centos,7
 
