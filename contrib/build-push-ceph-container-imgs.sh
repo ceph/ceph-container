@@ -17,6 +17,7 @@ fi
 
 CEPH_RELEASES_BIS=(luminous) # list of releases that need a "bis" image for ceph-ansible
 HOST_ARCH=$(uname -m)
+BUILD_ARM= # Set this variable to anything if you want to build the ARM images too
 
 
 #############
@@ -182,6 +183,10 @@ function push_ceph_imgs_latests {
 
 declare -F wait_for_arm_images ||
 function wait_for_arm_images {
+  if [ -z "$BUILD_ARM" ]; then
+    echo "ARM build is disabled, don't wait for arm images"
+    return
+  fi
   echo "Waiting for ARM64 images to be ready"
   set -e
   until docker pull ceph/daemon:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-7-aarch64; do
@@ -198,8 +203,16 @@ function create_registry_manifest {
   # IIRC docker manisfest will fail if the image does not exist
   for image in daemon-base daemon; do
     for ceph_release in luminous mimic; do
-      docker manifest create ceph/"$image":"$RELEASE"-"$ceph_release"-centos-7 ceph/"$image":"$RELEASE"-"$ceph_release"-centos-7-x86_64 ceph/"$image":"$RELEASE"-"$ceph_release"-centos-7-aarch64
-      docker manifest push ceph/"$image":"$RELEASE"-"$ceph_release"-centos-7
+      TARGET_RELEASE="ceph/${image}:${RELEASE}-${ceph_release}-centos-7"
+      DOCKER_IMAGES="$TARGET_RELEASE ${TARGET_RELEASE}-x86_64"
+
+      # Let's add ARM images if being built
+      if [ -n "$BUILD_ARM" ]; then
+        DOCKER_IMAGES="$DOCKER_IMAGES ${TARGET_RELEASE}-aarch64"
+      fi
+
+      docker manifest create "$DOCKER_IMAGES"
+      docker manifest push "$TARGET_RELEASE"
     done
   done
 }
