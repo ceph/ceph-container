@@ -211,7 +211,8 @@ function create_registry_manifest {
         DOCKER_IMAGES="$DOCKER_IMAGES ${TARGET_RELEASE}-aarch64"
       fi
 
-      docker manifest create "$DOCKER_IMAGES"
+      #shellcheck disable=SC2086
+      docker manifest create $DOCKER_IMAGES
       docker manifest push "$TARGET_RELEASE"
     done
   done
