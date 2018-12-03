@@ -60,6 +60,6 @@ function osd_disks {
 
   log "SUCCESS"
   # Actually, starting them as per forego configuration
-  source osd_common.sh
+  source /opt/ceph-container/bin/osd_common.sh
   start_forego
 }
