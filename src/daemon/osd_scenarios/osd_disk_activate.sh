@@ -1,7 +1,7 @@
 #!/bin/bash
 # shellcheck disable=SC2034
 set -e
-source disk_list.sh
+source /opt/ceph-container/bin/disk_list.sh
 
 function osd_activate {
   if [[ -z "${OSD_DEVICE}" ]] || [[ ! -b "${OSD_DEVICE}" ]]; then
