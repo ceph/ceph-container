@@ -553,12 +553,12 @@ function do_clean {
 function intersect_lists () {
   local list_a="${1}" list_b="${2}"
   # Turn lists into newline-delimited lists, and sort them by version
-  local sorted_a ; sorted_a="$(echo "${list_a// /$'\n'}" | sort --version-sort)"
-  local sorted_b ; sorted_b="$(echo "${list_b// /$'\n'}" | sort --version-sort)"
+  local sorted_a ; sorted_a="$(echo "${list_a// /$'\n'}" | sort)"  # comm needs lexicographic sort
+  local sorted_b ; sorted_b="$(echo "${list_b// /$'\n'}" | sort)"
   # Use sorted_a and _b as inputs to comm, which effectively returns the intersection of the lists
   intersected="$(comm -12 <(echo "${sorted_a}") <(echo "${sorted_b}"))"
   intersected="${intersected/#$'\n'}"  # remove leading newline
-  echo "${intersected%$'\n'}"  # return w/ trailing newline removed
+  echo "${intersected%$'\n'}" | sort --version-sort # return sorted w/ trailing newline removed
 }
 
 function install_docker {
