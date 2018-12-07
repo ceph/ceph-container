@@ -76,6 +76,9 @@ function teardown {
   do_stayalive
 
   echo "teardown: Bye Bye, container will die with return code $exit_code"
+  if [[ $exit_code -ne "0" ]]; then
+    echo "teardown: if you don't want me to die and have access to a shell to debug this situation, next time run me with '-e DEBUG=stayalive'"
+  fi
   exit $exit_code
 }
 
