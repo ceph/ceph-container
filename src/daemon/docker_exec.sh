@@ -111,10 +111,6 @@ function _chld {
   teardown "SIGCHLD" -1
 }
 
-function _kill {
-  teardown "SIGKILL" -1
-}
-
 function _err {
   teardown "ERR" -1
 }
@@ -131,7 +127,6 @@ function exec {
   trap _term SIGTERM
   trap _bus SIGBUS
   trap _chld SIGCHLD
-  trap _kill SIGKILL
   trap _err ERR
 
   # Running the program in background and save the pid in child_for_exec
