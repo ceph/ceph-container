@@ -101,9 +101,9 @@ List of available options:
   - 4 = Detect IPv4 only
   - 6 = Detect IPv6 only
 
-## Deploy a Manager daemon  
+## Deploy a Manager daemon
 Since luminous, a manager daemon is mandatory, see [docs](http://docs.ceph.com/docs/master/mgr/)
-  
+
 Without KV store, run:
 ```
 docker run -d --net=host \
@@ -410,8 +410,6 @@ List of available options:
 
 - `RGW_CIVETWEB_PORT` is the port to which civetweb is listening on (DEFAULT: 8080)
 - `RGW_NAME`: default to hostname
-- `RGW_ZONEGROUP`: zonegroup to use (DEFAULT: empty)
-- `RGW_ZONE`: zone to use (DEFAULT: empty)
 
 Administration via [radosgw-admin](http://docs.ceph.com/docs/infernalis/man/8/radosgw-admin/) from the Docker host if the `RGW_NAME` variable hasn't been supplied:
 
