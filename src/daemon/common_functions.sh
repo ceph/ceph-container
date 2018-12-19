@@ -513,3 +513,28 @@ function ami_privileged {
   # lsblk is not able to get device mappers path and is complaining.
   # That's why stderr is suppressed in /dev/null
 }
+
+# Detect how much ram is available
+function get_available_ram {
+  limit_in_bytes="/sys/fs/cgroup/memory/memory.limit_in_bytes"
+  memory_limit=$(cat $limit_in_bytes)
+  # 8 ExaBytes is the value of an unbounded device
+  if  [ "${memory_limit}" = "9223372036854771712" ]; then
+    # Looks like we are not in a container
+    # Let's report the MemAvailable on this system
+    echo $(( $(awk '/MemAvailable/{print $2}' /proc/meminfo) * 1024))
+  else
+    current_usage=$(cat /sys/fs/cgroup/memory/memory.usage_in_bytes)
+    echo $(( memory_limit - current_usage ))
+  fi
+}
+
+# Convert MB into bytes
+function MB_to_bytes() {
+  echo $(($1 * 1024 * 1024))
+}
+
+# Convert bytes into MB
+function bytes_to_MB() {
+  echo $(($1 / 1024 / 1024))
+}
