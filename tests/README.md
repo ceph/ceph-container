@@ -6,7 +6,7 @@ in a virtualenv (preferable) and run `py.test` in the current directory.
 
 **note**: By default `py.test` collects all/any tests present from the current
 directory recursively. Ensure that no other libraries/virtualenvs are present
-in that path, otherwise pass the path to `ceph-docker/tests` directly as an
+in that path, otherwise pass the path to `ceph-container/tests` directly as an
 argument
 
 

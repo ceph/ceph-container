@@ -9,7 +9,7 @@ metadata:
     release: {{ .Release.Name }}
   annotations:
     service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
-  #https://github.com/ceph/ceph-docker/issues/573
+  #https://github.com/ceph/ceph-container/issues/573
 spec:
   ports:
   - port: {{ .Values.service.mon.port }}

@@ -115,8 +115,8 @@ If you do not see output similar to the above or if any issues came up along the
 ### Create a clone of this repository in your work space
 
 ```
-git clone https://github.com/ceph/ceph-docker.git
-cd ceph-docker/examples/kubernetes
+git clone https://github.com/ceph/ceph-container.git
+cd ceph-container/examples/kubernetes
 ```
 
 ### Override default settings

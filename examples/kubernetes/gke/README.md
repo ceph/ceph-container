@@ -94,8 +94,8 @@ gke-kube-ceph-cluster-default-pool-592ab398-zt57   Ready     15m
 ### Create a clone of this repository in your work space
 
 ```
-git clone https://github.com/ceph/ceph-docker.git
-cd ceph-docker/examples/kubernetes
+git clone https://github.com/ceph/ceph-container.git
+cd ceph-container/examples/kubernetes
 ```
 
 ### Override default settings
