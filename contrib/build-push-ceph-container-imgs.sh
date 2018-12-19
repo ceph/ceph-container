@@ -15,7 +15,6 @@ if [ -z "$CEPH_RELEASES" ]; then
   CEPH_RELEASES=(master luminous mimic)
 fi
 
-CEPH_RELEASES_BIS=(luminous) # list of releases that need a "bis" image for ceph-ansible
 HOST_ARCH=$(uname -m)
 BUILD_ARM= # Set this variable to anything if you want to build the ARM images too
 
@@ -147,7 +146,7 @@ declare -F build_and_push_latest_bis ||
 function build_and_push_latest_bis {
   # latest-bis-$ceph_release is needed by ceph-ansible so it can test the restart handlers on an image ID change
   # rebuild latest again to get a different image ID
-  for ceph_release in "${CEPH_RELEASES_BIS[@]}"; do
+  for ceph_release in "${CEPH_RELEASES[@]}"; do
     make RELEASE="$BRANCH"-bis FLAVORS="${ceph_release}",centos,7 build
     docker tag ceph/daemon:"$BRANCH"-bis-"${ceph_release}"-centos-7-"${HOST_ARCH}" ceph/daemon:latest-bis-"$ceph_release"
     docker push ceph/daemon:latest-bis-"$ceph_release"
