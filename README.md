@@ -5,7 +5,7 @@ ceph-container
 ![Ceph Daemon Pulls](https://img.shields.io/docker/pulls/ceph/daemon.svg)
 
 Build Ceph into container images with upstream support for the latest few Ceph
-releases on Centos ceph-container also supports builds for multiple
+releases on CentOS ceph-container also supports builds for multiple
 distributions.
 
 
@@ -29,8 +29,7 @@ Stable images
 -------------
 Since everyone doesn't use Docker Hub API and Docker Hub WebUI doesn't paginate. It's hard to see all available stable images.
 
-` Starting August 22th 2018, Ubuntu images are no longer supported.
-Only OpenSuse and Centos images will be shipped.`
+**Starting August 22th 2018, Ubuntu images are no longer supported. Only openSUSE and CentOS images will be shipped.**
 
 Here is an example list of available stable Ceph images
 
@@ -48,7 +47,7 @@ Development images
 ------------------
 It is possible to build a container running the latest development release (master). It also includes the latest development packages from the nfs-ganesha project.
 
-This is only available on centos with the following command :
+This is only available on CentOS with the following command :
 `make FLAVORS="master,centos,7"`
 
 
