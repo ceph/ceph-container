@@ -6,8 +6,6 @@ branches:
   only:
     - master
 
-sudo: required
-
 dist: xenial
 
 services:
