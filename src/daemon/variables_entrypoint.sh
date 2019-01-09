@@ -66,6 +66,7 @@ fi
 : "${GANESHA_EPOCH:=""}" # For restarting
 : "${MGR_IP:=0.0.0.0}"
 : "${CEPH_ARCH:=$(uname -m)}"
+: "${MON_PORT:=6789}"
 
 # Make sure to change the value of one another if user changes some of the default values
 while read -r line; do

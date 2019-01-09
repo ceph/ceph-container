@@ -183,6 +183,6 @@ function start_mon {
     # DO NOT TOUCH IT, IT MUST BE PRESENT
     DAEMON_OPTS+=(--mon-cluster-log-to-stderr "--log-stderr-prefix=debug ")
     log "SUCCESS"
-    exec /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}:6789"
+    exec /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}:${MON_PORT}"
   fi
 }
