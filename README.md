@@ -1,8 +1,8 @@
 ceph-container
 ==============
 
-![Ceph Daemon Stars](https://img.shields.io/docker/stars/ceph/daemon.svg)
-![Ceph Daemon Pulls](https://img.shields.io/docker/pulls/ceph/daemon.svg)
+[![Ceph Daemon Stars](https://img.shields.io/docker/stars/ceph/daemon.svg)](https://hub.docker.com/r/ceph/daemon)
+[![Ceph Daemon Pulls](https://img.shields.io/docker/pulls/ceph/daemon.svg)](https://hub.docker.com/r/ceph/daemon)
 
 Build Ceph into container images with upstream support for the latest few Ceph
 releases on CentOS ceph-container also supports builds for multiple
