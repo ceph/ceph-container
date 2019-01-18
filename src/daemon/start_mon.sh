@@ -90,7 +90,9 @@ function start_mon {
       fi
   else
     local nic_more_traffic
-    nic_more_traffic=$(grep -vE "lo:|face|Inter" /proc/net/dev | sort -n -k 2 | tail -1 | awk '{ sub (":", "", $1); print $1 }')
+    nic_more_traffic_actual=$(grep -vE "lo:|face|Inter" /proc/net/dev | sort -n -k 2 | tail -1 | awk '{ sub (":", "", $1); print $1 }')
+    nic_more_traffic=${CEPH_NIC:=${nic_more_traffic_actual}}
+
     local ip_version=4
     if [ "${NETWORK_AUTO_DETECT}" -gt 1 ]; then
       MON_IP=$(get_ip "${nic_more_traffic}" "${NETWORK_AUTO_DETECT}")
