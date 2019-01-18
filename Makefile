@@ -144,7 +144,7 @@ TARGETS:
 
   Testing:
     lint              Lint the source code.
-    test.staging      Perform stageing integration test.
+    test.staging      Perform staging integration test.
 
   Help:
     help              Print this help message.
