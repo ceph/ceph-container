@@ -62,6 +62,9 @@ fi
 # MON #
 #######
 function bootstrap_mon {
+  if [[ "$CEPH_VERSION" != "luminous" ]] && [[ "$CEPH_VERSION" != "mimic" ]] ; then
+    MON_PORT=3300
+  fi
   # shellcheck disable=SC1091
   source /opt/ceph-container/bin/start_mon.sh
   start_mon
