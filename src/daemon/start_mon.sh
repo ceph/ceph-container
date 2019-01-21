@@ -162,7 +162,7 @@ function start_mon {
       fi
       # Be sure that the mon name of the current monitor in the monmap is equal to ${MON_NAME}.
       # Names can be different in case of full qualifed hostnames
-      MON_ID=$(monmaptool --print "${MONMAP}" | sed -n "s/^.*${MON_IP}:6789.*mon\\.//p")
+      MON_ID=$(monmaptool --print "${MONMAP}" | sed -n "s/^.*${MON_IP}:${MON_PORT}.*mon\\.//p")
       if [[ -n "$MON_ID" && "$MON_ID" != "$MON_NAME" ]]; then
         monmaptool --rm "$MON_ID" "$MONMAP" >/dev/null
         monmaptool --add "$MON_NAME" "$MON_IP" "$MONMAP" >/dev/null
@@ -170,7 +170,7 @@ function start_mon {
       ceph-mon --setuser ceph --setgroup ceph --cluster "${CLUSTER}" -i "${MON_NAME}" --inject-monmap "$MONMAP" --keyring "$MON_KEYRING" --mon-data "$MON_DATA_DIR"
     fi
     if [[ "$CEPH_DAEMON" != demo ]]; then
-      timeout 7 ceph "${CLI_OPTS[@]}" mon add "${MON_NAME}" "${MON_IP}:6789" || true
+      timeout 7 ceph "${CLI_OPTS[@]}" mon add "${MON_NAME}" "${MON_IP}":"${MON_PORT}" || true
     fi
   fi
 
@@ -181,7 +181,7 @@ function start_mon {
 
   # start MON
   if [[ "$CEPH_DAEMON" == demo ]]; then
-    /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}:6789"
+    /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}":"${MON_PORT}"
 
     if [ -n "$NEW_USER_KEYRING" ]; then
       echo "$NEW_USER_KEYRING" | ceph "${CLI_OPTS[@]}" auth import -i -

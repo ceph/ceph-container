@@ -23,7 +23,7 @@ function get_mon_config {
 [global]
 fsid = $fsid
 mon initial members = ${MON_NAME}
-mon host = ${MON_IP}
+mon host = v2:${MON_IP}:${MON_PORT}/0
 osd crush chooseleaf type = 0
 osd journal size = 100
 public network = ${CEPH_PUBLIC_NETWORK}
@@ -84,7 +84,7 @@ ENDHERE
       mv /etc/ceph/monmap "$MONMAP"
     else
       # Generate initial monitor map
-      monmaptool --create --add "${MON_NAME}" "${MON_IP}:6789" --fsid "${fsid}" "$MONMAP"
+      monmaptool --create --add "${MON_NAME}" "${MON_IP}:${MON_PORT}" --fsid "${fsid}" "$MONMAP"
     fi
     chown "${CHOWN_OPT[@]}" ceph. "$MONMAP"
   fi
