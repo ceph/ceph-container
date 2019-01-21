@@ -174,7 +174,10 @@ function start_mon {
     fi
   fi
 
-  tune_memory "$available_memory"
+  # Apply the tuning on Nautilus and above only since the values applied are causing the ceph-osd to crash on earlier versions
+  if [[ "$CEPH_VERSION" != "luminous" ]] && [[ "$CEPH_VERSION" != "mimic" ]] ; then
+    tune_memory "$available_memory"
+  fi
 
   # start MON
   if [[ "$CEPH_DAEMON" == demo ]]; then
