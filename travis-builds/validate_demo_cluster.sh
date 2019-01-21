@@ -7,7 +7,7 @@ set -xe
 #############
 function get_cluster_name {
   cluster=$(docker exec ceph-demo grep -R fsid /etc/ceph/ | egrep -o '^[^.]*')
-  DOCKER_COMMAND="docker exec ceph-demo ceph --cluster $(basename $cluster)"
+  DOCKER_COMMAND="docker exec ceph-demo ceph --connect-timeout 3 --cluster $(basename $cluster)"
 }
 
 function wait_for_daemon () {
