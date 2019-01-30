@@ -114,13 +114,13 @@ function extract_ceph_codename () {
   echo "${flavor_array[0]}"
 }
 
-# Given a flavor, extract the distro (e.g., centos, ubuntu)
+# Given a flavor, extract the distro (e.g., centos)
 # These build scripts want the distro without the '-arm64' suffix
 function extract_distro () {
   local flavor="${1}"
   # shellcheck disable=2206 # quoting to prevent word splitting below breaks conversion to array
   local flavor_array=(${flavor//,/ })
-  local flavor="${flavor_array[1]}"  # e.g., centos/ubuntu
+  local flavor="${flavor_array[1]}"  # e.g., centos
   echo "${flavor%-arm64}"
 }
 
