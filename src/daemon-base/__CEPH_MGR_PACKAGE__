@@ -1,1 +1,2 @@
-ceph-mgr__ENV_[CEPH_POINT_RELEASE]__
+ceph-mgr__ENV_[CEPH_POINT_RELEASE]__ \
+ceph-mgr-rook__ENV_[CEPH_POINT_RELEASE]__
