@@ -46,7 +46,7 @@ Development images
 It is possible to build a container running the latest development release (master). It also includes the latest development packages from the nfs-ganesha project.
 
 This is only available on CentOS with the following command :
-`make FLAVORS="master,centos,7"`
+`make FLAVORS="master,centos,7" build`
 
 
 
