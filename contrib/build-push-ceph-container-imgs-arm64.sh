@@ -13,7 +13,7 @@ CEPH_RELEASES=(luminous mimic)
 #############
 
 function install_docker {
-  sudo apt-get install -y --force-yes docker.io
+  sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --force-yes docker.io
   sudo systemctl start docker
   sudo systemctl status docker
   sudo chgrp "$(whoami)" /var/run/docker.sock
