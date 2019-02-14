@@ -181,7 +181,7 @@ function start_mon {
 
   # start MON
   if [[ "$CEPH_DAEMON" == demo ]]; then
-    /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}":"${MON_PORT}"
+    /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}"
 
     if [ -n "$NEW_USER_KEYRING" ]; then
       echo "$NEW_USER_KEYRING" | ceph "${CLI_OPTS[@]}" auth import -i -
@@ -192,7 +192,7 @@ function start_mon {
     # DO NOT TOUCH IT, IT MUST BE PRESENT
     DAEMON_OPTS+=(--mon-cluster-log-to-stderr "--log-stderr-prefix=debug ")
     log "SUCCESS"
-    exec /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}:${MON_PORT}"
+    exec /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}"
   fi
 }
 
