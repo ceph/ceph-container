@@ -47,5 +47,5 @@ function osd_volume_activate {
       umount "$mnt" || (log "osd_volume_activate: Failed to umount $mnt"; lsof "$mnt")
     done
   }
-  exec /usr/bin/ceph-osd "${CLI_OPTS[@]}" -f -i "${OSD_ID}"
+  exec /usr/bin/ceph-osd "${DAEMON_OPTS[@]}" -i "${OSD_ID}"
 }
