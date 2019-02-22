@@ -1,0 +1,4 @@
+dnf install -y wget unzip util-linux python3-setuptools udev device-mapper && \
+dnf install -y __DAEMON_PACKAGES__ && \
+__WEB_INSTALL_CONFD__ && \
+__WEB_INSTALL_FOREGO__

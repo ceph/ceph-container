@@ -1,0 +1,2 @@
+dnf update -y && \
+dnf install -y __CEPH_BASE_PACKAGES__
