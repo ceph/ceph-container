@@ -21,7 +21,6 @@ FLAVORS ?= \
 	luminous,opensuse,42.3 \
 	luminous,centos,7 \
 	mimic,centos,7 \
-	nautilus,centos,7 \
 	master,centos,7
 
 TAG_REGISTRY ?= ceph
