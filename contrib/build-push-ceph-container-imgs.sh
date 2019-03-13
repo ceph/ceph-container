@@ -12,7 +12,7 @@ LATEST_COMMIT_SHA=$(git rev-parse --short HEAD)
 TAGGED_HEAD=false # does HEAD is on a tag ?
 if [ -z "$CEPH_RELEASES" ]; then
   # NEVER change 'master' position in the array, this will break the 'latest' tag
-  CEPH_RELEASES=(master luminous mimic)
+  CEPH_RELEASES=(master luminous mimic nautilus)
 fi
 
 HOST_ARCH=$(uname -m)
