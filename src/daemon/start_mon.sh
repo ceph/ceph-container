@@ -192,7 +192,11 @@ function start_mon {
     # DO NOT TOUCH IT, IT MUST BE PRESENT
     DAEMON_OPTS+=(--mon-cluster-log-to-stderr "--log-stderr-prefix=debug ")
     log "SUCCESS"
-    exec /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}"
+    # Set PUBLIC_BIND_ADDRESS to MON_IP if unset
+    if [ -z "${PUBLIC_BIND_ADDRESS}" ]; then
+        PUBLIC_BIND_ADDRESS=${MON_IP}
+    fi
+    exec /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${PUBLIC_BIND_ADDRESS}" --public-bind-addr "${MON_IP}"
   fi
 }
 
