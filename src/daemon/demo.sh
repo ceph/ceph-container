@@ -135,7 +135,7 @@ function bootstrap_osd {
 
   # activate OSD
   if [[ -n "$OSD_DEVICE" ]]; then
-    OSD_FSID="$(ceph-volume lvm list --format json | python -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"][0][\"tags\"][\"ceph.osd_fsid\"])")"
+    OSD_FSID="$(ceph-volume lvm list --format json | $PYTHON -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"][0][\"tags\"][\"ceph.osd_fsid\"])")"
     ceph-volume lvm activate --no-systemd --bluestore "${OSD_ID}" "${OSD_FSID}"
   fi
 
@@ -329,7 +329,7 @@ function bootstrap_sree {
 
   # start Sree
   pushd "$SREE_DIR"
-  python app.py &
+  $PYTHON app.py &
   popd
 }
 

@@ -102,6 +102,12 @@ if [[ "$KV_TYPE" == "etcd" ]]; then
   ETCDCTL_OPTS=(--peers ${ETCD_SCHEMA}${KV_IP}:${KV_PORT})
 fi
 
+if is_available python; then
+  PYTHON=python
+else
+  PYTHON=python3
+fi
+
 # Internal variables
 MDS_KEYRING=/var/lib/ceph/mds/${CLUSTER}-${MDS_NAME}/keyring
 ADMIN_KEYRING=/etc/ceph/${CLUSTER}.client.admin.keyring

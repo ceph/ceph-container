@@ -6,16 +6,16 @@ function osd_volume_activate {
 
   CEPH_VOLUME_LIST_JSON="$(ceph-volume lvm list --format json)"
 
-  if ! echo "$CEPH_VOLUME_LIST_JSON" | python -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"])" &> /dev/null; then
+  if ! echo "$CEPH_VOLUME_LIST_JSON" | $PYTHON -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"])" &> /dev/null; then
     log "OSD id $OSD_ID does not exist"
     exit 1
   fi
 
   # Find the OSD FSID from the OSD ID
-  OSD_FSID="$(echo "$CEPH_VOLUME_LIST_JSON" | python -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"][0][\"tags\"][\"ceph.osd_fsid\"])")"
+  OSD_FSID="$(echo "$CEPH_VOLUME_LIST_JSON" | $PYTHON -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"][0][\"tags\"][\"ceph.osd_fsid\"])")"
 
   # Find the OSD type
-  OSD_TYPE="$(echo "$CEPH_VOLUME_LIST_JSON" | python -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"][0][\"type\"])")"
+  OSD_TYPE="$(echo "$CEPH_VOLUME_LIST_JSON" | $PYTHON -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"][0][\"type\"])")"
 
   # Discover the objectstore
   if [[ "data journal" =~ $OSD_TYPE ]]; then
