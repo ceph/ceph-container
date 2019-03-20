@@ -110,6 +110,10 @@ function start_mon {
         ip_version=4
       fi
     fi
+    # use the network provided by CEPH_PUBLIC_NETWORK_FALLBACK, if no network could be detected
+    if [ -z "$CEPH_PUBLIC_NETWORK" ]; then
+      CEPH_PUBLIC_NETWORK="${CEPH_PUBLIC_NETWORK_FALLBACK}"
+    fi
     if [[ "$(echo "$CEPH_PUBLIC_NETWORK" | wc -l)" -ne 1 ]]; then
       log "It seems that the interface ${nic_more_traffic} with most of the traffic has several subnets configured"
       log "I don't know which one to use."
