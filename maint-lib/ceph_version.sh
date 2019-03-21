@@ -9,6 +9,19 @@ WHAT_TO_EXTRACT=$2
 CEPH_POINT_RELEASE=""
 CEPH_VERSION="${CEPH_VERSION_SPEC}"
 
+# If we pass a dev branch, we don't know the version so let's use the branch name as the ceph version
+if [[ $WHAT_TO_EXTRACT == "CEPH_POINT_RELEASE" ]]; then
+  if [[ $CEPH_VERSION =~ ^wip* ]]; then
+    echo $CEPH_POINT_RELEASE
+    exit 0
+  fi
+else
+  if [[ $CEPH_VERSION =~ ^wip* ]]; then
+    echo "$CEPH_VERSION"
+    exit 0
+  fi
+fi
+
 # Search for the two possible separators between CEPH_VERSION and CEPH_POINT_RELEASE
 # Let's consider CEPH_VERSION_SPEC=luminous-12.2.0-1
 for separator in "=" "-"; do

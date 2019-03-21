@@ -4,7 +4,7 @@ bash -c ' \
   if [ -n "__GANESHA_PACKAGES__" ]; then \
     echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
     echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
-    if [ "${CEPH_VERSION}" == "master" ]; then \
+    if [[ "${CEPH_VERSION}" =~ master|^wip* ]]; then \
       REPO_URL=$(curl -s "https://shaman.ceph.com/api/search/?project=nfs-ganesha&distros=centos/__ENV_[BASEOS_TAG]__&flavor=ceph_master&ref=next&sha1=latest" | jq -a ".[0] | .url"); \
       echo "baseurl=$REPO_URL/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
     else \
@@ -22,8 +22,8 @@ bash -c ' \
 yum update -y && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
 bash -c ' \
-  if [ "${CEPH_VERSION}" == "master" ]; then \
-    REPO_URL=$(curl -s "https://shaman.ceph.com/api/search/?project=ceph&distros=centos/__ENV_[BASEOS_TAG]__&flavor=default&ref=master&sha1=latest" | jq -a ".[0] | .url"); \
+  if [[ "${CEPH_VERSION}" =~ master|^wip* ]]; then \
+    REPO_URL=$(curl -s "https://shaman.ceph.com/api/search/?project=ceph&distros=centos/__ENV_[BASEOS_TAG]__&flavor=default&ref=${CEPH_VERSION}&sha1=latest" | jq -a ".[0] | .url"); \
     RELEASE_VER=0 ;\
   else \
     RELEASE_VER=1 ;\
