@@ -102,7 +102,7 @@ if [[ "$KV_TYPE" == "etcd" ]]; then
   ETCDCTL_OPTS=(--peers ${ETCD_SCHEMA}${KV_IP}:${KV_PORT})
 fi
 
-if is_available python; then
+if command -v python &>/dev/null; then
   PYTHON=python
 else
   PYTHON=python3
