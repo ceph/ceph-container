@@ -21,7 +21,7 @@ function osd_activate {
   CEPH_VOLUME_SCAN_FILE=$(grep -l ${OSD_DEVICE}1 /etc/ceph/osd/*.json)
 
   # Find the OSD ID
-  OSD_ID="$(cat ${CEPH_VOLUME_SCAN_FILE} | python -c "import sys, json; print(json.load(sys.stdin)[\"whoami\"])")"
+  OSD_ID="$(cat ${CEPH_VOLUME_SCAN_FILE} | $PYTHON -c "import sys, json; print(json.load(sys.stdin)[\"whoami\"])")"
 
   # Activate the OSD
   # The command can fail so if it does, let's output the ceph-volume logs
