@@ -67,7 +67,7 @@ ENDHERE
       # Generate custom provided administrator key
       CLI+=("--add-key=$ADMIN_SECRET")
     fi
-    ceph-authtool "$ADMIN_KEYRING" --create-keyring -n client.admin "${CLI[@]}" --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow' --cap mgr 'allow *'
+    ceph-authtool "$ADMIN_KEYRING" --create-keyring -n client.admin "${CLI[@]}" --set-uid=0 --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow *' --cap mgr 'allow *'
   fi
 
   if [ ! -e "$MON_KEYRING" ]; then
