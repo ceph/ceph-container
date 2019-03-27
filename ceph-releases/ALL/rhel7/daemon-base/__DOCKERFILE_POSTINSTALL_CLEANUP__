@@ -2,4 +2,5 @@ echo 'Postinstall cleanup' && \
  ( yum clean all && \
    rpmdb --rebuilddb && \
    rpm -q __CEPH_BASE_PACKAGES__ && \
-   sed -i 's/enabled=.*/enabled=1/g' /etc/yum/pluginconf.d/subscription-manager.conf )
+   sed -i 's/enabled=.*/enabled=1/g' /etc/yum/pluginconf.d/subscription-manager.conf \
+   rm -f /etc/profile.d/lang.sh )
