@@ -65,7 +65,7 @@ function download_cn {
 
 function compare_docker_hub_and_github_tags {
   # build an array with the list of tags from github
-  for tag_github in $(grep_sort_tags git ls-remote --tags 2>/dev/null); do
+  for tag_github in $(grep_sort_tags git ls-remote --tags --refs 2>/dev/null); do
     tags_github_array+=("$tag_github")
   done
 
