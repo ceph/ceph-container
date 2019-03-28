@@ -221,8 +221,8 @@ function bootstrap_demo_user {
     radosgw-admin "${CLI_OPTS[@]}" caps add --caps="buckets=*;users=*;usage=*;metadata=*" --uid="$CEPH_DEMO_UID"
 
     # Use rgw port
-    sed -i "s/host_base = localhost/host_base = ${RGW_NAME}:${RGW_CIVETWEB_PORT}/" /root/.s3cfg
-    sed -i "s/host_bucket = localhost/host_bucket = ${RGW_NAME}:${RGW_CIVETWEB_PORT}/" /root/.s3cfg
+    sed -i "s/host_base = localhost/host_base = ${RGW_NAME}:${RGW_FRONTEND_PORT}/" /root/.s3cfg
+    sed -i "s/host_bucket = localhost/host_bucket = ${RGW_NAME}:${RGW_FRONTEND_PORT}/" /root/.s3cfg
 
     if [ -n "$CEPH_DEMO_BUCKET" ]; then
       log "Creating bucket..."
@@ -307,11 +307,11 @@ function bootstrap_sree {
     SECRET_KEY=$(awk '/Secret key/ {print $3}' /opt/ceph-container/tmp/ceph-demo-user)
 
     pushd "$SREE_DIR"
-    sed -i "s|ENDPOINT|http://${EXPOSED_IP}:${RGW_CIVETWEB_PORT}|" static/js/base.js
+    sed -i "s|ENDPOINT|http://${EXPOSED_IP}:${RGW_FRONTEND_PORT}|" static/js/base.js
     sed -i "s/ACCESS_KEY/$ACCESS_KEY/" static/js/base.js
     sed -i "s/SECRET_KEY/$SECRET_KEY/" static/js/base.js
     mv sree.cfg.sample sree.cfg
-    sed -i "s/RGW_CIVETWEB_PORT_VALUE/$RGW_CIVETWEB_PORT/" sree.cfg
+    sed -i "s/RGW_CIVETWEB_PORT_VALUE/$RGW_FRONTEND_PORT/" sree.cfg
     sed -i "s/SREE_PORT_VALUE/$SREE_PORT/" sree.cfg
     popd
   fi
