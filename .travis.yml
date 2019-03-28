@@ -16,7 +16,6 @@ services:
 
 before_install:
   - docker --version
-  - docker login -u leseb -p "$DOCKER_HUB_PASSWORD"
   - sudo apt-get install -y --force-yes xfsprogs
   - sudo ./travis-builds/purge_cluster.sh
   - export RELEASE="travis-build-$TRAVIS_BRANCH-$TRAVIS_COMMIT"
@@ -35,7 +34,6 @@ script:
   # - curl -L https://github.com/ceph/cn/releases/download/v1.8.0/cn-v1.8.0-bb92a8e-linux-amd64 -o cn
   # - chmod +x cn
   # - ./cn cluster start "$RELEASE" -i ceph/daemon:"$RELEASE"-mimic-centos-7-x86_64
-  - sudo make RELEASE="$RELEASE" FLAVORS="master,centos,7" push
 
 
 after_failure:
