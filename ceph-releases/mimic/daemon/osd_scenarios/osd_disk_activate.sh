@@ -55,7 +55,11 @@ function osd_activate {
     ceph-disk -v --setuser ceph --setgroup disk activate "${CEPH_DISK_OPTIONS[@]}" --no-start-daemon "${DATA_PART}"
   fi
 
-  actual_part=$(readlink -f "${MOUNTED_PART}")
+  if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+    actual_part=${MOUNTED_PART}
+  else
+    actual_part=$(readlink -f "${MOUNTED_PART}")
+  fi
   OSD_ID=$(grep "${actual_part}" /proc/mounts | awk '{print $2}' | sed -r 's/^.*-([0-9]+)$/\1/')
 
   if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
