@@ -238,13 +238,13 @@ function get_ceph_versions_on_server () {
   local pkg_regex=">ceph-[0-9.]+-[0-9]+"
   # pkg_list is returned in the form ">ceph-12.0.0 >ceph-12.0.1 >ceph-12.0.2 ..."
   local pkg_list
-  pkg_list="$(curl --silent "${server_url}" | grep --extended-regexp --only-matching "${pkg_regex}")"
+  # Make sure the versions are sorted. This should always be the case, but it's better to be safe.
+  pkg_list="$(curl --silent "${server_url}" | grep --extended-regexp --only-matching "${pkg_regex}" | sort --version-sort)"
   local version_list=""  # version strings only
   for pkg in $pkg_list; do
     version_list="${version_list} ${pkg#>ceph-}"  # strip '>ceph-' text from beginning of pkg names
   done
-  # Make sure the versions are sorted. This should always be the case, but it's better to be safe.
-  echo "${version_list}" | sort --version-sort
+  echo "${version_list}"
 }
 
 
