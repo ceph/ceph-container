@@ -75,10 +75,28 @@ case "$CEPH_DAEMON" in
     OSD_TYPE="directory_single"
     start_osd
     ;;
+  osd_ceph_disk)
+    # TAG: osd_ceph_disk
+    source /opt/ceph-container/bin/start_osd.sh
+    OSD_TYPE="disk"
+    start_osd
+    ;;
+  osd_ceph_disk_prepare)
+    # TAG: osd_ceph_disk_prepare
+    source /opt/ceph-container/bin/start_osd.sh
+    OSD_TYPE="prepare"
+    start_osd
+    ;;
   osd_ceph_disk_activate)
     # TAG: osd_ceph_disk_activate
     source /opt/ceph-container/bin/start_osd.sh
     OSD_TYPE="activate"
+    start_osd
+    ;;
+  osd_ceph_activate_journal)
+    # TAG: osd_ceph_activate_journal
+    source /opt/ceph-container/bin/start_osd.sh
+    OSD_TYPE="activate_journal"
     start_osd
     ;;
   osd_ceph_volume_activate)

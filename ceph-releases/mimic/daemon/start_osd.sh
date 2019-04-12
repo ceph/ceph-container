@@ -27,6 +27,13 @@ function start_osd {
       source /opt/ceph-container/bin/osd_directory_single.sh
       osd_directory_single
       ;;
+    disk)
+      osd_disk
+      ;;
+    prepare)
+      source /opt/ceph-container/bin/osd_disk_prepare.sh
+      osd_disk_prepare
+      ;;
     activate)
       source /opt/ceph-container/bin/osd_disk_activate.sh
       osd_activate
@@ -36,8 +43,20 @@ function start_osd {
       source /opt/ceph-container/bin/osd_common.sh
       osd_disks
       ;;
+    activate_journal)
+      source /opt/ceph-container/bin/osd_activate_journal.sh
+      source /opt/ceph-container/bin/osd_common.sh
+      osd_activate_journal
+      ;;
     *)
       osd_trying_to_determine_scenario
       ;;
   esac
+}
+
+function osd_disk {
+  source /opt/ceph-container/bin/osd_disk_prepare.sh
+  source /opt/ceph-container/bin/osd_disk_activate.sh
+  osd_disk_prepare
+  osd_activate
 }
