@@ -32,26 +32,6 @@ MGR_IP=$MON_IP
 : "${RBD_POOL:="rbd"}"
 
 
-if [[ "$RGW_FRONTEND_TYPE" == "civetweb" ]]; then
-  RGW_FRONTED_OPTIONS="$RGW_FRONTEND_OPTIONS port=$RGW_FRONTEND_IP:$RGW_FRONTEND_PORT"
-elif [[ "$RGW_FRONTEND_TYPE" == "beast" ]]; then
-  RGW_FRONTED_OPTIONS="$RGW_FRONTEND_OPTIONS endpoint=$RGW_FRONTEND_IP:$RGW_FRONTEND_PORT"
-else
-  log "ERROR: unsupported rgw backend type $RGW_FRONTEND_TYPE"
-  exit 1
-fi
-
-: "${RGW_FRONTEND:="$RGW_FRONTEND_TYPE $RGW_FRONTED_OPTIONS"}"
-
-if [[ "$RGW_FRONTEND_TYPE" == "beast" ]]; then
-  if [[ "$CEPH_VERSION" == "luminous" ]]; then
-    RGW_FRONTEND_TYPE=beast
-    log "ERROR: unsupported rgw backend type $RGW_FRONTEND_TYPE for your Ceph release $CEPH_VERSION, use at least the Mimic version."
-    exit 1
-  fi
-fi
-
-
 #######
 # MON #
 #######
@@ -165,6 +145,25 @@ function bootstrap_mds {
 # RGW #
 #######
 function bootstrap_rgw {
+  if [[ "$RGW_FRONTEND_TYPE" == "civetweb" ]]; then
+    RGW_FRONTED_OPTIONS="$RGW_FRONTEND_OPTIONS port=$RGW_FRONTEND_IP:$RGW_FRONTEND_PORT"
+  elif [[ "$RGW_FRONTEND_TYPE" == "beast" ]]; then
+    RGW_FRONTED_OPTIONS="$RGW_FRONTEND_OPTIONS endpoint=$RGW_FRONTEND_IP:$RGW_FRONTEND_PORT"
+  else
+    log "ERROR: unsupported rgw backend type $RGW_FRONTEND_TYPE"
+    exit 1
+  fi
+
+  : "${RGW_FRONTEND:="$RGW_FRONTEND_TYPE $RGW_FRONTED_OPTIONS"}"
+
+  if [[ "$RGW_FRONTEND_TYPE" == "beast" ]]; then
+    if [[ "$CEPH_VERSION" == "luminous" ]]; then
+      RGW_FRONTEND_TYPE=beast
+      log "ERROR: unsupported rgw backend type $RGW_FRONTEND_TYPE for your Ceph release $CEPH_VERSION, use at least the Mimic version."
+      exit 1
+    fi
+  fi
+
   if [ ! -e "$RGW_PATH"/keyring ]; then
     # bootstrap RGW
     mkdir -p "$RGW_PATH" /var/log/ceph
