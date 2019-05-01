@@ -14,7 +14,6 @@ MDS_PATH="/var/lib/ceph/mds/${CLUSTER}-$MDS_NAME"
 RGW_PATH="/var/lib/ceph/radosgw/${CLUSTER}-rgw.${RGW_NAME}"
 # shellcheck disable=SC2153
 MGR_PATH="/var/lib/ceph/mgr/${CLUSTER}-$MGR_NAME"
-RESTAPI_IP=$MON_IP
 MGR_IP=$MON_IP
 : "${DEMO_DAEMONS:=all}"
 : "${RGW_ENABLE_USAGE_LOG:=true}"
@@ -261,19 +260,9 @@ function bootstrap_nfs {
 # API #
 #######
 function bootstrap_rest_api {
-  if ! grep -E "\\[client.restapi\\]" /etc/ceph/"${CLUSTER}".conf; then
-    cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
-[client.restapi]
-public addr = ${RESTAPI_IP}:${RESTAPI_PORT}
-restapi base url = ${RESTAPI_BASE_URL}
-restapi log level = ${RESTAPI_LOG_LEVEL}
-log file = ${RESTAPI_LOG_FILE}
-
-ENDHERE
-  fi
-
-  # start ceph-rest-api
-  ceph-rest-api "${CLI_OPTS[@]}" -c /etc/ceph/"${CLUSTER}".conf -n client.admin &
+  ceph "${CLI_OPTS[@]}" mgr module enable restful
+  ceph "${CLI_OPTS[@]}" restful create-self-signed-cert
+  ceph "${CLI_OPTS[@]}" restful create-key demo
 }
 
 
