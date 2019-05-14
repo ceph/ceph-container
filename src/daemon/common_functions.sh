@@ -373,13 +373,17 @@ function get_dmcrypt_bluestore_uuid {
   start_disk_list
   BLOCK_DB_PART=$(start_disk_list)
   unset DISK_LIST_SEARCH
-  BLOCK_DB_UUID=$(get_part_uuid "${BLOCK_DB_PART}")
+  if [ -n "${BLOCK_DB_PART}" ]; then
+    BLOCK_DB_UUID=$(get_part_uuid "${BLOCK_DB_PART}")
+  fi
 
   export DISK_LIST_SEARCH=block.wal_dmcrypt
   start_disk_list
   BLOCK_WAL_PART=$(start_disk_list)
   unset DISK_LIST_SEARCH
-  BLOCK_WAL_UUID=$(get_part_uuid "${BLOCK_WAL_PART}")
+  if [ -n "${BLOCK_WAL_PART}" ]; then
+    BLOCK_WAL_UUID=$(get_part_uuid "${BLOCK_WAL_PART}")
+  fi
 }
 
 # This function gets the uuid of filestore partitions
@@ -409,10 +413,10 @@ function open_encrypted_parts_bluestore {
   if [[ ! -e /dev/mapper/"${BLOCK_UUID}" ]]; then
     open_encrypted_part "${BLOCK_UUID}" "${BLOCK_PART}" "${DATA_UUID}"
   fi
-  if [[ ! -e /dev/mapper/"${BLOCK_DB_UUID}" ]]; then
+  if [[ -n "${BLOCK_DB_UUID}" && ! -e /dev/mapper/"${BLOCK_DB_UUID}" ]]; then
     open_encrypted_part "${BLOCK_DB_UUID}" "${BLOCK_DB_PART}" "${DATA_UUID}"
   fi
-  if [[ ! -e /dev/mapper/"${BLOCK_WAL_UUID}" ]]; then
+  if [[ -n "${BLOCK_WAL_UUID}" && ! -e /dev/mapper/"${BLOCK_WAL_UUID}" ]]; then
     open_encrypted_part "${BLOCK_WAL_UUID}" "${BLOCK_WAL_PART}" "${DATA_UUID}"
   fi
 }
@@ -437,10 +441,10 @@ function close_encrypted_parts_bluestore {
   if [[ -e /dev/mapper/"${BLOCK_UUID}" ]]; then
     close_encrypted_part "${BLOCK_UUID}" "${BLOCK_PART}" "${DATA_UUID}"
   fi
-  if [[ -e /dev/mapper/"${BLOCK_DB_UUID}" ]]; then
+  if [[ -n "${BLOCK_DB_UUID}" && -e /dev/mapper/"${BLOCK_DB_UUID}" ]]; then
     close_encrypted_part "${BLOCK_DB_UUID}" "${BLOCK_DB_PART}" "${DATA_UUID}"
   fi
-  if [[ -e /dev/mapper/"${BLOCK_WAL_UUID}" ]]; then
+  if [[ -n "${BLOCK_WAL_UUID}" && -e /dev/mapper/"${BLOCK_WAL_UUID}" ]]; then
     close_encrypted_part "${BLOCK_WAL_UUID}" "${BLOCK_WAL_PART}" "${DATA_UUID}"
   fi
 }
