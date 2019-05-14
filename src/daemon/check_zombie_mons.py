@@ -17,8 +17,8 @@ else:
         '-o template' \
         ' --template="{ {{range  \$i, \$v  := .items}} {{ if \$i}} , {{ end }} \\"{{\$v.metadata.name}}\\": \\"{{\$v.status.podIP}}\\" {{end}} }"'  # noqa E501
 
-monmap_command = "ceph --cluster=${CLUSTER} mon getmap > /tmp/monmap && '\
-    'monmaptool -f /tmp/monmap --print"
+monmap_command = 'ceph --cluster=${CLUSTER} mon getmap > /tmp/monmap && '\
+    'monmaptool -f /tmp/monmap --print'
 
 
 def extract_mons_from_monmap():
