@@ -14,7 +14,6 @@ MDS_PATH="/var/lib/ceph/mds/${CLUSTER}-$MDS_NAME"
 RGW_PATH="/var/lib/ceph/radosgw/${CLUSTER}-rgw.${RGW_NAME}"
 # shellcheck disable=SC2153
 MGR_PATH="/var/lib/ceph/mgr/${CLUSTER}-$MGR_NAME"
-RESTAPI_IP=$MON_IP
 MGR_IP=$MON_IP
 : "${DEMO_DAEMONS:=all}"
 : "${RGW_ENABLE_USAGE_LOG:=true}"
@@ -26,36 +25,11 @@ MGR_IP=$MON_IP
 : "${SREE_PORT:=5000}"
 
 # rgw options
-: "${RGW_CIVETWEB_IP:=0.0.0.0}"
-: "${RGW_CIVETWEB_PORT:=8080}"
-: "${RGW_FRONTEND_IP:=$RGW_CIVETWEB_IP}"
-: "${RGW_FRONTEND_PORT:=$RGW_CIVETWEB_PORT}"
-: "${RGW_FRONTEND_TYPE:="civetweb"}"
+: "${RGW_FRONTEND_IP:=0.0.0.0}"
+: "${RGW_FRONTEND_PORT:=8080}"
+: "${RGW_FRONTEND_TYPE:="beast"}"
 
 : "${RBD_POOL:="rbd"}"
-
-
-RGW_CIVETWEB_OPTIONS="$RGW_CIVETWEB_OPTIONS port=$RGW_CIVETWEB_IP:$RGW_CIVETWEB_PORT"
-RGW_BEAST_OPTIONS="$RGW_BEAST_OPTIONS endpoint=$RGW_FRONTEND_IP:$RGW_FRONTEND_PORT"
-
-if [[ "$RGW_FRONTEND_TYPE" == "civetweb" ]]; then
-  RGW_FRONTED_OPTIONS="$RGW_CIVETWEB_OPTIONS"
-elif [[ "$RGW_FRONTEND_TYPE" == "beast" ]]; then
-  RGW_FRONTED_OPTIONS="$RGW_BEAST_OPTIONS"
-else
-  log "ERROR: unsupported rgw backend type $RGW_FRONTEND_TYPE"
-  exit 1
-fi
-
-: "${RGW_FRONTEND:="$RGW_FRONTEND_TYPE $RGW_FRONTED_OPTIONS"}"
-
-if [[ "$RGW_FRONTEND_TYPE" == "beast" ]]; then
-  if [[ "$CEPH_VERSION" == "luminous" ]]; then
-    RGW_FRONTEND_TYPE=beast
-    log "ERROR: unsupported rgw backend type $RGW_FRONTEND_TYPE for your Ceph release $CEPH_VERSION, use at least the Mimic version."
-    exit 1
-  fi
-fi
 
 
 #######
@@ -135,7 +109,7 @@ function bootstrap_osd {
 
   # activate OSD
   if [[ -n "$OSD_DEVICE" ]]; then
-    OSD_FSID="$(ceph-volume lvm list --format json | python -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"][0][\"tags\"][\"ceph.osd_fsid\"])")"
+    OSD_FSID="$(ceph-volume lvm list --format json | $PYTHON -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"][0][\"tags\"][\"ceph.osd_fsid\"])")"
     ceph-volume lvm activate --no-systemd --bluestore "${OSD_ID}" "${OSD_FSID}"
   fi
 
@@ -171,6 +145,25 @@ function bootstrap_mds {
 # RGW #
 #######
 function bootstrap_rgw {
+  if [[ "$RGW_FRONTEND_TYPE" == "civetweb" ]]; then
+    RGW_FRONTED_OPTIONS="$RGW_FRONTEND_OPTIONS port=$RGW_FRONTEND_IP:$RGW_FRONTEND_PORT"
+  elif [[ "$RGW_FRONTEND_TYPE" == "beast" ]]; then
+    RGW_FRONTED_OPTIONS="$RGW_FRONTEND_OPTIONS endpoint=$RGW_FRONTEND_IP:$RGW_FRONTEND_PORT"
+  else
+    log "ERROR: unsupported rgw backend type $RGW_FRONTEND_TYPE"
+    exit 1
+  fi
+
+  : "${RGW_FRONTEND:="$RGW_FRONTEND_TYPE $RGW_FRONTED_OPTIONS"}"
+
+  if [[ "$RGW_FRONTEND_TYPE" == "beast" ]]; then
+    if [[ "$CEPH_VERSION" == "luminous" ]]; then
+      RGW_FRONTEND_TYPE=beast
+      log "ERROR: unsupported rgw backend type $RGW_FRONTEND_TYPE for your Ceph release $CEPH_VERSION, use at least the Mimic version."
+      exit 1
+    fi
+  fi
+
   if [ ! -e "$RGW_PATH"/keyring ]; then
     # bootstrap RGW
     mkdir -p "$RGW_PATH" /var/log/ceph
@@ -222,8 +215,8 @@ function bootstrap_demo_user {
     radosgw-admin "${CLI_OPTS[@]}" caps add --caps="buckets=*;users=*;usage=*;metadata=*" --uid="$CEPH_DEMO_UID"
 
     # Use rgw port
-    sed -i "s/host_base = localhost/host_base = ${RGW_NAME}:${RGW_CIVETWEB_PORT}/" /root/.s3cfg
-    sed -i "s/host_bucket = localhost/host_bucket = ${RGW_NAME}:${RGW_CIVETWEB_PORT}/" /root/.s3cfg
+    sed -i "s/host_base = localhost/host_base = ${RGW_NAME}:${RGW_FRONTEND_PORT}/" /root/.s3cfg
+    sed -i "s/host_bucket = localhost/host_bucket = ${RGW_NAME}:${RGW_FRONTEND_PORT}/" /root/.s3cfg
 
     if [ -n "$CEPH_DEMO_BUCKET" ]; then
       log "Creating bucket..."
@@ -267,19 +260,9 @@ function bootstrap_nfs {
 # API #
 #######
 function bootstrap_rest_api {
-  if ! grep -E "\\[client.restapi\\]" /etc/ceph/"${CLUSTER}".conf; then
-    cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
-[client.restapi]
-public addr = ${RESTAPI_IP}:${RESTAPI_PORT}
-restapi base url = ${RESTAPI_BASE_URL}
-restapi log level = ${RESTAPI_LOG_LEVEL}
-log file = ${RESTAPI_LOG_FILE}
-
-ENDHERE
-  fi
-
-  # start ceph-rest-api
-  ceph-rest-api "${CLI_OPTS[@]}" -c /etc/ceph/"${CLUSTER}".conf -n client.admin &
+  ceph "${CLI_OPTS[@]}" mgr module enable restful
+  ceph "${CLI_OPTS[@]}" restful create-self-signed-cert
+  ceph "${CLI_OPTS[@]}" restful create-key demo
 }
 
 
@@ -318,18 +301,18 @@ function bootstrap_sree {
     SECRET_KEY=$(awk '/Secret key/ {print $3}' /opt/ceph-container/tmp/ceph-demo-user)
 
     pushd "$SREE_DIR"
-    sed -i "s|ENDPOINT|http://${EXPOSED_IP}:${RGW_CIVETWEB_PORT}|" static/js/base.js
+    sed -i "s|ENDPOINT|http://${EXPOSED_IP}:${RGW_FRONTEND_PORT}|" static/js/base.js
     sed -i "s/ACCESS_KEY/$ACCESS_KEY/" static/js/base.js
     sed -i "s/SECRET_KEY/$SECRET_KEY/" static/js/base.js
     mv sree.cfg.sample sree.cfg
-    sed -i "s/RGW_CIVETWEB_PORT_VALUE/$RGW_CIVETWEB_PORT/" sree.cfg
+    sed -i "s/RGW_CIVETWEB_PORT_VALUE/$RGW_FRONTEND_PORT/" sree.cfg
     sed -i "s/SREE_PORT_VALUE/$SREE_PORT/" sree.cfg
     popd
   fi
 
   # start Sree
   pushd "$SREE_DIR"
-  python app.py &
+  $PYTHON app.py &
   popd
 }
 

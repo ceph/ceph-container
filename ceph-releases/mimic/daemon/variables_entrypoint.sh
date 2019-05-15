@@ -5,7 +5,7 @@
 # LIST OF ALL SCENARIOS AVAILABLE #
 ###################################
 
-ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_ceph_disk osd_ceph_disk_prepare osd_ceph_disk_activate osd_ceph_activate_journal mds rgw rgw_user restapi nfs zap_device mon_health mgr disk_introspection demo disk_list tcmu_runner rbd_target_api rbd_target_gw"
+ALL_SCENARIOS="populate_kvstore mon osd osd_directory osd_directory_single osd_ceph_disk osd_ceph_disk_prepare osd_ceph_disk_activate osd_ceph_activate_journal mds rgw rgw_user nfs zap_device mon_health mgr disk_introspection demo disk_list tcmu_runner rbd_target_api rbd_target_gw"
 
 
 #########################
@@ -54,11 +54,6 @@ fi
 : "${CEPHFS_METADATA_POOL:=${CEPHFS_NAME}_metadata}"
 : "${CEPHFS_METADATA_POOL_PG:=8}"
 : "${RGW_USER:="cephnfs"}"
-: "${RESTAPI_IP:=0.0.0.0}"
-: "${RESTAPI_PORT:=5000}"
-: "${RESTAPI_BASE_URL:=/api/v0.1}"
-: "${RESTAPI_LOG_LEVEL:=warning}"
-: "${RESTAPI_LOG_FILE:=/var/log/ceph/ceph-restapi.log}"
 : "${KV_TYPE:=none}" # valid options: etcd, k8s|kubernetes or none
 : "${KV_IP:=127.0.0.1}"
 : "${KV_PORT:=2379}"
@@ -98,6 +93,12 @@ if [[ "$KV_TYPE" == "etcd" ]]; then
   fi
   ETCD_SCHEMA=${CONFD_NODE_SCHEMA}
   ETCDCTL_OPTS=(--peers ${ETCD_SCHEMA}${KV_IP}:${KV_PORT})
+fi
+
+if command -v python &>/dev/null; then
+  PYTHON=python
+else
+  PYTHON=python3
 fi
 
 # Internal variables

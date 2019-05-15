@@ -48,7 +48,11 @@ It is possible to build a container running the latest development release (mast
 This is only available on CentOS with the following command :
 `make FLAVORS="master,centos,7" build`
 
+Alternatively, you can build a container image based on `wip-*` branch:
 
+`make FLAVORS="wip-super-code,centos,7" build`
+
+To build your branch on Centos 7 on the `wip-super-code` branch.
 
 Core Components
 ---------------

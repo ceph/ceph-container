@@ -12,14 +12,14 @@
 # likely this will be x86_64 and ppc64le initially.
 ---
 x86_64:
-  - rhel-8-x86_64-rpms
-  - rhel-8-x86_64-extras-rpms
+  - rhel-8-for-x86_64-baseos-rpms
+  - rhel-8-for-x86_64-appstream-rpms
   - rhceph-4-tools-for-rhel-8-x86_64-rpms
   - rhceph-4-mon-for-rhel-8-x86_64-rpms
   - rhceph-4-osd-for-rhel-8-x86_64-rpms
 ppc64le:
-  - rhel-8-ppc64le-rpms
-  - rhel-8-ppc64le-extras-rpms
+  - rhel-8-for-ppc64le-baseos-rpms
+  - rhel-8-for-ppc64le-appstream-rpms
   - rhceph-4-tools-for-rhel-8-ppc64le-rpms
   - rhceph-4-mon-for-rhel-8-ppc64le-rpms
   - rhceph-4-osd-for-rhel-8-ppc64le-rpms

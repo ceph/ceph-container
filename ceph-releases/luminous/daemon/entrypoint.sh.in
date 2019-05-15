@@ -121,6 +121,11 @@ case "$CEPH_DAEMON" in
     source /opt/ceph-container/bin/start_rgw.sh
     create_rgw_user
     ;;
+  restapi)
+    # TAG: restapi
+    source /opt/ceph-container/bin/start_restapi.sh
+    start_restapi
+    ;;
   rbd_mirror)
     # TAG: rbd_mirror
     source /opt/ceph-container/bin/start_rbd_mirror.sh
