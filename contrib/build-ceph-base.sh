@@ -39,7 +39,9 @@ for flavor in $flavors_to_build; do
   for version in ${ceph_version_list}; do
     version_tag="$(convert_version_to_version_tag "${version}")"
     latest_server_image_tag="$(get_latest_full_semver_tag "${version_tag}" "${arch_image_repo}")"
-    if [ -n "${latest_server_image_tag}" ]; then
+    if [ -n "${latest_server_image_tag}" ] && [ -n "${FORCE_BUILD:-}" ]; then
+      info "Force build is enabled"
+    elif [ -n "${latest_server_image_tag}" ] && [ -z "${FORCE_BUILD:-}" ]; then
       # If the last tag is not empty, we must compare its base to the latest base
       # Pull the last image and the base image to see if the base images match
       do_pull "${latest_server_image_tag}"

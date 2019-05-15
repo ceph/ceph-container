@@ -12,4 +12,5 @@
         gdisk \
         __RADOSGW_PACKAGE__ \
         __GANESHA_PACKAGES__ \
-        __ISCSI_PACKAGES__
+        __ISCSI_PACKAGES__ \
+        __CSI_PACKAGES__

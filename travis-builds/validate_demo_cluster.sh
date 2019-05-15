@@ -41,7 +41,7 @@ function test_demo_mon {
 
 function test_demo_osd {
   # shellcheck disable=SC2046
-  return $(wait_for_daemon "$DOCKER_COMMAND -s | grep -sq '1 osds: 1 up.*., 1 in.*.'")
+  return $(wait_for_daemon "$DOCKER_COMMAND -s | grep -sq '1 osds: 1 up.*, 1 in.*'")
 }
 
 function test_demo_rgw {
@@ -68,6 +68,12 @@ function test_demo_mgr {
   return $(wait_for_daemon "$DOCKER_COMMAND -s | grep -sq 'mgr:'")
 }
 
+function test_demo_rest_api {
+  key=$($DOCKER_COMMAND restful list-keys | python -c 'import json, sys; print(json.load(sys.stdin)["demo"])')
+  docker exec ceph-demo curl -s --connect-timeout 1 -u demo:$key -k https://0.0.0.0:8003/server
+  # shellcheck disable=SC2046
+  return $(wait_for_daemon "$DOCKER_COMMAND mgr dump | grep -sq 'restful\": \"https://.*:8003'")
+}
 
 ########
 # MAIN #
@@ -83,6 +89,7 @@ ceph_version=$(get_ceph_version)
 if [[ $(echo $ceph_version '>' 10.2 | bc -l) == 1 ]] ; then
   test_demo_mgr
 fi
+test_demo_rest_api
 ceph_status # wait again for the cluster to stabilize (mds pools)
 
 if ! docker ps | grep ceph-demo; then

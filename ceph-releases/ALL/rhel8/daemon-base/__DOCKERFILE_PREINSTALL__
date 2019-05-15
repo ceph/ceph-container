@@ -1,5 +1,7 @@
 RUN sed -i 's/enabled=.*/enabled=0/g' /etc/yum/pluginconf.d/subscription-manager.conf
 
+RUN rm -f /etc/yum.repos.d/ubi.repo
+
 # Editing /etc/redhat-storage-server release file
 RUN echo "Red Hat Ceph Storage Server 4 (Container)" > /etc/redhat-storage-release
 
@@ -9,7 +11,7 @@ EXPOSE 6789 6800 6801 6802 6803 6804 6805 80 5000
 LABEL version=4
 
 # Build specific labels
-LABEL com.redhat.component="rhceph-rhel8-container"
+LABEL com.redhat.component="rhceph-container"
 LABEL name="rhceph"
 LABEL description="Red Hat Ceph Storage 4"
 LABEL summary="Provides the latest Red Hat Ceph Storage 4 on RHEL 8 in a fully featured and supported base image."

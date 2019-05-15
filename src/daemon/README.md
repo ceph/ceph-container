@@ -428,6 +428,7 @@ And run the container like this `docker run -d -v /etc/ceph:/etc/ceph -v /var/li
 ## Deploy a REST API
 
 This is pretty straighforward. The `--net=host` is not mandatory, if you don't use it do not forget to expose the `RESTAPI_PORT`.
+Only available in luminous.
 
 ```
 docker run -d --net=host \
@@ -435,6 +436,14 @@ docker run -d --net=host \
 -e KV_IP=192.168.0.20 \
 ceph/daemon restapi
 ```
+
+List of available options:
+
+- `RESTAPI_IP` is the IP address to listen on (DEFAULT: 0.0.0.0)
+- `RESTAPI_PORT` is the listening port of the REST API (DEFAULT: 5000)
+- `RESTAPI_BASE_URL` is the base URL of the API (DEFAULT: /api/v0.1)
+- `RESTAPI_LOG_LEVEL` is the log level of the API (DEFAULT: warning)
+- `RESTAPI_LOG_FILE` is the location of the log file (DEFAULT: /var/log/ceph/ceph-restapi.log)
 
 ## Deploy a RBD mirror
 
@@ -454,10 +463,3 @@ docker run -d --net=host \
 ceph/daemon rbd_mirror
 ```
 
-List of available options:
-
-- `RESTAPI_IP` is the IP address to listen on (DEFAULT: 0.0.0.0)
-- `RESTAPI_PORT` is the listening port of the REST API (DEFAULT: 5000)
-- `RESTAPI_BASE_URL` is the base URL of the API (DEFAULT: /api/v0.1)
-- `RESTAPI_LOG_LEVEL` is the log level of the API (DEFAULT: warning)
-- `RESTAPI_LOG_FILE` is the location of the log file (DEFAULT: /var/log/ceph/ceph-restapi.log)
