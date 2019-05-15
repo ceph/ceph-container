@@ -201,7 +201,7 @@ function create_registry_manifest {
   # This should normally work, by the time we get here the arm64 image should have been built and pushed
   # IIRC docker manisfest will fail if the image does not exist
   for image in daemon-base daemon; do
-    for ceph_release in luminous mimic; do
+    for ceph_release in ${CEPH_RELEASES[@]:1}; do
       TARGET_RELEASE="ceph/${image}:${RELEASE}-${ceph_release}-centos-7"
       DOCKER_IMAGES="$TARGET_RELEASE ${TARGET_RELEASE}-x86_64"
 

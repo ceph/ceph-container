@@ -49,6 +49,7 @@ ALL_BUILDABLE_FLAVORS := \
 	luminous,opensuse,42.3 \
 	luminous,debian,9 \
 	mimic,centos,7 \
+	nautilus,centos,7 \
 	master,centos,7
 
 # ==============================================================================
