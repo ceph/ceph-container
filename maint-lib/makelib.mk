@@ -2,7 +2,7 @@
 # Can be overridden, but don't change the ordering, because the images are built atop each other
 IMAGES_TO_BUILD ?= daemon-base daemon
 
-HOST_ARCH ?= $(shell uname --machine)
+HOST_ARCH ?= $(shell uname -m)
 
 
 # Export all relevant environment variables from a flavor spec in the format:
