@@ -4,6 +4,8 @@ set -e
 source disk_list.sh
 
 function osd_activate {
+  local action=${1}
+
   if [[ -z "${OSD_DEVICE}" ]] || [[ ! -b "${OSD_DEVICE}" ]]; then
     log "ERROR: you either provided a non-existing device or no device at all."
     log "You must provide a device to build your OSD ie: /dev/sdb"
@@ -85,5 +87,7 @@ function osd_activate {
     log "osd_disk_activate: Unmounting $osd_mnt"
     umount "$osd_mnt" || (log "osd_disk_activate: Failed to umount $osd_mnt"; lsof "$osd_mnt")
   }
-  exec /usr/bin/ceph-osd "${CLI_OPTS[@]}" -f -i "${OSD_ID}" --setuser ceph --setgroup disk
+  if [ "${action}" != "no_start" ]; then
+    exec /usr/bin/ceph-osd "${CLI_OPTS[@]}" -f -i "${OSD_ID}" --setuser ceph --setgroup disk
+  fi
 }

@@ -93,6 +93,12 @@ case "$CEPH_DAEMON" in
     OSD_TYPE="activate"
     start_osd
     ;;
+  osd_ceph_disk_activate_only)
+    # TAG: osd_ceph_disk_activate_only
+    source start_osd.sh
+    OSD_TYPE="activate_only"
+    start_osd
+    ;;
   osd_ceph_activate_journal)
     # TAG: osd_ceph_activate_journal
     source start_osd.sh

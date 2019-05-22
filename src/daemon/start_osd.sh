@@ -38,6 +38,10 @@ function start_osd {
       source osd_disk_activate.sh
       osd_activate
       ;;
+    activate_only)
+      source osd_disk_activate.sh
+      osd_activate no_start
+      ;;
     devices)
       source osd_disks.sh
       source osd_common.sh
