@@ -6,11 +6,11 @@
         ceph-osd__ENV_[CEPH_POINT_RELEASE]__ \
         ceph-mds__ENV_[CEPH_POINT_RELEASE]__ \
         rbd-mirror__ENV_[CEPH_POINT_RELEASE]__  \
-        __CEPH_MGR_PACKAGE__\
+        __CEPH_MGR_PACKAGES__\
         kmod \
         lvm2 \
         gdisk \
-        __RADOSGW_PACKAGE__ \
+        __RADOSGW_PACKAGES__ \
         __GANESHA_PACKAGES__ \
         __ISCSI_PACKAGES__ \
         __CSI_PACKAGES__
