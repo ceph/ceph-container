@@ -6,7 +6,7 @@ set -e
 # VARIABLES #
 #############
 
-STAGING_DIR=staging/nautilus-rhel8-8-released-x86_64/
+STAGING_DIR=staging/nautilus-ubi8-8-released-x86_64/
 DAEMON_DIR=$STAGING_DIR/daemon
 DAEMON_BASE_DIR=${DAEMON_DIR}-base/
 DOCKERFILE_DAEMON=$DAEMON_DIR/Dockerfile
@@ -57,7 +57,7 @@ clean_staging() {
 }
 
 make_staging() {
-  make FLAVORS=nautilus,rhel8,8-released || fatal "Cannot build rhel8"
+  make FLAVORS=nautilus,ubi8,8-released || fatal "Cannot build rhel8"
 }
 
 success() {
