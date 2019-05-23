@@ -7,7 +7,6 @@
         ceph-mds__ENV_[CEPH_POINT_RELEASE]__ \
         rbd-mirror__ENV_[CEPH_POINT_RELEASE]__  \
         __CEPH_MGR_PACKAGES__\
-        __CEPH_GRAFANA_PACKAGES__ \
         kmod \
         lvm2 \
         gdisk \
