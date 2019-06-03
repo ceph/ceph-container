@@ -22,8 +22,8 @@ PARENTHETICAL_LOGTEXT = '        {:>80}     {}'
 # Read text from the file
 def _get_file_text(file_path):
     try:
-        with open(file_path, 'r') as txtfile:
-            return txtfile.read()
+        with open(file_path, 'rb') as txtfile:
+            return txtfile.read().decode('UTF-8')
     except (OSError, IOError) as o:
         IOOSErrorGracefulFail(o, "Cannot read or decode {} \n".format(file_path))
 
