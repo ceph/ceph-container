@@ -14,9 +14,10 @@ bash -c ' \
     echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
   fi && \
   if [ -n "__ISCSI_PACKAGES__" ]; then \
-    for repo in tcmu-runner python-rtslib ceph-iscsi; do \
+    for repo in tcmu-runner python-rtslib; do \
       curl -L https://shaman.ceph.com/api/repos/$repo/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo > /etc/yum.repos.d/$repo.repo ; \
     done ; \
+    curl -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
   fi' && \
 yum update -y && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
