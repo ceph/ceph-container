@@ -16,6 +16,9 @@ function start_rbd_target_api {
   # mount configfs at /sys/kernel/config
   mount -t configfs none /sys/kernel/config
 
+  # create the log directory
+  mkdir -p /var/log/rbd-target-api
+
   log "SUCCESS"
   # start rbd-target-api
   exec /usr/bin/rbd-target-api
