@@ -56,6 +56,10 @@ ADD ceph.defaults /opt/ceph-container/etc/
 # We use COPY instead of ADD for tarball so that it does not get extracted automatically at build time
 COPY Sree-0.1.tar.gz /opt/ceph-container/tmp/sree.tar.gz
 
+# Fetch the cn-core binary
+RUN curl -SL https://github.com/ceph/cn-core/releases/download/v0.6/cn-core-v0.6-linux-amd64 -o /usr/local/bin/cn-core && \
+  chmod +x /usr/local/bin/cn-core
+
 # Modify the entrypoint
 RUN bash "/opt/ceph-container/bin/generate_entrypoint.sh" && \
   rm -f /opt/ceph-container/bin/generate_entrypoint.sh && \

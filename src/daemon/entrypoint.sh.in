@@ -157,7 +157,8 @@ case "$CEPH_DAEMON" in
     ;;
   demo)
     # TAG: demo
-    source /opt/ceph-container/bin/demo.sh
+    # Deploying mon, mgr, osd, rgw, dash using cn-core (https://github.com/ceph/cn-core)
+    cn-core init
     ;;
   disk_list)
     # TAG: disk_list
