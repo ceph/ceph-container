@@ -16,6 +16,9 @@ function start_rbd_target_gw {
   # mount configfs at /sys/kernel/config
   mount -t configfs none /sys/kernel/config
 
+  # create the log directory
+  mkdir -p /var/log/rbd-target-gw
+
   log "SUCCESS"
   # start rbd-target-gw
   exec /usr/bin/rbd-target-gw
