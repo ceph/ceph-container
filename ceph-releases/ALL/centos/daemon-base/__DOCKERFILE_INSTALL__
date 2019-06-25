@@ -4,15 +4,24 @@ bash -c ' \
   if [ -n "__GANESHA_PACKAGES__" ]; then \
     echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
     echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
-    REPO_URL=$(curl -s "https://shaman.ceph.com/api/search/?project=nfs-ganesha&distros=centos/__ENV_[BASEOS_TAG]__&flavor=ceph_master&ref=next&sha1=latest" | jq -a ".[0] | .url"); \
-    echo "baseurl=$REPO_URL/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
+    if [[ "${CEPH_VERSION}" =~ master|nautilus|^wip* ]]; then \
+      REPO_URL=$(curl -s "https://shaman.ceph.com/api/search/?project=nfs-ganesha&distros=centos/__ENV_[BASEOS_TAG]__&flavor=ceph_master&ref=next&sha1=latest" | jq -a ".[0] | .url"); \
+      echo "baseurl=$REPO_URL/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
+    else \
+      echo "baseurl=http://download.ceph.com/nfs-ganesha/rpm-V2.7-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
+    fi ; \
     echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
     echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
-  fi && \
+  fi ; \
   if [ -n "__ISCSI_PACKAGES__" ]; then \
-    for repo in tcmu-runner python-rtslib ceph-iscsi; do \
+    for repo in tcmu-runner python-rtslib; do \
       curl -L https://shaman.ceph.com/api/repos/$repo/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo > /etc/yum.repos.d/$repo.repo ; \
     done ; \
+    if [[ "${CEPH_VERSION}" =~ master|nautilus|^wip* ]]; then \
+      curl -L https://shaman.ceph.com/api/repos/ceph-iscsi/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo > /etc/yum.repos.d/ceph-iscsi.repo ; \
+    else \
+      curl -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
+    fi ; \
   fi' && \
 yum update -y && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
