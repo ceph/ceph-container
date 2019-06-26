@@ -80,7 +80,7 @@ CRUSH_LOCATION_DEFAULT=("root=default" "host=${HOSTNAME}")
 CLI_OPTS=(--cluster ${CLUSTER})
 
 # This is ONLY used for the daemon's startup, e.g: ceph-osd $DAEMON_OPTS
-DAEMON_OPTS=(--cluster ${CLUSTER} --setuser ceph --setgroup ceph -d)
+DAEMON_OPTS=(--cluster ${CLUSTER} --default-log-to-file=false --default-mon-cluster-log-to-file=false --setuser ceph --setgroup ceph -d)
 
 MOUNT_OPTS=(-t xfs -o noatime,inode64)
 

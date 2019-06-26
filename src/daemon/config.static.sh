@@ -28,7 +28,6 @@ osd crush chooseleaf type = 0
 osd journal size = 100
 public network = ${CEPH_PUBLIC_NETWORK}
 cluster network = ${CEPH_PUBLIC_NETWORK}
-log file = /dev/null
 osd pool default size = 1
 ENDHERE
 
@@ -48,7 +47,6 @@ mon host = ${MON_IP}
 public network = ${CEPH_PUBLIC_NETWORK}
 cluster network = ${CEPH_CLUSTER_NETWORK}
 osd journal size = ${OSD_JOURNAL_SIZE}
-log file = /dev/null
 ENDHERE
     fi
     if [ "$IP_LEVEL" -eq 6 ]; then
