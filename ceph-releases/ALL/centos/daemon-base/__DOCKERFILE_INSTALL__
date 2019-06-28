@@ -26,7 +26,7 @@ bash -c ' \
 yum update -y && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
 bash -c ' \
-  if [[ "${CEPH_VERSION}" =~ master|^wip* ]]; then \
+  if [[ "${CEPH_VERSION}" =~ master|^wip* ]] || ${CEPH_DEVEL}; then \
     REPO_URL=$(curl -s "https://shaman.ceph.com/api/search/?project=ceph&distros=centos/__ENV_[BASEOS_TAG]__&flavor=default&ref=${CEPH_VERSION}&sha1=latest" | jq -a ".[0] | .url"); \
     RELEASE_VER=0 ;\
   else \

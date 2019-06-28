@@ -10,6 +10,7 @@ set -ex
 BRANCH="${GIT_BRANCH#*/}"
 LATEST_COMMIT_SHA=$(git rev-parse --short HEAD)
 TAGGED_HEAD=false # does HEAD is on a tag ?
+DEVEL=${DEVEL:=false}
 if [ -z "$CEPH_RELEASES" ]; then
   # NEVER change 'master' position in the array, this will break the 'latest' tag
   CEPH_RELEASES=(master luminous mimic nautilus)
@@ -132,7 +133,7 @@ function create_head_or_point_release {
 declare -F build_ceph_imgs  ||
 function build_ceph_imgs {
   echo "Build Ceph container image(s)"
-  make RELEASE="$RELEASE" build.parallel
+  make CEPH_DEVEL=${DEVEL} RELEASE="$RELEASE" build.parallel
   docker images
 }
 
@@ -168,6 +169,9 @@ function push_ceph_imgs_latests {
       release=${CEPH_RELEASES[-1]}
     else
       latest_name="latest-$release"
+    fi
+    if ${DEVEL}; then
+      latest_name="${latest_name}-devel"
     fi
     for i in daemon-base daemon; do
       tag=ceph/$i:${BRANCH}-${LATEST_COMMIT_SHA}-$release-centos-7-${HOST_ARCH}
@@ -227,13 +231,21 @@ cleanup_previous_run
 login_docker_hub
 create_head_or_point_release
 build_ceph_imgs
-push_ceph_imgs
-wait_for_arm_images
-create_registry_manifest
+# With devel builds we only push latest builds.
+# arm64 aren't present on shaman/chacra so we don't
+# need to create a registry manifest
+if ! ${DEVEL}; then
+  push_ceph_imgs
+  wait_for_arm_images
+  create_registry_manifest
+fi
 # If we run on a tagged head, we should not push the 'latest' tag
 if $TAGGED_HEAD; then
   echo "Don't push latest as we run on a tagged head"
   exit 0
 fi
 push_ceph_imgs_latests
-build_and_push_latest_bis
+# We don't need latest bis tags with ceph devel
+if ! ${DEVEL}; then
+  build_and_push_latest_bis
+fi
