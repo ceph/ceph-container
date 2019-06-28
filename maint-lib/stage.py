@@ -70,6 +70,7 @@ def main(CORE_FILES_DIR, CEPH_RELEASES_DIR):
     logging.info('GO_ARCH: {}'.format(getEnvVar('GO_ARCH')))
 
     CEPH_VERSION = getEnvVar('CEPH_VERSION')
+    CEPH_DEVEL = getEnvVar('CEPH_DEVEL')
     DISTRO = getEnvVar('DISTRO')
     DISTRO_VERSION = getEnvVar('DISTRO_VERSION')
     IMAGES_TO_BUILD = getEnvVar('IMAGES_TO_BUILD').split(' ')

@@ -37,6 +37,9 @@ BASEOS_REGISTRY ?= ""
 BASEOS_REPO ?= ""
 BASEOS_TAG ?= ""
 
+# Use Ceph development build packages from shaman/chacra repositories.
+CEPH_DEVEL ?= false
+
 
 # ==============================================================================
 # Internal definitions
@@ -175,6 +178,7 @@ OPTIONS:
 
   RELEASE - The release version to integrate in the tag. If omitted, set to the branch name.
 
+  CEPH_DEVEL - Use the ceph development packages from shaman/chacra instead of stable (default false).
 
 ADVANCED OPTIONS:
     It is advised only to use the below options for builds of a single flavor. These options are

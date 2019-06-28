@@ -54,6 +54,20 @@ Alternatively, you can build a container image based on `wip-*` branch:
 
 To build your branch on Centos 7 on the `wip-super-code` branch.
 
+It's also possible to use the Ceph development builds instead of the stable one (except for master).
+The ceph packages will be pulled from shaman/chacra repositories.
+The Ceph development images are using the `latest-<release>-devel` tag where release is the ceph
+release name (ie: luminous, mimic, nautilus)
+
+`make CEPH_DEVEL=true FLAVORS="nautilus,centos,7" build`
+
+This will generate the following container images:
+
+```
+ceph/daemon:latest-nautilus-devel
+ceph/daemon-base:latest-nautilus-devel
+```
+
 Core Components
 ---------------
 

@@ -17,6 +17,7 @@ REQUIRED_ENV_VARS = OrderedDict([
     ('CEPH_VERSION',       'Ceph named version part of the ceph-releases source path' +  # noqa: E241,E501
                             ALIGNED_NEWLINE + '(e.g., luminous, mimic)'),  # noqa: E241
     ('CEPH_POINT_RELEASE', 'Points to specific version of Ceph (e.g -12.2.0) or empty'),  # noqa: E241,E501
+    ('CEPH_DEVEL',         'Flag to enable ceph development packages (default false)'), # noqa: E241,E501
     ('DISTRO',             'Distro part of the ceph-releases source path (e.g., opensuse, centos)'),  # noqa: E241,E501
     ('DISTRO_VERSION',     'Distro version part of the ceph-releases source path' +  # noqa: E241,E501
                             ALIGNED_NEWLINE + '(e.g. in quotes, opensuse/"42.3", centos/"7")'),
