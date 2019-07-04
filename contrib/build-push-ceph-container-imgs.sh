@@ -124,6 +124,13 @@ function create_head_or_point_release {
     BRANCH=$(git branch -r --contains tags/"${tag_to_build[*]}" | grep -Eo 'stable-[0-9].[0-9]')
     echo "Building a release Ceph container image based on branch $BRANCH and tag ${tag_to_build[*]}"
     RELEASE="${tag_to_build[*]}-$BRANCH"
+    # (todo): remove this when we have a better solution like running
+    # the build script directly from the right branch.
+    if [ "${BRANCH}" == "stable-3.2" ]; then
+      CEPH_RELEASES=(luminous mimic)
+    elif [ "${BRANCH}" == "stable-4.0" ]; then
+      CEPH_RELEASES=(nautilus)
+    fi
   else
     set -e
     echo "Building a devel Ceph container image based on branch $BRANCH and commit $LATEST_COMMIT_SHA"
@@ -206,7 +213,10 @@ function create_registry_manifest {
   # This should normally work, by the time we get here the arm64 image should have been built and pushed
   # IIRC docker manisfest will fail if the image does not exist
   for image in daemon-base daemon; do
-    for ceph_release in ${CEPH_RELEASES[@]:1}; do
+    for ceph_release in ${CEPH_RELEASES[@]}; do
+      if [ "${ceph_release}" == "master" ]; then
+        continue
+      fi
       TARGET_RELEASE="ceph/${image}:${RELEASE}-${ceph_release}-centos-7"
       DOCKER_IMAGES="$TARGET_RELEASE ${TARGET_RELEASE}-x86_64"
 
