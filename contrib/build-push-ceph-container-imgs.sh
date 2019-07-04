@@ -18,6 +18,7 @@ fi
 
 HOST_ARCH=$(uname -m)
 BUILD_ARM= # Set this variable to anything if you want to build the ARM images too
+CN_RELEASE="v2.3.1"
 
 
 #############
@@ -56,9 +57,9 @@ function grep_sort_tags {
 
 function download_cn {
   local cn_link
-  cn_link="https://github.com/ceph/cn/releases/download/v1.8.0/cn-v1.8.0-bb92a8e-linux-amd64"
+  cn_link="https://github.com/ceph/cn/releases/download/${CN_RELEASE}/cn-${CN_RELEASE}-linux-amd64"
   if [[ $(arch) == "aarch64" ]]; then
-    cn_link="https://github.com/ceph/cn/releases/download/v1.8.0/cn-v1.8.0-bb92a8e-linux-arm64"
+    cn_link="https://github.com/ceph/cn/releases/download/${CN_RELEASE}/cn-${CN_RELEASE}-linux-arm64"
   fi
   curl -L "$cn_link" -o cn
   chmod +x cn
