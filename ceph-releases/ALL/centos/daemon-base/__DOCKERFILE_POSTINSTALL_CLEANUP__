@@ -1,5 +1,6 @@
 echo 'Postinstall cleanup' && \
  (rm -rf "/usr/bin/hyperkube /usr/bin/etcd /usr/bin/systemd-analyze /usr/share/hwdata/{iab.txt,oui.txt} /etc/profile.d/lang.sh" && \
+   rpm --nodeps -e vim-minimal && \
    yum clean all && \
    rpmdb --rebuilddb && \
    rpm -q __CEPH_BASE_PACKAGES__)
