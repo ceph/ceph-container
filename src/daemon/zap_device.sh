@@ -110,22 +110,22 @@ function zap_device {
       exit 1
     fi
 
+    # if the disk passed is a raw device AND the boot system disk
+    [[ $(lsblk --nodeps -no LABEL "${device}") == "boot" ]] && log "Looks like ${device} has a boot partition," &&
+      log "if you want to delete specific partitions point to the partition instead of the raw device" &&
+      log "Do not use your system disk!" &&
+      exit 1
+    if is_dmcrypt "${device}"; then
+    # If dmcrypt partitions detected, loop over all uuid found and check whether they are still opened.
+      ceph_dm=$(get_dmcrypt_uuid_part "${device}")
+      opened_dm=$(get_opened_dmcrypt "${device}")
+      zap_dmcrypt_device "$ceph_dm" "$opened_dm"
+    fi
     pkname=$(lsblk --nodeps -no PKNAME "${device}")
     if [ -z "$pkname" ]; then
     # are we zapping an entire block device or just a partition?
     # if pkname is empty then yes
       partitions=$(get_child_partitions "${device}")
-      # if the disk passed is a raw device AND the boot system disk
-      [[ $(lsblk --nodeps -no LABEL "${device}") == "boot" ]] && log "Looks like ${device} has a boot partition," &&
-        log "if you want to delete specific partitions point to the partition instead of the raw device" &&
-        log "Do not use your system disk!" &&
-        exit 1
-      if is_dmcrypt "${device}"; then
-      # If dmcrypt partitions detected, loop over all uuid found and check whether they are still opened.
-        ceph_dm=$(get_dmcrypt_uuid_part "${device}")
-        opened_dm=$(get_opened_dmcrypt "${device}")
-        zap_dmcrypt_device "$ceph_dm" "$opened_dm"
-      fi
       log "Zapping the entire device ${device}"
       for part in $partitions; do
         wipefs --all "${part}"
