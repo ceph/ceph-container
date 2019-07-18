@@ -9,6 +9,7 @@ services:
 
 
 before_install:
+  - if [[ -n $(grep --exclude-dir=.git -I -P "\xa0" -r .) ]]; then echo 'NBSP characters found'; exit 1; fi
   - docker --version
   - sudo apt-get install -y --force-yes xfsprogs
   - sudo ./travis-builds/purge_cluster.sh
