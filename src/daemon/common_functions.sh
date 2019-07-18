@@ -373,7 +373,7 @@ function get_dmcrypt_bluestore_uuid {
   start_disk_list
   BLOCK_DB_PART=$(start_disk_list)
   unset DISK_LIST_SEARCH
-  if [ -n "${BLOCK_DB_PART}" ]; then
+  if [ -n "${BLOCK_DB_PART}" ]; then
     BLOCK_DB_UUID=$(get_part_uuid "${BLOCK_DB_PART}")
   fi
 
