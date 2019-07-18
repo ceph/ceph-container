@@ -112,6 +112,10 @@ case "$CEPH_DAEMON" in
     source /opt/ceph-container/bin/osd_volume_activate.sh
     osd_volume_activate
     ;;
+  osd_ceph_disk_dmcrypt_data_map)
+    # TAG: osd_ceph_disk_dmcrypt_data_map
+    dmcrypt_data_map
+    ;;
   mds)
     # TAG: mds
     source /opt/ceph-container/bin/start_mds.sh

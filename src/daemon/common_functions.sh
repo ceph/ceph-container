@@ -542,3 +542,15 @@ function MB_to_bytes() {
 function bytes_to_MB() {
   echo $(($1 / 1024 / 1024))
 }
+
+# Map dmcrypt data device
+function dmcrypt_data_map() {
+  for lockbox in $(blkid -t PARTLABEL="ceph lockbox" -o device | tr '\n' ' '); do
+    OSD_DEVICE=${lockbox:0:-1}
+    DATA_PART=$(dev_part "${OSD_DEVICE}" 1)
+    DATA_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 1)")
+    LOCKBOX_UUID=$(get_part_uuid "$(dev_part "${OSD_DEVICE}" 5)")
+    mount_lockbox "${DATA_UUID}" "${LOCKBOX_UUID}"
+    ceph-disk --setuser ceph --setgroup disk activate --dmcrypt --no-start-daemon ${DATA_PART} || true
+  done
+}

@@ -105,6 +105,10 @@ case "$CEPH_DAEMON" in
     OSD_TYPE="activate_journal"
     start_osd
     ;;
+  osd_ceph_disk_dmcrypt_data_map)
+    # TAG: osd_ceph_disk_dmcrypt_data_map
+    dmcrypt_data_map
+    ;;
   osd_ceph_volume_activate)
     ami_privileged
     # shellcheck disable=SC1091
