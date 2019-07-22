@@ -4,9 +4,11 @@ bash -c ' \
   if [ -n "__GANESHA_PACKAGES__" ]; then \
     echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
     echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
-    if [[ "${CEPH_VERSION}" =~ master|nautilus|^wip* ]]; then \
+    if [[ "${CEPH_VERSION}" =~ master|^wip* ]]; then \
       REPO_URL=$(curl -s "https://shaman.ceph.com/api/search/?project=nfs-ganesha&distros=centos/__ENV_[BASEOS_TAG]__&flavor=ceph_master&ref=next&sha1=latest" | jq -a ".[0] | .url"); \
       echo "baseurl=$REPO_URL/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
+    elif [[ "${CEPH_VERSION}" == nautilus ]]; then \
+      echo "baseurl=http://download.ceph.com/nfs-ganesha/rpm-V2.8-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
     else \
       echo "baseurl=http://download.ceph.com/nfs-ganesha/rpm-V2.7-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
     fi ; \
