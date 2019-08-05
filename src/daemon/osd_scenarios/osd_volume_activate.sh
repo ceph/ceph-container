@@ -1,16 +1,36 @@
 #!/bin/bash
 set -e
 
-function osd_volume_activate {
-  : "${OSD_ID:?Give me an OSD ID to activate, eg: -e OSD_ID=0}"
+function osd_volume_simple {
+  # Find the devices used by ceph-disk
+  DEVICES=$(ceph-volume inventory --format json | $PYTHON -c 'import sys, json; print(" ".join([d.get("path") for d in json.load(sys.stdin) if "Used by ceph-disk" in d.get("rejected_reasons")]))')
 
-  CEPH_VOLUME_LIST_JSON="$(ceph-volume lvm list --format json)"
+  # Scan devices with ceph data partition
+  for device in ${DEVICES}; do
+    if parted --script "${device}" print | grep -qE '^ 1.*ceph data'; then
+      if [[ "${device}" =~ ^/dev/(cciss|nvme) ]]; then
+        device+="p"
+      fi
+      ceph-volume simple scan ${device}1 --force || true
+    fi
+  done
 
-  if ! echo "$CEPH_VOLUME_LIST_JSON" | $PYTHON -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"])" &> /dev/null; then
-    log "OSD id $OSD_ID does not exist"
+  # Find the OSD json file associated to the ID
+  OSD_JSON=$(grep -l "whoami\": ${OSD_ID}$" /etc/ceph/osd/*.json)
+  if [ -z "${OSD_JSON}" ]; then
+    log "OSD id ${OSD_ID} does not exist"
     exit 1
   fi
 
+  # Activate the OSD
+  # The command can fail so if it does, let's output the ceph-volume logs
+  if ! ceph-volume simple activate --file ${OSD_JSON} --no-systemd; then
+    cat /var/log/ceph
+    exit 1
+  fi
+}
+
+function osd_volume_lvm {
   # Find the OSD FSID from the OSD ID
   OSD_FSID="$(echo "$CEPH_VOLUME_LIST_JSON" | $PYTHON -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"][0][\"tags\"][\"ceph.osd_fsid\"])")"
 
@@ -32,6 +52,18 @@ function osd_volume_activate {
   if ! ceph-volume lvm activate --no-systemd "${OSD_OBJECTSTORE[@]}" "${OSD_ID}" "${OSD_FSID}"; then
     cat /var/log/ceph
     exit 1
+  fi
+}
+
+function osd_volume_activate {
+  : "${OSD_ID:?Give me an OSD ID to activate, eg: -e OSD_ID=0}"
+
+  CEPH_VOLUME_LIST_JSON="$(ceph-volume lvm list --format json)"
+
+  if echo "$CEPH_VOLUME_LIST_JSON" | $PYTHON -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"])" &> /dev/null; then
+    osd_volume_lvm
+  else
+    osd_volume_simple
   fi
 
   log "SUCCESS"
