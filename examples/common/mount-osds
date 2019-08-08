@@ -91,3 +91,5 @@ for dev in $(find_osds); do
         }
     fi
 done
+
+#test
