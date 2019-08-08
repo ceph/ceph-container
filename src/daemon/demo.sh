@@ -394,3 +394,5 @@ touch /var/lib/ceph/I_AM_A_DEMO /etc/ceph/I_AM_A_DEMO
 
 log "SUCCESS"
 exec ceph "${CLI_OPTS[@]}" -w
+
+#lybtest
