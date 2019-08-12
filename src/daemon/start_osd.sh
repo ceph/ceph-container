@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+###test###
 
 if is_redhat; then
   if [[ -n "${TCMALLOC_MAX_TOTAL_THREAD_CACHE_BYTES}" ]]; then
