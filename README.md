@@ -17,11 +17,19 @@ For the daemon tags [visit](https://hub.docker.com/r/ceph/daemon/tags/).
 Alternatively, you can run the following command (install jq first):
 
 ```
-$ curl -s https://registry.hub.docker.com/v2/repositories/ceph/daemon/tags/ | jq '."results"[] .name'
+$ curl -s https://registry.hub.docker.com/v2/repositories/ceph/daemon/tags/?page_size=100 | jq '."results"[] .name'
 ```
 
-Be careful, by default the Docker API returns the first page with its 10 elements.
-To improve your `curl` you can pass the `https://registry.hub.docker.com/v2/repositories/ceph/daemon/tags/?page=2`
+
+Be careful, this will only show the latest 100 tags.  To improve your `curl` you can pass a page number: `https://registry.hub.docker.com/v2/repositories/ceph/daemon/tags/?page_size=100&page=2` or use the following bash script to search multiple pages:
+
+This will search for all tags with both **stable** and **nautlius** in the latest 2000
+
+```bash
+for i in {1..20}; do \
+    curl -s https://registry.hub.docker.com/v2/repositories/ceph/daemon/tags/?page_size=100\&page=$i | jq '."results"[] .name'; \
+done | awk '/stable/ && /nautilus/'
+```
 
 Stable images
 -------------
