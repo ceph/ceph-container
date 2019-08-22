@@ -6,6 +6,33 @@ set -ex
 #############
 # VARIABLES #
 #############
+function require {
+  if [[ -z "${!1}" ]] ; then
+    echo "Required variable $1 not set, exiting"
+    exit 1
+  fi
+}
+
+CI_CONTAINER=${CI_CONTAINER:=false}
+if ${CI_CONTAINER} ; then
+  # save the ceph branch, from the parent job
+  CEPH_BRANCH=${BRANCH}
+  # must be set by caller (perhaps another Jenkins build job)
+  # BRANCH (as above, the Ceph branch)
+  # SHA1 (sha1 corresponding to the Ceph branch)
+  # CONTAINER_REPO_HOSTNAME="quay.io"
+  # CONTAINER_REPO_ORGANIZATION="cephci"
+  # CONTAINER_REPO_USERNAME=user
+  # CONTAINER_REPO_PASSWORD=password
+  for v in BRANCH SHA1 CONTAINER_REPO_HOSTNAME CONTAINER_REPO_ORGANIZATION \
+    CONTAINER_REPO_USERNAME CONTAINER_REPO_PASSWORD; do
+    require $v
+  done
+fi
+
+# backward compatibility; script expected DOCKER_HUB names to be set
+CONTAINER_REPO_USERNAME=${CONTAINER_REPO_USERNAME:-$DOCKER_HUB_USERNAME}
+CONTAINER_REPO_PASSWORD=${CONTAINER_REPO_PASSWORD:-$DOCKER_HUB_PASSWORD}
 
 # GIT_BRANCH is typically 'origin/master', we strip the variable to only get 'master'
 CONTAINER_BRANCH="${GIT_BRANCH#*/}"
@@ -43,7 +70,7 @@ function install_docker {
 
 function login_docker_hub {
   echo "Login in the Docker Hub"
-  docker login -u "$DOCKER_HUB_USERNAME" -p "$DOCKER_HUB_PASSWORD"
+  docker login -u "$CONTAINER_REPO_USERNAME" -p "$CONTAINER_REPO_PASSWORD" ${CONTAINER_REPO_HOSTNAME}
 }
 
 function enable_experimental_docker_cli {
@@ -142,7 +169,16 @@ function create_head_or_point_release {
 declare -F build_ceph_imgs  ||
 function build_ceph_imgs {
   echo "Build Ceph container image(s)"
-  make CEPH_DEVEL=${DEVEL} RELEASE="$RELEASE" build.parallel
+  if ${CI_CONTAINER}; then
+    make FLAVORS="${CEPH_BRANCH},centos,7" \
+         CEPH_DEVEL="true" \
+         RELEASE=${RELEASE} \
+         TAG_REGISTRY=${CONTAINER_REPO_ORGANIZATION} \
+         IMAGES_TO_BUILD=daemon-base \
+         build.parallel
+  else
+    make CEPH_DEVEL=${DEVEL} RELEASE=${RELEASE} build.parallel
+  fi
   docker images
 }
 
@@ -171,6 +207,15 @@ function build_and_push_latest_bis {
 declare -F push_ceph_imgs_latest ||
 function push_ceph_imgs_latest {
   local latest_name
+
+  if ${CI_CONTAINER} ; then
+    local_tag=${CONTAINER_REPO_ORGANIZATION}/daemon-base:${RELEASE}-${BRANCH}-centos-7-${HOST_ARCH}
+    repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/daemon-base:${RELEASE}-centos-7-${HOST_ARCH}-devel
+    docker tag $local_tag $repo_tag
+    docker push $repo_tag
+    return
+  fi
+
   for release in "${CEPH_RELEASES[@]}" latest; do
     if [[ "$release" == "latest" ]]; then
       latest_name="latest"
@@ -241,12 +286,16 @@ function create_registry_manifest {
 install_docker
 cleanup_previous_run
 login_docker_hub
-create_head_or_point_release
+if ${CI_CONTAINER}; then
+  RELEASE=${CEPH_BRANCH}-${SHA1:0:7}
+else
+  create_head_or_point_release
+fi
 build_ceph_imgs
 # With devel builds we only push latest builds.
 # arm64 aren't present on shaman/chacra so we don't
 # need to create a registry manifest
-if ! ${DEVEL}; then
+if ! ( ${DEVEL} || ${CI_CONTAINER} ) ; then
   push_ceph_imgs
   wait_for_arm_images
   create_registry_manifest
@@ -258,6 +307,6 @@ if $TAGGED_HEAD; then
 fi
 push_ceph_imgs_latest
 # We don't need latest bis tags with ceph devel
-if ! ${DEVEL}; then
+if ! ( ${DEVEL} || ${CI_CONTAINER} ); then
   build_and_push_latest_bis
 fi
