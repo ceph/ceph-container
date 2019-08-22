@@ -38,7 +38,7 @@ function build_and_push_latest_bis {
   return
 }
 
-function push_ceph_imgs_latests {
+function push_ceph_imgs_latest {
   return
 }
 

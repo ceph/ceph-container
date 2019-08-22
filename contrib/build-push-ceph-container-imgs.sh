@@ -168,8 +168,8 @@ function build_and_push_latest_bis {
   docker push ceph/daemon:latest-bis
 }
 
-declare -F push_ceph_imgs_latests ||
-function push_ceph_imgs_latests {
+declare -F push_ceph_imgs_latest ||
+function push_ceph_imgs_latest {
   local latest_name
   for release in "${CEPH_RELEASES[@]}" latest; do
     if [[ "$release" == "latest" ]]; then
@@ -256,7 +256,7 @@ if $TAGGED_HEAD; then
   echo "Don't push latest as we run on a tagged head"
   exit 0
 fi
-push_ceph_imgs_latests
+push_ceph_imgs_latest
 # We don't need latest bis tags with ceph devel
 if ! ${DEVEL}; then
   build_and_push_latest_bis
