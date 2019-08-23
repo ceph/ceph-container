@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# use -E so that trap ERR works with set -e
+set -E
+
 function do_stayalive {
   if [ -z "$STAYALIVE" ]; then
     return
@@ -115,8 +118,18 @@ function _chld {
 }
 
 function _err {
-  teardown "ERR" -1
-}
+  local lineno=$1
+  local msg=$2
+  local parent=$3
+  local r=$4
+  echo "Failed at $lineno: $msg on parent $parent with return code $r"
+  # 143 usually means the application caught a SIGTERM signal, meaning the process was killed.
+  if [ "$r" -eq 143 ]; then
+    teardown "SIGTERM" 0
+  else
+    teardown "ERR" -1
+  fi
+  }
 
 function exec {
   # This function overrides the built-in exec() call
@@ -130,7 +143,7 @@ function exec {
   trap _term SIGTERM
   trap _bus SIGBUS
   trap _chld SIGCHLD
-  trap _err ERR
+  trap '_err ${LINENO} "$BASH_COMMAND" "$PPID" "$?"' ERR
 
   # Running the program in background and save the pid in child_for_exec
   "$@" &
