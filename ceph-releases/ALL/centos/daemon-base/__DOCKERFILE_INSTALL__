@@ -22,23 +22,9 @@ bash -c ' \
     if [[ "${CEPH_VERSION}" =~ master|^wip* ]]; then \
       curl -L https://shaman.ceph.com/api/repos/ceph-iscsi/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo > /etc/yum.repos.d/ceph-iscsi.repo ; \
     elif [[ "${CEPH_VERSION}" == nautilus ]]; then \
-      curl -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
+      curl -L https://download.ceph.com/ceph-iscsi/3/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     else \
-      echo "[ceph-iscsi]" > /etc/yum.repos.d/ceph-iscsi.repo ; \
-      echo "name=ceph-iscsi noarch packages" >> /etc/yum.repos.d/ceph-iscsi.repo ; \
-      echo "baseurl=http://download.ceph.com/ceph-iscsi/2/rpm/el7/noarch" >> /etc/yum.repos.d/ceph-iscsi.repo ; \
-      echo "enabled=1" >> /etc/yum.repos.d/ceph-iscsi.repo ; \
-      echo "gpgcheck=1" >> /etc/yum.repos.d/ceph-iscsi.repo ; \
-      echo "gpgkey=https://download.ceph.com/keys/release.asc" >> /etc/yum.repos.d/ceph-iscsi.repo ; \
-      echo "type=rpm-md" >> /etc/yum.repos.d/ceph-iscsi.repo ; \
-      echo "" >> /etc/yum.repos.d/ceph-iscsi.repo ; \
-      echo "[ceph-iscsi-source]" >> /etc/yum.repos.d/ceph-iscsi.repo ; \
-      echo "name=ceph-iscsi source packages" >> /etc/yum.repos.d/ceph-iscsi.repo ; \
-      echo "baseurl=http://download.ceph.com/ceph-iscsi/2/rpm/el7/SRPMS" >> /etc/yum.repos.d/ceph-iscsi.repo ; \
-      echo "enabled=0" >> /etc/yum.repos.d/ceph-iscsi.repo ; \
-      echo "gpgcheck=1" >> /etc/yum.repos.d/ceph-iscsi.repo ; \
-      echo "gpgkey=https://download.ceph.com/keys/release.asc" >> /etc/yum.repos.d/ceph-iscsi.repo ; \
-      echo "type=rpm-md" >> /etc/yum.repos.d/ceph-iscsi.repo ; \
+      curl -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     fi ; \
   fi' && \
 yum update -y && \
