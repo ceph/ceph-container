@@ -153,7 +153,7 @@ function create_head_or_point_release {
     git checkout refs/tags/"${tag_to_build[*]}"
 
     # find branch associated to that tag
-    BRANCH=$(git branch -r --contains tags/"${tag_to_build[*]}" | grep -Eo 'stable-[0-9].[0-9]')
+    CONTAINER_BRANCH=$(git branch -r --contains tags/"${tag_to_build[*]}" | grep -Eo 'stable-[0-9].[0-9]')
     echo "Building a release Ceph container image based on branch $CONTAINER_BRANCH and tag ${tag_to_build[*]}"
     RELEASE="${tag_to_build[*]}-$CONTAINER_BRANCH"
     # (todo): remove this when we have a better solution like running
