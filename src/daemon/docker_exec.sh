@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# use -E so that trap ERR works with set -e
-set -E
-
 function do_stayalive {
   if [ -z "$STAYALIVE" ]; then
     return
@@ -31,7 +28,7 @@ child_for_exec=1
 
 function teardown {
   # Disabling the traps to avoid a cascading
-  trap - SIGINT SIGILL SIGABRT SIGFPE SIGSEGV SIGTERM SIGBUS SIGCHLD SIGKILL ERR
+  trap - SIGINT SIGILL SIGABRT SIGFPE SIGSEGV SIGTERM SIGBUS SIGCHLD SIGKILL
 
   # This function is called when we got a signal reporting something died
   # It will check the child_for_exec process exited
@@ -117,24 +114,10 @@ function _chld {
   teardown "SIGCHLD" -1
 }
 
-function _err {
-  local lineno=$1
-  local msg=$2
-  local parent=$3
-  local r=$4
-  echo "Failed at $lineno: $msg on parent $parent with return code $r"
-  # 143 usually means the application caught a SIGTERM signal, meaning the process was killed.
-  if [ "$r" -eq 143 ]; then
-    teardown "SIGTERM" 0
-  else
-    teardown "ERR" -1
-  fi
-  }
-
 function exec {
   # This function overrides the built-in exec() call
-  # It starts the process in background to catch ERR but
-  # as per docker requirement, forward the SIGTERM to it.
+  # It starts the process in the background to hook shutdown, but forwards
+  # signals to the processes.
   trap _int SIGINT
   trap _ill SIGILL
   trap _abrt SIGABRT
@@ -143,7 +126,6 @@ function exec {
   trap _term SIGTERM
   trap _bus SIGBUS
   trap _chld SIGCHLD
-  trap '_err ${LINENO} "$BASH_COMMAND" "$PPID" "$?"' ERR
 
   # Running the program in background and save the pid in child_for_exec
   "$@" &
