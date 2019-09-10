@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-${OSD_DISKS:-none}
+OSD_DISKS=${OSD_DISKS:-none}
 
 function osd_disks {
   if [[ ! -d /var/lib/ceph/osd ]]; then
