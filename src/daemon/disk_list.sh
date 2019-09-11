@@ -6,8 +6,6 @@ set -e
 # VARIABLES #
 #############
 
-mkdir -p /var/lib/ceph/tmp/
-tmp_dir="$(mktemp --directory --tmpdir=/var/lib/ceph/tmp/)"
 DOCKER_ENV=""
 
 
@@ -26,21 +24,25 @@ function mandatory_checks () {
 }
 
 function mount_ceph_data () {
+  local mount_point="$1"
   if is_dmcrypt; then
-    mount /dev/mapper/"${data_uuid}" "$tmp_dir"
+    mount /dev/mapper/"${data_uuid}" "$mount_point"
   else
     data_part=$(dev_part "${OSD_DEVICE}" 1)
-    mount /dev/disk/by-partuuid/"$(blkid -t PARTLABEL="ceph data" -s PARTUUID -o value ${data_part})" "$tmp_dir"
+    mount /dev/disk/by-partuuid/"$(blkid -t PARTLABEL="ceph data" -s PARTUUID -o value ${data_part})" "$mount_point"
   fi
 }
 
 function umount_ceph_data () {
-  umount "$tmp_dir"
+  local mount_point="$1"
+  umount "$mount_point"
 }
 
 function get_docker_env () {
-  mount_ceph_data
-  cd "$tmp_dir" || return
+  mkdir -p /var/lib/ceph/tmp/
+  local mount_point="$(mktemp --directory --tmpdir=/var/lib/ceph/tmp/)"
+  mount_ceph_data "$mount_point"
+  cd "$mount_point" || return
   if [[ -n ${1} ]]; then
     if [[ "${1}" == "whoami" ]]; then
       if is_dmcrypt; then
@@ -88,7 +90,8 @@ function get_docker_env () {
   fi
 
   cd || return
-  umount_ceph_data
+  umount_ceph_data "$mount_point"
+  rmdir "$mount_point"
 }
 
 function start_disk_list () {
