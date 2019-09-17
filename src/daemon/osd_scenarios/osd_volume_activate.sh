@@ -1,6 +1,16 @@
 #!/bin/bash
 set -e
 
+function get_osd_volume_type {
+  CEPH_VOLUME_LIST_JSON="$(ceph-volume lvm list --format json)"
+  #shellcheck disable=SC2153
+  if echo "$CEPH_VOLUME_LIST_JSON" | python -c "import sys, json; print(json.load(sys.stdin)['$OSD_ID'])" &> /dev/null; then
+    echo "lvm"
+  else
+    echo "simple"
+  fi
+}
+
 function osd_volume_simple {
   # Find the devices used by ceph-disk
   DEVICES=$(ceph-volume inventory --format json | python -c 'import sys, json; print(" ".join([d.get("path") for d in json.load(sys.stdin) if "Used by ceph-disk" in d.get("rejected_reasons")]))')
@@ -24,10 +34,14 @@ function osd_volume_simple {
 
   # Activate the OSD
   # The command can fail so if it does, let's output the ceph-volume logs
-  if ! ceph-volume simple activate --file ${OSD_JSON} --no-systemd; then
+  if ! ceph-volume simple activate --file "${OSD_JSON}" --no-systemd; then
     cat /var/log/ceph
     exit 1
   fi
+}
+
+function get_dmcrypt_uuids {
+  dmsetup ls --target=crypt | cut -d$'\t' -f 1
 }
 
 function osd_volume_lvm {
@@ -61,9 +75,9 @@ function osd_volume_activate {
   ulimit -Sn 1024
   ulimit -Hn 4096
 
-  CEPH_VOLUME_LIST_JSON="$(ceph-volume lvm list --format json)"
+  OSD_VOLUME_TYPE=$(get_osd_volume_type)
 
-  if echo "$CEPH_VOLUME_LIST_JSON" | python -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"])" &> /dev/null; then
+  if [[ "$OSD_VOLUME_TYPE" == "lvm" ]]; then
     osd_volume_lvm
   else
     osd_volume_simple
@@ -80,6 +94,20 @@ function osd_volume_activate {
     for mnt in $ceph_mnt; do
       log "osd_volume_activate: Unmounting $mnt"
       umount "$mnt" || (log "osd_volume_activate: Failed to umount $mnt"; lsof "$mnt")
+    done
+
+    UUIDS=$(get_dmcrypt_uuids)
+
+    for uuid in ${UUIDS}; do
+      if [[ "$OSD_VOLUME_TYPE" == "simple" ]]; then
+        DATA="${OSD_JSON}"
+      else
+        DATA=$(echo "$CEPH_VOLUME_LIST_JSON" | python -c "import sys, json; print(json.load(sys.stdin)['$OSD_ID'])")
+      fi
+      if grep -qo "${uuid}" "${DATA}"; then
+        log "osd_volume_activate: Closing dmcrypt $uuid"
+        cryptsetup close "${uuid}" || log "osd_volume_activate: Failed to close dmcrypt ${uuid}"
+      fi
     done
   }
   # /usr/lib/systemd/system/ceph-osd@.service
