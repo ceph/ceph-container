@@ -1,16 +1,6 @@
 #!/bin/bash
 set -e
 
-function get_osd_volume_type {
-  CEPH_VOLUME_LIST_JSON="$(ceph-volume lvm list --format json)"
-  #shellcheck disable=SC2153
-  if echo "$CEPH_VOLUME_LIST_JSON" | $PYTHON -c "import sys, json; print(json.load(sys.stdin)['$OSD_ID'])" &> /dev/null; then
-    echo "lvm"
-  else
-    echo "simple"
-  fi
-}
-
 function osd_volume_simple {
   # Find the devices used by ceph-disk
   DEVICES=$(ceph-volume inventory --format json | $PYTHON -c 'import sys, json; print(" ".join([d.get("path") for d in json.load(sys.stdin) if "Used by ceph-disk" in d.get("rejected_reasons")]))')
@@ -26,6 +16,7 @@ function osd_volume_simple {
   done
 
   # Find the OSD json file associated to the ID
+  #shellcheck disable=SC2153
   OSD_JSON=$(grep -l "whoami\": ${OSD_ID}$" /etc/ceph/osd/*.json)
   if [ -z "${OSD_JSON}" ]; then
     log "OSD id ${OSD_ID} does not exist"
@@ -46,10 +37,10 @@ function get_dmcrypt_uuids {
 
 function osd_volume_lvm {
   # Find the OSD FSID from the OSD ID
-  OSD_FSID="$(echo "$CEPH_VOLUME_LIST_JSON" | $PYTHON -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"][0][\"tags\"][\"ceph.osd_fsid\"])")"
+  OSD_FSID="$(echo "$CEPH_VOLUME_LIST_JSON" | $PYTHON -c "import sys, json; print(json.load(sys.stdin)['$OSD_ID'][0]['tags']['ceph.osd_fsid'])")"
 
   # Find the OSD type
-  OSD_TYPE="$(echo "$CEPH_VOLUME_LIST_JSON" | $PYTHON -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"][0][\"type\"])")"
+  OSD_TYPE="$(echo "$CEPH_VOLUME_LIST_JSON" | $PYTHON -c "import sys, json; print(json.load(sys.stdin)['$OSD_ID'][0]['type'])")"
 
   # Discover the objectstore
   if [[ "data journal" =~ $OSD_TYPE ]]; then
@@ -72,7 +63,14 @@ function osd_volume_lvm {
 function osd_volume_activate {
   : "${OSD_ID:?Give me an OSD ID to activate, eg: -e OSD_ID=0}"
 
-  OSD_VOLUME_TYPE=$(get_osd_volume_type)
+  CEPH_VOLUME_LIST_JSON="$(ceph-volume lvm list --format json)"
+
+  #shellcheck disable=SC2153
+  if echo "$CEPH_VOLUME_LIST_JSON" | $PYTHON -c "import sys, json; print(json.load(sys.stdin)['$OSD_ID'])" &> /dev/null; then
+    OSD_VOLUME_TYPE=lvm
+  else
+    OSD_VOLUME_TYPE=simple
+  fi
 
   if [[ "$OSD_VOLUME_TYPE" == "lvm" ]]; then
     osd_volume_lvm
