@@ -102,7 +102,7 @@ function osd_volume_activate {
       else
         DATA=$(echo "$CEPH_VOLUME_LIST_JSON" | python -c "import sys, json; print(json.load(sys.stdin)['$OSD_ID'])")
       fi
-      if grep -qo "${uuid}" "${DATA}"; then
+      if echo "${DATA}" | grep -qo "${uuid}"; then
         log "osd_volume_activate: Closing dmcrypt $uuid"
         cryptsetup close "${uuid}" || log "osd_volume_activate: Failed to close dmcrypt ${uuid}"
       fi
