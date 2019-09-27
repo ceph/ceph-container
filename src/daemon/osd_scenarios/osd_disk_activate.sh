@@ -8,6 +8,10 @@ function osd_activate {
     exit 1
   fi
 
+  if [ -L "${OSD_DEVICE}" ]; then
+    OSD_DEVICE=$(readlink -f ${OSD_DEVICE})
+  fi
+
   if ! parted --script "${OSD_DEVICE}" print | grep -qE '^ 1.*ceph data'; then
     log "ERROR: ${OSD_DEVICE} doesn't have a ceph metadata partition"
     exit 1
