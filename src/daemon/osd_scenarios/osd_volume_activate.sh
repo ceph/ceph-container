@@ -8,7 +8,7 @@ function osd_volume_simple {
   # Scan devices with ceph data partition
   for device in ${DEVICES}; do
     if parted --script "${device}" print | grep -qE '^ 1.*ceph data'; then
-      if [[ "${device}" =~ ^/dev/(cciss|nvme) ]]; then
+      if [[ "${device}" =~ ^/dev/(cciss|nvme|loop) ]]; then
         device+="p"
       fi
       ceph-volume simple scan ${device}1 --force || true
