@@ -8,7 +8,7 @@ RUN echo "Red Hat Ceph Storage Server 4 (Container)" > /etc/redhat-storage-relea
 EXPOSE 6789 6800 6801 6802 6803 6804 6805 80 5000
 
 # Atomic specific labels
-LABEL version=4
+LABEL version="4"
 
 # Build specific labels
 LABEL com.redhat.component="rhceph-container"
