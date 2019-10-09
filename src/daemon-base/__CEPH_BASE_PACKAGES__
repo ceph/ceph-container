@@ -11,6 +11,8 @@
         kmod \
         lvm2 \
         gdisk \
+	smartmontools \
+	nvme-cli \
         __RADOSGW_PACKAGES__ \
         __GANESHA_PACKAGES__ \
         __ISCSI_PACKAGES__
