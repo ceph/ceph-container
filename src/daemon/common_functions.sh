@@ -538,3 +538,54 @@ function MB_to_bytes() {
 function bytes_to_MB() {
   echo $(($1 / 1024 / 1024))
 }
+
+function tune_memory {
+  local available_memory="$1"
+  _50MB="$(MB_to_bytes 50)"
+  _128MB="$(MB_to_bytes 128)"
+  _4096MB="$(MB_to_bytes 4096)"
+
+  # Don't try to tune the cluster if its already done
+  if grep -q -e osd_memory_target -e osd_memory_base -e osd_memory_cache_min /etc/ceph/"${CLUSTER}".conf; then
+    log "/etc/ceph/${CLUSTER}.conf is already memory tuned"
+    return
+  fi
+
+  if [ -z "$available_memory" ]; then
+    log "The memory detection failed, cannot tune memory"
+    return
+  fi
+
+  log "Found $(bytes_to_MB "$available_memory")MB of available memory ($available_memory bytes)"
+  # If the system have a lot of ram, it's difficult to consider that everything will be given to ceph
+  # As the current default of ceph is around 4GB, let's cap the memory assigned to ceph at 4GB.
+  if [ "$available_memory" -gt "${_4096MB}" ]; then
+    log "More than 4GB of available memory found. Caping to 4GB to avoid consuming all memory for ceph"
+    available_memory="$_4096MB"
+  fi
+
+  # osd_memory_target is 50MB below the available memory
+  # That let some room for other processes (to be adjusted)
+  osd_memory_target=$((available_memory - _50MB))
+  if [ "$osd_memory_target" -le "${_128MB}" ]; then
+    log  "osd_memory_target ($(bytes_to_MB $osd_memory_target)MB) is too small, cannot tune memory."
+    return
+  fi
+
+  # osd_memory_base is set to half of the memory available
+  osd_memory_base=$((available_memory / 2))
+  if [ "$osd_memory_base" -le "${_128MB}" ]; then
+    log  "osd_memory_base ($(bytes_to_MB $osd_memory_base)MB) is too small, cannot tune memory."
+    return
+  fi
+
+  # let's put the cache_min at the middle between memory_base and memory_target
+  osd_memory_cache_min=$(((osd_memory_target - osd_memory_base) / 2 + osd_memory_base))
+  log "Tuning memory : osd_memory_base=$(bytes_to_MB $osd_memory_base)MB, osd_memory_cache_min=$(bytes_to_MB $osd_memory_cache_min)MB, osd_memory_target=$(bytes_to_MB $osd_memory_target)MB"
+
+  cat << ENDHERE >> /etc/ceph/"${CLUSTER}".conf
+osd_memory_target = $osd_memory_target
+osd_memory_base = $osd_memory_base
+osd_memory_cache_min = $osd_memory_cache_min
+ENDHERE
+}
