@@ -73,6 +73,11 @@ function parse_size {
 }
 
 function bootstrap_osd {
+  # Apply the tuning on Nautilus and above only since the values applied are causing the ceph-osd to crash on earlier versions
+  if [[ ${OSD_BLUESTORE} -eq 1 ]] && [[ "$CEPH_VERSION" != "luminous" ]] && [[ "$CEPH_VERSION" != "mimic" ]]; then
+    tune_memory $(get_available_ram)
+  fi
+
   if [[ -n "$OSD_DEVICE" ]]; then
     if [[ -b "$OSD_DEVICE" ]]; then
       if [ -n "$BLUESTORE_BLOCK_SIZE" ]; then

@@ -78,8 +78,6 @@ function get_network {
 }
 
 function start_mon {
-  available_memory=$(get_available_ram)
-
   if [[ ${NETWORK_AUTO_DETECT} -eq 0 ]]; then
       if [[ -z "$CEPH_PUBLIC_NETWORK" ]]; then
         log "ERROR- CEPH_PUBLIC_NETWORK must be defined as the name of the network for the OSDs"
@@ -179,11 +177,6 @@ function start_mon {
         timeout 7 ceph "${CLI_OPTS[@]}" mon add "${MON_NAME}" "${MON_IP}":"${MON_PORT}" || true
       fi
     fi
-  fi
-
-  # Apply the tuning on Nautilus and above only since the values applied are causing the ceph-osd to crash on earlier versions
-  if [[ "$CEPH_VERSION" != "luminous" ]] && [[ "$CEPH_VERSION" != "mimic" ]] ; then
-    tune_memory "$available_memory"
   fi
 
   # start MON
