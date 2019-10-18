@@ -49,6 +49,11 @@ function test_demo_rgw {
   return $(wait_for_daemon "$DOCKER_COMMAND -s | grep -sq 'rgw:'")
 }
 
+function test_demo_nfs {
+  # shellcheck disable=SC2046
+  return $(wait_for_daemon "$DOCKER_COMMAND -s | grep -sq 'rgw-nfs:'")
+}
+
 function test_demo_mds {
   echo "Waiting for the MDS to be ready"
   # NOTE(leseb): metadata server always takes up to 5 sec to run
@@ -84,6 +89,7 @@ test_demo_mon
 test_demo_osd
 test_demo_rgw
 test_demo_mds
+test_demo_nfs
 test_demo_rbd_mirror
 ceph_version=$(get_ceph_version)
 if [[ $(echo $ceph_version '>' 10.2 | bc -l) == 1 ]] ; then
