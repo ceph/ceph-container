@@ -13,6 +13,7 @@
         gdisk \
 	smartmontools \
 	nvme-cli \
+	libstoragemgmt \
         __RADOSGW_PACKAGES__ \
         __GANESHA_PACKAGES__ \
         __ISCSI_PACKAGES__ \
