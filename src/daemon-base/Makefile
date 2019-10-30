@@ -22,7 +22,7 @@
 
 build:
 	@echo === docker build $(DAEMON_BASE_IMAGE)
-	@docker build $(BUILD_ARGS) --tag $(DAEMON_BASE_IMAGE) .
+	@docker build --pull $(BUILD_ARGS) --tag $(DAEMON_BASE_IMAGE) .
 
 push: ; @docker push $(DAEMON_BASE_IMAGE)
 clean:
