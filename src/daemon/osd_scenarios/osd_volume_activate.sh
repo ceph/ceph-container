@@ -63,6 +63,9 @@ function osd_volume_lvm {
 function osd_volume_activate {
   : "${OSD_ID:?Give me an OSD ID to activate, eg: -e OSD_ID=0}"
 
+  ulimit -Sn 1024
+  ulimit -Hn 4096
+
   CEPH_VOLUME_LIST_JSON="$(ceph-volume lvm list --format json)"
 
   #shellcheck disable=SC2153
