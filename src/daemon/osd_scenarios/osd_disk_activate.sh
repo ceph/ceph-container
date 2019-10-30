@@ -12,6 +12,9 @@ function osd_activate {
     exit 1
   fi
 
+  ulimit -Sn 1024
+  ulimit -Hn 4096
+
   CEPH_DISK_OPTIONS=()
 
   if [[ ${OSD_FILESTORE} -eq 1 ]] && [[ ${OSD_DMCRYPT} -eq 0 ]]; then
