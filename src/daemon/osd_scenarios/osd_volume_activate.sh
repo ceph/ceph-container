@@ -4,6 +4,9 @@ set -e
 function osd_volume_activate {
   : "${OSD_ID:?Give me an OSD ID to activate, eg: -e OSD_ID=0}"
 
+  ulimit -Sn 1024
+  ulimit -Hn 4096
+
   CEPH_VOLUME_LIST_JSON="$(ceph-volume lvm list --format json)"
 
   if ! echo "$CEPH_VOLUME_LIST_JSON" | python -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"])" &> /dev/null; then
