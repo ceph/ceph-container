@@ -88,6 +88,10 @@ function osd_activate {
     umount "$osd_mnt" || (log "osd_disk_activate: Failed to umount $osd_mnt"; lsof "$osd_mnt")
   }
   if [ "${action}" != "no_start" ]; then
+    # /usr/lib/systemd/system/ceph-osd@.service
+    # LimitNOFILE=1048576
+    # LimitNPROC=1048576
+    ulimit -n 1048576 -u 1048576
     exec /usr/bin/ceph-osd "${CLI_OPTS[@]}" -f -i "${OSD_ID}" --setuser ceph --setgroup disk
   fi
 }

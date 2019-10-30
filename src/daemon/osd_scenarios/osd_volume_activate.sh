@@ -105,5 +105,9 @@ function osd_volume_activate {
       fi
     done
   }
+  # /usr/lib/systemd/system/ceph-osd@.service
+  # LimitNOFILE=1048576
+  # LimitNPROC=1048576
+  ulimit -n 1048576 -u 1048576
   exec /usr/bin/ceph-osd "${DAEMON_OPTS[@]}" -i "${OSD_ID}"
 }
