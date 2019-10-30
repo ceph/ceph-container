@@ -8,6 +8,9 @@ function osd_activate {
     exit 1
   fi
 
+  ulimit -Sn 1024
+  ulimit -Hn 4096
+
   if [ -L "${OSD_DEVICE}" ]; then
     OSD_DEVICE=$(readlink -f ${OSD_DEVICE})
   fi
