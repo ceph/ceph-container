@@ -33,6 +33,7 @@ bash -c ' \
   if [[ "${CEPH_VERSION}" =~ master|^wip* ]] || ${CEPH_DEVEL}; then \
     REPO_URL=$(curl -s "https://shaman.ceph.com/api/search/?project=ceph&distros=centos/__ENV_[BASEOS_TAG]__&flavor=default&ref=${CEPH_VERSION}&sha1=latest" | jq -a ".[0] | .url"); \
     RELEASE_VER=0 ;\
+    rpm -e python-remoto --nodeps ; \
     yum install -y python-pip ; \
     pip install -U remoto ; \
     yum remove -y python-pip ; \
