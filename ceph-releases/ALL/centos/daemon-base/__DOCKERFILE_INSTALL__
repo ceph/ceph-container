@@ -45,3 +45,6 @@ bash -c ' \
     pip install -U remoto ; \
     yum remove -y python-pip ; \
   fi '
+
+# customize root's prompt, for benefit of users shelling into this container
+echo PS1="'[ceph: \u@\h:\l \W]\\$ '" >> /root/.bashrc
