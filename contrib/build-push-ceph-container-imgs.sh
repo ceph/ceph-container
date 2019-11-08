@@ -21,7 +21,7 @@ if ${CI_CONTAINER} ; then
   # BRANCH (as above, the Ceph branch)
   # SHA1 (sha1 corresponding to the Ceph branch)
   # CONTAINER_REPO_HOSTNAME="quay.io"
-  # CONTAINER_REPO_ORGANIZATION="cephci"
+  # CONTAINER_REPO_ORGANIZATION="ceph-ci"
   # CONTAINER_REPO_USERNAME=user
   # CONTAINER_REPO_PASSWORD=password
   for v in BRANCH SHA1 CONTAINER_REPO_HOSTNAME CONTAINER_REPO_ORGANIZATION \
@@ -214,9 +214,12 @@ function push_ceph_imgs_latest {
 
   if ${CI_CONTAINER} ; then
     local_tag=${CONTAINER_REPO_ORGANIZATION}/daemon-base:${RELEASE}-${BRANCH}-centos-7-${HOST_ARCH}
-    repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/daemon-base:${RELEASE}-centos-7-${HOST_ARCH}-devel
-    docker tag $local_tag $repo_tag
-    docker push $repo_tag
+    full_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${RELEASE}-centos-7-${HOST_ARCH}-devel
+    short_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${BRANCH}
+    docker tag $local_tag $full_repo_tag
+    docker tag $local_tag $short_repo_tag
+    docker push $full_repo_tag
+    docker push $short_repo_tag
     return
   fi
 
