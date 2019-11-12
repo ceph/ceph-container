@@ -17,4 +17,5 @@
         __RADOSGW_PACKAGES__ \
         __GANESHA_PACKAGES__ \
         __ISCSI_PACKAGES__ \
-        __CSI_PACKAGES__
+        __CSI_PACKAGES__ \
+	less
