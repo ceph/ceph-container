@@ -36,7 +36,7 @@ MGR_IP=$MON_IP
 # MON #
 #######
 function bootstrap_mon {
-  if [[ "$CEPH_VERSION" != "luminous" ]] && [[ "$CEPH_VERSION" != "mimic" ]] ; then
+  if [[ ! "${CEPH_VERSION}" =~ ^(luminous|mimic)$ ]]; then
     MON_PORT=3300
   fi
   # shellcheck disable=SC1091
@@ -74,7 +74,7 @@ function parse_size {
 
 function bootstrap_osd {
   # Apply the tuning on Nautilus and above only since the values applied are causing the ceph-osd to crash on earlier versions
-  if [[ ${OSD_BLUESTORE} -eq 1 ]] && [[ "$CEPH_VERSION" != "luminous" ]] && [[ "$CEPH_VERSION" != "mimic" ]]; then
+  if [[ ${OSD_BLUESTORE} -eq 1 ]] && [[ "${CEPH_VERSION}" =~ ^(luminous|mimic)$ ]]; then
     tune_memory $(get_available_ram)
   fi
 
