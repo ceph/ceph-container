@@ -93,11 +93,17 @@ function bootstrap_osd {
   fi
 
   if [ ! -e "$OSD_PATH"/keyring ]; then
-    if ! grep -qE "osd data = $OSD_PATH" /etc/ceph/"${CLUSTER}".conf; then
-      echo "osd data = $OSD_PATH" >> /etc/ceph/"${CLUSTER}".conf
+    if ! grep -qE "osd objectstore = bluestore" /etc/ceph/"${CLUSTER}".conf; then
       echo "osd objectstore = bluestore" >> /etc/ceph/"${CLUSTER}".conf
     fi
+    if ! grep -qE "osd data = $OSD_PATH" /etc/ceph/"${CLUSTER}".conf; then
+      cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
 
+[osd.${OSD_ID}]
+osd data = ${OSD_PATH}
+
+ENDHERE
+    fi
     # bootstrap OSD
     mkdir -p "$OSD_PATH"
     chown --verbose -R ceph. "$OSD_PATH"
