@@ -215,11 +215,14 @@ function push_ceph_imgs_latest {
   if ${CI_CONTAINER} ; then
     local_tag=${CONTAINER_REPO_ORGANIZATION}/daemon-base:${RELEASE}-${BRANCH}-centos-7-${HOST_ARCH}
     full_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${RELEASE}-centos-7-${HOST_ARCH}-devel
-    short_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${BRANCH}
+    branch_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${BRANCH}
+    sha1_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}
     docker tag $local_tag $full_repo_tag
-    docker tag $local_tag $short_repo_tag
+    docker tag $local_tag $branch_repo_tag
+    docker tag $local_tag $sha1_repo_tag
     docker push $full_repo_tag
-    docker push $short_repo_tag
+    docker push $branch_repo_tag
+    docker push $sha1_repo_tag
     return
   fi
 
