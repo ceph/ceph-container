@@ -8,12 +8,19 @@ function start_rpc {
 
 }
 
+function start_dbus {
+  mkdir -p /run/dbus
+  dbus-daemon --system
+}
+
 function start_nfs {
   get_config
   check_config
 
   # Init RPC
   start_rpc
+  # Start dbus daemon
+  start_dbus
 
   if [ ! -e "$RGW_KEYRING" ]; then
 
@@ -32,6 +39,7 @@ function start_nfs {
 
   # create ganesha log directory since the package does not create it
   mkdir -p /var/log/ganesha/
+
 
   log "SUCCESS"
   # start ganesha, logging both to STDOUT and to the configured location
