@@ -77,7 +77,7 @@ done"  # add 'done' to end of next_versions list so for loop will continue one p
                                        "${PUSH_REPOSITORY}" "${newest_build_number}")"
 
     # Apply tags for the minor versions (and major version)
-    additional_tags=()
+    additional_tags=("${version_tag}")
     minor_number="$(extract_minor_version "${version_tag}")"
     next_minor_number=''
     if [ "${next_version}" == "done" ]; then
