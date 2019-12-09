@@ -343,7 +343,11 @@ function get_tags_matching () {
     if [ -n "${matching_tags}" ]; then
       all_matching_tags="$(printf '%s\n%s' "${all_matching_tags}" "${matching_tags}")"
     fi
-    page=$((page + 1))
+    if [ "$(echo "${response}" | jq -r .next)" == "null" ]; then
+      break
+    else
+      page=$((page + 1))
+    fi
   done
   local full_tags=''
   for tag in $all_matching_tags; do
