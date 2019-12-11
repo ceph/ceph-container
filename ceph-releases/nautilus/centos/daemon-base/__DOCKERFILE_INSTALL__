@@ -1,0 +1,47 @@
+yum install -y epel-release && \
+yum install -y jq && \
+bash -c ' \
+  if [ -n "__GANESHA_PACKAGES__" ]; then \
+    echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
+    echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
+    if [[ "${CEPH_VERSION}" =~ master|^wip* ]]; then \
+      REPO_URL=$(curl -s "https://shaman.ceph.com/api/search/?project=nfs-ganesha&distros=centos/__ENV_[BASEOS_TAG]__&flavor=ceph_master&ref=next&sha1=latest" | jq -a ".[0] | .url"); \
+      echo "baseurl=$REPO_URL/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
+    elif [[ "${CEPH_VERSION}" == nautilus ]]; then \
+      echo "baseurl=http://download.ceph.com/nfs-ganesha/rpm-V2.8-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
+    else \
+      echo "baseurl=http://download.ceph.com/nfs-ganesha/rpm-V2.7-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
+    fi ; \
+    echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
+    echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
+  fi ; \
+  if [ -n "__ISCSI_PACKAGES__" ]; then \
+    for repo in tcmu-runner python-rtslib; do \
+      curl -s -L https://shaman.ceph.com/api/repos/$repo/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo > /etc/yum.repos.d/$repo.repo ; \
+    done ; \
+    if [[ "${CEPH_VERSION}" =~ master|^wip* ]]; then \
+      curl -s -L https://shaman.ceph.com/api/repos/ceph-iscsi/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo > /etc/yum.repos.d/ceph-iscsi.repo ; \
+    elif [[ "${CEPH_VERSION}" == nautilus ]]; then \
+      curl -s -L https://download.ceph.com/ceph-iscsi/3/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
+    else \
+      curl -s -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
+    fi ; \
+  fi' && \
+yum update -y && \
+rpm --import 'https://download.ceph.com/keys/release.asc' && \
+bash -c ' \
+  if [[ "${CEPH_VERSION}" =~ master|^wip* ]] || ${CEPH_DEVEL}; then \
+    REPO_URL=$(curl -s "https://shaman.ceph.com/api/search/?project=ceph&distros=centos/__ENV_[BASEOS_TAG]__&flavor=default&ref=${CEPH_VERSION}&sha1=latest" | jq -a ".[0] | .url"); \
+    RELEASE_VER=0 ;\
+  else \
+    RELEASE_VER=1 ;\
+    REPO_URL="http://download.ceph.com/rpm-${CEPH_VERSION}/el__ENV_[BASEOS_TAG]__/"; \
+  fi && \
+  rpm -Uvh "$REPO_URL/noarch/ceph-release-1-${RELEASE_VER}.el__ENV_[BASEOS_TAG]__.noarch.rpm" ' && \
+yum install -y __CEPH_BASE_PACKAGES__ && \
+bash -c ' \
+  if [[ "${CEPH_VERSION}" =~ master|^wip* ]] || ${CEPH_DEVEL}; then \
+    yum install -y python-pip openssh-clients ; \
+    pip install -U remoto ; \
+    yum remove -y python-pip ; \
+  fi '
