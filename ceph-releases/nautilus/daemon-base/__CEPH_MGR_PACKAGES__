@@ -1,5 +1,4 @@
 ceph-mgr__ENV_[CEPH_POINT_RELEASE]__ \
-ceph-mgr-cephadm__ENV_[CEPH_POINT_RELEASE]__ \
 ceph-mgr-dashboard__ENV_[CEPH_POINT_RELEASE]__ \
 ceph-mgr-diskprediction-local__ENV_[CEPH_POINT_RELEASE]__ \
 ceph-mgr-k8sevents__ENV_[CEPH_POINT_RELEASE]__ \
