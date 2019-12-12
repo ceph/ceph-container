@@ -41,7 +41,6 @@ bash -c ' \
 yum install -y __CEPH_BASE_PACKAGES__ && \
 bash -c ' \
   if [[ "${CEPH_VERSION}" =~ master|^wip* ]] || ${CEPH_DEVEL}; then \
-    yum install -y ceph-mgr-cephadm ; \
     yum install -y python-pip ; \
     pip install -U remoto ; \
     yum remove -y python-pip ; \
