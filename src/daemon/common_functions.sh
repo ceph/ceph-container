@@ -87,7 +87,7 @@ function create_mandatory_directories {
 
   # Adjust the owner of all those directories
   chown "${CHOWN_OPT[@]}" -R ceph. /var/run/ceph/
-  find -L /var/lib/ceph/ -mindepth 1 -maxdepth 3 -exec chown "${CHOWN_OPT[@]}" ceph. {} \;
+  find -L /var/lib/ceph/ -mindepth 1 -maxdepth 3 -not \( -user ceph -or -group ceph \) -exec chown "${CHOWN_OPT[@]}" ceph. {} \;
 }
 
 # Print resolved symbolic links of a device
