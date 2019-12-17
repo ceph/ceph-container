@@ -197,8 +197,13 @@ function build_and_push_latest_bis {
   # latest-bis-$ceph_release is needed by ceph-ansible so it can test the restart handlers on an image ID change
   # rebuild latest again to get a different image ID
   for ceph_release in "${CEPH_RELEASES[@]}"; do
-    make RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,7 build
-    docker tag ceph/daemon:"$CONTAINER_BRANCH"-bis-"${ceph_release}"-centos-7-"${HOST_ARCH}" ceph/daemon:latest-bis-"$ceph_release"
+    if [ "${ceph_release}" == "master" ]; then
+      CENTOS_RELEASE=8
+    else
+      CENTOS_RELEASE=7
+    fi
+    make RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,${CENTOS_RELEASE} build
+    docker tag ceph/daemon:"$CONTAINER_BRANCH"-bis-"${ceph_release}"-centos-${CENTOS_RELEASE}-"${HOST_ARCH}" ceph/daemon:latest-bis-"$ceph_release"
     docker push ceph/daemon:latest-bis-"$ceph_release"
   done
 
@@ -213,8 +218,9 @@ function push_ceph_imgs_latest {
   local latest_name
 
   if ${CI_CONTAINER} ; then
-    local_tag=${CONTAINER_REPO_ORGANIZATION}/daemon-base:${RELEASE}-${BRANCH}-centos-7-${HOST_ARCH}
-    full_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${RELEASE}-centos-7-${HOST_ARCH}-devel
+    # Let's use centos 8 on ceph-ci for now and add a special case for nautilus/centos7 later
+    local_tag=${CONTAINER_REPO_ORGANIZATION}/daemon-base:${RELEASE}-${BRANCH}-centos-8-${HOST_ARCH}
+    full_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${RELEASE}-centos-8-${HOST_ARCH}-devel
     branch_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${BRANCH}
     sha1_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}
     docker tag $local_tag $full_repo_tag
@@ -238,7 +244,12 @@ function push_ceph_imgs_latest {
       latest_name="${latest_name}-devel"
     fi
     for i in daemon-base daemon; do
-      tag=ceph/$i:${CONTAINER_BRANCH}-${CONTAINER_SHA}-$release-centos-7-${HOST_ARCH}
+      if [ "${release}" == "master" ]; then
+        CENTOS_RELEASE=8
+      else
+        CENTOS_RELEASE=7
+      fi
+      tag=ceph/$i:${CONTAINER_BRANCH}-${CONTAINER_SHA}-$release-centos-${CENTOS_RELEASE}-${HOST_ARCH}
       # tag image
       docker tag "$tag" ceph/$i:"$latest_name"
 
