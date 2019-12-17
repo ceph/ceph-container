@@ -30,6 +30,15 @@ bash -c ' \
 yum update -y && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
 bash -c ' \
+  if [[ __ENV_[BASEOS_TAG]__ -eq 8 ]]; then \
+    yum install -y dnf-plugins-core ;\
+    yum copr enable -y ktdreyer/ceph-el8 ;\
+    echo "[lab-extras]" > /etc/yum.repos.d/lab-extras.repo ;\
+    echo "name=labextras" >> /etc/yum.repos.d/lab-extras.repo ;\
+    echo "baseurl=http://apt-mirror.front.sepia.ceph.com/lab-extras/8/" >> /etc/yum.repos.d/lab-extras.repo ;\
+    echo "enabled=1" >> /etc/yum.repos.d/lab-extras.repo ;\
+    echo "gpgcheck=0" >> /etc/yum.repos.d/lab-extras.repo ;\
+  fi && \
   if [[ "${CEPH_VERSION}" =~ master|^wip* ]] || ${CEPH_DEVEL}; then \
     REPO_URL=$(curl -s "https://shaman.ceph.com/api/search/?project=ceph&distros=centos/__ENV_[BASEOS_TAG]__&flavor=default&ref=${CEPH_VERSION}&sha1=latest" | jq -a ".[0] | .url"); \
     RELEASE_VER=0 ;\
@@ -38,10 +47,4 @@ bash -c ' \
     REPO_URL="http://download.ceph.com/rpm-${CEPH_VERSION}/el__ENV_[BASEOS_TAG]__/"; \
   fi && \
   rpm -Uvh "$REPO_URL/noarch/ceph-release-1-${RELEASE_VER}.el__ENV_[BASEOS_TAG]__.noarch.rpm" ' && \
-yum install -y __CEPH_BASE_PACKAGES__ && \
-bash -c ' \
-  if [[ "${CEPH_VERSION}" =~ master|^wip* ]] || ${CEPH_DEVEL}; then \
-    yum install -y python-pip ; \
-    pip install -U remoto ; \
-    yum remove -y python-pip ; \
-  fi '
+yum install -y __CEPH_BASE_PACKAGES__
