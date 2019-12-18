@@ -84,7 +84,7 @@ function enable_experimental_docker_cli {
 }
 
 function grep_sort_tags {
-  "$@" | grep -oE 'v[3-9].[0-9]*.[0-9]|v[3-9].[0-9]*.[0-9](alpha|beta|rc)[0-9]{1,2}?' | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n
+  "$@" | grep -oE 'v[3-9].[0-9]*.[0-9]*|v[3-9].[0-9]*.[0-9](alpha|beta|rc)[0-9]{1,2}?' | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n
 }
 
 function download_cn {
