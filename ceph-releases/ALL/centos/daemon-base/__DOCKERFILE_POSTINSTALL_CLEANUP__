@@ -3,4 +3,4 @@ echo 'Postinstall cleanup' && \
    yum clean all && \
    rpmdb --rebuilddb && \
    rpm -q __CEPH_BASE_PACKAGES__ && \
-   yum-config-manager --disable ceph-iscsi ceph-iscsi-source ceph-iscsi-noarch tcmu-runner tcmu-runner-noarch tcmu-runner-source python-rtslib-source python-rtslib-noarch python-rtslib)
+   yum-config-manager --disable ceph-iscsi ceph-iscsi-source ceph-iscsi-noarch tcmu-runner tcmu-runner-noarch tcmu-runner-source)
