@@ -85,16 +85,16 @@ function test_demo_rest_api {
 ########
 get_cluster_name
 ceph_status # wait for the cluster to stabilize
+ceph_version=$(get_ceph_version)
 test_demo_mon
 test_demo_osd
 test_demo_rgw
 test_demo_mds
-test_demo_nfs
-test_demo_rbd_mirror
-ceph_version=$(get_ceph_version)
-if [[ $(echo $ceph_version '>' 10.2 | bc -l) == 1 ]] ; then
-  test_demo_mgr
+if [[ $(echo $ceph_version '<' 15.0 | bc -l) == 1 ]] ; then
+  test_demo_nfs
 fi
+test_demo_rbd_mirror
+test_demo_mgr
 test_demo_rest_api
 ceph_status # wait again for the cluster to stabilize (mds pools)
 
