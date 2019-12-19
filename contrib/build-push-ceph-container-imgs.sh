@@ -76,10 +76,13 @@ function install_docker {
     sudo apt-get update
     sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --force-yes docker-ce
   fi
-  # ignore failure here; some distros (el8) don't need this
-  sudo systemctl start docker || true
-  sudo systemctl status --no-pager docker || true
-  sudo chgrp "$(whoami)" /var/run/docker.sock || true
+  sudo systemctl start docker
+  sudo systemctl status --no-pager docker
+  sudo chgrp "$(whoami)" /var/run/docker.sock
+}
+
+function install_podman {
+  sudo dnf install -y podman podman-docker
 }
 
 function login_docker_hub {
@@ -306,7 +309,11 @@ function create_registry_manifest {
 # MAIN #
 ########
 
-install_docker
+if [[ -x /usr/bin/dnf ]] ; then
+  install_podman
+then
+  install_docker
+fi
 cleanup_previous_run
 login_docker_hub
 if ${CI_CONTAINER}; then
