@@ -76,9 +76,10 @@ function install_docker {
     sudo apt-get update
     sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --force-yes docker-ce
   fi
-  sudo systemctl start docker
-  sudo systemctl status --no-pager docker
-  sudo chgrp "$(whoami)" /var/run/docker.sock
+  # ignore failure here; some distros (el8) don't need this
+  sudo systemctl start docker || true
+  sudo systemctl status --no-pager docker || true
+  sudo chgrp "$(whoami)" /var/run/docker.sock || true
 }
 
 function login_docker_hub {
