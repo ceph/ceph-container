@@ -76,9 +76,14 @@ function install_docker {
     sudo apt-get update
     sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --force-yes docker-ce
   fi
-  sudo systemctl start docker
-  sudo systemctl status --no-pager docker
-  sudo chgrp "$(whoami)" /var/run/docker.sock
+
+  # Podman doesn't have systemd unit files so we can't start them on CentOS8
+  CENTOS_RELEASE=$(_centos_release ${CEPH_BRANCH})
+  if [ $CENTOS_RELEASE != 8 ] || [[ -x /usr/bin/apt-get ]]; then
+    sudo systemctl start docker
+    sudo systemctl status --no-pager docker
+    sudo chgrp "$(whoami)" /var/run/docker.sock
+  fi
 }
 
 function login_docker_hub {
