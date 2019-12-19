@@ -53,6 +53,15 @@ CN_RELEASE="v2.3.1"
 # FUNCTIONS #
 #############
 
+function _centos_release {
+  local release=$1
+  if [[ "${release}" =~ master|^wip* ]]; then
+    echo 8
+  else
+    echo 7
+  fi
+}
+
 function cleanup_previous_run {
   make clean.all || true
 }
@@ -174,7 +183,7 @@ declare -F build_ceph_imgs  ||
 function build_ceph_imgs {
   echo "Build Ceph container image(s)"
   if ${CI_CONTAINER}; then
-    make FLAVORS="${CEPH_BRANCH},centos,7" \
+    make FLAVORS="${CEPH_BRANCH},centos,$(_centos_release ${CEPH_BRANCH})" \
          CEPH_DEVEL="true" \
          RELEASE=${RELEASE} \
          TAG_REGISTRY=${CONTAINER_REPO_ORGANIZATION} \
@@ -197,19 +206,16 @@ function build_and_push_latest_bis {
   # latest-bis-$ceph_release is needed by ceph-ansible so it can test the restart handlers on an image ID change
   # rebuild latest again to get a different image ID
   for ceph_release in "${CEPH_RELEASES[@]}"; do
-    if [ "${ceph_release}" == "master" ]; then
-      CENTOS_RELEASE=8
-    else
-      CENTOS_RELEASE=7
-    fi
+    CENTOS_RELEASE=$(_centos_release ${ceph_release})
     make RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,${CENTOS_RELEASE} build
     docker tag ceph/daemon:"$CONTAINER_BRANCH"-bis-"${ceph_release}"-centos-${CENTOS_RELEASE}-"${HOST_ARCH}" ceph/daemon:latest-bis-"$ceph_release"
     docker push ceph/daemon:latest-bis-"$ceph_release"
   done
 
   # Now let's build the latest
-  make RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,7 build
-  docker tag ceph/daemon:"$CONTAINER_BRANCH"-bis-"${CEPH_RELEASES[-1]}"-centos-7-"${HOST_ARCH}" ceph/daemon:latest-bis
+  CENTOS_RELEASE=$(_centos_release ${CEPH_RELEASES[-1]})
+  make RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,${CENTOS_RELEASE} build
+  docker tag ceph/daemon:"$CONTAINER_BRANCH"-bis-"${CEPH_RELEASES[-1]}"-centos-${CENTOS_RELEASE}-"${HOST_ARCH}" ceph/daemon:latest-bis
   docker push ceph/daemon:latest-bis
 }
 
@@ -218,9 +224,9 @@ function push_ceph_imgs_latest {
   local latest_name
 
   if ${CI_CONTAINER} ; then
-    # Let's use centos 8 on ceph-ci for now and add a special case for nautilus/centos7 later
-    local_tag=${CONTAINER_REPO_ORGANIZATION}/daemon-base:${RELEASE}-${BRANCH}-centos-8-${HOST_ARCH}
-    full_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${RELEASE}-centos-8-${HOST_ARCH}-devel
+    CENTOS_RELEASE=$(_centos_release ${BRANCH})
+    local_tag=${CONTAINER_REPO_ORGANIZATION}/daemon-base:${RELEASE}-${BRANCH}-centos-${CENTOS_RELEASE}-${HOST_ARCH}
+    full_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${RELEASE}-centos-${CENTOS_RELEASE}-${HOST_ARCH}-devel
     branch_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${BRANCH}
     sha1_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}
     docker tag $local_tag $full_repo_tag
@@ -244,12 +250,7 @@ function push_ceph_imgs_latest {
       latest_name="${latest_name}-devel"
     fi
     for i in daemon-base daemon; do
-      if [ "${release}" == "master" ]; then
-        CENTOS_RELEASE=8
-      else
-        CENTOS_RELEASE=7
-      fi
-      tag=ceph/$i:${CONTAINER_BRANCH}-${CONTAINER_SHA}-$release-centos-${CENTOS_RELEASE}-${HOST_ARCH}
+      tag=ceph/$i:${CONTAINER_BRANCH}-${CONTAINER_SHA}-$release-centos-$(_centos_release ${release})-${HOST_ARCH}
       # tag image
       docker tag "$tag" ceph/$i:"$latest_name"
 
@@ -284,7 +285,7 @@ function create_registry_manifest {
       if [ "${ceph_release}" == "master" ]; then
         continue
       fi
-      TARGET_RELEASE="ceph/${image}:${RELEASE}-${ceph_release}-centos-7"
+      TARGET_RELEASE="ceph/${image}:${RELEASE}-${ceph_release}-centos-$(_centos_release ${ceph_release})"
       DOCKER_IMAGES="$TARGET_RELEASE ${TARGET_RELEASE}-x86_64"
 
       # Let's add ARM images if being built
