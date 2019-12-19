@@ -311,7 +311,7 @@ function create_registry_manifest {
 
 if [[ -x /usr/bin/dnf ]] ; then
   install_podman
-then
+else
   install_docker
 fi
 cleanup_previous_run
