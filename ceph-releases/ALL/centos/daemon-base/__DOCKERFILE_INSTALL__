@@ -1,7 +1,7 @@
 yum install -y epel-release && \
 yum install -y jq && \
 bash -c ' \
-  if [ -n "__GANESHA_PACKAGES__" ]; then \
+  if [ -e "__GANESHA_PACKAGES__" ]; then \
     echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
     echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
     if [[ "${CEPH_VERSION}" =~ master|^wip* ]]; then \
@@ -15,7 +15,7 @@ bash -c ' \
     echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
     echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
   fi ; \
-  if [ -n "__ISCSI_PACKAGES__" ]; then \
+  if [ -e "__ISCSI_PACKAGES__" ]; then \
     curl -s -L https://shaman.ceph.com/api/repos/tcmu-runner/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo > /etc/yum.repos.d/tcmu-runner.repo ; \
     if [[ "${CEPH_VERSION}" =~ master|^wip* ]]; then \
       curl -s -L https://shaman.ceph.com/api/repos/ceph-iscsi/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo > /etc/yum.repos.d/ceph-iscsi.repo ; \
