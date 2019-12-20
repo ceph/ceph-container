@@ -11,7 +11,7 @@ function get_cluster_name {
 }
 
 function wait_for_daemon () {
-  timeout=20
+  timeout=90
   daemon_to_test=$1
   while [ $timeout -ne 0 ]; do
     if eval $daemon_to_test; then
@@ -90,9 +90,7 @@ test_demo_mon
 test_demo_osd
 test_demo_rgw
 test_demo_mds
-if [[ $(echo $ceph_version '<' 15.0 | bc -l) == 1 ]] ; then
-  test_demo_nfs
-fi
+test_demo_nfs
 test_demo_rbd_mirror
 test_demo_mgr
 test_demo_rest_api

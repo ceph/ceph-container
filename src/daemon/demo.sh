@@ -410,9 +410,7 @@ function build_bootstrap {
         fi
         ;;
       nfs)
-        if [[ "${CEPH_VERSION}" != "master" ]]; then
-          bootstrap_nfs
-        fi
+        bootstrap_nfs
         ;;
       rbd_mirror)
         bootstrap_rbd_mirror
