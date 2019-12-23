@@ -233,9 +233,7 @@ function bootstrap_demo_user {
       log "Creating bucket..."
 
       # Trying to create a s3cmd within 5 seconds
-      if [[ "${CEPH_VERSION}" != "master" ]]; then
-        timeout 5 bash -c "until s3cmd mb s3://$CEPH_DEMO_BUCKET; do sleep .1; done"
-      fi
+      timeout 5 bash -c "until s3cmd mb s3://$CEPH_DEMO_BUCKET; do sleep .1; done"
     fi
   fi
 }
@@ -404,9 +402,7 @@ function build_bootstrap {
         bootstrap_demo_user
         bootstrap_sree
         if [[ -n "$DATA_TO_SYNC" ]] && [[ -n "$DATA_TO_SYNC_BUCKET" ]]; then
-          if [[ "${CEPH_VERSION}" != "master" ]]; then
-            import_in_s3
-          fi
+          import_in_s3
         fi
         ;;
       nfs)
