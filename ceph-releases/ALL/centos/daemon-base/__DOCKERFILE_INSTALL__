@@ -31,6 +31,15 @@ bash -c ' \
   fi' && \
 yum update -y --exclude=platform-python --exclude=python3-libs && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
+if [[ "${CEPH_VERSION}" == nautilus ]]; then \
+  CEPH_MGR_K8SEVENTS="ceph-mgr-k8sevents__ENV_[CEPH_POINT_RELEASE]__"; \
+  if [[ -n "__ENV_[CEPH_POINT_RELEASE]__" ]]; then \
+    CPR=__ENV_[CEPH_POINT_RELEASE]__ ; \
+    if [[ ${CPR:1:2} -eq 14 ]] && [[ ${CPR:4:1} -eq 2 ]] && [[ ${CPR:6} -lt 5 ]]; then \
+      CEPH_MGR_K8SEVENTS="" ; \
+    fi ; \
+  fi ; \
+fi && \
 bash -c ' \
   if [[ __ENV_[BASEOS_TAG]__ -eq 8 ]]; then \
     yum install -y dnf-plugins-core ;\
