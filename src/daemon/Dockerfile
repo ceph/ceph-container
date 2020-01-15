@@ -54,7 +54,7 @@ ADD ceph.defaults /opt/ceph-container/etc/
 
 # Copye sree web interface for cn
 # We use COPY instead of ADD for tarball so that it does not get extracted automatically at build time
-COPY Sree-0.1.tar.gz /opt/ceph-container/tmp/sree.tar.gz
+COPY Sree-0.2.tar.gz /opt/ceph-container/tmp/sree.tar.gz
 
 # Modify the entrypoint
 RUN bash "/opt/ceph-container/bin/generate_entrypoint.sh" && \
