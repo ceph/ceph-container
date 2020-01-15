@@ -229,14 +229,15 @@ function get_ceph_download_url () {
 }
 
 # Return a list of the ceph version strings available on the server as:
-#   "12.0.0 12.0.1 12.0.2 12.1.0 ..."
+#   "12.2.0 12.2.1 12.2.2..."
 function get_ceph_versions_on_server () {
   local server_url="${1}"
   # Curl gives a listing of the URL like below:
   # <a href="ceph-12.2.7-0.el7.x86_64.rpm">ceph-12.2.7-0.el7.x86_64.rpm</a>  17-Jul-2018 14:11  3024
   # The ceph base package can be id'ed uniquely by the text ">ceph-" followed by a version string
-  local pkg_regex=">ceph-[0-9.]+-[0-9]+"
-  # pkg_list is returned in the form ">ceph-12.0.0 >ceph-12.0.1 >ceph-12.0.2 ..."
+  # Only match stable releases which are identified by the minor number '2'
+  local pkg_regex=">ceph-[0-9]+.[2].[0-9]-[0-9]+"
+  # pkg_list is returned in the form ">ceph-12.2.0 >ceph-12.2.1 >ceph-12.2.2 ..."
   local pkg_list
   # Make sure the versions are sorted. This should always be the case, but it's better to be safe.
   pkg_list="$(curl --silent "${server_url}" | grep --extended-regexp --only-matching "${pkg_regex}" | sort --version-sort)"
