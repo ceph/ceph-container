@@ -29,7 +29,7 @@ bash -c ' \
       curl -s -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     fi ; \
   fi' && \
-yum update -y --exclude=platform-python --exclude=python3-libs && \
+yum update -y && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
 bash -c ' \
   if [[ __ENV_[BASEOS_TAG]__ -eq 8 ]]; then \
