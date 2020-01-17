@@ -11,7 +11,7 @@ function osd_volume_simple {
       if [[ "${device}" =~ ^/dev/(cciss|nvme|loop) ]]; then
         device+="p"
       fi
-      ceph-volume simple scan ${device}1 --force || true
+      ceph-volume simple scan ${device}1 || true
     fi
   done
 
