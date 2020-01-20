@@ -8,10 +8,21 @@ function osd_volume_simple {
   # Scan devices with ceph data partition
   for device in ${DEVICES}; do
     if parted --script "${device}" print | grep -qE '^ 1.*ceph data'; then
-      if [[ "${device}" =~ ^/dev/(cciss|nvme|loop) ]]; then
-        device+="p"
+      OSD_DEVICE=${device}
+      DATA_PART=$(dev_part "${OSD_DEVICE}" 1)
+      MOUNTED_PART=${DATA_PART}
+      if [[ ${OSD_DMCRYPT} -eq 1 ]] && [[ ${OSD_FILESTORE} -eq 1 ]]; then
+        get_dmcrypt_filestore_uuid || true
+        mount_lockbox "$DATA_UUID" "$LOCKBOX_UUID"
+        MOUNTED_PART="/dev/mapper/${DATA_UUID}"
+        open_encrypted_parts_filestore
+      elif [[ ${OSD_DMCRYPT} -eq 1 ]] && [[ ${OSD_BLUESTORE} -eq 1 ]]; then
+        get_dmcrypt_bluestore_uuid  || true
+        mount_lockbox "$DATA_UUID" "$LOCKBOX_UUID"
+        MOUNTED_PART="/dev/mapper/${DATA_UUID}"
+        open_encrypted_parts_bluestore
       fi
-      ceph-volume simple scan ${device}1 --force || true
+      ceph-volume simple scan ${DATA_PART} --force || true
     fi
   done
 
