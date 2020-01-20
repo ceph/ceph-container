@@ -41,7 +41,7 @@ TAGGED_HEAD=false # does HEAD is on a tag ?
 DEVEL=${DEVEL:=false}
 if [ -z "$CEPH_RELEASES" ]; then
   # NEVER change 'master' position in the array, this will break the 'latest' tag
-  CEPH_RELEASES=(master luminous mimic nautilus)
+  CEPH_RELEASES=(master)
 fi
 
 HOST_ARCH=$(uname -m)
@@ -215,12 +215,6 @@ function build_and_push_latest_bis {
     docker tag ceph/daemon:"$CONTAINER_BRANCH"-bis-"${ceph_release}"-centos-${CENTOS_RELEASE}-"${HOST_ARCH}" ceph/daemon:latest-bis-"$ceph_release"
     docker push ceph/daemon:latest-bis-"$ceph_release"
   done
-
-  # Now let's build the latest
-  CENTOS_RELEASE=$(_centos_release ${CEPH_RELEASES[-1]})
-  make RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,${CENTOS_RELEASE} build
-  docker tag ceph/daemon:"$CONTAINER_BRANCH"-bis-"${CEPH_RELEASES[-1]}"-centos-${CENTOS_RELEASE}-"${HOST_ARCH}" ceph/daemon:latest-bis
-  docker push ceph/daemon:latest-bis
 }
 
 declare -F push_ceph_imgs_latest ||
@@ -242,7 +236,7 @@ function push_ceph_imgs_latest {
     return
   fi
 
-  for release in "${CEPH_RELEASES[@]}" latest; do
+  for release in "${CEPH_RELEASES[@]}"; do
     if [[ "$release" == "latest" ]]; then
       latest_name="latest"
       # Use the last item in the array which corresponds to the latest stable Ceph version

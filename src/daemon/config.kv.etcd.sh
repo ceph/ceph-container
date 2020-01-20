@@ -55,10 +55,6 @@ function get_mon_config {
       sleep 1
     done
 
-    if [[ "$CEPH_VERSION" == "luminous" ]] || [[ "$CEPH_VERSION" == "mimic" ]]; then
-      CLI+=("--set-uid=0")
-    fi
-
     log "Creating Keyrings."
     if [ -z "$ADMIN_SECRET" ]; then
       # Automatically generate administrator key

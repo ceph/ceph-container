@@ -5,7 +5,7 @@ set -ex
 # VARIABLES #
 #############
 
-CEPH_RELEASES=(luminous mimic nautilus)
+CEPH_RELEASES=()
 
 
 #############
