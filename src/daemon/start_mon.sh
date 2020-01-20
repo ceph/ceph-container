@@ -190,7 +190,11 @@ function start_mon {
     # enable cluster/audit/mon logs on the same stream
     # Mind the extra space after 'debug'
     # DO NOT TOUCH IT, IT MUST BE PRESENT
-    DAEMON_OPTS+=(--mon-cluster-log-to-stderr "--log-stderr-prefix=debug ")
+    if [[ ! "${CEPH_VERSION}" =~ ^(luminous|mimic)$ ]]; then
+      DAEMON_OPTS+=(--mon-cluster-log-to-stderr "--default-mon-cluster-log-to-file=false " "--log-stderr-prefix=debug ")
+    else
+      DAEMON_OPTS+=(--mon-cluster-log-to-stderr "--log-stderr-prefix=debug ")
+    fi
     log "SUCCESS"
     exec /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}"
   fi
