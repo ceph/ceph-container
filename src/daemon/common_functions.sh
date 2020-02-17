@@ -528,7 +528,11 @@ function dmcrypt_data_map() {
     fi
     DATA_PART=$(dev_part "${OSD_DEVICE}" 1)
     DATA_UUID=$(get_part_uuid "${DATA_PART}")
-    LOCKBOX_PART=$(dev_part "${OSD_DEVICE}" 5)
+    if [[ -b "$(dev_part "${OSD_DEVICE}" 3)" ]]; then
+      LOCKBOX_PART=$(dev_part "${OSD_DEVICE}" 3)
+    else
+      LOCKBOX_PART=$(dev_part "${OSD_DEVICE}" 5)
+    fi
     LOCKBOX_UUID=$(get_part_uuid "${LOCKBOX_PART}")
     mount_lockbox "${DATA_UUID}" "${LOCKBOX_UUID}"
     ceph-disk --setuser ceph --setgroup disk activate --dmcrypt --no-start-daemon ${DATA_PART} || true
