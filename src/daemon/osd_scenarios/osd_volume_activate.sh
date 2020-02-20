@@ -23,6 +23,9 @@ function osd_volume_simple {
         open_encrypted_parts_bluestore
       fi
       ceph-volume simple scan ${DATA_PART} --force || true
+      if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+        umount_lockbox
+      fi
     fi
   done
 
