@@ -13,31 +13,68 @@
       set_fact:
         is_atomic: '{{ stat_ostree.stat.exists }}'
 
-    - name: install docker on redhat systems
-      package:
-        name: docker
-        state: present
+    - name: red hat 7 based systems tasks
       when:
         - ansible_os_family == 'RedHat'
-        - not is_atomic
+        - ansible_distribution_major_version == '7'
+      block:
+        - name: install python-docker-py on red hat / centos
+          package:
+            name: ['docker', 'python-docker-py']
+            state: present
+          register: result_docker_install
+          until: result_docker_install is succeeded
+
+        - name: start docker service
+          service:
+            name: docker
+            state: started
+            enabled: yes
+
+    - name: red hat 8 based systems tasks
+      block:
+        - name: install podman
+          package:
+            name: 'podman'
+            state: present
+          register: result_podman_install
+          until: result_podman_install is succeeded
+          tags:
+            with_pkg
+      when:
+        - ansible_os_family == 'RedHat'
+        - ansible_distribution_major_version == '8'
 
     - name: install docker.io on debian systems
       package:
         name: docker.io
         state: present
+      register: result_docker_install
+      until: result_docker_install is succeeded
       when:
         - ansible_os_family == 'Debian'
         - not is_atomic
 
-    - name: allow nodes to use an insecure registry
+    - name: allow nodes to use an insecure registry - docker
       blockinfile:
         dest: /etc/sysconfig/docker
         block: |
           INSECURE_REGISTRY='--insecure-registry {{ public_network }}'
           BLOCK_REGISTRY='--block-registry docker.io'
-        marker: "# {mark} ANSIBLE MANAGED BLOCK" 
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+      when: result_docker_install.skipped is not defined
+
+    - name: allow nodes to use an insecure registry - podman
+      lineinfile:
+        dest: /etc/containers/registries.conf
+        line: "registries = ['{{ ceph_docker_registry }}']"
+        insertbefore: '^\[registries\.block\]'
+        regexp: '^registries = \[\]'
+        firstmatch: yes
+      when: result_podman_install.skipped is not defined
 
     - name: restart docker
       service:
         name: docker
         state: restarted
+      when: result_docker_install.skipped is not defined
