@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+
 IPV4_REGEXP='[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'
 IPV4_NETWORK_REGEXP="$IPV4_REGEXP/[0-9]\\{1,2\\}"
 
