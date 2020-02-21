@@ -59,7 +59,7 @@ fi
 
 cd "$WORKSPACE"
 # we test the latest stable release of Ceph in priority
-FLAVOR="mimic,centos,7"
+FLAVOR="master,centos,8"
 
 # build everything that was touched to make sure build succeeds
 mapfile -t FLAVOR_ARRAY < <(sudo make flavors.modified)
@@ -78,16 +78,6 @@ if [[ "$NIGHTLY" != 'TRUE' ]]; then
   fi
 fi
 
-CURRENT_CEPH_STABLE_RELEASE="$(echo $FLAVOR|awk -F ',' '{ print $1}')"
-
-# CEPH_STABLE_RELEASE is an info passed by the CI (see tox.ini)
-# if CEPH_STABLE_RELEASE does not match CURRENT_CEPH_STABLE_RELEASE then CEPH_STABLE_RELEASE wins
-# so we will build the desired CEPH_STABLE_RELEASE since the current patch didn't change the Ceph version
-# Since we test all the Ceph releases, we will always test the impacted one
-if [[ "$CEPH_STABLE_RELEASE" != "$CURRENT_CEPH_STABLE_RELEASE" ]]; then
-  FLAVOR="$CEPH_STABLE_RELEASE,centos,7"
-fi
-
 echo "Building flavor $FLAVOR"
 make_output=$(sudo make FLAVORS="$FLAVOR" stage) # Run staging to get DAEMON_IMAGE name
 daemon_image=$(echo "${make_output}" | grep " DAEMON_IMAGE ") # Find DAEMON_IMAGE line
@@ -98,11 +88,11 @@ sudo make FLAVORS="$FLAVOR" build.parallel
 # start a local docker registry
 sudo docker run -d -p 5000:5000 --restart=always --name registry registry:2
 # add the image we just built to the registry
-sudo docker tag "${daemon_image}" localhost:5000/ceph/daemon:"$CEPH_STABLE_RELEASE"-latest
+sudo docker tag "${daemon_image}" localhost:5000/ceph/daemon:latest-master
 # this avoids a race condition between the tagging and the push
 # which causes this to sometimes fail when run by jenkins
 sleep 1
-sudo docker --debug push localhost:5000/ceph/daemon:"$CEPH_STABLE_RELEASE"-latest
+sudo docker --debug push localhost:5000/ceph/daemon:latest-master
 
 cd "$CEPH_ANSIBLE_SCENARIO_PATH"
 vagrant up --no-provision --provider="$VAGRANT_PROVIDER"
@@ -114,7 +104,7 @@ export ANSIBLE_SSH_ARGS="-F $CEPH_ANSIBLE_SCENARIO_PATH/vagrant_ssh_config"
 
 # runs a playbook to configure nodes for testing
 ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/tests/setup.yml
-ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/site-docker.yml.sample --extra-vars="ceph_stable_release=$CEPH_STABLE_RELEASE ceph_docker_image_tag=$CEPH_STABLE_RELEASE-latest ceph_docker_registry=$REGISTRY_ADDRESS fetch_directory=$CEPH_ANSIBLE_SCENARIO_PATH/fetch"
+ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/site-docker.yml.sample --extra-vars="ceph_docker_image_tag=latest-master ceph_docker_registry=$REGISTRY_ADDRESS fetch_directory=$CEPH_ANSIBLE_SCENARIO_PATH/fetch"
 
 ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/tests/functional/setup.yml
 
