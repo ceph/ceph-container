@@ -169,9 +169,9 @@ function start_mon {
       ceph-mon --setuser ceph --setgroup ceph --cluster "${CLUSTER}" -i "${MON_NAME}" --inject-monmap "$MONMAP" --keyring "$MON_KEYRING" --mon-data "$MON_DATA_DIR"
     fi
     if [[ "$CEPH_DAEMON" != demo ]]; then
-      v2v1=$(ceph-conf -c /etc/ceph/${CLUSTER}.conf 'mon host' | tr ',' '\n' | grep -c ${MON_IP})
+      v2v1=$(ceph-conf -c /etc/ceph/"${CLUSTER}".conf 'mon host' | tr ',' '\n' | grep -c "${MON_IP}")
       # in case of v2+v1 configuration : [v2:xxxx:3300,v1:xxxx:6789]
-      if [ ${v2v1} -eq 2 ]; then
+      if [ "${v2v1}" -eq 2 ]; then
         timeout 7 ceph "${CLI_OPTS[@]}" mon add "${MON_NAME}" "${MON_IP}" || true
       # with v2 only : [v2:xxxx:3300]
       else
