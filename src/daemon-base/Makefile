@@ -24,11 +24,8 @@ build:
 	@echo === docker build $(DAEMON_BASE_IMAGE)
 # use root to workaround https://bugzilla.redhat.com/show_bug.cgi?id=1802907
 	@sudo docker build --pull $(BUILD_ARGS) --tag $(DAEMON_BASE_IMAGE) .
-# chown the image, so it's visible to $(USER)
-	@sudo docker save $(DAEMON_BASE_IMAGE) | sudo -u $(USER) docker load
-	@sudo docker rmi $(DAEMON_BASE_IMAGE)
 
-push: ; docker push $(DAEMON_BASE_IMAGE)
+push: ; @sudo docker push $(DAEMON_BASE_IMAGE)
 clean:
 # Don't fail if can't clean; user may have removed the image
-	docker rmi $(DAEMON_BASE_IMAGE) || true
+	@sudo docker rmi $(DAEMON_BASE_IMAGE) || true
