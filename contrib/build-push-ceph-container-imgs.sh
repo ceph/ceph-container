@@ -187,12 +187,12 @@ declare -F build_ceph_imgs  ||
 function build_ceph_imgs {
   echo "Build Ceph container image(s)"
   if ${CI_CONTAINER}; then
-    make FLAVORS="${CEPH_BRANCH},centos,$(_centos_release ${CEPH_BRANCH})" \
-         CEPH_DEVEL="true" \
-         RELEASE=${RELEASE} \
-         TAG_REGISTRY=${CONTAINER_REPO_ORGANIZATION} \
-         IMAGES_TO_BUILD=daemon-base \
-         build.parallel
+    sudo make FLAVORS="${CEPH_BRANCH},centos,$(_centos_release ${CEPH_BRANCH})" \
+              CEPH_DEVEL="true" \
+              RELEASE=${RELEASE} \
+              TAG_REGISTRY=${CONTAINER_REPO_ORGANIZATION} \
+              IMAGES_TO_BUILD=daemon-base \
+              build.parallel
   else
     make CEPH_DEVEL=${DEVEL} RELEASE=${RELEASE} build.parallel
   fi
@@ -233,12 +233,12 @@ function push_ceph_imgs_latest {
     full_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${RELEASE}-centos-${CENTOS_RELEASE}-${HOST_ARCH}-devel
     branch_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${BRANCH}
     sha1_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}
-    docker tag $local_tag $full_repo_tag
-    docker tag $local_tag $branch_repo_tag
-    docker tag $local_tag $sha1_repo_tag
-    docker push $full_repo_tag
-    docker push $branch_repo_tag
-    docker push $sha1_repo_tag
+    sudo docker tag $local_tag $full_repo_tag
+    sudo docker tag $local_tag $branch_repo_tag
+    sudo docker tag $local_tag $sha1_repo_tag
+    sudo docker push $full_repo_tag
+    sudo docker push $branch_repo_tag
+    sudo docker push $sha1_repo_tag
     return
   fi
 
