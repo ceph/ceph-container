@@ -82,6 +82,8 @@ function install_docker {
 }
 
 function install_podman {
+  # https://tracker.ceph.com/issues/44242
+  sudo dnf localinstall -y http://apt-mirror.front.sepia.ceph.com/lab-extras/8/fuse-overlayfs-0.7.6-2.0.dev.gitf1da779.el8.x86_64.rpm
   sudo dnf install -y podman podman-docker
 }
 
