@@ -106,6 +106,14 @@ case "$CEPH_DAEMON" in
     source /opt/ceph-container/bin/osd_volume_activate.sh
     osd_volume_activate
     ;;
+  osd_ceph_volume_activate_only)
+    ami_privileged
+    # TAG: osd_ceph_volume_activate_only
+    source /opt/ceph-container/bin/osd_volume_activate_only.sh
+    osd_volume_activate_only
+    STAYALIVE="True"
+    do_stayalive
+    ;;
   mds)
     # TAG: mds
     source /opt/ceph-container/bin/start_mds.sh
