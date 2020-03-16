@@ -55,7 +55,7 @@ CN_RELEASE="v2.3.1"
 
 function _centos_release {
   local release=$1
-  if [[ "${release}" =~ master|^wip* ]]; then
+  if [[ "${release}" =~ master|octopus|^wip* ]]; then
     echo 8
   else
     echo 7
