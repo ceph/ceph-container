@@ -21,6 +21,7 @@ FLAVORS ?= \
 	luminous,centos,7 \
 	mimic,centos,7 \
 	nautilus,centos,7 \
+	octopus,centos,8 \
 	master,centos,8
 
 TAG_REGISTRY ?= ceph
@@ -52,6 +53,7 @@ ALL_BUILDABLE_FLAVORS := \
 	luminous,debian,9 \
 	mimic,centos,7 \
 	nautilus,centos,7 \
+	octopus,centos,8 \
 	master,centos,8
 
 # ==============================================================================
