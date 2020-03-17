@@ -4,15 +4,6 @@
   gather_facts: true
   become: yes
   tasks :
-    - name: check if it is Atomic host
-      stat: path=/run/ostree-booted
-      register: stat_ostree
-      check_mode: no
-
-    - name: set fact for using Atomic host
-      set_fact:
-        is_atomic: '{{ stat_ostree.stat.exists }}'
-
     - name: red hat 7 based systems tasks
       when:
         - ansible_os_family == 'RedHat'
@@ -44,16 +35,6 @@
       when:
         - ansible_os_family == 'RedHat'
         - ansible_distribution_major_version == '8'
-
-    - name: install docker.io on debian systems
-      package:
-        name: docker.io
-        state: present
-      register: result_docker_install
-      until: result_docker_install is succeeded
-      when:
-        - ansible_os_family == 'Debian'
-        - not is_atomic
 
     - name: allow nodes to use an insecure registry - docker
       copy:
