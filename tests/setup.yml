@@ -29,13 +29,14 @@
         - ansible_os_family == 'Debian'
         - not is_atomic
 
-    - name: allow nodes to use an insecure registry
-      blockinfile:
-        dest: /etc/sysconfig/docker
-        block: |
-          INSECURE_REGISTRY='--insecure-registry {{ public_network }}'
-          BLOCK_REGISTRY='--block-registry docker.io'
-        marker: "# {mark} ANSIBLE MANAGED BLOCK" 
+    - name: allow nodes to use an insecure registry - docker
+      copy:
+        dest: /etc/docker/daemon.json
+        content: |
+          {
+            "insecure-registries": ["{{ ceph_docker_registry }}"]
+          }
+      when: result_docker_install.skipped is not defined
 
     - name: restart docker
       service:
