@@ -46,12 +46,11 @@
       when: result_docker_install.skipped is not defined
 
     - name: allow nodes to use an insecure registry - podman
-      lineinfile:
-        dest: /etc/containers/registries.conf
-        line: "registries = ['{{ ceph_docker_registry }}']"
-        insertbefore: '^\[registries\.block\]'
-        regexp: '^registries = \[\]'
-        firstmatch: yes
+      ini_file:
+        path: /etc/containers/registries.conf
+        section: registries.insecure
+        option: registries
+        value: "['{{ ceph_docker_registry }}']"
       when: result_podman_install.skipped is not defined
 
     - name: restart docker
