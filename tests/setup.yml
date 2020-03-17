@@ -56,12 +56,12 @@
         - not is_atomic
 
     - name: allow nodes to use an insecure registry - docker
-      blockinfile:
-        dest: /etc/sysconfig/docker
-        block: |
-          INSECURE_REGISTRY='--insecure-registry {{ public_network }}'
-          BLOCK_REGISTRY='--block-registry docker.io'
-        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+      copy:
+        dest: /etc/docker/daemon.json
+        content: |
+          {
+            "insecure-registries": ["{{ ceph_docker_registry }}"]
+          }
       when: result_docker_install.skipped is not defined
 
     - name: allow nodes to use an insecure registry - podman
