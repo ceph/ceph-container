@@ -50,7 +50,7 @@ bash -c ' \
     echo "enabled=1" >> /etc/yum.repos.d/lab-extras.repo ;\
     echo "gpgcheck=0" >> /etc/yum.repos.d/lab-extras.repo ;\
   fi && \
-  if [[ "${CEPH_VERSION}" =~ master|^wip* ]] || ${CEPH_DEVEL}; then \
+  if [[ "${CEPH_VERSION}" =~ master|octopus|^wip* ]] || ${CEPH_DEVEL}; then \
     REPO_URL=$(curl -s "https://shaman.ceph.com/api/search/?project=ceph&distros=centos/__ENV_[BASEOS_TAG]__&flavor=default&ref=${CEPH_VERSION}&sha1=latest" | jq -a ".[0] | .url"); \
     RELEASE_VER=0 ;\
   else \
