@@ -39,8 +39,6 @@ after_failure:
   - docker exec ceph-demo ceph --cluster test -s
 
 env:
-  global:
-    secure: Q7ilx50Ch5DPNiSfTpEwrlrzGOXTFaKVoaGdKWHoxj5zf2+G3/pggCtW3ZTeuof0AtHjsnfG0f20Y+S+pwo9q+ksTa52UdUIBOXZZVeovGfQAaH23E+gxJwxHYdWwhSJAzpRzFKgr7XoZO+lwMFYun0sBCTk8lLG/nEMw37t3ks=
   matrix:
     - CEPH_FLAVOR=mimic RGW_FRONTEND_TYPE=civetweb
     - CEPH_FLAVOR=luminous RGW_FRONTEND_TYPE=civetweb
