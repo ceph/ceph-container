@@ -64,6 +64,13 @@ function _centos_release {
 
 function cleanup_previous_run {
   make clean.all || true
+  # https://github.com/containers/libpod/issues/5306#issuecomment-591661572
+  # https://github.com/containers/libpod/issues/5306#issuecomment-595737952
+  if ${CI_CONTAINER}; then
+    docker system migrate || true
+    rm -rf ~/.config/containers || true
+    rm -rf ~/.local/share/containers || true
+  fi
 }
 
 declare -F install_docker ||
