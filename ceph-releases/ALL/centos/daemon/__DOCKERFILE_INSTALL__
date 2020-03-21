@@ -1,5 +1,11 @@
 echo 'Install packages' && \
-      yum install -y wget unzip util-linux python-setuptools udev device-mapper && \
+    bash -c ' \
+    if [[ __ENV_[BASEOS_TAG]__ -eq 8 ]]; then \
+      yum install -y python3-setuptools; \
+    else \
+      yum install -y python-setuptools; \
+    fi' && \
+      yum install -y wget unzip util-linux udev device-mapper && \
       yum install -y __DAEMON_PACKAGES__ && \
     # Centos 7 doesn't have confd/forego packages, so install them from web
     __WEB_INSTALL_CONFD__ && \
