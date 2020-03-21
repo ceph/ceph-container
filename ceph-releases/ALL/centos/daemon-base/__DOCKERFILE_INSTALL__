@@ -42,7 +42,7 @@ if [[ "${CEPH_VERSION}" == nautilus ]]; then \
 fi && \
 bash -c ' \
   if [[ __ENV_[BASEOS_TAG]__ -eq 8 ]]; then \
-    yum install -y dnf-plugins-core ;\
+    yum install -y dnf-plugins-core yum-utils ;\
     yum copr enable -y ktdreyer/ceph-el8 ;\
     echo "[lab-extras]" > /etc/yum.repos.d/lab-extras.repo ;\
     echo "name=labextras" >> /etc/yum.repos.d/lab-extras.repo ;\
