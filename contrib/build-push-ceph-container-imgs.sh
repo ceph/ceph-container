@@ -184,6 +184,8 @@ function create_head_or_point_release {
       CEPH_RELEASES=(luminous mimic)
     elif [ "${CONTAINER_BRANCH}" == "stable-4.0" ]; then
       CEPH_RELEASES=(nautilus)
+    elif [ "${CONTAINER_BRANCH}" == "stable-5.0" ]; then
+      CEPH_RELEASES=(octopus)
     fi
   else
     set -e
