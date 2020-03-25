@@ -68,8 +68,8 @@ function cleanup_previous_run {
   # https://github.com/containers/libpod/issues/5306#issuecomment-595737952
   if ${CI_CONTAINER}; then
     docker system migrate || true
-    rm -rf ~/.config/containers || true
-    rm -rf ~/.local/share/containers || true
+    sudo rm -rf ~/.config/containers || true
+    sudo rm -rf ~/.local/share/containers || true
   fi
 }
 
