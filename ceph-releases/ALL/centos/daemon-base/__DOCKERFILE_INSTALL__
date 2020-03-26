@@ -28,9 +28,9 @@ bash -c ' \
   fi ; \
   if [ -n "__ISCSI_PACKAGES__" ]; then \
     curl -s -L https://shaman.ceph.com/api/repos/tcmu-runner/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo > /etc/yum.repos.d/tcmu-runner.repo ; \
-    if [[ "${CEPH_VERSION}" =~ master|octopus|^wip* ]]; then \
+    if [[ "${CEPH_VERSION}" =~ master|^wip* ]]; then \
       curl -s -L https://shaman.ceph.com/api/repos/ceph-iscsi/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo > /etc/yum.repos.d/ceph-iscsi.repo ; \
-    elif [[ "${CEPH_VERSION}" == nautilus ]]; then \
+    elif [[ "${CEPH_VERSION}" =~ nautilus|octopus ]]; then \
       curl -s -L https://download.ceph.com/ceph-iscsi/3/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     else \
       curl -s -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
