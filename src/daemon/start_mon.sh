@@ -144,7 +144,8 @@ function start_mon {
     done
 
     # Prepare the monitor daemon's directory with the map and keyring
-    ceph-mon --setuser ceph --setgroup ceph --cluster "${CLUSTER}" --mkfs -i "${MON_NAME}" --inject-monmap "$MONMAP" --keyring "$MON_KEYRING" --mon-data "$MON_DATA_DIR"
+    ceph-mon --setuser ceph --setgroup ceph --cluster "${CLUSTER}" --mkfs -i "${MON_NAME}" --keyring "$MON_KEYRING" --mon-data "$MON_DATA_DIR"
+    ceph-mon --setuser ceph --setgroup ceph --cluster "${CLUSTER}" --inject-monmap "${MONMAP}" -i "${MON_NAME}" --keyring "$MON_KEYRING" --mon-data "$MON_DATA_DIR"
 
     # Never re-use that monmap again, otherwise we end up with partitioned Ceph monitor
     # The initial mon **only** contains the current monitor, so this is useful for initial bootstrap
