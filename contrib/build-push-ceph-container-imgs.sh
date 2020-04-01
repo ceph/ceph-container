@@ -82,8 +82,6 @@ function install_docker {
 }
 
 function install_podman {
-  # https://tracker.ceph.com/issues/44242
-  sudo dnf localinstall -y http://apt-mirror.front.sepia.ceph.com/lab-extras/8/fuse-overlayfs-0.7.6-2.0.dev.gitf1da779.el8.x86_64.rpm
   # https://github.com/containers/libpod/issues/5306
   # https://podman.io/getting-started/installation.html
   if ${CI_CONTAINER}; then
@@ -91,6 +89,9 @@ function install_podman {
     sudo dnf -y install 'dnf-command(copr)'
     sudo dnf -y copr enable rhcontainerbot/container-selinux
     sudo curl -L -o /etc/yum.repos.d/devel:kubic:libcontainers:stable.repo https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/CentOS_8/devel:kubic:libcontainers:stable.repo
+    # https://tracker.ceph.com/issues/44242
+    # We used to provide fuse-overlayfs-0.7.6-2.0 in lab-extras but a newer version is available in the kubic repo so we'll install/update from there
+    sudo dnf install -y fuse-overlayfs
   fi
   sudo dnf install -y podman podman-docker
 }
