@@ -95,7 +95,7 @@ sleep 1
 sudo docker --debug push localhost:5000/ceph/daemon:latest-octopus
 
 cd "$CEPH_ANSIBLE_SCENARIO_PATH"
-vagrant up --no-provision --provider="$VAGRANT_PROVIDER"
+bash "$TOXINIDIR"/ceph-ansible/tests/scripts/vagrant_up.sh --no-provision --provider="$VAGRANT_PROVIDER"
 
 bash "$TOXINIDIR"/ceph-ansible/tests/scripts/generate_ssh_config.sh "$CEPH_ANSIBLE_SCENARIO_PATH"
 
