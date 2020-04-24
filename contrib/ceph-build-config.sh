@@ -236,7 +236,7 @@ function get_ceph_versions_on_server () {
   # <a href="ceph-12.2.7-0.el7.x86_64.rpm">ceph-12.2.7-0.el7.x86_64.rpm</a>  17-Jul-2018 14:11  3024
   # The ceph base package can be id'ed uniquely by the text ">ceph-" followed by a version string
   # Only match stable releases which are identified by the minor number '2'
-  local pkg_regex=">ceph-[0-9]+.[2].[0-9]-[0-9]+"
+  local pkg_regex=">ceph-[0-9]+.[2].[0-9]+-[0-9]+"
   # pkg_list is returned in the form ">ceph-12.2.0 >ceph-12.2.1 >ceph-12.2.2 ..."
   local pkg_list
   # Make sure the versions are sorted. This should always be the case, but it's better to be safe.
