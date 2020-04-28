@@ -156,6 +156,7 @@ docker run -d --net=host \
 -v /etc/ceph:/etc/ceph \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
+-v /run/udev/:/run/udev/ \
 -e OSD_DEVICE=/dev/vdd \
 ceph/daemon osd
 ```
@@ -167,6 +168,7 @@ docker run -d --net=host \
 --privileged=true \
 --pid=host \
 -v /dev/:/dev/ \
+-v /run/udev/:/run/udev/ \
 -e OSD_DEVICE=/dev/vdd \
 -e KV_TYPE=etcd \
 -e KV_IP=192.168.0.20 \
@@ -184,6 +186,7 @@ docker run -d --net=host \
 -v /etc/ceph:/etc/ceph \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
+-v /run/udev/:/run/udev/ \
 -e OSD_DEVICE=/dev/vdd \
 -e OSD_TYPE=disk \
 ceph/daemon osd
@@ -198,6 +201,7 @@ docker run -d --net=host \
 -v /etc/ceph:/etc/ceph \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
+-v /run/udev/:/run/udev/ \
 -e OSD_DEVICE=/dev/vdd \
 -e OSD_TYPE=disk \
 -e OSD_BLUESTORE=1 \
@@ -213,6 +217,7 @@ docker run -d --net=host \
 -v /etc/ceph:/etc/ceph \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
+-v /run/udev/:/run/udev/ \
 -e OSD_DEVICE=/dev/vdd \
 -e OSD_TYPE=disk \
 -e OSD_DMCRYPT=1 \
@@ -226,6 +231,7 @@ docker run -d --net=host \
 --privileged=true \
 --pid=host \
 -v /dev/:/dev/ \
+-v /run/udev/:/run/udev/ \
 -e OSD_DEVICE=/dev/vdd \
 -e OSD_TYPE=disk \
 -e KV_TYPE=etcd \
@@ -240,6 +246,7 @@ docker run -d --net=host \
 --privileged=true \
 --pid=host \
 -v /dev/:/dev/ \
+-v /run/udev/:/run/udev/ \
 -e OSD_DEVICE=/dev/vdd \
 -e OSD_TYPE=disk \
 -e KV_TYPE=etcd \
@@ -255,6 +262,7 @@ docker run -d --net=host \
 --privileged=true \
 --pid=host \
 -v /dev/:/dev/ \
+-v /run/udev/:/run/udev/ \
 -e OSD_DEVICE=/dev/vdd \
 -e OSD_TYPE=disk \
 -e KV_TYPE=etcd \
@@ -282,6 +290,7 @@ docker run -d --net=host \
 -v /etc/ceph:/etc/ceph \
 -v /var/lib/ceph/:/var/lib/ceph/ \
 -v /dev/:/dev/ \
+-v /run/udev/:/run/udev/ \
 -e OSD_DEVICE=/dev/vdd \
 -e OSD_TYPE=activate \
 ceph/daemon osd
