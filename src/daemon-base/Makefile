@@ -21,10 +21,10 @@
 .PHONY: build push clean
 
 build:
-	@echo === docker build $(DAEMON_BASE_IMAGE)
-	@docker build --pull $(BUILD_ARGS) --tag $(DAEMON_BASE_IMAGE) .
+	@echo === container build $(DAEMON_BASE_IMAGE)
+	$(IMAGE_BUILD_CMD) build --pull $(BUILD_ARGS) --tag $(DAEMON_BASE_IMAGE) .
 
-push: ; @docker push $(DAEMON_BASE_IMAGE)
+push: ; $(IMAGE_BUILD_CMD) push $(DAEMON_BASE_IMAGE)
 clean:
 # Don't fail if can't clean; user may have removed the image
-	@docker rmi $(DAEMON_BASE_IMAGE) || true
+	$(IMAGE_BUILD_CMD) rmi $(DAEMON_BASE_IMAGE) || true

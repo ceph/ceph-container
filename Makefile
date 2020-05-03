@@ -16,6 +16,13 @@
 # ==============================================================================
 # Build tunables
 
+ifeq ($(IMAGE_BUILD_CMD),)
+export IMAGE_BUILD_CMD?=$(shell docker version >/dev/null 2>&1 && echo docker)
+endif
+ifeq ($(IMAGE_BUILD_CMD),)
+       export IMAGE_BUILD_CMD=$(shell podman version >/dev/null 2>&1 && echo podman)
+endif
+
 # When updating these defaults, be sure to check that ALL_BUILDABLE_FLAVORS is updated
 FLAVORS ?= \
 	luminous,centos,7 \
@@ -97,17 +104,17 @@ clean.image.%: do.image.%
 clean: $(foreach p, $(FLAVORS), clean.image.$(HOST_ARCH),$(p))
 
 clean.nones:
-	@if [ -n "$(shell docker images --quiet --filter "dangling=true")" ] ; then \
-		docker rmi -f $(shell docker images --quiet --filter "dangling=true") || true ; \
+	@if [ -n "$(shell $(IMAGE_BUILD_CMD) images --quiet --filter "dangling=true")" ] ; then \
+		 $(IMAGE_BUILD_CMD) rmi -f $(shell $(IMAGE_BUILD_CMD) images --quiet --filter "dangling=true") || true ; \
 	fi
 
 clean.all: clean.nones
 	@rm -rf staging/
 	@# Inspect each image, and if we find 'CEPH_POINT_RELEASE' we can be pretty sure it's a
 	@# ceph-container image and safe to delete
-	@for image in $(shell docker images --quiet); do \
-		if docker inspect "$$image" | grep -q 'CEPH_POINT_RELEASE'; then \
-			docker rmi -f "$$image" || true ; \
+	@for image in $(shell $(IMAGE_BUILD_CMD) images --quiet); do \
+		if $(IMAGE_BUILD_CMD) inspect "$$image" | grep -q 'CEPH_POINT_RELEASE'; then \
+			$(IMAGE_BUILD_CMD) rmi -f "$$image" || true ; \
 		fi ; \
 	done
 
