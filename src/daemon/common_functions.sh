@@ -274,8 +274,8 @@ function apply_ceph_ownership_to_disks {
     fi
   fi
   if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
-    dev_real_path=$(resolve_symlink "$OSD_BLUESTORE_BLOCK_WAL" "$OSD_BLUESTORE_BLOCK_DB")
-    for partition in $(list_dev_partitions "$OSD_DEVICE" "$dev_real_path"); do
+    dev_real_path=($(resolve_symlink "$OSD_BLUESTORE_BLOCK_WAL" "$OSD_BLUESTORE_BLOCK_DB"))
+    for partition in $(list_dev_partitions "$OSD_DEVICE" "${dev_real_path[@]}"); do
       part_code=$(get_part_typecode "$partition")
       if [[ "$part_code" == "5ce17fce-4087-4169-b7ff-056cc58472be" ||
             "$part_code" == "5ce17fce-4087-4169-b7ff-056cc58473f9" ||
