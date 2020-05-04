@@ -68,6 +68,7 @@ function osd_activate {
   OSD_ID=$(grep "${actual_part}" /proc/mounts | awk '{print $2}' | sed -r 's/^.*-([0-9]+)$/\1/')
 
   if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
+    OSD_PATH=$(get_osd_path "${OSD_ID}")
     # Get the device used for block db and wal otherwise apply_ceph_ownership_to_disks will fail
     OSD_BLUESTORE_BLOCK_DB_TMP=$(resolve_symlink "${OSD_PATH}block.db")
 # shellcheck disable=SC2034
