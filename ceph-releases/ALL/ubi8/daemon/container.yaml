@@ -4,3 +4,4 @@
 compose:
   packages: []
   pulp_repos: true
+  ignore_absent_pulp_repos: true
