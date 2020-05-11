@@ -40,6 +40,7 @@ BASEOS_TAG ?= ""
 
 # Use Ceph development build packages from shaman/chacra repositories.
 CEPH_DEVEL ?= false
+OSD_FLAVOR ?= "default"
 
 
 # ==============================================================================
