@@ -530,6 +530,7 @@ manifests:
     platform:
       architecture: arm64
       os: linux
+      variant: v8
 EOF
   info "manifest file:
 $(cat "${manifest_spec_file}")

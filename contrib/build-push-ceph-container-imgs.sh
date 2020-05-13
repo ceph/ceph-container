@@ -312,6 +312,9 @@ function create_registry_manifest {
 
       #shellcheck disable=SC2086
       docker manifest create $DOCKER_IMAGES
+      if [ -n "$BUILD_ARM" ]; then
+        docker manifest annotate --variant v8 "${TARGET_RELEASE}" "${TARGET_RELEASE}-aarch64"
+      fi
       docker manifest push "$TARGET_RELEASE"
     done
   done
