@@ -58,8 +58,11 @@ bash -c ' \
     echo "gpgcheck=0" >> /etc/yum.repos.d/lab-extras.repo ;\
   fi && \
   if [[ "${CEPH_VERSION}" =~ master|^wip* ]] || ${CEPH_DEVEL}; then \
-    REPO_URL=$(curl -s "https://shaman.ceph.com/api/search/?project=ceph&distros=centos/__ENV_[BASEOS_TAG]__&flavor=default&ref=${CEPH_VERSION}&sha1=latest" | jq -a ".[0] | .url"); \
+    REPO_URL=$(curl -s "https://shaman.ceph.com/api/search/?project=ceph&distros=centos/__ENV_[BASEOS_TAG]__&flavor=${OSD_FLAVOR}&ref=${CEPH_VERSION}&sha1=latest" | jq -a ".[0] | .url"); \
     RELEASE_VER=0 ;\
+    if [[ "${OSD_FLAVOR}" == "crimson" ]]; then \
+     CRIMSON_PACKAGES="ceph-crimson-osd__ENV_[CEPH_POINT_RELEASE]__";\
+    fi ;\
   else \
     RELEASE_VER=1 ;\
     REPO_URL="http://download.ceph.com/rpm-${CEPH_VERSION}/el__ENV_[BASEOS_TAG]__/"; \
