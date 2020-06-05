@@ -39,6 +39,8 @@ CONTAINER_BRANCH="${GIT_BRANCH#*/}"
 CONTAINER_SHA=$(git rev-parse --short HEAD)
 TAGGED_HEAD=false # does HEAD is on a tag ?
 DEVEL=${DEVEL:=false}
+OSD_FLAVOR=${FLAVOR:="default"}
+
 if [ -z "$CEPH_RELEASES" ]; then
   # NEVER change 'master' position in the array, this will break the 'latest' tag
   CEPH_RELEASES=(master nautilus octopus)
@@ -202,6 +204,7 @@ function build_ceph_imgs {
   if ${CI_CONTAINER}; then
     make FLAVORS="${CEPH_BRANCH},centos,$(_centos_release ${CEPH_BRANCH})" \
          CEPH_DEVEL="true" \
+         OSD_FLAVOR=${OSD_FLAVOR} \
          RELEASE=${RELEASE} \
          TAG_REGISTRY=${CONTAINER_REPO_ORGANIZATION} \
          IMAGES_TO_BUILD=daemon-base \

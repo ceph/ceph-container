@@ -20,6 +20,7 @@ $(shell bash -c 'set -eu ; \
 	set_var CEPH_VERSION       "$$(bash maint-lib/ceph_version.sh "$$ceph_version_spec" CEPH_VERSION)" ; \
 	set_var CEPH_POINT_RELEASE "$$(bash maint-lib/ceph_version.sh "$$ceph_version_spec" CEPH_POINT_RELEASE)" ; \
 	set_var CEPH_DEVEL         "$(CEPH_DEVEL)" ; \
+	set_var	OSD_FLAVOR         "$(OSD_FLAVOR)" ; \
 	set_var DISTRO             "$(word 3, $(subst $(comma), , $(1)))" ; \
 	set_var DISTRO_VERSION     "$(word 4, $(subst $(comma), , $(1)))" ; \
 	\
