@@ -30,7 +30,7 @@ else
   sudo yum install -y docker xfsprogs
   if ! command -v python3.6 &>/dev/null; then
     sudo yum -y groupinstall development
-    sudo yum -y install https://centos7.iuscommunity.org/ius-release.rpm
+    sudo yum -y install https://repo.ius.io/ius-release-el7.rpm
     sudo yum -y install python36u
   fi
   sudo ln -sf "$(command -v python3.6)" /usr/bin/python3
