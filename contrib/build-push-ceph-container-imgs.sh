@@ -20,6 +20,7 @@ if ${CI_CONTAINER} ; then
   # must be set by caller (perhaps another Jenkins build job)
   # BRANCH (as above, the Ceph branch)
   # SHA1 (sha1 corresponding to the Ceph branch)
+  # OSD_FLAVOR (choose between default and crimson flavor)
   # CONTAINER_REPO_HOSTNAME="quay.io"
   # CONTAINER_REPO_ORGANIZATION="ceph-ci"
   # CONTAINER_REPO_USERNAME=user
@@ -39,7 +40,8 @@ CONTAINER_BRANCH="${GIT_BRANCH#*/}"
 CONTAINER_SHA=$(git rev-parse --short HEAD)
 TAGGED_HEAD=false # does HEAD is on a tag ?
 DEVEL=${DEVEL:=false}
-OSD_FLAVOR=${FLAVOR:="default"}
+# flavor based on OSD type proporgated by ceph-build
+OSD_FLAVOR=${OSD_FLAVOR:=default}
 
 if [ -z "$CEPH_RELEASES" ]; then
   # NEVER change 'master' position in the array, this will break the 'latest' tag
@@ -255,6 +257,11 @@ function push_ceph_imgs_latest {
     docker push $full_repo_tag
     docker push $branch_repo_tag
     docker push $sha1_repo_tag
+    if [[ "${OSD_FLAVOR}" == "crimson" ]]; then
+      sha1_flavor_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}-${OSD_FLAVOR}
+      docker tag $local_tag $sha1_flavor_repo_tag
+      docker push $sha1_flavor_repo_tag
+    fi
     return
   fi
 
