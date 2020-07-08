@@ -6,11 +6,9 @@ set -e
 # VARIABLES #
 #############
 
-STAGING_DIR=staging/pacific-ubi8-latest-x86_64/
-DAEMON_DIR=$STAGING_DIR/daemon
-DAEMON_BASE_DIR=${DAEMON_DIR}-base/
-DOCKERFILE_DAEMON=$DAEMON_DIR/Dockerfile
-DOCKERFILE_DAEMON_BASE=$DAEMON_DIR/Dockerfile
+STAGING_DIR=staging/master-ubi8-latest-x86_64/
+DAEMON_BASE_DIR=$STAGING_DIR/daemon-base/
+DOCKERFILE_DAEMON_BASE=$DAEMON_BASE_DIR/Dockerfile
 COMPOSED_DIR=$STAGING_DIR/composed
 
 
@@ -27,11 +25,9 @@ fatal() {
 }
 
 check_staging_exist(){
-  for dockerfile in "$DOCKERFILE_DAEMON" "$DOCKERFILE_DAEMON_BASE"; do
-    if [ ! -f "$dockerfile" ]; then
-      fatal "Missing dockerfile $dockerfile ! Please stage first !"
-    fi
-  done
+  if [ ! -f "$DOCKERFILE_DAEMON_BASE" ]; then
+    fatal "Missing dockerfile $DOCKERFILE_DAEMON_BASE ! Please stage first !"
+  fi
 }
 
 create_compose_directory() {
@@ -45,11 +41,6 @@ import_content() {
   rsync -a --exclude "__*__" --exclude "*.bak" --exclude "*.md" "$1"/* $COMPOSED_DIR/ || fatal "Cannot rsync"
 }
 
-# Select the end of the daemon Dockerfile to complete the daemon-base's one
-merge_content() {
-  grep -B1 -A1000 "# Add ceph-container files" $DOCKERFILE_DAEMON >> $COMPOSED_DIR/Dockerfile || fatal "Cannot find starting point in $DOCKERFILE_DAEMON"
-}
-
 clean_staging() {
   if [ -d "$STAGING_DIR" ]; then
     rm -rf "${STAGING_DIR:?}"
@@ -57,7 +48,7 @@ clean_staging() {
 }
 
 make_staging() {
-  make BASEOS_REGISTRY=registry.redhat.io BASEOS_REPO=ubi8/ubi FLAVORS=pacific,ubi8,latest || fatal "Cannot build rhel8"
+  make BASEOS_REGISTRY=registry.redhat.io BASEOS_REPO=ubi8/ubi FLAVORS=master,ubi8,latest IMAGES_TO_BUILD=daemon-base || fatal "Cannot build rhel8"
 }
 
 success() {
@@ -75,7 +66,5 @@ clean_staging
 make_staging
 check_staging_exist
 create_compose_directory
-import_content $DAEMON_DIR
 import_content $DAEMON_BASE_DIR
-merge_content
 success

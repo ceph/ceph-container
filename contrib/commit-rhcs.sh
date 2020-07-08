@@ -49,7 +49,7 @@ pushd "$CEPH_CONTAINER_DIR"
   contrib/compose-rhcs.sh
 popd > /dev/null
 
-COMPOSED_DIR=$CEPH_CONTAINER_DIR/staging/pacific-ubi8-latest-x86_64/composed
+COMPOSED_DIR=$CEPH_CONTAINER_DIR/staging/master-ubi8-latest-x86_64/composed
 
 if [ ! -d "$COMPOSED_DIR" ]; then
   fatal "There is no composed directory. Looks like the build failed !"
