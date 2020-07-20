@@ -252,8 +252,9 @@ function push_ceph_imgs_latest {
   local latest_name
 
   if ${CI_CONTAINER} ; then
-    CENTOS_RELEASE=$(_centos_release ${BRANCH})
-    local_tag=${CONTAINER_REPO_ORGANIZATION}/daemon-base:${RELEASE}-${BRANCH}-centos-${CENTOS_RELEASE}-${HOST_ARCH}
+    CENTOS_RELEASE=$(_centos_release "${BRANCH}")
+    # local_tag should match with daemon_img defined in maint-lib/makelib.mk
+    local_tag=${CONTAINER_REPO_ORGANIZATION}/daemon-base:${RELEASE}-${CEPH_VERSION}-centos-${CENTOS_RELEASE}-${HOST_ARCH}
     full_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${RELEASE}-centos-${CENTOS_RELEASE}-${HOST_ARCH}-devel
     branch_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${BRANCH}
     sha1_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}
@@ -351,6 +352,8 @@ cleanup_previous_run
 login_docker_hub
 if ${CI_CONTAINER}; then
   RELEASE=${CEPH_BRANCH}-${SHA1:0:7}
+  top_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+  CEPH_VERSION=$(bash "${top_dir}"/maint-lib/ceph_version.sh "${CEPH_BRANCH}" CEPH_VERSION)
 else
   create_head_or_point_release
 fi

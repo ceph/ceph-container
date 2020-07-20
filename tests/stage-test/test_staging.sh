@@ -4,6 +4,8 @@ set -euo pipefail
 # Integration test to make sure staging is working properly
 
 export CEPH_VERSION_SPEC=luminous-12.2.1-0
+CEPH_REF=$(maint-lib/ceph_version.sh "${CEPH_VERSION_SPEC}" "CEPH_REF")
+export CEPH_REF
 CEPH_VERSION=$(maint-lib/ceph_version.sh "${CEPH_VERSION_SPEC}" "CEPH_VERSION")
 export CEPH_VERSION
 CEPH_POINT_RELEASE=$(maint-lib/ceph_version.sh "${CEPH_VERSION_SPEC}" "CEPH_POINT_RELEASE")
