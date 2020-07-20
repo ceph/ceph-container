@@ -58,9 +58,10 @@ This is only available on CentOS with the following command :
 
 Alternatively, you can build a container image based on `wip-*` branch:
 
-`make FLAVORS="wip-super-code,centos,7" build`
+`make FLAVORS="wip-nautilus-superb,centos,7" build`
 
-To build your branch on Centos 7 on the `wip-super-code` branch.
+To build your branch on Centos 7 on the `wip-nautilus-superb` branch. But please make sure the
+branch name contains the release name from which the branch is created.
 
 It's also possible to use the Ceph development builds instead of the stable one (except for master).
 The ceph packages will be pulled from shaman/chacra repositories.
