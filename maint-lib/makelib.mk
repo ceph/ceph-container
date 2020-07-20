@@ -18,7 +18,13 @@ $(shell bash -c 'set -eu ; \
 	set_var HOST_ARCH          "$(word 1, $(subst $(comma), ,$(1)))" ; \
 	ceph_version_spec="$(word 2, $(subst $(comma), ,$(1)))" ; \
 	set_var CEPH_VERSION       "$$(bash maint-lib/ceph_version.sh "$$ceph_version_spec" CEPH_VERSION)" ; \
-	set_var CEPH_POINT_RELEASE "$$(bash maint-lib/ceph_version.sh "$$ceph_version_spec" CEPH_POINT_RELEASE)" ; \
+	if "$(CEPH_DEVEL)"; then \
+		set_var CEPH_REF       "$$ceph_version_spec" ; \
+		set_var CEPH_POINT_RELEASE "" ; \
+	else \
+		set_var CEPH_REF       "$$(bash maint-lib/ceph_version.sh "$$ceph_version_spec" CEPH_REF)" ; \
+		set_var CEPH_POINT_RELEASE "$$(bash maint-lib/ceph_version.sh "$$ceph_version_spec" CEPH_POINT_RELEASE)" ; \
+	fi ; \
 	set_var CEPH_DEVEL         "$(CEPH_DEVEL)" ; \
 	set_var	OSD_FLAVOR         "$(OSD_FLAVOR)" ; \
 	set_var DISTRO             "$(word 3, $(subst $(comma), , $(1)))" ; \

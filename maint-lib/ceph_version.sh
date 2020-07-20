@@ -4,34 +4,38 @@ set -euo pipefail
 CEPH_VERSION_SPEC=$1
 WHAT_TO_EXTRACT=$2
 
-# By default, we consider that CEPH_VERSION_SPEC in this style: luminous
-# So no point release, just a version
-CEPH_POINT_RELEASE=""
-CEPH_VERSION="${CEPH_VERSION_SPEC}"
-
 function parse_ceph_version_spec {
   local version_spec="${1}"
   shift
+  local ceph_version="${1}"
+  shift
+  # By default, we consider that CEPH_VERSION_SPEC in this style: luminous
+  # So no point release, just a version
+  local ceph_ref="${version_spec}"
+  local ceph_point_release=""
   # Search for the two possible separators between CEPH_VERSION and CEPH_POINT_RELEASE
   # Let's consider CEPH_VERSION_SPEC=luminous-12.2.0-1
-  local ceph_point_release=""
   for separator in "=" "-"; do
     # If the line doesn't have a separator, let's try the next one
-    if [[ ! "${version_spec}" =~ ${separator} ]]; then continue; fi
-
-    # If we found it, let's save both parts in the respective variables
-    # shellcheck disable=SC2034
-    ceph_point_release="${separator}${CEPH_VERSION_SPEC#*${separator}}"
+    if [[ ! "${version_spec}" =~ ${separator} ]]; then
+      continue;
+    fi
+    ceph_ref="${CEPH_VERSION_SPEC%%${separator}*}"
+    # only set point_release if spec looks like "<ceph_version>=<point_release>"
+    if [[ "$ceph_ref" == "${ceph_version}" ]]; then
+      ceph_point_release="${separator}${CEPH_VERSION_SPEC#*${separator}}"
+    else
+      ceph_ref=${version_spec}
+    fi
     # Don't continue if we found something
     break
   done
-  # Let's print the requested variable
-  echo "${ceph_point_release}"
+  echo "${ceph_ref}" "${ceph_point_release}"
 }
 
 function get_ceph_version {
-  local release="${1}"
-  case  "${release}" in
+  local spec="${1}"
+  case  "${spec}" in
     *mimic*)
       echo mimic
       ;;
@@ -50,15 +54,23 @@ function get_ceph_version {
   esac
 }
 
-# If we pass a dev branch, we don't know the version so let's use the branch name as the ceph version
+ceph_version=$(get_ceph_version "${CEPH_VERSION_SPEC}")
+if [[ "${CEPH_VERSION_SPEC}" =~ wip ]]; then
+  ceph_ref=${CEPH_VERSION_SPEC}
+  ceph_point_release=""
+else
+  read -r ceph_ref ceph_point_release <<< \
+       "$(parse_ceph_version_spec "${CEPH_VERSION_SPEC}" "${ceph_version}")"
+fi
+
 case "$WHAT_TO_EXTRACT" in
+  CEPH_VERSION)
+    echo "${ceph_version}"
+    ;;
+  CEPH_REF)
+    echo "${ceph_ref}"
+    ;;
   CEPH_POINT_RELEASE)
-    if [[ $CEPH_VERSION =~ ^wip* ]]; then
-      echo $CEPH_POINT_RELEASE
-    else
-      echo $(parse_ceph_version_spec ${CEPH_VERSION_SPEC})
-    fi;;
-    CEPH_VERSION)
-      echo $(get_ceph_version ${CEPH_VERSION_SPEC})
-      ;;
+    echo "${ceph_point_release}"
+    ;;
 esac

@@ -16,6 +16,7 @@ ALIGNED_NEWLINE = '\n' + ' ' * 21  # align second line to column
 REQUIRED_ENV_VARS = OrderedDict([
     ('CEPH_VERSION',       'Ceph named version part of the ceph-releases source path' +  # noqa: E241,E501
                             ALIGNED_NEWLINE + '(e.g., luminous, mimic)'),  # noqa: E241
+    ('CEPH_REF',           'Branch name of Ceph (e.g. wip-luminous-test)'), # noqa: E241,E501
     ('CEPH_POINT_RELEASE', 'Points to specific version of Ceph (e.g -12.2.0) or empty'),  # noqa: E241,E501
     ('CEPH_DEVEL',         'Flag to enable ceph development packages (default false)'), # noqa: E241,E501
     ('OSD_FLAVOR',         'Choose to build between default and crimson osd (default flavor: default)'), # noqa: E241,E501
