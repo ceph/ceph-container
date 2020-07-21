@@ -210,7 +210,21 @@ declare -F build_ceph_imgs  ||
 function build_ceph_imgs {
   echo "Build Ceph container image(s)"
   if ${CI_CONTAINER}; then
-    make FLAVORS="${CEPH_BRANCH},centos,$(_centos_release ${CEPH_BRANCH})" \
+    if [ -z "$CONTAINER_FLAVOR" ]; then
+      CONTAINER_FLAVOR=${CEPH_BRANCH},centos,$(_centos_release "${CEPH_BRANCH}")
+    else
+      IFS="," read -r ceph_branch distro distro_release <<< "${CONTAINER_FLAVOR}"
+      if [ "${ceph_branch}" != "${BRANCH}" ]; then
+        echo "branch \"${ceph_branch}\" in \$CONTAINER_FLAVOR does not match with \$BRANCH \"${BRANCH}\""
+        exit 1
+      fi
+      if [ "${distro}" != "centos" ]; then
+        echo "distro \"${distro}\"in \$CONTAINER_FLAVOR is not supported yet"
+        exit 1
+      fi
+    fi
+
+    make FLAVORS="${CONTAINER_FLAVOR}" \
          CEPH_DEVEL="true" \
          OSD_FLAVOR=${OSD_FLAVOR} \
          RELEASE=${RELEASE} \
@@ -252,10 +266,15 @@ function push_ceph_imgs_latest {
   local latest_name
 
   if ${CI_CONTAINER} ; then
-    CENTOS_RELEASE=$(_centos_release "${BRANCH}")
+    if [ -z "$CONTAINER_FLAVOR" ]; then
+      distro=centos
+      distro_release=$(_centos_release "${BRANCH}")
+    else
+      IFS="," read -r ceph_branch distro distro_release <<< "${CONTAINER_FLAVOR}"
+    fi
     # local_tag should match with daemon_img defined in maint-lib/makelib.mk
-    local_tag=${CONTAINER_REPO_ORGANIZATION}/daemon-base:${RELEASE}-${CEPH_VERSION}-centos-${CENTOS_RELEASE}-${HOST_ARCH}
-    full_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${RELEASE}-centos-${CENTOS_RELEASE}-${HOST_ARCH}-devel
+    local_tag=${CONTAINER_REPO_ORGANIZATION}/daemon-base:${RELEASE}-${CEPH_VERSION}-${distro}-${distro_release}-${HOST_ARCH}
+    full_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${RELEASE}-${distro}-${distro_release}-${HOST_ARCH}-devel
     branch_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${BRANCH}
     sha1_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}
     if [[ "${OSD_FLAVOR}" == "crimson" ]]; then
