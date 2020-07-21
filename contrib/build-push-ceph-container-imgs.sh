@@ -108,7 +108,7 @@ function install_podman {
 
 function login_docker_hub {
   echo "Login in the Docker Hub"
-  docker login -u "$CONTAINER_REPO_USERNAME" -p "$CONTAINER_REPO_PASSWORD" ${CONTAINER_REPO_HOSTNAME}
+  docker login -u "$CONTAINER_REPO_USERNAME" -p "$CONTAINER_REPO_PASSWORD" "${CONTAINER_REPO_HOSTNAME}"
 }
 
 function enable_experimental_docker_cli {
@@ -227,12 +227,12 @@ function build_ceph_imgs {
     make FLAVORS="${CONTAINER_FLAVOR}" \
          CEPH_DEVEL="true" \
          OSD_FLAVOR=${OSD_FLAVOR} \
-         RELEASE=${RELEASE} \
-         TAG_REGISTRY=${CONTAINER_REPO_ORGANIZATION} \
+         RELEASE="${RELEASE}" \
+         TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" \
          IMAGES_TO_BUILD=daemon-base \
          build.parallel
   else
-    make CEPH_DEVEL=${DEVEL} RELEASE=${RELEASE} build.parallel
+    make CEPH_DEVEL=${DEVEL} RELEASE="${RELEASE}" build.parallel
   fi
   docker images
 }
@@ -248,16 +248,16 @@ function build_and_push_latest_bis {
   # latest-bis-$ceph_release is needed by ceph-ansible so it can test the restart handlers on an image ID change
   # rebuild latest again to get a different image ID
   for ceph_release in "${CEPH_RELEASES[@]}"; do
-    CENTOS_RELEASE=$(_centos_release ${ceph_release})
-    make RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,${CENTOS_RELEASE} build
-    docker tag ceph/daemon:"$CONTAINER_BRANCH"-bis-"${ceph_release}"-centos-${CENTOS_RELEASE}-"${HOST_ARCH}" ceph/daemon:latest-bis-"$ceph_release"
+    CENTOS_RELEASE=$(_centos_release "${ceph_release}")
+    make RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,"${CENTOS_RELEASE}" build
+    docker tag ceph/daemon:"$CONTAINER_BRANCH"-bis-"${ceph_release}"-centos-"${CENTOS_RELEASE}"-"${HOST_ARCH}" ceph/daemon:latest-bis-"$ceph_release"
     docker push ceph/daemon:latest-bis-"$ceph_release"
   done
 
   # Now let's build the latest
-  CENTOS_RELEASE=$(_centos_release ${CEPH_RELEASES[-1]})
-  make RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,${CENTOS_RELEASE} build
-  docker tag ceph/daemon:"$CONTAINER_BRANCH"-bis-"${CEPH_RELEASES[-1]}"-centos-${CENTOS_RELEASE}-"${HOST_ARCH}" ceph/daemon:latest-bis
+  CENTOS_RELEASE=$(_centos_release "${CEPH_RELEASES[-1]}")
+  make RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,"${CENTOS_RELEASE}" build
+  docker tag ceph/daemon:"$CONTAINER_BRANCH"-bis-"${CEPH_RELEASES[-1]}"-centos-"${CENTOS_RELEASE}"-"${HOST_ARCH}" ceph/daemon:latest-bis
   docker push ceph/daemon:latest-bis
 }
 
@@ -279,15 +279,15 @@ function push_ceph_imgs_latest {
     sha1_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}
     if [[ "${OSD_FLAVOR}" == "crimson" ]]; then
       sha1_flavor_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}-${OSD_FLAVOR}
-      docker tag $local_tag $sha1_flavor_repo_tag
-      docker push $sha1_flavor_repo_tag
+      docker tag "$local_tag" "$sha1_flavor_repo_tag"
+      docker push "$sha1_flavor_repo_tag"
     else
-      docker tag $local_tag $full_repo_tag
-      docker tag $local_tag $branch_repo_tag
-      docker tag $local_tag $sha1_repo_tag
-      docker push $full_repo_tag
-      docker push $branch_repo_tag
-      docker push $sha1_repo_tag
+      docker tag "$local_tag" "$full_repo_tag"
+      docker tag "$local_tag" "$branch_repo_tag"
+      docker tag "$local_tag" "$sha1_repo_tag"
+      docker push "$full_repo_tag"
+      docker push "$branch_repo_tag"
+      docker push "$sha1_repo_tag"
     fi
     return
   fi
@@ -304,7 +304,7 @@ function push_ceph_imgs_latest {
       latest_name="${latest_name}-devel"
     fi
     for i in daemon-base daemon; do
-      tag=ceph/$i:${CONTAINER_BRANCH}-${CONTAINER_SHA}-$release-centos-$(_centos_release ${release})-${HOST_ARCH}
+      tag=ceph/$i:${CONTAINER_BRANCH}-${CONTAINER_SHA}-$release-centos-$(_centos_release "${release}")-${HOST_ARCH}
       # tag image
       docker tag "$tag" ceph/$i:"$latest_name"
 
@@ -335,11 +335,11 @@ function create_registry_manifest {
   # This should normally work, by the time we get here the arm64 image should have been built and pushed
   # IIRC docker manisfest will fail if the image does not exist
   for image in daemon-base daemon; do
-    for ceph_release in ${CEPH_RELEASES[@]}; do
+    for ceph_release in "${CEPH_RELEASES[@]}"; do
       if [ "${ceph_release}" == "master" ]; then
         continue
       fi
-      TARGET_RELEASE="ceph/${image}:${RELEASE}-${ceph_release}-centos-$(_centos_release ${ceph_release})"
+      TARGET_RELEASE="ceph/${image}:${RELEASE}-${ceph_release}-centos-$(_centos_release "${ceph_release}")"
       DOCKER_IMAGES="$TARGET_RELEASE ${TARGET_RELEASE}-x86_64"
 
       # Let's add ARM images if being built
