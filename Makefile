@@ -52,6 +52,8 @@ ALL_BUILDABLE_FLAVORS := \
 	luminous,debian,9 \
 	mimic,centos,7 \
 	nautilus,centos,7 \
+	nautilus,centos,8 \
+	octopus,centos,7 \
 	octopus,centos,8 \
 	master,centos,8
 
