@@ -6,7 +6,7 @@ set -e
 # VARIABLES #
 #############
 
-STAGING_DIR=staging/octopus-ubi8-8-released-x86_64/
+STAGING_DIR=staging/octopus-ubi8-latest-x86_64/
 DAEMON_DIR=$STAGING_DIR/daemon
 DAEMON_BASE_DIR=${DAEMON_DIR}-base/
 DOCKERFILE_DAEMON=$DAEMON_DIR/Dockerfile
@@ -57,7 +57,7 @@ clean_staging() {
 }
 
 make_staging() {
-  make FLAVORS=octopus,ubi8,8-released || fatal "Cannot build rhel8"
+  make BASEOS_REGISTRY=registry.redhat.io BASEOS_REPO=ubi8/ubi FLAVORS=octopus,ubi8,latest || fatal "Cannot build rhel8"
 }
 
 success() {
