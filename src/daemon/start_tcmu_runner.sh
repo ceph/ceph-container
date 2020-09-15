@@ -16,7 +16,10 @@ function start_tcmu_runner {
   # mount configfs at /sys/kernel/config
   mount -t configfs none /sys/kernel/config
 
+  # create the log directory
+  mkdir -p "${TCMU_RUNNER_LOG_DIR}"
+
   log "SUCCESS"
   # start tcmu-runner
-  exec tcmu-runner
+  exec tcmu-runner --tcmu-log-dir "${TCMU_RUNNER_LOG_DIR}"
 }
