@@ -123,3 +123,4 @@ MONMAP=/etc/ceph/monmap-${CLUSTER}
 MGR_KEYRING=/var/lib/ceph/mgr/${CLUSTER}-${MGR_NAME}/keyring
 RBD_MIRROR_KEYRING=/etc/ceph/${CLUSTER}.client.rbd-mirror.${HOSTNAME}.keyring
 STAYALIVE=
+TCMU_RUNNER_LOG_DIR=/var/log/tcmu-runner
