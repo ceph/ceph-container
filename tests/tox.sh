@@ -51,10 +51,10 @@ pip install -r "$TOXINIDIR"/ceph-ansible/tests/requirements.txt
 bash "$WORKSPACE"/travis-builds/purge_cluster.sh
 # XXX purge_cluster only stops containers, it doesn't really remove them so try to
 # remove them for real
-containers_to_remove=$(sudo docker ps -a -q)
+containers_to_remove=$(docker ps -a -q)
 
 if [ "${containers_to_remove}" ]; then
-  sudo docker rm -f "$@" "${containers_to_remove}" || echo failed to remove containers
+  docker rm -f "$@" "${containers_to_remove}" || echo failed to remove containers
 fi
 
 cd "$WORKSPACE"
@@ -62,14 +62,14 @@ cd "$WORKSPACE"
 FLAVOR="luminous,centos,7"
 
 # build everything that was touched to make sure build succeeds
-mapfile -t FLAVOR_ARRAY < <(sudo make flavors.modified)
+mapfile -t FLAVOR_ARRAY < <(make flavors.modified)
 
 if [[ "$NIGHTLY" != 'TRUE' ]]; then
   if [[ "${#FLAVOR_ARRAY[@]}" -eq "0" ]]; then
     echo "The ceph-container code has not changed."
     echo "Nothing to test here."
     echo "SUCCESS"
-    sudo make clean.all
+    make clean.all
     exit 0
   fi
 
@@ -79,20 +79,20 @@ if [[ "$NIGHTLY" != 'TRUE' ]]; then
 fi
 
 echo "Building flavor $FLAVOR"
-make_output=$(sudo make FLAVORS="$FLAVOR" stage) # Run staging to get DAEMON_IMAGE name
+make_output=$(make FLAVORS="$FLAVOR" stage) # Run staging to get DAEMON_IMAGE name
 daemon_image=$(echo "${make_output}" | grep " DAEMON_IMAGE ") # Find DAEMON_IMAGE line
 daemon_image="${daemon_image#*DAEMON_IMAGE*: }" # Remove DAEMON_IMAGE from beginning
 daemon_image="$(echo "${daemon_image}" | tr -s ' ')" # Remove whitespace
-sudo make FLAVORS="$FLAVOR" build.parallel
+make FLAVORS="$FLAVOR" build.parallel
 
 # start a local docker registry
-sudo docker run -d -p 5000:5000 --restart=always --name registry registry:2
+docker run -d -p 5000:5000 --restart=always --name registry registry:2
 # add the image we just built to the registry
-sudo docker tag "${daemon_image}" localhost:5000/ceph/daemon:latest-luminous
+docker tag "${daemon_image}" localhost:5000/ceph/daemon:latest-luminous
 # this avoids a race condition between the tagging and the push
 # which causes this to sometimes fail when run by jenkins
 sleep 1
-sudo docker --debug push localhost:5000/ceph/daemon:latest-luminous
+docker --debug push localhost:5000/ceph/daemon:latest-luminous
 
 cd "$CEPH_ANSIBLE_SCENARIO_PATH"
 bash "$TOXINIDIR"/ceph-ansible/tests/scripts/vagrant_up.sh --no-provision --provider="$VAGRANT_PROVIDER"
@@ -112,5 +112,5 @@ py.test -n 8 --sudo -v --connection=ansible --ansible-inventory="$CEPH_ANSIBLE_S
 # teardown
 #################################################################################
 cd "$WORKSPACE"
-sudo make clean.all
+make clean.all
 bash "$TOXINIDIR"/tests/teardown.sh
