@@ -80,7 +80,7 @@ CRUSH_LOCATION_DEFAULT=("root=default" "host=${HOSTNAME}")
 CLI_OPTS=(--cluster ${CLUSTER})
 
 # This is ONLY used for the daemon's startup, e.g: ceph-osd $DAEMON_OPTS
-DAEMON_OPTS=(--cluster ${CLUSTER} --setuser ceph --setgroup ceph --log-to-stderr=true --err-to-stderr=true --default-log-to-file=false)
+DAEMON_OPTS=(--cluster ${CLUSTER} --setuser ceph --setgroup ceph --default-log-to-stderr=true --err-to-stderr=true --default-log-to-file=false)
 if [[ "$CEPH_DAEMON" == demo ]]; then
   DAEMON_OPTS+=(--daemon)
 else
