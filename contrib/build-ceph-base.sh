@@ -17,6 +17,7 @@ source "${SCRIPT_DIR}/ceph-build-config.sh"
 flavors_to_build="$(get_flavors_to_build "${ARCH}")"
 
 install_docker
+do_login
 do_clean
 
 echo ''
