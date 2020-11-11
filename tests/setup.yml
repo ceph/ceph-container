@@ -45,12 +45,20 @@
           }
       when: result_docker_install.skipped is not defined
 
-    - name: allow nodes to use an insecure registry - podman
+    - name: allow nodes to use an insecure registry - podman | location
       ini_file:
         path: /etc/containers/registries.conf
-        section: registries.insecure
-        option: registries
-        value: "['{{ ceph_docker_registry }}']"
+        section: "[registry]"
+        option: location
+        value: "\"{{ ceph_docker_registry }}\""
+      when: result_podman_install.skipped is not defined
+
+    - name: allow nodes to use an insecure registry - podman | insecure
+      ini_file:
+        path: /etc/containers/registries.conf
+        section: "[registry]"
+        option: insecure
+        value: "true"
       when: result_podman_install.skipped is not defined
 
     - name: restart docker
