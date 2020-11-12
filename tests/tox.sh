@@ -43,6 +43,10 @@ else
   sudo chgrp "$(whoami)" /var/run/docker.sock
 fi
 
+if [ -n "${DOCKER_HUB_USERNAME}" ] && [ -n "${DOCKER_HUB_PASSWORD}" ]; then
+  docker login -u "${DOCKER_HUB_USERNAME}" -p "${DOCKER_HUB_PASSWORD}"
+fi
+
 rm -rf "$WORKSPACE"/ceph-ansible || true
 git clone -b "$CEPH_ANSIBLE_BRANCH" --single-branch https://github.com/ceph/ceph-ansible.git ceph-ansible
 
