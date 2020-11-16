@@ -578,7 +578,7 @@ function install_docker {
   if [ -n "${DRY_RUN:-}" ]; then
     return
   fi
-  sudo apt-get install -y --force-yes docker.io
+  sudo apt-get install -y --force-yes docker.io containerd
   sudo systemctl start docker
   sudo systemctl status docker
   sudo chgrp "$(whoami)" /var/run/docker.sock
