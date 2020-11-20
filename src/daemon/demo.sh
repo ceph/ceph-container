@@ -31,6 +31,13 @@ MGR_IP=$MON_IP
 
 : "${RBD_POOL:="rbd"}"
 
+# sanity check dashboard env vars
+if [ -n "$CEPH_DEMO_DASHBOARD_USER" ] || [ -n "$CEPH_DEMO_DASHBOARD_PASSWORD" ]; then
+  if [ -z "$CEPH_DEMO_DASHBOARD_USER" ] || [ -z "$CEPH_DEMO_DASHBOARD_PASSWORD" ]; then
+    echo "Both CEPH_DEMO_DASHBOARD_USER and CEPH_DEMO_DASHBOARD_PASSWORD must be set if either is set" >&2
+    exit 1
+  fi
+fi
 
 #######
 # MON #
@@ -431,6 +438,21 @@ build_bootstrap
 
 # create 2 files so we can later check that this is a demo container
 touch /var/lib/ceph/I_AM_A_DEMO /etc/ceph/I_AM_A_DEMO
+
+#################
+# MGR DASHBOARD #
+#################
+
+# https://docs.ceph.com/en/latest/mgr/dashboard/
+# Runs on port 8443 by default
+
+if [ -n "$CEPH_DEMO_DASHBOARD_USER" ] && [ -n "$CEPH_DEMO_DASHBOARD_PASSWORD" ]; then
+  ceph mgr module enable dashboard
+  ceph dashboard create-self-signed-cert
+  ceph mgr module disable dashboard
+  ceph mgr module enable dashboard
+  ceph dashboard ac-user-create "$CEPH_DEMO_DASHBOARD_USER" "$CEPH_DEMO_DASHBOARD_PASSWORD" administrator
+fi
 
 log "SUCCESS"
 exec ceph "${CLI_OPTS[@]}" -w
