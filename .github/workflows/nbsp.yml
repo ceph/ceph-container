@@ -1,0 +1,11 @@
+name: nbsp
+on: [pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: check NBSP characters
+        run: if [[ -n $(grep --exclude-dir=.git -I -P "\xa0" -r .) ]]; then echo 'NBSP characters found'; exit 1; fi
