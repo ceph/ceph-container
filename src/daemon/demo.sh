@@ -452,6 +452,15 @@ if [ -n "$CEPH_DEMO_DASHBOARD_USER" ] && [ -n "$CEPH_DEMO_DASHBOARD_PASSWORD" ];
   ceph mgr module disable dashboard
   ceph mgr module enable dashboard
   ceph dashboard ac-user-create "$CEPH_DEMO_DASHBOARD_USER" "$CEPH_DEMO_DASHBOARD_PASSWORD" administrator
+
+  #enable rgw dashboard capability
+  #https://docs.ceph.com/en/octopus/mgr/dashboard/#enabling-the-object-gateway-management-frontend
+  if [ -n "$CEPH_DEMO_UID" ] && [ -n "$CEPH_DEMO_ACCESS_KEY" ] && [ -n $CEPH_DEMO_SECRET_KEY ]; then
+    ceph dashboard set-rgw-api-access-key $CEPH_DEMO_ACCESS_KEY
+    ceph dashboard set-rgw-api-secret-key $CEPH_DEMO_SECRET_KEY
+    ceph dashboard set-rgw-api-ssl-verify False
+    radosgw-admin user modify --uid $CEPH_DEMO_UID --system
+  fi
 fi
 
 log "SUCCESS"
