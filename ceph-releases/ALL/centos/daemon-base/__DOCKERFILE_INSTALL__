@@ -43,10 +43,6 @@ if [[ "${CEPH_VERSION}" == nautilus ]]; then \
   fi ; \
 fi && \
 bash -c ' \
-  if [[ __ENV_[BASEOS_TAG]__ -eq 8 ]]; then \
-    yum install -y dnf-plugins-core ;\
-    yum copr enable -y ktdreyer/ceph-el8 ;\
-  fi && \
   if [[ "${CEPH_VERSION}" =~ master ]] || ${CEPH_DEVEL}; then \
     REPO_URL=$(curl -s "https://shaman.ceph.com/api/search/?project=ceph&distros=centos/__ENV_[BASEOS_TAG]__&flavor=${OSD_FLAVOR}&ref=${CEPH_REF}&sha1=latest" | jq -a ".[0] | .url"); \
     RELEASE_VER=0 ;\
