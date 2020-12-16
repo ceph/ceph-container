@@ -43,7 +43,7 @@ git reset --hard "origin/$CURRENT_GIT_BRANCH" || fatal "Cannot reset the local d
 DOWNSTREAM_BRANCH_VERSION=$(echo "$CURRENT_GIT_BRANCH" | sed 's/ceph-\(.*\)-rhel.*/\1/g')
 
 step "Cloning ceph-container $DOWNSTREAM_BRANCH_VERSION"
-git clone https://github.com/ceph/ceph-container.git -b "stable-$DOWNSTREAM_BRANCH_VERSION" $CEPH_CONTAINER_DIR
+git clone https://github.com/ceph/ceph-container.git -b "stable-$DOWNSTREAM_BRANCH_VERSION" "$CEPH_CONTAINER_DIR"
 
 step "Composing RHCS"
 pushd "$CEPH_CONTAINER_DIR"
@@ -78,6 +78,6 @@ This is not related to the bz but needed to keep the resync in coherency with up
 
 EOF
 COMMITS=$(git diff --staged | grep GIT_COMMIT |cut -d '"' -f 2 | sed -e ':a;N;$!ba;s/\n/../g')
-git -C  $CEPH_CONTAINER_DIR log "$COMMITS" --oneline --no-decorate >> "$COMMIT_TEMPLATE"
+git -C  "$CEPH_CONTAINER_DIR" log "$COMMITS" --oneline --no-decorate >> "$COMMIT_TEMPLATE"
 
 git commit -st "$COMMIT_TEMPLATE"
