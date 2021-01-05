@@ -40,6 +40,7 @@ function osd_directory {
     log "created folder $OSD_PATH"
     # write the secret to the osd keyring file
     ceph-authtool --create-keyring "${OSD_PATH}"/keyring --name osd."${OSD_ID}" --add-key "${OSD_SECRET}"
+    chown "${CHOWN_OPT[@]}" ceph. "${OSD_PATH}"/keyring
     # init data directory
     ceph-osd --cluster "${CLUSTER}" -i "${OSD_ID}" --mkfs --osd-uuid "${UUID}" --mkjournal --osd-journal "${OSD_J}" --setuser ceph --setgroup ceph
   fi
