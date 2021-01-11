@@ -183,7 +183,9 @@ function start_mon {
   # start MON
   if [[ "$CEPH_DAEMON" == demo ]]; then
     if [[ ! "${CEPH_VERSION}" =~ ^(luminous|mimic)$ ]]; then
-      echo "mon warn on pool no redundancy = false" >> /etc/ceph/"${CLUSTER}".conf
+      if ! grep -qE "mon warn on pool no redundancy = false" /etc/ceph/"${CLUSTER}".conf; then
+          echo "mon warn on pool no redundancy = false" >> /etc/ceph/"${CLUSTER}".conf
+      fi
     fi
     /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}"
 
