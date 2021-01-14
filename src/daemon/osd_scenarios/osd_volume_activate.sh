@@ -19,10 +19,11 @@ function osd_volume_simple {
       elif [[ ${OSD_DMCRYPT} -eq 1 ]] && [[ ${OSD_BLUESTORE} -eq 1 ]]; then
         get_dmcrypt_bluestore_uuid  || true
         mount_lockbox "$DATA_UUID" "$LOCKBOX_UUID"
+        # shellcheck disable=SC2034
         MOUNTED_PART="/dev/mapper/${DATA_UUID}"
         open_encrypted_parts_bluestore
       fi
-      ceph-volume simple scan ${DATA_PART} --force || true
+      ceph-volume simple scan "${DATA_PART}" --force || true
       if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
         umount_lockbox
       fi
