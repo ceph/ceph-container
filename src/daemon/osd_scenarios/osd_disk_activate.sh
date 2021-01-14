@@ -80,6 +80,10 @@ function osd_activate {
   fi
   apply_ceph_ownership_to_disks
 
+  if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+    umount_lockbox
+  fi
+
   log "SUCCESS"
   # This ensures all resources have been unmounted after the OSD has exited
   # We define `sigterm_cleanup_post` here because:
@@ -87,7 +91,7 @@ function osd_activate {
   # - having the cleaning code just next to the concerned function in the same file is nice.
   function sigterm_cleanup_post {
     local osd_mnt
-    osd_mnt=$(df --output=target | grep '/var/lib/ceph/osd/')
+    osd_mnt="/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}"
     log "osd_disk_activate: Unmounting $osd_mnt"
     umount "$osd_mnt" || (log "osd_disk_activate: Failed to umount $osd_mnt"; lsof "$osd_mnt")
   }
