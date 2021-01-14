@@ -102,11 +102,9 @@ function osd_volume_activate {
   # - having the cleaning code just next to the concerned function in the same file is nice.
   function sigterm_cleanup_post {
     local ceph_mnt
-    ceph_mnt=$(findmnt --nofsroot --noheadings --output SOURCE --submounts --target /var/lib/ceph/osd/"${CLUSTER}-${OSD_ID}" | grep '^/')
-    for mnt in $ceph_mnt; do
-      log "osd_volume_activate: Unmounting $mnt"
-      umount "$mnt" || (log "osd_volume_activate: Failed to umount $mnt"; lsof "$mnt")
-    done
+    ceph_mnt="/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}"
+    log "osd_volume_activate: Unmounting $ceph_mnt"
+    umount "$ceph_mnt" || (log "osd_volume_activate: Failed to umount $ceph_mnt"; lsof "$ceph_mnt")
 
     UUIDS=$(get_dmcrypt_uuids)
 
