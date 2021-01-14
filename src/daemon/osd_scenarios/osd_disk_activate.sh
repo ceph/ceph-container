@@ -12,7 +12,7 @@ function osd_activate {
   ulimit -Hn 4096
 
   if [ -L "${OSD_DEVICE}" ]; then
-    OSD_DEVICE=$(readlink -f ${OSD_DEVICE})
+    OSD_DEVICE=$(readlink -f "${OSD_DEVICE}")
   fi
 
   if ! parted --script "${OSD_DEVICE}" print | grep -qE '^ 1.*ceph data'; then
@@ -22,19 +22,19 @@ function osd_activate {
 
   data_part=$(dev_part "${OSD_DEVICE}" 1)
 
-  if ! test -d /etc/ceph/osd || ! grep -q ${data_part} /etc/ceph/osd/*.json; then
+  if ! test -d /etc/ceph/osd || ! grep -q "${data_part}" /etc/ceph/osd/*.json; then
     log "INFO: Scanning ${data_part}"
-    ceph-volume simple scan ${data_part}
+    ceph-volume simple scan "${data_part}"
   fi
 
-  CEPH_VOLUME_SCAN_FILE=$(grep -l ${data_part} /etc/ceph/osd/*.json)
+  CEPH_VOLUME_SCAN_FILE=$(grep -l "${data_part}" /etc/ceph/osd/*.json)
 
   # Find the OSD ID
-  OSD_ID="$(cat ${CEPH_VOLUME_SCAN_FILE} | $PYTHON -c "import sys, json; print(json.load(sys.stdin)[\"whoami\"])")"
+  OSD_ID="$($PYTHON -c "import sys, json; print(json.load(sys.stdin)[\"whoami\"])" < "${CEPH_VOLUME_SCAN_FILE}")"
 
   # Activate the OSD
   # The command can fail so if it does, let's output the ceph-volume logs
-  if ! ceph-volume simple activate --file ${CEPH_VOLUME_SCAN_FILE} --no-systemd; then
+  if ! ceph-volume simple activate --file "${CEPH_VOLUME_SCAN_FILE}" --no-systemd; then
     cat /var/log/ceph
     exit 1
   fi
