@@ -105,7 +105,7 @@ export ANSIBLE_SSH_ARGS="-F $CEPH_ANSIBLE_SCENARIO_PATH/vagrant_ssh_config -o Co
 ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/tests/setup.yml --extra-vars="ceph_docker_registry=$REGISTRY_ADDRESS"
 ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/tests/functional/lvm_setup.yml
 ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/tests/functional/setup.yml
-ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/site-container.yml.sample --extra-vars="ceph_docker_image_tag=latest-nautilus ceph_docker_registry=$REGISTRY_ADDRESS ceph_docker_image=ceph/daemon fetch_directory=$CEPH_ANSIBLE_SCENARIO_PATH/fetch"
+ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/site-container.yml.sample --extra-vars="ceph_docker_image_tag=latest-nautilus ceph_docker_registry=$REGISTRY_ADDRESS ceph_docker_image=ceph/daemon"
 
 py.test --reruns 5 --reruns-delay 10 -n 8 --sudo -v --connection=ansible --ansible-inventory="$CEPH_ANSIBLE_SCENARIO_PATH"/hosts --ssh-config="$CEPH_ANSIBLE_SCENARIO_PATH"/vagrant_ssh_config "$TOXINIDIR"/ceph-ansible/tests/functional/tests
 
