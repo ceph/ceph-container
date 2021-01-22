@@ -20,6 +20,7 @@
 FLAVORS ?= \
 	nautilus,centos,7 \
 	octopus,centos,8 \
+	pacific,centos,8 \
 	master,centos,8
 
 TAG_REGISTRY ?= ceph
@@ -55,6 +56,7 @@ ALL_BUILDABLE_FLAVORS := \
 	nautilus,centos,8 \
 	octopus,centos,7 \
 	octopus,centos,8 \
+	pacific,centos,8 \
 	master,centos,8
 
 # ==============================================================================
