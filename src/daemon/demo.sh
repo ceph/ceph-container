@@ -354,6 +354,7 @@ function bootstrap_sree {
     sed -i "s/SECRET_KEY/$SECRET_KEY/" static/js/base.js
     mv sree.cfg.sample sree.cfg
     sed -i "s/RGW_CIVETWEB_PORT_VALUE/$RGW_FRONTEND_PORT/" sree.cfg
+    sed -i "s/RGW_ADDRESS_VALUE/$EXPOSED_IP/" sree.cfg
     sed -i "s/SREE_PORT_VALUE/$SREE_PORT/" sree.cfg
     popd
   fi
