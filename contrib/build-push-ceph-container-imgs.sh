@@ -103,7 +103,11 @@ function install_podman {
     # We used to provide fuse-overlayfs-0.7.6-2.0 in lab-extras but a newer version is available in the kubic repo so we'll install/update from there
     sudo dnf install -y fuse-overlayfs
   fi
-  sudo dnf install -y podman podman-docker
+  ALLOWERASING=""
+  if [[ "$HOST_ARCH" == "aarch64" ]] ; then 
+    ALLOWERASING="--allowerasing"
+  fi
+  sudo dnf install ${ALLOWERASING} -y podman podman-docker
 }
 
 function login_docker_hub {
