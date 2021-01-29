@@ -63,7 +63,7 @@ fi
 
 cd "$WORKSPACE"
 # we test the latest stable release of Ceph in priority
-FLAVOR="master,centos,8"
+FLAVOR="pacific,centos,8"
 
 # build everything that was touched to make sure build succeeds
 mapfile -t FLAVOR_ARRAY < <(make flavors.modified)
@@ -92,11 +92,11 @@ make FLAVORS="$FLAVOR" build.parallel
 # start a local docker registry
 docker run -d -p 5000:5000 --restart=always --name registry registry:2
 # add the image we just built to the registry
-docker tag "${daemon_image}" localhost:5000/ceph/daemon:latest-master
+docker tag "${daemon_image}" localhost:5000/ceph/daemon:latest-pacific
 # this avoids a race condition between the tagging and the push
 # which causes this to sometimes fail when run by jenkins
 sleep 1
-docker --debug push localhost:5000/ceph/daemon:latest-master
+docker --debug push localhost:5000/ceph/daemon:latest-pacific
 
 cd "$CEPH_ANSIBLE_SCENARIO_PATH"
 bash "$TOXINIDIR"/ceph-ansible/tests/scripts/vagrant_up.sh --no-provision --provider="$VAGRANT_PROVIDER"
@@ -109,7 +109,7 @@ export ANSIBLE_SSH_ARGS="-F $CEPH_ANSIBLE_SCENARIO_PATH/vagrant_ssh_config -o Co
 ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/tests/setup.yml --extra-vars="ceph_docker_registry=$REGISTRY_ADDRESS"
 ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/tests/functional/lvm_setup.yml
 ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/tests/functional/setup.yml
-ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/site-container.yml.sample --extra-vars="ceph_docker_image_tag=latest-master ceph_docker_registry=$REGISTRY_ADDRESS ceph_docker_image=ceph/daemon"
+ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/site-container.yml.sample --extra-vars="ceph_docker_image_tag=latest-pacific ceph_docker_registry=$REGISTRY_ADDRESS ceph_docker_image=ceph/daemon"
 
 py.test --reruns 5 --reruns-delay 10 -n 8 --sudo -v --connection=ansible --ansible-inventory="$CEPH_ANSIBLE_SCENARIO_PATH"/hosts --ssh-config="$CEPH_ANSIBLE_SCENARIO_PATH"/vagrant_ssh_config "$TOXINIDIR"/ceph-ansible/tests/functional/tests
 
