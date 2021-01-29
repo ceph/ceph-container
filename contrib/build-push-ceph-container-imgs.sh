@@ -60,6 +60,9 @@ CN_RELEASE="v2.3.1"
 function _centos_release {
   local release=$1
   case  "${release}" in
+    *luminous*)
+      echo 7
+      ;;
     *mimic*)
       echo 7
       ;;
