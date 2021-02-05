@@ -5,7 +5,6 @@ set -ex
 # VARIABLES #
 #############
 
-CEPH_RELEASES=(nautilus octopus)
 
 
 #############
