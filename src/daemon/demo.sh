@@ -240,8 +240,8 @@ function bootstrap_demo_user {
     if [ -n "$CEPH_DEMO_BUCKET" ]; then
       log "Creating bucket..."
 
-      # Trying to create a s3cmd within 5 seconds
-      timeout 5 bash -c "until s3cmd mb s3://$CEPH_DEMO_BUCKET; do sleep .1; done"
+      # Trying to create a s3cmd within 30 seconds
+      timeout 30 bash -c "until s3cmd mb s3://$CEPH_DEMO_BUCKET; do sleep .1; done"
     fi
   fi
 }
