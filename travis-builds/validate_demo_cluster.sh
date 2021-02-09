@@ -6,26 +6,26 @@ set -xe
 # FUNCTIONS #
 #############
 function get_cluster_name {
-  cluster=$(docker exec ceph-demo grep -R fsid /etc/ceph/ | egrep -o '^[^.]*')
-  DOCKER_COMMAND="docker exec ceph-demo ceph --connect-timeout 3 --cluster $(basename $cluster)"
+  cluster=$(docker exec ceph-demo grep -R fsid /etc/ceph/ | grep -Eo '^[^.]*')
+  DOCKER_COMMAND="docker exec ceph-demo ceph --connect-timeout 3 --cluster $(basename "$cluster")"
 }
 
 function wait_for_daemon () {
   timeout=90
   daemon_to_test=$1
   while [ $timeout -ne 0 ]; do
-    if eval $daemon_to_test; then
+    if eval "$daemon_to_test"; then
       return 0
     fi
     sleep 1
-    let timeout=timeout-1
+    (( timeout=timeout-1 ))
   done
   return 1
 }
 
 function get_ceph_version {
   # shellcheck disable=SC2046
-  echo $($DOCKER_COMMAND --version | grep -Eo '[0-9][0-9]\.[0-9]')
+  $DOCKER_COMMAND --version | grep -Eo '[0-9][0-9]\.[0-9]'
 }
 
 function ceph_status {
@@ -75,7 +75,7 @@ function test_demo_mgr {
 
 function test_demo_rest_api {
   key=$($DOCKER_COMMAND restful list-keys | python -c 'import json, sys; print(json.load(sys.stdin)["demo"])')
-  docker exec ceph-demo curl -s --connect-timeout 1 -u demo:$key -k https://0.0.0.0:8003/server
+  docker exec ceph-demo curl -s --connect-timeout 1 -u demo:"$key" -k https://0.0.0.0:8003/server
   # shellcheck disable=SC2046
   return $(wait_for_daemon "$DOCKER_COMMAND mgr dump | grep -sq 'restful\": \"https://.*:8003'")
 }
@@ -85,7 +85,7 @@ function test_demo_rest_api {
 ########
 get_cluster_name
 ceph_status # wait for the cluster to stabilize
-ceph_version=$(get_ceph_version)
+get_ceph_version
 test_demo_mon
 test_demo_osd
 test_demo_rgw

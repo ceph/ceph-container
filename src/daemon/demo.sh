@@ -12,6 +12,7 @@ MDS_PATH="/var/lib/ceph/mds/${CLUSTER}-$MDS_NAME"
 RGW_PATH="/var/lib/ceph/radosgw/${CLUSTER}-rgw.${RGW_NAME}"
 # shellcheck disable=SC2153
 MGR_PATH="/var/lib/ceph/mgr/${CLUSTER}-$MGR_NAME"
+# shellcheck disable=SC2034
 MGR_IP=$MON_IP
 : "${DEMO_DAEMONS:=all}"
 : "${RGW_ENABLE_USAGE_LOG:=true}"
@@ -35,6 +36,7 @@ MGR_IP=$MON_IP
 #######
 function bootstrap_mon {
   if [[ ! "${CEPH_VERSION}" =~ ^(luminous|mimic)$ ]]; then
+    # shellcheck disable=SC2034
     MON_PORT=3300
   fi
   # shellcheck disable=SC1091
@@ -73,7 +75,7 @@ function parse_size {
 function bootstrap_osd {
   # Apply the tuning on Nautilus and above only since the values applied are causing the ceph-osd to crash on earlier versions
   if [[ ${OSD_BLUESTORE} -eq 1 ]] && [[ ! "${CEPH_VERSION}" =~ ^(luminous|mimic)$ ]]; then
-    tune_memory $(get_available_ram)
+    tune_memory "$(get_available_ram)"
   fi
 
   if [[ -n "$OSD_DEVICE" ]]; then
@@ -93,7 +95,7 @@ function bootstrap_osd {
   : "${OSD_COUNT:=1}"
 
   for i in $(seq 1 1 "$OSD_COUNT"); do
-    let OSD_ID="$i"-1 || true
+    (( OSD_ID="$i"-1 )) || true
     OSD_PATH="/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}"
 
     if [ ! -e "$OSD_PATH"/keyring ]; then
@@ -162,6 +164,7 @@ function bootstrap_mds {
 #######
 function bootstrap_rgw {
   if [[ "$RGW_FRONTEND_TYPE" == "civetweb" ]]; then
+    # shellcheck disable=SC2153
     RGW_FRONTED_OPTIONS="$RGW_FRONTEND_OPTIONS port=$RGW_FRONTEND_IP:$RGW_FRONTEND_PORT"
   elif [[ "$RGW_FRONTEND_TYPE" == "beast" ]]; then
     RGW_FRONTED_OPTIONS="$RGW_FRONTEND_OPTIONS endpoint=$RGW_FRONTEND_IP:$RGW_FRONTEND_PORT"
