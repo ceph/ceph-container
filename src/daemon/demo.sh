@@ -2,8 +2,6 @@
 set -e
 
 unset "DAEMON_OPTS[${#DAEMON_OPTS[@]}-1]" # remove the last element of the array
-OSD_ID=0
-: "${OSD_PATH:=/var/lib/ceph/osd/${CLUSTER}-$OSD_ID}"
 # the following ceph version can start with a numerical value where the new ones need a proper name
 if [[ "$CEPH_VERSION" == "luminous" ]]; then
   MDS_NAME=0
@@ -92,42 +90,49 @@ function bootstrap_osd {
     fi
   fi
 
-  if [ ! -e "$OSD_PATH"/keyring ]; then
-    if ! grep -qE "osd objectstore = bluestore" /etc/ceph/"${CLUSTER}".conf; then
-      echo "osd objectstore = bluestore" >> /etc/ceph/"${CLUSTER}".conf
-    fi
-    if ! grep -qE "osd data = $OSD_PATH" /etc/ceph/"${CLUSTER}".conf; then
-      cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
+  : "${OSD_COUNT:=1}"
+
+  for i in $(seq 1 1 "$OSD_COUNT"); do
+    let OSD_ID="$i"-1 || true
+    OSD_PATH="/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}"
+
+    if [ ! -e "$OSD_PATH"/keyring ]; then
+      if ! grep -qE "osd objectstore = bluestore" /etc/ceph/"${CLUSTER}".conf; then
+        echo "osd objectstore = bluestore" >> /etc/ceph/"${CLUSTER}".conf
+      fi
+      if ! grep -qE "osd data = $OSD_PATH" /etc/ceph/"${CLUSTER}".conf; then
+        cat <<ENDHERE >>/etc/ceph/"${CLUSTER}".conf
 
 [osd.${OSD_ID}]
 osd data = ${OSD_PATH}
 
 ENDHERE
-    fi
-    # bootstrap OSD
-    mkdir -p "$OSD_PATH"
-    chown --verbose -R ceph. "$OSD_PATH"
+      fi
+      # bootstrap OSD
+      mkdir -p "$OSD_PATH"
+      chown --verbose -R ceph. "$OSD_PATH"
 
-    # if $OSD_DEVICE exists we deploy with ceph-volume
+      # if $OSD_DEVICE exists we deploy with ceph-volume
+      if [[ -n "$OSD_DEVICE" ]]; then
+        ceph-volume lvm prepare --data "$OSD_DEVICE"
+      else
+        # we go for a 'manual' bootstrap
+        ceph "${CLI_OPTS[@]}" auth get-or-create osd."$OSD_ID" mon 'allow profile osd' osd 'allow *' mgr 'allow profile osd' -o "$OSD_PATH"/keyring
+        ceph-osd --conf /etc/ceph/"${CLUSTER}".conf --osd-data "$OSD_PATH" --mkfs -i "$OSD_ID"
+      fi
+    fi
+
+    # activate OSD
     if [[ -n "$OSD_DEVICE" ]]; then
-      ceph-volume lvm prepare --data "$OSD_DEVICE"
-    else
-      # we go for a 'manual' bootstrap
-      ceph "${CLI_OPTS[@]}" auth get-or-create osd."$OSD_ID" mon 'allow profile osd' osd 'allow *' mgr 'allow profile osd' -o "$OSD_PATH"/keyring
-      ceph-osd --conf /etc/ceph/"${CLUSTER}".conf --osd-data "$OSD_PATH" --mkfs -i "$OSD_ID"
+      OSD_FSID="$(ceph-volume lvm list --format json | $PYTHON -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"][0][\"tags\"][\"ceph.osd_fsid\"])")"
+      ceph-volume lvm activate --no-systemd --bluestore "${OSD_ID}" "${OSD_FSID}"
     fi
-  fi
 
-  # activate OSD
-  if [[ -n "$OSD_DEVICE" ]]; then
-    OSD_FSID="$(ceph-volume lvm list --format json | $PYTHON -c "import sys, json; print(json.load(sys.stdin)[\"$OSD_ID\"][0][\"tags\"][\"ceph.osd_fsid\"])")"
-    ceph-volume lvm activate --no-systemd --bluestore "${OSD_ID}" "${OSD_FSID}"
-  fi
-
-  # start OSD
-  chown --verbose -R ceph. "$OSD_PATH"
-  ceph-osd "${DAEMON_OPTS[@]}" -i "$OSD_ID"
-  ceph "${CLI_OPTS[@]}" osd pool create "$RBD_POOL" 8
+    # start OSD
+    chown --verbose -R ceph. "$OSD_PATH"
+    ceph-osd "${DAEMON_OPTS[@]}" -i "$OSD_ID"
+    ceph "${CLI_OPTS[@]}" osd pool create "$RBD_POOL" 8
+  done
 }
 
 
