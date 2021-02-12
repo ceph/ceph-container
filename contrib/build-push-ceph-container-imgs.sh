@@ -95,18 +95,27 @@ function install_docker {
 }
 
 function install_podman {
-  # https://github.com/containers/libpod/issues/5306
-  # https://podman.io/getting-started/installation.html
+
   if ${CI_CONTAINER}; then
-    sudo dnf -y module disable container-tools
-    sudo dnf -y install 'dnf-command(copr)'
-    sudo dnf -y copr enable rhcontainerbot/container-selinux
-    sudo curl -L -o /etc/yum.repos.d/devel:kubic:libcontainers:stable.repo https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/CentOS_8/devel:kubic:libcontainers:stable.repo
-    # https://tracker.ceph.com/issues/44242
-    # We used to provide fuse-overlayfs-0.7.6-2.0 in lab-extras but a newer version is available in the kubic repo so we'll install/update from there
-    sudo dnf install -y fuse-overlayfs
+    # we may need to undo prior packaging hacks.  This code should only
+    # have any effect the first time it runs.
+    sudo dnf -y repository-packages devel_kubic_libcontainers_stable remove
+    sudo dnf -y repository-packages copr:copr.fedorainfracloud.org:rhcontainerbot:container-selinux remove
+    sudo dnf config-manager --disable devel_kubic_libcontainers_stable
+    sudo dnf config-manager --disable copr:copr.fedorainfracloud.org:rhcontainerbot:container-selinux
+    sudo dnf module enable -y container-tools:rhel8
   fi
+
+  # now install it
   sudo dnf install -y podman podman-docker
+
+  if ${CI_CONTAINER}; then
+    # if we actually uninstalled above, it removed our custom registries.conf.
+    # Luckily it saved a copy
+    if [[ -f /etc/containers/registries.conf.rpmsave ]]; then
+      sudo mv /etc/containers/registries.conf.rpmsave /etc/containers/registries.conf
+    fi
+  fi
 }
 
 function login_docker_hub {
