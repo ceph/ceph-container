@@ -292,19 +292,23 @@ function push_ceph_imgs_latest {
     branch_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${BRANCH}
     sha1_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}
     if [[ "${OSD_FLAVOR}" == "crimson" ]]; then
-      sha1_flavor_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}-${OSD_FLAVOR}
-      docker tag "$local_tag" "$sha1_flavor_repo_tag"
-      docker push "$sha1_flavor_repo_tag"
+      if [[ "${HOST_ARCH}" == "x86_64" ]]; then
+        sha1_flavor_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}-${OSD_FLAVOR}
+        docker tag "$local_tag" "$sha1_flavor_repo_tag"
+        docker push "$sha1_flavor_repo_tag"
+      fi
     elif [[ "${distro_release}" == "7" ]]; then
       docker tag "$local_tag" "$full_repo_tag"
       docker push "$full_repo_tag"
     else
       docker tag "$local_tag" "$full_repo_tag"
-      docker tag "$local_tag" "$branch_repo_tag"
-      docker tag "$local_tag" "$sha1_repo_tag"
       docker push "$full_repo_tag"
-      docker push "$branch_repo_tag"
-      docker push "$sha1_repo_tag"
+      if [[ "${HOST_ARCH}" == "x86_64" ]] ; then
+        docker tag "$local_tag" "$branch_repo_tag"
+        docker tag "$local_tag" "$sha1_repo_tag"
+        docker push "$branch_repo_tag"
+        docker push "$sha1_repo_tag"
+      fi
     fi
     return
   fi
