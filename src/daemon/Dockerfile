@@ -53,7 +53,7 @@ ADD ceph.defaults /opt/ceph-container/etc/
 # ADD *.sh ceph.defaults check_zombie_mons.py ./osd_scenarios/* entrypoint.sh.in disabled_scenario /
 
 # Download sree web interface for cn
-ARG SREE_VERSION=v0.2
+ARG SREE_VERSION=v0.3
 RUN wget https://github.com/leseb/Sree/archive/$SREE_VERSION.tar.gz -O /opt/ceph-container/tmp/sree.tar.gz
 
 # Modify the entrypoint
