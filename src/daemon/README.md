@@ -436,7 +436,7 @@ And run the container like this `docker run -d -v /etc/ceph:/etc/ceph -v /var/li
 
 ## Deploy a REST API
 
-This is pretty straighforward. The `--net=host` is not mandatory, if you don't use it do not forget to expose the `RESTAPI_PORT`.
+This is pretty straightforward. The `--net=host` is not mandatory, if you don't use it do not forget to expose the `RESTAPI_PORT`.
 Only available in luminous.
 
 ```
@@ -456,7 +456,7 @@ List of available options:
 
 ## Deploy a RBD mirror
 
-This is pretty straighforward. The `--net=host` is not mandatory, with KV we do:
+This is pretty straightforward. The `--net=host` is not mandatory, with KV we do:
 
 ```
 docker run -d --net=host \
