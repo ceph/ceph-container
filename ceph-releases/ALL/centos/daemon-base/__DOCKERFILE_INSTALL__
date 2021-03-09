@@ -58,4 +58,5 @@ bash -c ' \
     REPO_URL="http://download.ceph.com/rpm-${CEPH_VERSION}/el__ENV_[BASEOS_TAG]__/"; \
   fi && \
   rpm -Uvh "$REPO_URL/noarch/ceph-release-1-${RELEASE_VER}.el__ENV_[BASEOS_TAG]__.noarch.rpm" ' && \
+yum install -y __GPERFTOOLS_LIBS__ && \
 yum install -y __CEPH_BASE_PACKAGES__
