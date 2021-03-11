@@ -57,6 +57,11 @@ bash -c ' \
     RELEASE_VER=1 ;\
     REPO_URL="http://download.ceph.com/rpm-${CEPH_VERSION}/el__ENV_[BASEOS_TAG]__/"; \
   fi && \
-  rpm -Uvh "$REPO_URL/noarch/ceph-release-1-${RELEASE_VER}.el__ENV_[BASEOS_TAG]__.noarch.rpm" ' && \
+  rpm -Uvh "$REPO_URL/noarch/ceph-release-1-${RELEASE_VER}.el__ENV_[BASEOS_TAG]__.noarch.rpm" && \
+  if [[ __ENV_[BASEOS_TAG]__ -eq 8 ]]; then \
+    yum install -y dnf-plugins-core ; \
+    yum copr enable -y tchaikov/python-scikit-learn ; \
+    yum install -y python3-scikit-learn ; \
+  fi ' && \
 yum install -y __GPERFTOOLS_LIBS__ && \
 yum install -y __CEPH_BASE_PACKAGES__
