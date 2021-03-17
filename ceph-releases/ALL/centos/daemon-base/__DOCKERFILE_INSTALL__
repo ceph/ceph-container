@@ -70,5 +70,4 @@ bash -c ' \
     yum copr enable -y tchaikov/python-scikit-learn ; \
     yum install -y python3-scikit-learn ; \
   fi ' && \
-yum install -y __GPERFTOOLS_LIBS__ && \
 yum install -y __CEPH_BASE_PACKAGES__
