@@ -579,6 +579,7 @@ function install_docker {
     return
   fi
   sudo apt-get install -y --force-yes docker.io containerd
+  sudo systemctl unmask docker
   sudo systemctl start docker
   sudo systemctl status docker
   sudo chgrp "$(whoami)" /var/run/docker.sock
