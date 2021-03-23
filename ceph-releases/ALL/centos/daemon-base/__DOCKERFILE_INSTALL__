@@ -58,7 +58,7 @@ if [[ "${CEPH_VERSION}" == nautilus ]]; then \
   fi ; \
 fi && \
 bash -c ' \
-  if [[ "${CEPH_VERSION}" =~ master|pacific ]] || ${CEPH_DEVEL}; then \
+  if [[ "${CEPH_VERSION}" =~ master ]] || ${CEPH_DEVEL}; then \
     ARCH=$(arch); \
     if [[ "${ARCH}" == "aarch64" ]]; then \
       ARCH="arm64"; \
