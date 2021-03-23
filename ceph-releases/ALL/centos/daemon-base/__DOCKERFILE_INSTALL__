@@ -16,9 +16,7 @@ bash -c ' \
     echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
   fi ; \
   if [ -n "__ISCSI_PACKAGES__" ]; then \
-    for repo in tcmu-runner python-rtslib; do \
-      curl -L https://shaman.ceph.com/api/repos/$repo/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo > /etc/yum.repos.d/$repo.repo ; \
-    done ; \
+    curl -L https://shaman.ceph.com/api/repos/tcmu-runner/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo > /etc/yum.repos.d/tcmu-runner.repo ; \
     if [[ "${CEPH_VERSION}" =~ master|^wip* ]]; then \
       curl -L https://shaman.ceph.com/api/repos/ceph-iscsi/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo > /etc/yum.repos.d/ceph-iscsi.repo ; \
     elif [[ "${CEPH_VERSION}" == nautilus ]]; then \
