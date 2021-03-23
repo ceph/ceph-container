@@ -11,20 +11,26 @@ bash -c ' \
       echo "[ganesha-noarch]" >> /etc/yum.repos.d/ganesha.repo ; \
       echo "name=ganesha-noarch" >> /etc/yum.repos.d/ganesha.repo ; \
       echo "baseurl=https://download.nfs-ganesha.org/3/LATEST/CentOS/el-\$releasever/noarch" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
     elif [[ "${CEPH_VERSION}" == octopus ]]; then \
       echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V3.3-stable/$CEPH_VERSION/el\$releasever/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
       echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
       echo "[ganesha-noarch]" >> /etc/yum.repos.d/ganesha.repo ; \
       echo "name=ganesha-noarch" >> /etc/yum.repos.d/ganesha.repo ; \
       echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V3.3-stable/$CEPH_VERSION/el\$releasever/noarch/" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
     elif [[ "${CEPH_VERSION}" == nautilus ]]; then \
       echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V2.8-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
     else \
       echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V2.7-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
     fi ; \
-    echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
-    echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
   fi ; \
   if [ -n "__ISCSI_PACKAGES__" ]; then \
     curl -s -L https://shaman.ceph.com/api/repos/tcmu-runner/master/latest/centos/__ENV_[BASEOS_TAG]__/repo?arch=$(arch) -o /etc/yum.repos.d/tcmu-runner.repo ; \
