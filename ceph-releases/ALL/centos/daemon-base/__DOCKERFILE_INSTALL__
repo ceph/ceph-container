@@ -59,6 +59,5 @@ bash -c ' \
   if [[ __ENV_[BASEOS_TAG]__ -eq 8 ]]; then \
     yum install -y dnf-plugins-core ; \
     yum copr enable -y tchaikov/python-scikit-learn ; \
-    yum install -y python3-scikit-learn ; \
   fi ' && \
 yum install -y __CEPH_BASE_PACKAGES__
