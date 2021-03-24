@@ -16,9 +16,9 @@ bash -c ' \
     echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
   fi ; \
   if [ -n "__ISCSI_PACKAGES__" ]; then \
-    curl -s -L $(curl -s "https://shaman.ceph.com/api/search/?project=tcmu-runner&distros=centos/__ENV_[BASEOS_TAG]__/$(arch)&ref=master&sha1=latest" | jq -r .[0].chacra_url)repo > /etc/yum.repos.d/tcmu-runner.repo ; \
+    curl -s -L https://shaman.ceph.com/api/repos/tcmu-runner/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo?arch=$(arch) -o /etc/yum.repos.d/tcmu-runner.repo ; \
     if [[ "${CEPH_VERSION}" =~ master|^wip* ]]; then \
-      curl -L https://shaman.ceph.com/api/repos/ceph-iscsi/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo > /etc/yum.repos.d/ceph-iscsi.repo ; \
+      curl -L https://shaman.ceph.com/api/repos/ceph-iscsi/master/latest/__ENV_[BASEOS_REPO]__/__ENV_[BASEOS_TAG]__/repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     elif [[ "${CEPH_VERSION}" == nautilus ]]; then \
       curl -L https://download.ceph.com/ceph-iscsi/3/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     else \
