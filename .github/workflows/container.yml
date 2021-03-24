@@ -1,7 +1,7 @@
 name: container
 on: [pull_request]
 jobs:
-  build:
+  x86_64:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -29,3 +29,14 @@ jobs:
           docker ps -a
           docker logs ceph-demo
           docker exec ceph-demo ceph --cluster test -s
+  arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: setup qemu-static-user
+        run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+
+      - name: build the ceph container arm64 image
+        run: make RELEASE="demo" BASEOS_REPO=arm64v8/centos DAEMON_BASE_TAG="daemon-base:demo-centos-8-aarch64" DAEMON_TAG="daemon:demo-centos-8-aarch64" FLAVORS="master,centos-arm64,8" build
