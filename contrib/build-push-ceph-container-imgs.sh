@@ -365,6 +365,7 @@ function create_registry_manifest {
   enable_experimental_docker_cli
   # This should normally work, by the time we get here the arm64 image should have been built and pushed
   # IIRC docker manisfest will fail if the image does not exist
+  rm -rvf ~/.docker/manifests
   for image in daemon-base daemon; do
     for ceph_release in "${CEPH_RELEASES[@]}"; do
       if [ "${ceph_release}" == "master" ]; then
