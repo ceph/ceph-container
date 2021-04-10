@@ -102,7 +102,7 @@ List of available options:
   - 6 = Detect IPv6 only
 
 ## Deploy a Manager daemon
-Since luminous, a manager daemon is mandatory, see [docs](http://docs.ceph.com/docs/master/mgr/)
+Since luminous, a manager daemon is mandatory, see [docs](https://docs.ceph.com/en/latest/mgr/)
 
 Without KV store, run:
 ```
@@ -420,7 +420,7 @@ List of available options:
 - `RGW_CIVETWEB_PORT` is the port to which civetweb is listening on (DEFAULT: 8080)
 - `RGW_NAME`: default to hostname
 
-Administration via [radosgw-admin](http://docs.ceph.com/docs/infernalis/man/8/radosgw-admin/) from the Docker host if the `RGW_NAME` variable hasn't been supplied:
+Administration via [radosgw-admin](https://docs.ceph.com/en/latest/man/8/radosgw-admin/) from the Docker host if the `RGW_NAME` variable hasn't been supplied:
 
 `docker exec <containerId> radosgw-admin -n client.rgw.$(hostname) -k /var/lib/ceph/radosgw/$(hostname)/keyring <commands>`
 
