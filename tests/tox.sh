@@ -14,6 +14,8 @@ set -ex
 # If WORKSPACE is undefined, set it to $TOXINIDIR
 echo "${WORKSPACE:=$TOXINIDIR}"
 
+rm -rf /home/jenkins-build/build/workspace/ceph-container-nightly* /home/jenkins-build/build/workspace/ceph-ansible-nightly-luminous-centos-container-stable-3.1-purge_filestore "{$WORKSPACE}"/staging
+
 # Write down a couple environment variables, for use in teardown
 OUR_TOX_VARS=$WORKSPACE/.tox_vars
 rm -f "$OUR_TOX_VARS"
