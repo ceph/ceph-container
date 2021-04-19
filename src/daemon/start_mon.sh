@@ -186,6 +186,9 @@ function start_mon {
       if ! grep -qE "mon warn on pool no redundancy = false" /etc/ceph/"${CLUSTER}".conf; then
           echo "mon warn on pool no redundancy = false" >> /etc/ceph/"${CLUSTER}".conf
       fi
+      if ! grep -qE "auth allow insecure global id reclaim = false" /etc/ceph/"${CLUSTER}".conf; then
+          echo "auth allow insecure global id reclaim = false" >> /etc/ceph/"${CLUSTER}".conf
+      fi
     fi
     /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}"
 
