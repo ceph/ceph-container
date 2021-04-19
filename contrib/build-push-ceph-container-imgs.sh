@@ -90,7 +90,7 @@ function install_docker {
     sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --force-yes docker-ce
   fi
   sudo systemctl unmask docker
-  sudo systemctl start docker
+  sudo systemctl start docker || sudo systemctl restart docker
   sudo systemctl status --no-pager docker
   sudo chgrp "$(whoami)" /var/run/docker.sock
 }
