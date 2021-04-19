@@ -48,10 +48,6 @@ include maint-lib/makelib.mk
 
 # All flavor options that can be passed to FLAVORS
 ALL_BUILDABLE_FLAVORS := \
-	luminous,centos,7 \
-	luminous,opensuse,42.3 \
-	luminous,debian,9 \
-	mimic,centos,7 \
 	nautilus,centos,7 \
 	nautilus,centos,8 \
 	octopus,centos,7 \
