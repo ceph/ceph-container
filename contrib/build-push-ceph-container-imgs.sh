@@ -50,7 +50,6 @@ fi
 
 HOST_ARCH=$(uname -m)
 BUILD_ARM= # Set this variable to anything if you want to build the ARM images too
-CN_RELEASE="v2.3.1"
 
 
 #############
@@ -140,28 +139,24 @@ function grep_sort_tags {
   "$@" | grep -oE 'v[3-9].[0-9]*.[0-9]*|v[3-9].[0-9]*.[0-9](alpha|beta|rc)[0-9]{1,2}?' | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n
 }
 
-function download_cn {
-  local cn_link
-  cn_link="https://github.com/ceph/cn/releases/download/${CN_RELEASE}/cn-${CN_RELEASE}-linux-amd64"
-  if [[ $(arch) == "aarch64" ]]; then
-    cn_link="https://github.com/ceph/cn/releases/download/${CN_RELEASE}/cn-${CN_RELEASE}-linux-arm64"
-  fi
-  curl -L "$cn_link" -o cn
-  chmod +x cn
-}
-
 function compare_docker_hub_and_github_tags {
   # build an array with the list of tags from github
   for tag_github in $(grep_sort_tags git ls-remote --tags --refs 2>/dev/null); do
     tags_github_array+=("$tag_github")
   done
 
-  # download cn to list docker hub images, it's easier than building the logic in bash...
-  # and cn is only 10MB so it doesn't hurt
-  download_cn
-
   # build an array with the list of tag from docker hub
-  tags_docker_hub="$(grep_sort_tags ./cn image ls -a | uniq)"
+  local page=1
+  while response="$(curl --silent --fail --list-only --location \
+                      "https://registry.hub.docker.com/v2/repositories/ceph/daemon/tags/?page_size=100&page=${page}")"; do
+    local tags_docker_hub ; tags_docker_hub+=$(echo "${response}" | jq -r .results[].name)
+    if [ "$(echo "${response}" | jq -r .next)" == "null" ]; then
+      break
+    else
+      page=$((page + 1))
+    fi
+  done
+  tags_docker_hub=$(grep_sort_tags echo "${tags_docker_hub}" | uniq)
   for tag_docker_hub in $tags_docker_hub; do
     tags_docker_hub_array+=("$tag_docker_hub")
   done
