@@ -46,7 +46,7 @@ bash -c ' \
       curl -s -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     fi ; \
   fi' && \
-yum update -y && \
+yum update -y --setopt=install_weak_deps=False && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
 if [[ "${CEPH_VERSION}" == nautilus ]]; then \
   CEPH_MGR_K8SEVENTS="ceph-mgr-k8sevents__ENV_[CEPH_POINT_RELEASE]__"; \
@@ -77,4 +77,4 @@ bash -c ' \
     yum install -y dnf-plugins-core ; \
     yum copr enable -y tchaikov/python-scikit-learn ; \
   fi ' && \
-yum install -y __CEPH_BASE_PACKAGES__
+yum install -y --setopt=install_weak_deps=False __CEPH_BASE_PACKAGES__
