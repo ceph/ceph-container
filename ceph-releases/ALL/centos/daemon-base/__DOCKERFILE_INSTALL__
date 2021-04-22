@@ -29,7 +29,7 @@ bash -c ' \
       curl -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     fi ; \
   fi' && \
-yum update -y && \
+yum update -y --setopt=install_weak_deps=False && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
 bash -c ' \
   if [[ "${CEPH_VERSION}" =~ master|^wip* ]]; then \
@@ -40,4 +40,4 @@ bash -c ' \
     REPO_URL="http://download.ceph.com/rpm-${CEPH_VERSION}/el__ENV_[BASEOS_TAG]__/"; \
   fi && \
   rpm -Uvh "$REPO_URL/noarch/ceph-release-1-${RELEASE_VER}.el__ENV_[BASEOS_TAG]__.noarch.rpm" ' && \
-yum install -y __CEPH_BASE_PACKAGES__
+yum install -y --setopt=install_weak_deps=False __CEPH_BASE_PACKAGES__
