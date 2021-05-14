@@ -9,9 +9,9 @@
 {{range gets "/mon/*"}}
   {{base .Key}} = {{.Value}}{{end}}
 {{range gets "/mon_host/*"}}
-    [mon.{{base .Key}}]
-      host = {{base .Key}}
-      mon_addr = {{.Value}}{{end}}
+[mon.{{base .Key}}]
+  host = {{base .Key}}
+  mon_addr = {{.Value}}{{end}}
 
 [osd]
 {{range gets "/osd/*"}}
