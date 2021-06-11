@@ -45,6 +45,9 @@ bash -c ' \
     else \
       curl -s -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     fi ; \
+  fi ; \
+  if [ -n "__VAULT_PACKAGES__" ] && [[ $(arch) == "x86_64" ]]; then \
+    curl -s -L https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo -o /etc/yum.repos.d/hashicorp.repo ; \
   fi' && \
 yum update -y --setopt=install_weak_deps=False && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \

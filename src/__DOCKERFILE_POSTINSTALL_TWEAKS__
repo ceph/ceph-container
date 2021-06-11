@@ -3,4 +3,10 @@ sed -i -e 's/udev_rules = 1/udev_rules = 0/' -e 's/udev_sync = 1/udev_sync = 0/'
 # validate the sed command worked as expected
 grep -sqo "udev_sync = 0" /etc/lvm/lvm.conf && \
 grep -sqo "udev_rules = 0" /etc/lvm/lvm.conf && \
-grep -sqo "obtain_device_list_from_udev = 0" /etc/lvm/lvm.conf
+grep -sqo "obtain_device_list_from_udev = 0" /etc/lvm/lvm.conf && \
+bash -c ' \
+    if [ -n "__VAULT_PACKAGES__" ]; then \
+        # https://github.com/hashicorp/vault/issues/10048
+        setcap cap_ipc_lock= "$(command -v vault)" ; \
+    fi ; \
+'
