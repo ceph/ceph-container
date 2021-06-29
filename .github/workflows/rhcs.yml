@@ -1,0 +1,11 @@
+name: rhcs
+on: [pull_request]
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: compose the RHCS container image
+        run: ./contrib/compose-rhcs.sh
