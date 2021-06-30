@@ -69,7 +69,7 @@ function test_demo_mgr {
 }
 
 function test_demo_rest_api {
-  key=$($DOCKER_COMMAND restful list-keys | python -c 'import json, sys; print(json.load(sys.stdin)["demo"])')
+  key=$($DOCKER_COMMAND restful list-keys | jq -r .demo)
   docker exec ceph-demo curl -s --connect-timeout 1 -u demo:$key -k https://0.0.0.0:8003/server
   # shellcheck disable=SC2046
   return $(wait_for_daemon "$DOCKER_COMMAND mgr dump | grep -sq 'restful\": \"https://.*:8003'")
