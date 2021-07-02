@@ -31,7 +31,7 @@ child_for_exec=1
 
 function teardown {
   # Disabling the traps to avoid a cascading
-  trap - SIGINT SIGILL SIGABRT SIGFPE SIGSEGV SIGTERM SIGBUS SIGCHLD SIGKILL ERR
+  trap - SIGHUP SIGINT SIGILL SIGABRT SIGFPE SIGSEGV SIGTERM SIGBUS SIGCHLD SIGKILL ERR
 
   # This function is called when we got a signal reporting something died
   # It will check the child_for_exec process exited
@@ -117,6 +117,16 @@ function _chld {
   teardown "SIGCHLD" 0
 }
 
+function _send_sighup_to_daemons {
+  pkill -1 -x "ceph-mon|ceph-mgr|ceph-mds|ceph-osd|ceph-fuse|radosgw|rbd-mirror" || true
+  echo "Sent SIGHUP to running daemons"
+}
+
+function _hup {
+  _send_sighup_to_daemons &
+  wait $child_for_exec
+}
+
 function _err {
   local lineno=$1
   local msg=$2
@@ -135,6 +145,7 @@ function exec {
   # This function overrides the built-in exec() call
   # It starts the process in background to catch ERR but
   # as per docker requirement, forward the SIGTERM to it.
+  trap _hup SIGHUP
   trap _int SIGINT
   trap _ill SIGILL
   trap _abrt SIGABRT
