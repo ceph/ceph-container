@@ -32,8 +32,11 @@ PUSH_REPOSITORY="ceph"
 X86_64_PUSH_REPOSITORY="${PUSH_REPOSITORY}-amd64"
 AARCH64_PUSH_REPOSITORY="${PUSH_REPOSITORY}-arm64"
 
-# Push to the docker hub by default
-PUSH_REGISTRY_URL="https://registry.hub.docker.com"
+# Push to the quay.io by default
+REGISTRY="quay.io"
+
+# Registry API endpoint URL
+PUSH_REGISTRY_URL="https://${REGISTRY}/api/v1"
 
 # The distro part of the ceph-releases/<ceph>/<DISTRO> path for centos' aarch64 build
 CENTOS_AARCH64_FLAVOR_DISTRO='centos-arm64'
@@ -148,10 +151,8 @@ function get_arch_image_repo () {
 # Given a flavor and arch, return the full tag of the base image
 function get_base_image_full_tag () {
   local flavor="${1}" arch="${2}"
-  if [ "${arch}" = 'x86_64' ]; then
-    local default_library="amd64"
-  elif [ "${arch}" = 'aarch64' ]; then
-    local default_library="arm64v8"
+  if [ "${arch}" = 'x86_64' ] || [ "${arch}" = 'aarch64' ]; then
+    local default_library="${REGISTRY}/centos"
   else
     error "get_base_image_full_tag - unknown arch '${arch}'"
   fi
@@ -277,10 +278,10 @@ function construct_full_push_image_tag () {
   local version_tag="${1}" image_repo="${2}" build_number="${3}"
   if [ -z "${build_number}" ]; then
     # If build number is empty string, don't append it
-    echo "${PUSH_LIBRARY}/${image_repo}:${version_tag}"
+    echo "${REGISTRY}/${PUSH_LIBRARY}/${image_repo}:${version_tag}"
     return
   fi
-  echo "${PUSH_LIBRARY}/${image_repo}:${version_tag}-${build_number}"
+  echo "${REGISTRY}/${PUSH_LIBRARY}/${image_repo}:${version_tag}-${build_number}"
 }
 
 # Given a full tag, extract the build number from it
@@ -331,20 +332,20 @@ function get_tags_matching () {
   local version_tag="${1}" repository="${2}"
   # DockerHub API limits page_size to 100, so we must loop through the pages
   # It would be super cool if the DockerHub HTTP API had a filter option ...
-  local tag_list_url="${PUSH_REGISTRY_URL}/v2/repositories/${PUSH_LIBRARY}/${repository}/tags/?page_size=100"
+  local tag_list_url="${PUSH_REGISTRY_URL}/repository/${PUSH_LIBRARY}/${repository}/tag?page_size=100"
   local all_matching_tags=''
   local page=1
   local response
   while response="$(curl --silent --fail --list-only --location \
                       "${tag_list_url}&page=${page}")"; do
     local matching_tags ; matching_tags="$(echo "${response}" | \
-              jq -r ".results[] | select(.name | match(\"${version_tag}\")) | .name")"
+              jq -r ".tags[] | select(.name | match(\"${version_tag}\")) | .name")"
     # jq: From the results of the curl, select all images with a name matching the matcher, and then
     # output the name. Exits success w/ empty string if no matches found.
     if [ -n "${matching_tags}" ]; then
       all_matching_tags="$(printf '%s\n%s' "${all_matching_tags}" "${matching_tags}")"
     fi
-    if [ "$(echo "${response}" | jq -r .next)" == "null" ]; then
+    if [ "$(echo "${response}" | jq -r .has_additional)" == "false" ]; then
       break
     else
       page=$((page + 1))
@@ -352,7 +353,7 @@ function get_tags_matching () {
   done
   local full_tags=''
   for tag in $all_matching_tags; do
-    full_tags="$(printf '%s\n%s' "${full_tags}" "${PUSH_LIBRARY}/${repository}:${tag}")"
+    full_tags="$(printf '%s\n%s' "${full_tags}" "${REGISTRY}/${PUSH_LIBRARY}/${repository}:${tag}")"
   done
   echo "${full_tags}"
 }
@@ -376,7 +377,7 @@ function get_latest_full_semver_tag () {
     if [[ $repository =~ .*amd64.* ]]; then
       build_num=$((build_num - 1))  # Subtract more from build num for amd64 test images
     fi
-    local test_tag="${PUSH_LIBRARY}/${repository}:${full_semver_version_tag}-${build_num}"
+    local test_tag="${REGISTRY}/${PUSH_LIBRARY}/${repository}:${full_semver_version_tag}-${build_num}"
     test_info "get_latest_full_semver_tag - returning ${test_tag}"
     echo "${test_tag}"
   else
@@ -399,7 +400,7 @@ function full_tag_exists () {
   local tag="${full_tag##*:}"
   local tag_minus_library="${full_tag##*/}"
   local repository="${tag_minus_library%:*}"
-  local tag_query_url="${PUSH_REGISTRY_URL}/v2/repositories/${PUSH_LIBRARY}/${repository}/tags/${tag}"
+  local tag_query_url="${PUSH_REGISTRY_URL}/repository/${PUSH_LIBRARY}/${repository}/tag/${tag}/images"
   if curl --silent --fail --list-only --show-error --location "${tag_query_url}" &> /dev/null ; then
     local retval=$?
   else
@@ -440,7 +441,7 @@ function image_base_changed () {
 # Login on the registry
 function do_login () {
   if [ -z "${DRY_RUN:-}" ]; then
-    docker login -u "${DOCKER_HUB_USERNAME}" -p "${DOCKER_HUB_PASSWORD}"
+    docker login -u "${REGISTRY_USERNAME}" -p "${REGISTRY_PASSWORD}" "${REGISTRY}"
   fi
 }
 
