@@ -10,6 +10,31 @@ jobs:
       - name: build the ceph container image
         run: make RELEASE="demo" FLAVORS="master,centos,8" build
 
+      - name: save the ceph container image
+        run: docker save ceph/daemon:demo-master-centos-8-x86_64 | gzip > ceph.tar.gz
+
+      - name: upload the ceph container for demo
+        uses: actions/upload-artifact@v2
+        with:
+          name: ceph_container
+          path: ceph.tar.gz
+          retention-days: 1
+
+  demo:
+    needs: x86_64
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: download the ceph container
+        uses: actions/download-artifact@v2
+        with:
+          name: ceph_container
+
+      - name: load the ceph container
+        run: docker load < ceph.tar.gz
+
       - name: run the ceph demo container
         run: docker run -d --privileged --name ceph-demo -v /etc/modprobe.d:/etc/modprobe.d -v /mnt/ceph:/var/lib/ceph -e RGW_FRONTEND_TYPE=beast -e DEBUG=verbose -e RGW_FRONTEND_PORT=8000 -e MON_IP=127.0.0.1 -e CEPH_PUBLIC_NETWORK=0.0.0.0/0 -e CLUSTER=test -e CEPH_DEMO_UID=demo -e CEPH_DEMO_ACCESS_KEY=G1EZ5R4K6IJ7XUQKMAED -e CEPH_DEMO_SECRET_KEY=cNmUrqpBKjCMzcfqG8fg4Qk07Xkoyau52OmvnSsz -e CEPH_DEMO_BUCKET=foobar -e SREE_PORT=5001 -e DATA_TO_SYNC=/etc/modprobe.d -e DATA_TO_SYNC_BUCKET=github -e OSD_COUNT=2 ceph/daemon:demo-master-centos-8-x86_64 demo
 
