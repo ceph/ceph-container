@@ -160,6 +160,11 @@ function get_base_image_full_tag () {
   local distro_release ; distro_release="$(extract_distro_release "${flavor}")"
   case $distro in
     centos)
+      if [ "${distro_release}" = "7" ]; then
+        # keep using docker.io/centos:7 because quay.io/centos/centos:7 doesn't
+        # have an arm64 image.
+        default_library="docker.io"
+      fi
       echo "${default_library}/centos:${distro_release}"
       return ;;
     *)
