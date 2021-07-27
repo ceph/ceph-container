@@ -28,7 +28,7 @@ jobs:
           docker ps
           docker ps -a
           docker logs ceph-demo
-          docker exec ceph-demo ceph --cluster test -s
+          docker exec ceph-demo ceph --connect-timeout 3 --cluster test -s
   arm64:
     runs-on: ubuntu-latest
     steps:
