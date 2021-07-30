@@ -3,11 +3,7 @@ set -e
 
 unset "DAEMON_OPTS[${#DAEMON_OPTS[@]}-1]" # remove the last element of the array
 # the following ceph version can start with a numerical value where the new ones need a proper name
-if [[ "$CEPH_VERSION" == "luminous" ]]; then
-  MDS_NAME=0
-else
-  MDS_NAME=demo
-fi
+MDS_NAME=demo
 MDS_PATH="/var/lib/ceph/mds/${CLUSTER}-$MDS_NAME"
 RGW_PATH="/var/lib/ceph/radosgw/${CLUSTER}-rgw.${RGW_NAME}"
 # shellcheck disable=SC2153
@@ -35,10 +31,8 @@ MGR_IP=$MON_IP
 # MON #
 #######
 function bootstrap_mon {
-  if [[ ! "${CEPH_VERSION}" =~ ^(luminous|mimic)$ ]]; then
-    # shellcheck disable=SC2034
-    MON_PORT=3300
-  fi
+  # shellcheck disable=SC2034
+  MON_PORT=3300
   # shellcheck disable=SC1091
   source /opt/ceph-container/bin/start_mon.sh
   start_mon
@@ -73,8 +67,7 @@ function parse_size {
 }
 
 function bootstrap_osd {
-  # Apply the tuning on Nautilus and above only since the values applied are causing the ceph-osd to crash on earlier versions
-  if [[ ${OSD_BLUESTORE} -eq 1 ]] && [[ ! "${CEPH_VERSION}" =~ ^(luminous|mimic)$ ]]; then
+  if [[ ${OSD_BLUESTORE} -eq 1 ]]; then
     tune_memory "$(get_available_ram)"
   fi
 
@@ -174,14 +167,6 @@ function bootstrap_rgw {
   fi
 
   : "${RGW_FRONTEND:="$RGW_FRONTEND_TYPE $RGW_FRONTED_OPTIONS"}"
-
-  if [[ "$RGW_FRONTEND_TYPE" == "beast" ]]; then
-    if [[ "$CEPH_VERSION" == "luminous" ]]; then
-      RGW_FRONTEND_TYPE=beast
-      log "ERROR: unsupported rgw backend type $RGW_FRONTEND_TYPE for your Ceph release $CEPH_VERSION, use at least the Mimic version."
-      exit 1
-    fi
-  fi
 
   if [ ! -e "$RGW_PATH"/keyring ]; then
     # bootstrap RGW
