@@ -306,7 +306,7 @@ function bootstrap_rbd_mirror {
 #######
 function bootstrap_mgr {
   mkdir -p "$MGR_PATH"
-  ceph "${CLI_OPTS[@]}" auth get-or-create mgr."$MGR_NAME" mon 'allow *' -o "$MGR_PATH"/keyring
+  ceph "${CLI_OPTS[@]}" auth get-or-create mgr."$MGR_NAME" mon 'allow profile mgr' mds 'allow *' osd 'allow *' -o "$MGR_PATH"/keyring
   chown --verbose -R ceph. "$MGR_PATH"
 
   # start ceph-mgr
