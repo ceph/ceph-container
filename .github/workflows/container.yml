@@ -11,7 +11,7 @@ jobs:
         run: make RELEASE="demo" FLAVORS="pacific,centos,8" build
 
       - name: run the ceph demo container
-        run: docker run -d --privileged --name ceph-demo -v /etc/modprobe.d:/etc/modprobe.d -v /mnt/ceph:/var/lib/ceph -e RGW_FRONTEND_TYPE=beast -e DEBUG=verbose -e RGW_FRONTEND_PORT=8000 -e MON_IP=127.0.0.1 -e CEPH_PUBLIC_NETWORK=0.0.0.0/0 -e CLUSTER=test -e CEPH_DEMO_UID=demo -e CEPH_DEMO_ACCESS_KEY=G1EZ5R4K6IJ7XUQKMAED -e CEPH_DEMO_SECRET_KEY=cNmUrqpBKjCMzcfqG8fg4Qk07Xkoyau52OmvnSsz -e CEPH_DEMO_BUCKET=foobar -e SREE_PORT=5001 -e DATA_TO_SYNC=/etc/modprobe.d -e DATA_TO_SYNC_BUCKET=github -e OSD_COUNT=2 ceph/daemon:demo-pacific-centos-8-x86_64 demo
+        run: docker run -d --privileged --name ceph-demo -v /mnt/ceph:/var/lib/ceph -e RGW_FRONTEND_TYPE=beast -e DEBUG=verbose -e RGW_FRONTEND_PORT=8000 -e MON_IP=127.0.0.1 -e CEPH_PUBLIC_NETWORK=0.0.0.0/0 -e CLUSTER=ceph -e CEPH_DEMO_UID=demo -e CEPH_DEMO_ACCESS_KEY=G1EZ5R4K6IJ7XUQKMAED -e CEPH_DEMO_SECRET_KEY=cNmUrqpBKjCMzcfqG8fg4Qk07Xkoyau52OmvnSsz -e CEPH_DEMO_BUCKET=foobar -e SREE_PORT=5001 -e DATA_TO_SYNC=/etc/modprobe.d -e DATA_TO_SYNC_BUCKET=github -e OSD_COUNT=2 ceph/daemon:demo-pacific-centos-8-x86_64 demo
 
       - name: run the demo validation
         run: |
@@ -19,7 +19,7 @@ jobs:
           sudo ./travis-builds/validate_demo_cluster.sh
           docker exec ceph-demo ps fauwwwx
           docker exec ceph-demo ss -ntlp
-          docker exec ceph-demo cat /etc/ceph/test.conf
+          docker exec ceph-demo cat /etc/ceph/ceph.conf
 
       - name: debug on failure
         if: ${{ failure() }}
@@ -28,7 +28,7 @@ jobs:
           docker ps
           docker ps -a
           docker logs ceph-demo
-          docker exec ceph-demo ceph --connect-timeout 3 --cluster test -s
+          docker exec ceph-demo ceph --connect-timeout 3 --cluster ceph -s
   arm64:
     runs-on: ubuntu-latest
     steps:
