@@ -343,6 +343,20 @@ function bootstrap_sree {
 }
 
 
+#########
+# CRASH #
+#########
+function bootstrap_crash {
+  CRASH_NAME="client.crash"
+  mkdir -p /var/lib/ceph/crash/posted
+  ceph "${CLI_OPTS[@]}" auth get-or-create "${CRASH_NAME}" mon 'profile crash' mgr 'profile crash' -o /etc/ceph/"${CLUSTER}"."${CRASH_NAME}".keyring
+  chown --verbose -R ceph. /etc/ceph/"${CLUSTER}"."${CRASH_NAME}".keyring /var/lib/ceph/crash
+
+  # start ceph-crash
+  nohup ceph-crash -n "${CRASH_NAME}" &
+}
+
+
 ###################
 # BUILD BOOTSTRAP #
 ###################
@@ -355,7 +369,7 @@ function build_bootstrap {
   bootstrap_mgr
 
   if [[ "$DEMO_DAEMONS" == "all" ]]; then
-    daemons_list="osd mds rgw nfs rbd_mirror rest_api"
+    daemons_list="osd mds rgw nfs rbd_mirror rest_api crash"
   else
     # change commas to space
     comma_to_space=${DEMO_DAEMONS//,/ }
@@ -399,6 +413,9 @@ function build_bootstrap {
         ;;
       rest_api)
         bootstrap_rest_api
+        ;;
+      crash)
+        bootstrap_crash
         ;;
       *)
         log "ERROR: unknown scenario!"
