@@ -80,6 +80,11 @@ function test_demo_rest_api {
   return $(wait_for_daemon "$DOCKER_COMMAND mgr dump | grep -sq 'restful\": \"https://.*:8003'")
 }
 
+function test_demo_crash {
+  # shellcheck disable=SC2046
+  return $(wait_for_daemon "ps aux | grep -sq [c]eph-crash")
+}
+
 ########
 # MAIN #
 ########
@@ -94,6 +99,7 @@ test_demo_nfs
 test_demo_rbd_mirror
 test_demo_mgr
 test_demo_rest_api
+test_demo_crash
 ceph_status # wait again for the cluster to stabilize (mds pools)
 
 if ! docker ps | grep ceph-demo; then
