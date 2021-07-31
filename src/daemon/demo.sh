@@ -25,8 +25,6 @@ MGR_IP=$MON_IP
 : "${RGW_FRONTEND_PORT:=8080}"
 : "${RGW_FRONTEND_TYPE:="beast"}"
 
-: "${RBD_POOL:="rbd"}"
-
 
 #######
 # MON #
@@ -115,7 +113,6 @@ function bootstrap_osd {
   # start OSD
   chown --verbose -R ceph. "$OSD_PATH"
   ceph-osd "${DAEMON_OPTS[@]}" -i "$OSD_ID"
-  ceph "${CLI_OPTS[@]}" osd pool create "$RBD_POOL" 8
 }
 
 
