@@ -143,7 +143,7 @@ function bootstrap_mds {
 
     # bootstrap MDS
     mkdir -p "$MDS_PATH"
-    ceph "${CLI_OPTS[@]}" auth get-or-create mds."$MDS_NAME" mds 'allow' osd 'allow *' mon 'allow profile mds' -o "$MDS_PATH"/keyring
+    ceph "${CLI_OPTS[@]}" auth get-or-create mds."$MDS_NAME" mds 'allow *' osd 'allow *' mon 'profile mds' mgr 'profile mds' -o "$MDS_PATH"/keyring
     chown --verbose -R ceph. "$MDS_PATH"
   fi
 
