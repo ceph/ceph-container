@@ -26,37 +26,18 @@ bash -c ' \
       echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V3.3-stable/$CEPH_VERSION/el\$releasever/noarch/" >> /etc/yum.repos.d/ganesha.repo ; \
       echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
       echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
-    elif [[ "${CEPH_VERSION}" == nautilus ]]; then \
-      echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V2.8-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
-    else \
-      echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V2.7-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
     fi ; \
   fi ; \
   if [ -n "__ISCSI_PACKAGES__" ]; then \
     curl -s -L https://shaman.ceph.com/api/repos/tcmu-runner/master/latest/centos/__ENV_[BASEOS_TAG]__/repo?arch=$(arch) -o /etc/yum.repos.d/tcmu-runner.repo ; \
     if [[ "${CEPH_VERSION}" =~ master ]]; then \
       curl -s -L https://shaman.ceph.com/api/repos/ceph-iscsi/master/latest/centos/__ENV_[BASEOS_TAG]__/repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
-    elif [[ "${CEPH_VERSION}" =~ nautilus|octopus|pacific ]]; then \
-      curl -s -L https://download.ceph.com/ceph-iscsi/3/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     else \
-      curl -s -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
+      curl -s -L https://download.ceph.com/ceph-iscsi/3/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     fi ; \
   fi' && \
 yum update -y --setopt=install_weak_deps=False && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
-if [[ "${CEPH_VERSION}" == nautilus ]]; then \
-  CEPH_MGR_K8SEVENTS="ceph-mgr-k8sevents__ENV_[CEPH_POINT_RELEASE]__"; \
-  if [[ -n "__ENV_[CEPH_POINT_RELEASE]__" ]]; then \
-    CPR=__ENV_[CEPH_POINT_RELEASE]__ ; \
-    if [[ ${CPR:1:2} -eq 14 ]] && [[ ${CPR:4:1} -eq 2 ]] && [[ ${CPR:6} -lt 5 ]]; then \
-      CEPH_MGR_K8SEVENTS="" ; \
-    fi ; \
-  fi ; \
-fi && \
 bash -c ' \
   if [[ "${CEPH_VERSION}" =~ master ]] || ${CEPH_DEVEL}; then \
     ARCH=$(arch); \
