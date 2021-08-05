@@ -1,4 +1,4 @@
-yum install -y epel-release && \
+yum install -y epel-release https://apache.jfrog.io/artifactory/arrow/centos/__ENV_[BASEOS_TAG]__/apache-arrow-release-latest.rpm && \
 yum install -y jq && \
 bash -c ' \
   if [ -n "__GANESHA_PACKAGES__" ]; then \
@@ -78,4 +78,4 @@ bash -c ' \
     yum copr enable -y tchaikov/python-scikit-learn ; \
     yum copr enable -y tchaikov/python3-asyncssh ; \
   fi ' && \
-yum install -y --setopt=install_weak_deps=False __CEPH_BASE_PACKAGES__
+yum install -y --setopt=install_weak_deps=False --enablerepo=powertools __CEPH_BASE_PACKAGES__
