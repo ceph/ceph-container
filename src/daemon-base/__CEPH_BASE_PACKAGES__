@@ -12,13 +12,13 @@
         kmod \
         lvm2 \
         gdisk \
-	smartmontools \
-	nvme-cli \
-	libstoragemgmt \
+        smartmontools \
+        nvme-cli \
+        libstoragemgmt \
         __RADOSGW_PACKAGES__ \
         __GANESHA_PACKAGES__ \
         __ISCSI_PACKAGES__ \
         __CSI_PACKAGES__ \
-	__CRIMSON_PACKAGES__ \
+        __CRIMSON_PACKAGES__ \
         __CEPH_IMMUTABLE_OBJECT_CACHE_PACKAGE__ \
         __SCIKIT_LEARN__
