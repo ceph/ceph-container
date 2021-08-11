@@ -1,6 +1,9 @@
 ceph-container
 ==============
 
+As of August 2021, new ceph/ceph container images are pushed to quay.io registry only.
+Docker hub won't receive new content for that specific image but current images remain available.
+
 [![Ceph Daemon Stars](https://img.shields.io/docker/stars/ceph/daemon.svg)](https://hub.docker.com/r/ceph/daemon)
 [![Ceph Daemon Pulls](https://img.shields.io/docker/pulls/ceph/daemon.svg)](https://hub.docker.com/r/ceph/daemon)
 
@@ -10,7 +13,23 @@ releases on CentOS. ceph-container also supports builds for multiple distributio
 Find available container image tags
 -----------------------------------
 
-All tags can be found on the Docker Hub.
+All tags for ceph/ceph can be found on the quay.io registry.
+[visit](https://quay.io/repository/ceph/ceph?tab=tags)
+As an alternative you can still use the docker hub registry but without the most recent images.
+[visit](https://hub.docker.com/r/ceph/ceph/tags)
+
+Alternatively, you can run the following command (install jq first):
+
+For quay.io registry
+```bash
+$ curl -s -L https://quay.io/api/v1/repository/ceph/ceph/tag?page_size=100 | jq '."tags"[] .name'
+```
+For docker hub registry
+```bash
+$ curl -s https://registry.hub.docker.com/v2/repositories/ceph/ceph/tags/?page_size=100 | jq '."results"[] .name'
+```
+
+All tags for ceph/{daemon-base,daemon} can be found on the Docker Hub.
 For the daemon-base tags [visit](https://hub.docker.com/r/ceph/daemon-base/tags/).
 For the daemon tags [visit](https://hub.docker.com/r/ceph/daemon/tags/).
 
