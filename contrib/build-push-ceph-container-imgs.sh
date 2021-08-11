@@ -31,9 +31,15 @@ if ${CI_CONTAINER} ; then
   done
 fi
 
+# Push to the quay.io registry by default
+REGISTRY="quay.io"
+REGISTRY_ORG="ceph"
+
 # backward compatibility; script expected DOCKER_HUB names to be set
-CONTAINER_REPO_USERNAME=${CONTAINER_REPO_USERNAME:-$DOCKER_HUB_USERNAME}
-CONTAINER_REPO_PASSWORD=${CONTAINER_REPO_PASSWORD:-$DOCKER_HUB_PASSWORD}
+CONTAINER_REPO_HOSTNAME=${CONTAINER_REPO_HOSTNAME:-$REGISTRY}
+CONTAINER_REPO_ORGANIZATION=${CONTAINER_REPO_ORGANIZATION:-$REGISTRY/$REGISTRY_ORG}
+CONTAINER_REPO_USERNAME=${CONTAINER_REPO_USERNAME:-$REGISTRY_USERNAME}
+CONTAINER_REPO_PASSWORD=${CONTAINER_REPO_PASSWORD:-$REGISTRY_PASSWORD}
 
 # GIT_BRANCH is typically 'origin/master', we strip the variable to only get 'master'
 CONTAINER_BRANCH="${GIT_BRANCH#*/}"
@@ -124,8 +130,8 @@ function install_podman {
   fi
 }
 
-function login_docker_hub {
-  echo "Login in the Docker Hub"
+function login_registry {
+  echo "Login in the registry"
   docker login -u "$CONTAINER_REPO_USERNAME" -p "$CONTAINER_REPO_PASSWORD" "${CONTAINER_REPO_HOSTNAME}"
 }
 
@@ -139,35 +145,35 @@ function grep_sort_tags {
   "$@" | grep -oE 'v[3-9].[0-9]*.[0-9]*|v[3-9].[0-9]*.[0-9](alpha|beta|rc)[0-9]{1,2}?' | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n
 }
 
-function compare_docker_hub_and_github_tags {
+function compare_registry_and_github_tags {
   # build an array with the list of tags from github
   for tag_github in $(grep_sort_tags git ls-remote --tags --refs 2>/dev/null); do
     tags_github_array+=("$tag_github")
   done
 
-  # build an array with the list of tag from docker hub
+  # build an array with the list of tag from the registry
   local page=1
   while response="$(curl --silent --fail --list-only --location \
-                      "https://registry.hub.docker.com/v2/repositories/ceph/daemon/tags/?page_size=100&page=${page}")"; do
-    local tags_docker_hub ; tags_docker_hub+=$(echo "${response}" | jq -r .results[].name)
-    if [ "$(echo "${response}" | jq -r .next)" == "null" ]; then
+                      "https://${REGISTRY}/api/v1/repository/ceph/daemon/tag?page_size=100&page=${page}")"; do
+    local tags_registry ; tags_registry+=$(echo "${response}" | jq -r .tags[].name)
+    if [ "$(echo "${response}" | jq -r .has_additional)" == "false" ]; then
       break
     else
       page=$((page + 1))
     fi
   done
-  tags_docker_hub=$(grep_sort_tags echo "${tags_docker_hub}" | uniq)
-  for tag_docker_hub in $tags_docker_hub; do
-    tags_docker_hub_array+=("$tag_docker_hub")
+  tags_registry=$(grep_sort_tags echo "${tags_registry}" | uniq)
+  for tag_registry in $tags_registry; do
+    tags_registry_array+=("$tag_registry")
   done
 
   # we now look into each array and find a possible missing tag
-  # the idea is to find if a tag present on github is not present on docker hub
+  # the idea is to find if a tag present on github is not present on the registry
   for i in "${tags_github_array[@]}"; do
     # the grep has a conditionnal on either the explicit match last character is the end of the line OR
     # it has a space after it so we cover the case where the tag that matches is placed at the end
     # of the line or the first one
-    echo "${tags_docker_hub_array[@]}" | grep -qoE "${i}$|${i} " || tag_to_build+=("$i")
+    echo "${tags_registry_array[@]}" | grep -qoE "${i}$|${i} " || tag_to_build+=("$i")
   done
 
   # if there is an entry we activate TAGGED_HEAD which tells the script to build a release image
@@ -191,7 +197,7 @@ function create_head_or_point_release {
   # instead of overriding the previous one.
 
   # call compare tags to determine if we need to build a release
-  compare_docker_hub_and_github_tags
+  compare_registry_and_github_tags
 
   # shellcheck disable=SC2181
   if $TAGGED_HEAD; then
@@ -248,15 +254,15 @@ function build_ceph_imgs {
          IMAGES_TO_BUILD=daemon-base \
          build.parallel
   else
-    make CEPH_DEVEL=${DEVEL} RELEASE="${RELEASE}" build.parallel
+    make CEPH_DEVEL=${DEVEL} RELEASE="${RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build.parallel
   fi
   docker images
 }
 
 declare -F push_ceph_imgs ||
 function push_ceph_imgs {
-  echo "Push Ceph container image(s) to the Docker Hub registry"
-  make RELEASE="$RELEASE" push.parallel
+  echo "Push Ceph container image(s) to the registry"
+  make RELEASE="$RELEASE" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" push.parallel
 }
 
 declare -F build_and_push_latest_bis ||
@@ -265,16 +271,15 @@ function build_and_push_latest_bis {
   # rebuild latest again to get a different image ID
   for ceph_release in "${CEPH_RELEASES[@]}"; do
     CENTOS_RELEASE=$(_centos_release "${ceph_release}")
-    make RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,"${CENTOS_RELEASE}" build
-    docker tag ceph/daemon:"$CONTAINER_BRANCH"-bis-"${ceph_release}"-centos-"${CENTOS_RELEASE}"-"${HOST_ARCH}" ceph/daemon:latest-bis-"$ceph_release"
-    docker push ceph/daemon:latest-bis-"$ceph_release"
+    tag_bis="latest-bis-${ceph_release}"
+    make DAEMON_BASE_TAG="daemon-base:${tag_bis}" DAEMON_TAG="daemon:${tag_bis}" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build
+    make DAEMON_BASE_TAG="daemon-base:${tag_bis}" DAEMON_TAG="daemon:${tag_bis}" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" push
   done
 
   # Now let's build the latest
   CENTOS_RELEASE=$(_centos_release "${CEPH_RELEASES[-1]}")
-  make RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,"${CENTOS_RELEASE}" build
-  docker tag ceph/daemon:"$CONTAINER_BRANCH"-bis-"${CEPH_RELEASES[-1]}"-centos-"${CENTOS_RELEASE}"-"${HOST_ARCH}" ceph/daemon:latest-bis
-  docker push ceph/daemon:latest-bis
+  make DAEMON_BASE_TAG="daemon-base:latest-bis" DAEMON_TAG="daemon:latest-bis" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build
+  make DAEMON_BASE_TAG="daemon-base:latest-bis" DAEMON_TAG="daemon:latest-bis" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" push
 }
 
 declare -F push_ceph_imgs_latest ||
@@ -330,12 +335,12 @@ function push_ceph_imgs_latest {
       latest_name="${latest_name}-devel"
     fi
     for i in daemon-base daemon; do
-      tag=ceph/$i:${CONTAINER_BRANCH}-${CONTAINER_SHA}-$release-centos-$(_centos_release "${release}")-${HOST_ARCH}
+      tag=${CONTAINER_REPO_ORGANIZATION}/$i:${CONTAINER_BRANCH}-${CONTAINER_SHA}-$release-centos-$(_centos_release "${release}")-${HOST_ARCH}
       # tag image
-      docker tag "$tag" ceph/$i:"$latest_name"
+      docker tag "$tag" "${CONTAINER_REPO_ORGANIZATION}"/$i:"$latest_name"
 
-      # push image to the Docker Hub
-      docker push ceph/$i:"$latest_name"
+      # push image to the registry
+      docker push "${CONTAINER_REPO_ORGANIZATION}"/$i:"$latest_name"
     done
   done
 }
@@ -348,7 +353,7 @@ function wait_for_arm_images {
   fi
   echo "Waiting for ARM64 images to be ready"
   set -e
-  until docker pull ceph/daemon:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-7-aarch64; do
+  until docker pull "${CONTAINER_REPO_ORGANIZATION}"/daemon:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-7-aarch64; do
     echo -n .
     sleep 1
   done
@@ -366,7 +371,7 @@ function create_registry_manifest {
       if [ "${ceph_release}" == "master" ]; then
         continue
       fi
-      TARGET_RELEASE="ceph/${image}:${RELEASE}-${ceph_release}-centos-$(_centos_release "${ceph_release}")"
+      TARGET_RELEASE="${CONTAINER_REPO_ORGANIZATION}/${image}:${RELEASE}-${ceph_release}-centos-$(_centos_release "${ceph_release}")"
       DOCKER_IMAGES="$TARGET_RELEASE ${TARGET_RELEASE}-x86_64"
 
       # Let's add ARM images if being built
@@ -395,7 +400,7 @@ else
   install_docker
 fi
 cleanup_previous_run
-login_docker_hub
+login_registry
 if ${CI_CONTAINER}; then
   RELEASE=${CEPH_BRANCH}-${SHA1:0:7}
   top_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"

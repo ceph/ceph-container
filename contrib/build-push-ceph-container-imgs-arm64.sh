@@ -22,16 +22,16 @@ function build_ceph_imgs {
   echo "Build Ceph container image(s)"
   for ceph_release in "${CEPH_RELEASES[@]}"; do
     CENTOS_RELEASE=$(_centos_release "${ceph_release}")
-    make DAEMON_BASE_TAG=daemon-base:"$RELEASE"-"${ceph_release}"-centos-"${CENTOS_RELEASE}"-aarch64 DAEMON_TAG=daemon:"$RELEASE"-"${ceph_release}"-centos-"${CENTOS_RELEASE}"-aarch64 RELEASE="${RELEASE}" FLAVORS="${ceph_release},centos-arm64,${CENTOS_RELEASE}" BASEOS_REPO=centos build
+    make DAEMON_BASE_TAG=daemon-base:"$RELEASE"-"${ceph_release}"-centos-"${CENTOS_RELEASE}"-aarch64 DAEMON_TAG=daemon:"$RELEASE"-"${ceph_release}"-centos-"${CENTOS_RELEASE}"-aarch64 RELEASE="${RELEASE}" FLAVORS="${ceph_release},centos-arm64,${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build
   done
   docker images
 }
 
 function push_ceph_imgs {
-  echo "Push Ceph container image(s) to the Docker Hub registry"
+  echo "Push Ceph container image(s) to the registry"
   for ceph_release in "${CEPH_RELEASES[@]}"; do
     CENTOS_RELEASE=$(_centos_release "${ceph_release}")
-    make DAEMON_BASE_TAG=daemon-base:"$RELEASE"-"${ceph_release}"-centos-"${CENTOS_RELEASE}"-aarch64 DAEMON_TAG=daemon:"$RELEASE"-"${ceph_release}"-centos-"${CENTOS_RELEASE}"-aarch64 RELEASE="${RELEASE}" FLAVORS="${ceph_release},centos-arm64,${CENTOS_RELEASE}" BASEOS_REPO=centos push
+    make DAEMON_BASE_TAG=daemon-base:"$RELEASE"-"${ceph_release}"-centos-"${CENTOS_RELEASE}"-aarch64 DAEMON_TAG=daemon:"$RELEASE"-"${ceph_release}"-centos-"${CENTOS_RELEASE}"-aarch64 RELEASE="${RELEASE}" FLAVORS="${ceph_release},centos-arm64,${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" push
   done
 }
 
