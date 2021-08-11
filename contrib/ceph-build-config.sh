@@ -492,7 +492,7 @@ function add_tag () {
 # Manifests
 #===================================================================================================
 
-MANIFEST_TOOL_VERSION="v0.8.0"
+MANIFEST_TOOL_VERSION="v1.0.3"
 MANIFEST_TOOL_LOCATION="/tmp/manifest-tool-${MANIFEST_TOOL_VERSION}"
 # Manifest tool: https://github.com/estesp/manifest-tool
 # `docker manifest` command exists but is experiemental and not present in all environments;
@@ -500,8 +500,8 @@ MANIFEST_TOOL_LOCATION="/tmp/manifest-tool-${MANIFEST_TOOL_VERSION}"
 function download_manifest_tool () {
   if [[ ! -x "${MANIFEST_TOOL_LOCATION}" ]]; then
     info "Manifest tool is not downloaded. Downloading it now."
-    curl --silent --location \
-      "https://github.com/estesp/manifest-tool/releases/download/${MANIFEST_TOOL_VERSION}/manifest-tool-linux-${BUILD_SERVER_GOARCH}" > "${MANIFEST_TOOL_LOCATION}"
+    curl --silent --location --output "${MANIFEST_TOOL_LOCATION}" \
+      "https://github.com/estesp/manifest-tool/releases/download/${MANIFEST_TOOL_VERSION}/manifest-tool-linux-${BUILD_SERVER_GOARCH}"
     chmod +x "${MANIFEST_TOOL_LOCATION}"
   fi
 }
