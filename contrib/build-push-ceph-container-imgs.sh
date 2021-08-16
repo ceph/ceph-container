@@ -369,9 +369,6 @@ function create_registry_manifest {
   rm -rvf ~/.docker/manifests
   for image in daemon-base daemon; do
     for ceph_release in "${CEPH_RELEASES[@]}"; do
-      if [ "${ceph_release}" == "master" ]; then
-        continue
-      fi
       TARGET_RELEASE="${CONTAINER_REPO_ORGANIZATION}/${image}:${RELEASE}-${ceph_release}-centos-$(_centos_release "${ceph_release}")"
       DOCKER_IMAGES="$TARGET_RELEASE ${TARGET_RELEASE}-x86_64"
 
