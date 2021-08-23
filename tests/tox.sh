@@ -43,8 +43,8 @@ else
   sudo chgrp "$(whoami)" /var/run/docker.sock
 fi
 
-if [ -n "${DOCKER_HUB_USERNAME}" ] && [ -n "${DOCKER_HUB_PASSWORD}" ]; then
-  docker login -u "${DOCKER_HUB_USERNAME}" -p "${DOCKER_HUB_PASSWORD}"
+if [ -n "${REGISTRY_USERNAME}" ] && [ -n "${REGISTRY_PASSWORD}" ]; then
+  docker login -u "${REGISTRY_USERNAME}" -p "${REGISTRY_PASSWORD}" "${REGISTRY}"
 fi
 
 rm -rf "$WORKSPACE"/ceph-ansible || true
@@ -87,7 +87,7 @@ make_output=$(make FLAVORS="$FLAVOR" stage) # Run staging to get DAEMON_IMAGE na
 daemon_image=$(echo "${make_output}" | grep " DAEMON_IMAGE ") # Find DAEMON_IMAGE line
 daemon_image="${daemon_image#*DAEMON_IMAGE*: }" # Remove DAEMON_IMAGE from beginning
 daemon_image="$(echo "${daemon_image}" | tr -s ' ')" # Remove whitespace
-make FLAVORS="$FLAVOR" build.parallel
+make FLAVORS="$FLAVOR" BASEOS_REGISTRY="${REGISTRY}/centos" BASEOS_REPO="centos" build.parallel
 
 # start a local docker registry
 docker run -d -p 5000:5000 --restart=always --name registry registry:2
