@@ -1,5 +1,5 @@
-yum install -y epel-release https://apache.jfrog.io/artifactory/arrow/centos/__ENV_[BASEOS_TAG]__/apache-arrow-release-latest.rpm && \
-yum install -y jq && \
+yum install -y --nodocs epel-release https://apache.jfrog.io/artifactory/arrow/centos/__ENV_[BASEOS_TAG]__/apache-arrow-release-latest.rpm && \
+yum install -y --nodocs jq && \
 bash -c ' \
   if [ -n "__GANESHA_PACKAGES__" ]; then \
     echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
@@ -46,7 +46,7 @@ bash -c ' \
       curl -s -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     fi ; \
   fi' && \
-yum update -y --setopt=install_weak_deps=False && \
+yum update -y --setopt=install_weak_deps=False --nodocs && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
 if [[ "${CEPH_VERSION}" == nautilus ]]; then \
   CEPH_MGR_K8SEVENTS="ceph-mgr-k8sevents__ENV_[CEPH_POINT_RELEASE]__"; \
@@ -74,8 +74,8 @@ bash -c ' \
   fi && \
   rpm -Uvh "$REPO_URL/noarch/ceph-release-1-${RELEASE_VER}.el__ENV_[BASEOS_TAG]__.noarch.rpm" && \
   if [[ __ENV_[BASEOS_TAG]__ -eq 8 ]]; then \
-    yum install -y dnf-plugins-core ; \
+    yum install -y --nodocs dnf-plugins-core ; \
     yum copr enable -y tchaikov/python-scikit-learn ; \
     yum copr enable -y tchaikov/python3-asyncssh ; \
   fi ' && \
-yum install -y --setopt=install_weak_deps=False --enablerepo=powertools __CEPH_BASE_PACKAGES__
+yum install -y --setopt=install_weak_deps=False --nodocs --enablerepo=powertools __CEPH_BASE_PACKAGES__
