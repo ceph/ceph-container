@@ -201,6 +201,8 @@ function create_head_or_point_release {
 
   # shellcheck disable=SC2181
   if $TAGGED_HEAD; then
+    # wait for the arm64 image for the manifest creation as we only have one image to build
+    BUILD_ARM=true
     # checkout tag's code
     # using [*] but [0] would work too, also the array's length should be 1 anyway
     # this code is only activated if length is 1 so we are safe
