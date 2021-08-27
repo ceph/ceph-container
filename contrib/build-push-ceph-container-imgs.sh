@@ -358,7 +358,7 @@ function wait_for_arm_images {
   CENTOS_RELEASE=$(_centos_release "${CEPH_RELEASES[-1]}")
   until docker pull "${CONTAINER_REPO_ORGANIZATION}"/daemon:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-"${CENTOS_RELEASE}"-aarch64; do
     echo -n .
-    sleep 1
+    sleep 30
   done
   set +e
 }
