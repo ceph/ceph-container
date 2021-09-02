@@ -39,11 +39,10 @@ trap cleanup EXIT QUIT INT TERM
 step "Updating local repository"
 git fetch || fatal 'Cannot fetch the remote repository'
 git reset --hard "origin/$CURRENT_GIT_BRANCH" || fatal "Cannot reset the local directory !"
-#shellcheck disable=SC2001
-DOWNSTREAM_BRANCH_VERSION=$(echo "$CURRENT_GIT_BRANCH" | sed 's/ceph-\(.*\)-rhel.*/\1/g')
+UPSTREAM_BRANCH_VERSION="stable-3.2"
 
-step "Cloning ceph-container $DOWNSTREAM_BRANCH_VERSION"
-git clone https://github.com/ceph/ceph-container.git -b "stable-$DOWNSTREAM_BRANCH_VERSION" $CEPH_CONTAINER_DIR
+step "Cloning ceph-container ${UPSTREAM_BRANCH_VERSION}"
+git clone https://github.com/ceph/ceph-container.git -b "${UPSTREAM_BRANCH_VERSION}" "$CEPH_CONTAINER_DIR"
 
 step "Composing RHCS"
 pushd "$CEPH_CONTAINER_DIR"
