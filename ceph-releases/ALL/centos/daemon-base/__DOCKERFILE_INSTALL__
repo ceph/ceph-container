@@ -58,12 +58,6 @@ if [[ "${CEPH_VERSION}" == nautilus ]]; then \
   fi ; \
 fi && \
 bash -c ' \
-  CPR=__ENV_[CEPH_POINT_RELEASE]__ ; \
-  if [[ ${CPR:1:2} -ge 17 ]]; then \
-    CEPH_VOLUME_PACKAGES=="ceph-volume__ENV_[CEPH_POINT_RELEASE]__" ; \
-  else \
-    CEPH_VOLUME_PACKAGES="" ; \
-  fi ; \
   if [[ "${CEPH_VERSION}" =~ master ]] || ${CEPH_DEVEL}; then \
     ARCH=$(arch); \
     if [[ "${ARCH}" == "aarch64" ]]; then \
