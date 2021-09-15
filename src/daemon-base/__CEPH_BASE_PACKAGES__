@@ -20,4 +20,5 @@
         __CSI_PACKAGES__ \
         __CRIMSON_PACKAGES__ \
         __CEPH_IMMUTABLE_OBJECT_CACHE_PACKAGE__ \
-        __SCIKIT_LEARN__
+        __SCIKIT_LEARN__ \
+        __CEPH_VOLUME_PACKAGE__
