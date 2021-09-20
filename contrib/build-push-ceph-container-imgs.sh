@@ -154,7 +154,7 @@ function compare_registry_and_github_tags {
   # build an array with the list of tag from the registry
   local page=1
   while response="$(curl --silent --fail --list-only --location \
-                      "https://${REGISTRY}/api/v1/repository/ceph/daemon/tag?page_size=100&page=${page}")"; do
+                      "https://${REGISTRY}/api/v1/repository/ceph/daemon/tag?limit=100&page=${page}")"; do
     local tags_registry ; tags_registry+=$(echo "${response}" | jq -r .tags[].name)
     if [ "$(echo "${response}" | jq -r .has_additional)" == "false" ]; then
       break
