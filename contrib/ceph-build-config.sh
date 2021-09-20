@@ -332,7 +332,7 @@ function get_tags_matching () {
   local version_tag="${1}" repository="${2}"
   # DockerHub API limits page_size to 100, so we must loop through the pages
   # It would be super cool if the DockerHub HTTP API had a filter option ...
-  local tag_list_url="${PUSH_REGISTRY_URL}/repository/${PUSH_LIBRARY}/${repository}/tag?page_size=100"
+  local tag_list_url="${PUSH_REGISTRY_URL}/repository/${PUSH_LIBRARY}/${repository}/tag?limit=100"
   local all_matching_tags=''
   local page=1
   local response
