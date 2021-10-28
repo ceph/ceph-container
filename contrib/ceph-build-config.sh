@@ -151,16 +151,23 @@ function get_arch_image_repo () {
 # Given a flavor and arch, return the full tag of the base image
 function get_base_image_full_tag () {
   local flavor="${1}" arch="${2}"
+  local distro ; distro="$(extract_distro "${flavor}")"
+  local distro_release ; distro_release="$(extract_distro_release "${flavor}")"
   if [ "${arch}" = 'x86_64' ] || [ "${arch}" = 'aarch64' ]; then
-    local default_library="${REGISTRY}/centos"
+    if [ "${distro}" = 'centos' ]; then
+      local default_library="${REGISTRY}/centos"
+    else
+      local default_library="${REGISTRY}/ubi${distro_release}"
+    fi
   else
     error "get_base_image_full_tag - unknown arch '${arch}'"
   fi
-  local distro ; distro="$(extract_distro "${flavor}")"
-  local distro_release ; distro_release="$(extract_distro_release "${flavor}")"
   case $distro in
     centos)
       echo "${default_library}/centos:${distro_release}"
+      return ;;
+    ubi)
+      echo "${default_library}/ubi:${distro_release}"
       return ;;
     *)
       error "get_base_image_full_tag - unknown distro '${distro}'"

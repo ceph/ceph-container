@@ -235,7 +235,12 @@ function build_ceph_imgs {
   echo "Build Ceph container image(s)"
   if ${CI_CONTAINER}; then
     if [ -z "$CONTAINER_FLAVOR" ]; then
-      CONTAINER_FLAVOR=${CEPH_BRANCH},centos,$(_centos_release "${CEPH_BRANCH}")
+      if [ "${BASEOS_REPO}" == "ubi" ]; then
+        container_flavor_distro="ubi"
+      else
+        container_flavor_distro="centos"
+      fi
+      CONTAINER_FLAVOR=${CEPH_BRANCH},${container_flavor_distro},$(_centos_release "${CEPH_BRANCH}")
     else
       IFS="," read -r ceph_branch distro distro_release <<< "${CONTAINER_FLAVOR}"
       if [ "${ceph_branch}" != "${BRANCH}" ]; then
