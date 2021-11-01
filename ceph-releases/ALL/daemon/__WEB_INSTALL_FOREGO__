@@ -1,6 +1,0 @@
-echo 'Install forego' && \
-      # Assume linux
-      FOREGO_ARCH=linux-__ENV_[GO_ARCH]__ && \
-      wget -q -O /forego.tgz \
-        "https://bin.equinox.io/c/ekMN3bCZFUn/forego-stable-${FOREGO_ARCH}.tgz" && \
-      cd /usr/local/bin && tar xfz /forego.tgz && chmod +x /usr/local/bin/forego && rm /forego.tgz
