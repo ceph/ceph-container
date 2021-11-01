@@ -4,8 +4,7 @@ echo 'Install packages' && \
         wget unzip uuid-runtime python-setuptools udev dmsetup && \
       apt-get install -y  --no-install-recommends --force-yes __DAEMON_PACKAGES__ && \
       apt-get clean && \
-    # debian does not have confd/forego/kubectl/etcd packages, so install from web
+    # debian does not have confd/kubectl/etcd packages, so install from web
     __WEB_INSTALL_CONFD__ && \
-    __WEB_INSTALL_FOREGO__ && \
     __WEB_INSTALL_KUBECTL__ && \
     __WEB_INSTALL_ETCDCTL__
