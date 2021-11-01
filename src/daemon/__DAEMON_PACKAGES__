@@ -2,7 +2,6 @@
           sharutils \
           lsof \
           __CONFD_PACKAGE__ \
-          __FOREGO_PACKAGE__ \
           __KUBECTL_PACKAGE__ \
           __ETCD_PACKAGE__ \
           __S3CMD_PACKAGE__

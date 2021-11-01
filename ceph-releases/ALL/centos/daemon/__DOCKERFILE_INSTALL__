@@ -1,6 +1,5 @@
 echo 'Install packages' && \
       yum install -y --setopt=install_weak_deps=False wget unzip util-linux python-setuptools udev device-mapper && \
       yum install -y --setopt=install_weak_deps=False __DAEMON_PACKAGES__ && \
-    # Centos 7 doesn't have confd/forego packages, so install them from web
-    __WEB_INSTALL_CONFD__ && \
-    __WEB_INSTALL_FOREGO__
+    # Centos 7 doesn't have confd package, so install them from web
+    __WEB_INSTALL_CONFD__
