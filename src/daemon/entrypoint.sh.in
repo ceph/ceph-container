@@ -63,12 +63,6 @@ case "$CEPH_DAEMON" in
     source /opt/ceph-container/bin/start_osd.sh
     start_osd
     ;;
-  osd_directory)
-    # TAG: osd_directory
-    source /opt/ceph-container/bin/start_osd.sh
-    OSD_TYPE="directory"
-    start_osd
-    ;;
   osd_directory_single)
     # TAG: osd_directory_single
     source /opt/ceph-container/bin/start_osd.sh
