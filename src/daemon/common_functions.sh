@@ -142,9 +142,8 @@ function dev_part {
 function osd_trying_to_determine_scenario {
   : "${OSD_DEVICE:=none}"
   if [[ ${OSD_DEVICE} == "none" ]]; then
-    log "Bootstrapped OSD(s) found; using OSD directory"
-    source /opt/ceph-container/bin/osd_directory.sh
-    osd_directory
+    log "No device found, please provide one with OSD_DEVICE variable"
+    exit 1
   elif parted --script "${OSD_DEVICE}" print | grep -sqE '^ 1.*ceph data'; then
     log "Bootstrapped OSD found; activating ${OSD_DEVICE}"
     source /opt/ceph-container/bin/osd_disk_activate.sh
