@@ -1,9 +1,3 @@
-# forego build
-
-FROM docker.io/golang:1.17 AS builder
-ENV CGO_ENABLED=0
-RUN go install github.com/ddollar/forego@v0.16.1
-
 # CEPH DAEMON IMAGE
 
 FROM __ENV_[DAEMON_BASE_IMAGE]__

@@ -18,11 +18,6 @@ function start_osd {
   fi
 
   case "$OSD_TYPE" in
-    directory)
-      source /opt/ceph-container/bin/osd_directory.sh
-      source /opt/ceph-container/bin/osd_common.sh
-      osd_directory
-      ;;
     directory_single)
       source /opt/ceph-container/bin/osd_directory_single.sh
       osd_directory_single
@@ -37,11 +32,6 @@ function start_osd {
     activate)
       source /opt/ceph-container/bin/osd_disk_activate.sh
       osd_activate
-      ;;
-    devices)
-      source /opt/ceph-container/bin/osd_disks.sh
-      source /opt/ceph-container/bin/osd_common.sh
-      osd_disks
       ;;
     activate_journal)
       source /opt/ceph-container/bin/osd_activate_journal.sh
