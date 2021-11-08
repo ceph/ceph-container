@@ -1,16 +1,7 @@
 # Let's remove easy stuff
     rm -f /usr/bin/{etcd-tester,etcd-dump-logs} && \
-    # Let's compress fat binaries but keep them executable
-    # As we don't run them often, the performance penalty isn't that big
-    for binary in /usr/local/bin/{confd,kubectl} /usr/bin/etcdctl; do \
-      if [ -f "$binary" ]; then gzexe $binary && rm -f ${binary}~; fi; \
-    done && \
     # Remove etcd since all we need is etcdctl
     rm -f /usr/bin/etcd && \
-    # Strip binaries
-    bash -c ' \
-      function ifstrip () { if compgen -g "$1"; then strip -s "$1"; fi } && \
-      ifstrip /usr/local/bin/{confd,kubectl}' && \
     # Uncomment below line for more detailed debug info
     # find / -xdev -type f -exec du -c {} \; |sort -n && \
     echo "CLEAN DAEMON DONE!"

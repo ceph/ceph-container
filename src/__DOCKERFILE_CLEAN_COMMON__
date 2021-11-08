@@ -14,15 +14,6 @@ rm -rf \
     # rm -f /usr/bin/ceph-dencoder && \
     if [ -f /usr/bin/ceph-dencoder ]; then gzip -9 /usr/bin/ceph-dencoder; fi && \
     # TODO: What other ceph stuff needs removed/stripped/zipped here?
-    # TODO: There was some overlap between this and the ceph clean? Where does it belong?
-    #       If it's idempotent, it can *always* live here, even if it doesn't always apply
-    # TODO: Should we even strip ceph libs at all?
-    bash -c ' \
-      function ifstrip () { if compgen -g "$1"; then strip -s "$1"; fi } && \
-      ifstrip /usr/lib{,64}/ceph/erasure-code/* && \
-      ifstrip /usr/lib{,64}/rados-classes/* && \
-      ifstrip /usr/lib{,64}/python*/{dist,site}-packages/{rados,rbd,rgw}.*.so && \
-      ifstrip /usr/bin/{crushtool,monmaptool,osdmaptool}' && \
     # Photoshop files inside a container ?
     rm -f /usr/lib/ceph/mgr/dashboard/static/AdminLTE-*/plugins/datatables/extensions/TableTools/images/psd/* && \
     # Some logfiles are not empty, there is no need to keep them
