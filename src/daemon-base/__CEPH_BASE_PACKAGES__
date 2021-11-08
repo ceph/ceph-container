@@ -6,7 +6,7 @@
         ceph-osd__ENV_[CEPH_POINT_RELEASE]__ \
         __CEPHFS_PACKAGES__ \
         rbd-mirror__ENV_[CEPH_POINT_RELEASE]__  \
-        __CEPH_MGR_PACKAGES__\
+        __CEPH_MGR_PACKAGES__ \
         __CEPH_GRAFANA_PACKAGES__ \
         kmod \
         lvm2 \
