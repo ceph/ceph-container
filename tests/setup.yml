@@ -48,9 +48,14 @@
     - name: allow nodes to use an insecure registry - podman
       ini_file:
         path: /etc/containers/registries.conf
-        section: registries.insecure
-        option: registries
-        value: "['{{ ceph_docker_registry }}']"
+        section: "[registry]"
+        option: "{{ item.key }}"
+        value: "{{ item.value }}"
+      loop: "{{ insecure_registry_config | dict2items }}"
+      vars:
+        insecure_registry_config:
+          location: '"{{ ceph_docker_registry }}"'
+          insecure: "true"
       when: result_podman_install.skipped is not defined
 
     - name: restart docker
