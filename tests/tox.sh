@@ -63,7 +63,7 @@ fi
 
 cd "$WORKSPACE"
 # we test the latest stable release of Ceph in priority
-FLAVOR="master,centos,8"
+FLAVOR="master,centos,stream8"
 
 # build everything that was touched to make sure build succeeds
 mapfile -t FLAVOR_ARRAY < <(make flavors.modified)

@@ -18,9 +18,9 @@
 
 # When updating these defaults, be sure to check that ALL_BUILDABLE_FLAVORS is updated
 FLAVORS ?= \
-	octopus,centos,8 \
-	pacific,centos,8 \
-	master,centos,8
+	octopus,centos,stream8 \
+	pacific,centos,stream8 \
+	master,centos,stream8
 
 TAG_REGISTRY ?= ceph
 
@@ -48,9 +48,9 @@ include maint-lib/makelib.mk
 # All flavor options that can be passed to FLAVORS
 ALL_BUILDABLE_FLAVORS := \
 	octopus,centos,7 \
-	octopus,centos,8 \
-	pacific,centos,8 \
-	master,centos,8
+	octopus,centos,stream8 \
+	pacific,centos,stream8 \
+	master,centos,stream8
 
 # ==============================================================================
 # Build targets
