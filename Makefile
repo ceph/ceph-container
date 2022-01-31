@@ -32,7 +32,7 @@ DAEMON_BASE_TAG ?= ""
 DAEMON_TAG ?= ""
 
 # These values are given sane defaults if they are unset. Otherwise, they get the value specified.
-BASEOS_REGISTRY ?= ""
+BASEOS_REGISTRY ?= "quay.io/centos"
 BASEOS_REPO ?= ""
 BASEOS_TAG ?= ""
 
