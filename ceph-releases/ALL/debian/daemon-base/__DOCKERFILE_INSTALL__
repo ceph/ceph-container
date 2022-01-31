@@ -1,11 +1,11 @@
 # add the necessary repos
-    echo "deb http://obs.linaro.org/ERP:/ceph-ansible:/${CEPH_VERSION}/Debian___ENV_[BASEOS_TAG]__ ./" \
+    echo "deb http://obs.linaro.org/ERP:/ceph-ansible:/${CEPH_VERSION}/Debian___ENV_[DISTRO_VERSION]__ ./" \
       >> /etc/apt/sources.list.d/erp.list && \
     echo "deb http://deb.debian.org/debian/ __OS_CODENAME__-backports main" \
       >> /etc/apt/sources.list.d/erp.list && \
     echo "deb http://download.ceph.com/debian-${CEPH_VERSION} __OS_CODENAME__ main" \
       >> /etc/apt/sources.list.d/ceph.list && \
-    curl http://obs.linaro.org/ERP:/ceph-ansible:/${CEPH_VERSION}/Debian___ENV_[BASEOS_TAG]__/Release.key | apt-key add - && \
+    curl http://obs.linaro.org/ERP:/ceph-ansible:/${CEPH_VERSION}/Debian___ENV_[DISTRO_VERSION]__/Release.key | apt-key add - && \
     curl https://download.ceph.com/keys/release.asc | apt-key add - && \
     DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -yy --force-yes --no-install-recommends \
