@@ -8,17 +8,17 @@ jobs:
         uses: actions/checkout@v2
 
       - name: build the ceph container image
-        run: make RELEASE="demo" FLAVORS="master,centos,8" build
+        run: make BASEOS_REGISTRY=quay.io/centos BASEOS_TAG=stream8 RELEASE="demo" FLAVORS="master,centos,8" build
 
       - name: run the ceph demo container
-        run: docker run -d --privileged --name ceph-demo -v /mnt/ceph:/var/lib/ceph -e RGW_FRONTEND_TYPE=beast -e DEBUG=verbose -e RGW_FRONTEND_PORT=8000 -e MON_IP=127.0.0.1 -e CEPH_PUBLIC_NETWORK=0.0.0.0/0 -e CLUSTER=ceph -e CEPH_DEMO_UID=demo -e CEPH_DEMO_ACCESS_KEY=G1EZ5R4K6IJ7XUQKMAED -e CEPH_DEMO_SECRET_KEY=cNmUrqpBKjCMzcfqG8fg4Qk07Xkoyau52OmvnSsz -e CEPH_DEMO_BUCKET=foobar -e SREE_PORT=5001 -e DATA_TO_SYNC=/etc/modprobe.d -e DATA_TO_SYNC_BUCKET=github -e OSD_COUNT=2 ceph/daemon:demo-master-centos-8-x86_64 demo
+        run: docker run -d --privileged --name ceph-demo -v /mnt/ceph:/var/lib/ceph -e RGW_FRONTEND_TYPE=beast -e DEBUG=verbose -e RGW_FRONTEND_PORT=8000 -e MON_IP=127.0.0.1 -e CEPH_PUBLIC_NETWORK=0.0.0.0/0 -e CLUSTER=ceph -e CEPH_DEMO_UID=demo -e CEPH_DEMO_ACCESS_KEY=G1EZ5R4K6IJ7XUQKMAED -e CEPH_DEMO_SECRET_KEY=cNmUrqpBKjCMzcfqG8fg4Qk07Xkoyau52OmvnSsz -e CEPH_DEMO_BUCKET=foobar -e SREE_PORT=5001 -e DATA_TO_SYNC=/etc/modprobe.d -e DATA_TO_SYNC_BUCKET=github -e OSD_COUNT=2 ceph/daemon:demo-master-centos-stream8-x86_64 demo
 
       - name: run the demo validation
         run: |
           sleep 10
           sudo ./travis-builds/validate_demo_cluster.sh
-          docker exec ceph-demo ps fauwwwx
-          docker exec ceph-demo ss -ntlp
+          docker top ceph-demo
+          ss -ntlp
           docker exec ceph-demo cat /etc/ceph/ceph.conf
 
       - name: debug on failure
@@ -39,4 +39,4 @@ jobs:
         run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
       - name: build the ceph container arm64 image
-        run: make RELEASE="demo" BASEOS_REPO=arm64v8/centos DAEMON_BASE_TAG="daemon-base:demo-centos-8-aarch64" DAEMON_TAG="daemon:demo-centos-8-aarch64" FLAVORS="master,centos-arm64,8" build
+        run: make BASEOS_REGISTRY=quay.io BASEOS_TAG=stream8 RELEASE="demo" BASEOS_REPO=centos/arm64v8 DAEMON_BASE_TAG="daemon-base:demo-centos-8-aarch64" DAEMON_TAG="daemon:demo-centos-stream8-aarch64" FLAVORS="master,centos-arm64,8" build

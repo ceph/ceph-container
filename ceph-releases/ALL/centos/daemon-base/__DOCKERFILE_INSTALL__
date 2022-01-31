@@ -1,4 +1,4 @@
-yum install -y epel-release https://apache.jfrog.io/artifactory/arrow/centos/__ENV_[BASEOS_TAG]__/apache-arrow-release-latest.rpm && \
+yum install -y epel-release https://apache.jfrog.io/artifactory/arrow/centos/__ENV_[DISTRO_VERSION]__/apache-arrow-release-latest.rpm && \
 yum install -y jq && \
 bash -c ' \
   if [ -n "__GANESHA_PACKAGES__" ]; then \
@@ -37,13 +37,13 @@ bash -c ' \
     fi ; \
   fi ; \
   if [ -n "__ISCSI_PACKAGES__" ]; then \
-    curl -s -L https://shaman.ceph.com/api/repos/tcmu-runner/master/latest/centos/__ENV_[BASEOS_TAG]__/repo?arch=$(arch) -o /etc/yum.repos.d/tcmu-runner.repo ; \
+    curl -s -L https://shaman.ceph.com/api/repos/tcmu-runner/master/latest/centos/__ENV_[DISTRO_VERSION]__/repo?arch=$(arch) -o /etc/yum.repos.d/tcmu-runner.repo ; \
     if [[ "${CEPH_VERSION}" =~ master ]]; then \
-      curl -s -L https://shaman.ceph.com/api/repos/ceph-iscsi/master/latest/centos/__ENV_[BASEOS_TAG]__/repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
+      curl -s -L https://shaman.ceph.com/api/repos/ceph-iscsi/master/latest/centos/__ENV_[DISTRO_VERSION]__/repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     elif [[ "${CEPH_VERSION}" =~ nautilus|octopus|pacific ]]; then \
-      curl -s -L https://download.ceph.com/ceph-iscsi/3/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
+      curl -s -L https://download.ceph.com/ceph-iscsi/3/rpm/el__ENV_[DISTRO_VERSION]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     else \
-      curl -s -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[BASEOS_TAG]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
+      curl -s -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[DISTRO_VERSION]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     fi ; \
   fi' && \
 yum update -y --setopt=install_weak_deps=False && \
@@ -63,17 +63,17 @@ bash -c ' \
     if [[ "${ARCH}" == "aarch64" ]]; then \
       ARCH="arm64"; \
     fi ; \
-    REPO_URL=$(curl -s "https://shaman.ceph.com/api/search/?project=ceph&distros=centos/__ENV_[BASEOS_TAG]__/${ARCH}&flavor=${OSD_FLAVOR}&ref=${CEPH_REF}&sha1=latest" | jq -r .[0].url); \
+    REPO_URL=$(curl -s "https://shaman.ceph.com/api/search/?project=ceph&distros=centos/__ENV_[DISTRO_VERSION]__/${ARCH}&flavor=${OSD_FLAVOR}&ref=${CEPH_REF}&sha1=latest" | jq -r .[0].url); \
     RELEASE_VER=0 ;\
     if [[ "${OSD_FLAVOR}" == "crimson" ]]; then \
      CRIMSON_PACKAGES="ceph-crimson-osd__ENV_[CEPH_POINT_RELEASE]__";\
     fi ;\
   else \
     RELEASE_VER=1 ;\
-    REPO_URL="http://download.ceph.com/rpm-${CEPH_VERSION}/el__ENV_[BASEOS_TAG]__/"; \
+    REPO_URL="http://download.ceph.com/rpm-${CEPH_VERSION}/el__ENV_[DISTRO_VERSION]__/"; \
   fi && \
-  rpm -Uvh "$REPO_URL/noarch/ceph-release-1-${RELEASE_VER}.el__ENV_[BASEOS_TAG]__.noarch.rpm" && \
-  if [[ __ENV_[BASEOS_TAG]__ -eq 8 ]]; then \
+  rpm -Uvh "$REPO_URL/noarch/ceph-release-1-${RELEASE_VER}.el__ENV_[DISTRO_VERSION]__.noarch.rpm" && \
+  if [[ __ENV_[DISTRO_VERSION]__ -eq 8 ]]; then \
     yum install -y dnf-plugins-core ; \
     yum copr enable -y tchaikov/python-scikit-learn ; \
     yum copr enable -y tchaikov/python3-asyncssh ; \
