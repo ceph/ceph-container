@@ -256,7 +256,7 @@ function build_ceph_imgs {
          IMAGES_TO_BUILD=daemon-base \
          build.parallel
   else
-    make CEPH_DEVEL=${DEVEL} RELEASE="${RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build.parallel
+    make BASEOS_TAG=stream8 CEPH_DEVEL=${DEVEL} RELEASE="${RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build.parallel
   fi
   docker images
 }
@@ -274,14 +274,14 @@ function build_and_push_latest_bis {
   for ceph_release in "${CEPH_RELEASES[@]}"; do
     CENTOS_RELEASE=$(_centos_release "${ceph_release}")
     tag_bis="latest-bis-${ceph_release}"
-    make DAEMON_BASE_TAG="daemon-base:${tag_bis}" DAEMON_TAG="daemon:${tag_bis}" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build
-    make DAEMON_BASE_TAG="daemon-base:${tag_bis}" DAEMON_TAG="daemon:${tag_bis}" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" push
+    make BASEOS_TAG=stream8 DAEMON_BASE_TAG="daemon-base:${tag_bis}" DAEMON_TAG="daemon:${tag_bis}" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build
+    make BASEOS_TAG=stream8 DAEMON_BASE_TAG="daemon-base:${tag_bis}" DAEMON_TAG="daemon:${tag_bis}" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" push
   done
 
   # Now let's build the latest
   CENTOS_RELEASE=$(_centos_release "${CEPH_RELEASES[-1]}")
-  make DAEMON_BASE_TAG="daemon-base:latest-bis" DAEMON_TAG="daemon:latest-bis" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build
-  make DAEMON_BASE_TAG="daemon-base:latest-bis" DAEMON_TAG="daemon:latest-bis" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" push
+  make BASEOS_TAG=stream8 DAEMON_BASE_TAG="daemon-base:latest-bis" DAEMON_TAG="daemon:latest-bis" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build
+  make BASEOS_TAG=stream8 DAEMON_BASE_TAG="daemon-base:latest-bis" DAEMON_TAG="daemon:latest-bis" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" push
 }
 
 declare -F push_ceph_imgs_latest ||
