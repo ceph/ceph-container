@@ -264,7 +264,7 @@ function build_ceph_imgs {
 declare -F push_ceph_imgs ||
 function push_ceph_imgs {
   echo "Push Ceph container image(s) to the registry"
-  make RELEASE="$RELEASE" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" push.parallel
+  make BASEOS_TAG=stream8 RELEASE="$RELEASE" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" push.parallel
 }
 
 declare -F build_and_push_latest_bis ||
