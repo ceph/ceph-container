@@ -234,7 +234,7 @@ function build_ceph_imgs {
          IMAGES_TO_BUILD=daemon-base \
          build.parallel
   else
-    make CEPH_DEVEL=${DEVEL} RELEASE="${RELEASE}" build.parallel
+    make BASEOS_TAG=stream8 CEPH_DEVEL=${DEVEL} RELEASE="${RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build.parallel
   fi
   docker images
 }
@@ -251,15 +251,15 @@ function build_and_push_latest_bis {
   # rebuild latest again to get a different image ID
   for ceph_release in "${CEPH_RELEASES[@]}"; do
     CENTOS_RELEASE=$(_centos_release "${ceph_release}")
-    make RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,"${CENTOS_RELEASE}" build
-    docker tag ceph/daemon:"$CONTAINER_BRANCH"-bis-"${ceph_release}"-centos-"${CENTOS_RELEASE}"-"${HOST_ARCH}" ceph/daemon:latest-bis-"$ceph_release"
+    make BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" BASEOS_TAG=stream"${CENTOS_RELEASE}" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,"${CENTOS_RELEASE}" build
+    docker tag ceph/daemon:"$CONTAINER_BRANCH"-bis-"${ceph_release}"-centos-stream"${CENTOS_RELEASE}"-"${HOST_ARCH}" ceph/daemon:latest-bis-"$ceph_release"
     docker push ceph/daemon:latest-bis-"$ceph_release"
   done
 
   # Now let's build the latest
   CENTOS_RELEASE=$(_centos_release "${CEPH_RELEASES[-1]}")
-  make RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,"${CENTOS_RELEASE}" build
-  docker tag ceph/daemon:"$CONTAINER_BRANCH"-bis-"${CEPH_RELEASES[-1]}"-centos-"${CENTOS_RELEASE}"-"${HOST_ARCH}" ceph/daemon:latest-bis
+  make BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" BASEOS_TAG=stream"${CENTOS_RELEASE}" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,"${CENTOS_RELEASE}" build
+  docker tag ceph/daemon:"$CONTAINER_BRANCH"-bis-"${CEPH_RELEASES[-1]}"-centos-stream"${CENTOS_RELEASE}"-"${HOST_ARCH}" ceph/daemon:latest-bis
   docker push ceph/daemon:latest-bis
 }
 

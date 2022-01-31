@@ -159,7 +159,7 @@ function get_base_image_full_tag () {
   local distro_release ; distro_release="$(extract_distro_release "${flavor}")"
   case $distro in
     centos)
-      echo "${default_library}/centos:${distro_release}"
+      echo "${default_library}/centos:stream${distro_release}"
       return ;;
     *)
       error "get_base_image_full_tag - unknown distro '${distro}'"
