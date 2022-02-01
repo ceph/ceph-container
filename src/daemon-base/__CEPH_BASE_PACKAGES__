@@ -14,6 +14,7 @@
         smartmontools \
         nvme-cli \
         libstoragemgmt \
+        systemd-udev \
         __RADOSGW_PACKAGES__ \
         __GANESHA_PACKAGES__ \
         __ISCSI_PACKAGES__ \
