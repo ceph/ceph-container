@@ -228,7 +228,7 @@ function build_ceph_imgs {
     fi
 
     make FLAVORS="${CONTAINER_FLAVOR}" \
-         BASEOS_TAG=stream"${CENTOS_RELEASE}"
+         BASEOS_TAG=stream"${CENTOS_RELEASE}" \
          CEPH_DEVEL="true" \
          OSD_FLAVOR=${OSD_FLAVOR} \
          RELEASE="${RELEASE}" \
