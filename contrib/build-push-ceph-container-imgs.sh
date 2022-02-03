@@ -358,7 +358,7 @@ function wait_for_arm_images {
   echo "Waiting for ARM64 images to be ready"
   set -e
   CENTOS_RELEASE=$(_centos_release "${CEPH_RELEASES[-1]}")
-  until docker pull "${CONTAINER_REPO_ORGANIZATION}"/daemon:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-"${CENTOS_RELEASE}"-aarch64; do
+  until docker pull "${CONTAINER_REPO_ORGANIZATION}"/daemon:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-stream"${CENTOS_RELEASE}"-aarch64; do
     echo -n .
     sleep 30
   done
