@@ -48,6 +48,9 @@ function get_ceph_version {
     *pacific*)
       echo pacific
       ;;
+    *quincy*)
+      echo quincy
+      ;;
     *)
       echo master
       ;;

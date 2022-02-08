@@ -13,8 +13,8 @@ trap 'exit $?' ERR
 # These build scripts don't need to have the aarch64 part of the distro specified
 # I.e., specifying 'luminous,centos-arm64,7' is not necessary for aarch64 builds; these scripts
 #       will do the right build. See configurable CENTOS_AARCH64_FLAVOR_DISTRO below
-X86_64_FLAVORS_TO_BUILD="octopus,centos,8 pacific,centos,8"
-AARCH64_FLAVORS_TO_BUILD="octopus,centos,8 pacific,centos,8"
+X86_64_FLAVORS_TO_BUILD="octopus,centos,8 pacific,centos,8 quincy,centos,8"
+AARCH64_FLAVORS_TO_BUILD="octopus,centos,8 pacific,centos,8 quincy,centos,8"
 
 # Allow running this script with the env var ARCH='aarch64' to build arm images
 # ARCH='x86_64'
@@ -237,7 +237,7 @@ function get_ceph_versions_on_server () {
   # <a href="ceph-12.2.7-0.el7.x86_64.rpm">ceph-12.2.7-0.el7.x86_64.rpm</a>  17-Jul-2018 14:11  3024
   # The ceph base package can be id'ed uniquely by the text ">ceph-" followed by a version string
   # Only match stable releases which are identified by the minor number '2'
-  local pkg_regex=">ceph-[0-9]+.[2].[0-9]+-[0-9]+"
+  local pkg_regex=">ceph-[0-9]+.[12].[0-9]+-[0-9]+"
   # pkg_list is returned in the form ">ceph-12.2.0 >ceph-12.2.1 >ceph-12.2.2 ..."
   local pkg_list
   # Make sure the versions are sorted. This should always be the case, but it's better to be safe.
