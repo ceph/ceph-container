@@ -15,6 +15,8 @@
         nvme-cli \
         libstoragemgmt \
         systemd-udev \
+        procps-ng \
+        hostname \
         __RADOSGW_PACKAGES__ \
         __GANESHA_PACKAGES__ \
         __ISCSI_PACKAGES__ \
