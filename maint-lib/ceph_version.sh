@@ -20,10 +20,10 @@ function parse_ceph_version_spec {
     if [[ ! "${version_spec}" =~ ${separator} ]]; then
       continue;
     fi
-    ceph_ref="${CEPH_VERSION_SPEC%%${separator}*}"
+    ceph_ref="${CEPH_VERSION_SPEC%%"${separator}"*}"
     # only set point_release if spec looks like "<ceph_version>=<point_release>"
     if [[ "$ceph_ref" == "${ceph_version}" ]]; then
-      ceph_point_release="${separator}${CEPH_VERSION_SPEC#*${separator}}"
+      ceph_point_release="${separator}${CEPH_VERSION_SPEC#*"${separator}"}"
     else
       ceph_ref=${version_spec}
     fi
