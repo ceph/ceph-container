@@ -9,6 +9,7 @@
         __CEPH_MGR_PACKAGES__\
         __CEPH_GRAFANA_PACKAGES__ \
         kmod \
+        less \
         lvm2 \
         gdisk \
         smartmontools \
