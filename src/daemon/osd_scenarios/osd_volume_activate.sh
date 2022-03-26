@@ -46,14 +46,13 @@ function osd_volume_simple {
   fi
 }
 
-function get_dmcrypt_uuids {
-  dmsetup ls --target=crypt | cut -d$'\t' -f 1
+function get_osd_fsid {
+  echo "$CEPH_VOLUME_LIST_JSON" | $PYTHON -c "import sys, json; print(json.load(sys.stdin)['$OSD_ID'][0]['tags']['ceph.osd_fsid'])"
 }
 
 function osd_volume_lvm {
   # Find the OSD FSID from the OSD ID
-  OSD_FSID="$(echo "$CEPH_VOLUME_LIST_JSON" | $PYTHON -c "import sys, json; print(json.load(sys.stdin)['$OSD_ID'][0]['tags']['ceph.osd_fsid'])")"
-
+  OSD_FSID="$(get_osd_fsid)"
   # Find the OSD type
   OSD_TYPE="$(echo "$CEPH_VOLUME_LIST_JSON" | $PYTHON -c "import sys, json; print(json.load(sys.stdin)['$OSD_ID'][0]['type'])")"
 
@@ -102,24 +101,14 @@ function osd_volume_activate {
   # - we want to 'protect' the following `exec` in particular.
   # - having the cleaning code just next to the concerned function in the same file is nice.
   function sigterm_cleanup_post {
-    local ceph_mnt
-    ceph_mnt="/var/lib/ceph/osd/${CLUSTER}-${OSD_ID}"
-    log "osd_volume_activate: Unmounting $ceph_mnt"
-    umount "$ceph_mnt" || (log "osd_volume_activate: Failed to umount $ceph_mnt"; lsof "$ceph_mnt")
+    # Find the OSD FSID from the OSD ID
+    OSD_FSID="$(get_osd_fsid)"
 
-    UUIDS=$(get_dmcrypt_uuids)
-
-    for uuid in ${UUIDS}; do
-      if [[ "$OSD_VOLUME_TYPE" == "simple" ]]; then
-        DATA="${OSD_JSON}"
-      else
-        DATA=$(echo "$CEPH_VOLUME_LIST_JSON" | $PYTHON -c "import sys, json; print(json.load(sys.stdin)['$OSD_ID'])")
-      fi
-      if echo "${DATA}" | grep -qo "${uuid}"; then
-        log "osd_volume_activate: Closing dmcrypt $uuid"
-        cryptsetup close "${uuid}" || log "osd_volume_activate: Failed to close dmcrypt ${uuid}"
-      fi
-    done
+    # deactivate the osd - this unmounts everything necessary and also closes any dmcrypt
+    if ! ceph-volume lvm deactivate "${OSD_ID}" "${OSD_FSID}"; then
+      cat /var/log/ceph
+      exit 1
+    fi
   }
   # /usr/lib/systemd/system/ceph-osd@.service
   # LimitNOFILE=1048576
