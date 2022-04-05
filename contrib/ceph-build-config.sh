@@ -400,18 +400,31 @@ function full_tag_exists () {
   local tag="${full_tag##*:}"
   local tag_minus_library="${full_tag##*/}"
   local repository="${tag_minus_library%:*}"
-  local tag_query_url="${PUSH_REGISTRY_URL}/repository/${PUSH_LIBRARY}/${repository}/tag/${tag}/images"
-  if curl --silent --fail --list-only --show-error --location "${tag_query_url}" &> /dev/null ; then
-    local retval=$?
-  else
-    local retval=$?
-    info "full_tag_exists - GET from ${tag_query_url} did not succeed - retval: ${retval}"
-  fi
+  local tag_query_url="${PUSH_REGISTRY_URL}/repository/${PUSH_LIBRARY}/${repository}/tag/?specificTag=${tag}"
+  local retval
+  local response
+
   if [ -n "${TEST_RUN:-}" ]; then
     test_info "full_tag_exists - returning that tag ${full_tag} does not exist"
     return 1  # always return that the tag doesn't exist for test runs
   fi
-  return "${retval}"
+
+  response=$(curl --silent --fail --list-only --show-error --location "${tag_query_url}")
+  retval=$?
+
+  if [ ${retval} -eq 0 ]; then
+    if [ "$(jq '.tags | length' <<< "${response}")" -gt 0 ]; then
+      # at least one tag exist
+      return 0
+    else
+      # the tag does not exist
+      return 1
+    fi
+  else
+    # curl command is failing so exiting the script
+    info "full_tag_exists - GET from ${tag_query_url} did not succeed - retval: ${retval}"
+    exit ${retval}
+  fi
 }
 
 
