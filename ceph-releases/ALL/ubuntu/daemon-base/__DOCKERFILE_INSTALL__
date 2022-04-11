@@ -1,0 +1,11 @@
+# add the necessary repos
+    echo "" > /etc/apt/sources.list && \
+    echo "deb http://archive.ubuntu.com/ubuntu/ __OS_CODENAME__-backports main" \
+      >> /etc/apt/sources.list.d/erp.list && \
+    echo "deb http://archive.ubuntu.com/ubuntu/ __OS_CODENAME__ main universe multiverse" \
+      >> /etc/apt/sources.list.d/__OS_CODENAME__.list && \
+    echo "deb http://archive.ubuntu.com/ubuntu/ __OS_CODENAME__-updates main universe multiverse" \
+      >> /etc/apt/sources.list.d/__OS_CODENAME__.list && \
+    DEBIAN_FRONTEND=noninteractive apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -yy --force-yes --no-install-recommends \
+       __CEPH_BASE_PACKAGES__ 

@@ -1,0 +1,7 @@
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+DEBIAN_FRONTEND=noninteractive apt-get install -yy --force-yes --no-install-recommends \
+gnupg curl apt-transport-https ca-certificates
+
+# No ceph-grafana-dashboard package on focal so we install dashboards manually
+RUN mkdir -p /etc/grafana/dashboards/ceph-dashboard/
+ADD ceph-dashboard /etc/grafana/dashboards/ceph-dashboard/
