@@ -72,6 +72,9 @@ bash -c ' \
     if [[ "${OSD_FLAVOR}" == "crimson" ]]; then \
      CRIMSON_PACKAGES="ceph-crimson-osd__ENV_[CEPH_POINT_RELEASE]__";\
     fi ;\
+    if [[ "${CEPH_REF}" == "octopus" ]]; then \
+     RELEASE_VER=1 ;\
+    fi ;\
   else \
     RELEASE_VER=1 ;\
     REPO_URL="http://download.ceph.com/rpm-${CEPH_VERSION}/el__ENV_[DISTRO_VERSION]__/"; \
