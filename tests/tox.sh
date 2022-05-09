@@ -28,19 +28,6 @@ if command -v apt-get &>/dev/null; then
   sudo ln -sf "$(command -v python3.6)" /usr/bin/python3
 else
   sudo yum install -y docker xfsprogs
-  if ! command -v python3.6 &>/dev/null; then
-    sudo yum -y groupinstall development
-    sudo yum -y install https://repo.ius.io/ius-release-el7.rpm
-    sudo yum -y install python36u
-  fi
-  sudo ln -sf "$(command -v python3.6)" /usr/bin/python3
-
-  if ! systemctl status docker >/dev/null; then
-    # daemon doesn't start automatically after being installed
-    sudo systemctl restart docker
-  fi
-  # Allow running `docker` without sudo
-  sudo chgrp "$(whoami)" /var/run/docker.sock
 fi
 
 if [ -n "${REGISTRY_USERNAME}" ] && [ -n "${REGISTRY_PASSWORD}" ]; then
@@ -96,7 +83,7 @@ docker tag "${daemon_image}" localhost:5000/ceph/daemon:latest-pacific
 # this avoids a race condition between the tagging and the push
 # which causes this to sometimes fail when run by jenkins
 sleep 5
-docker --debug push localhost:5000/ceph/daemon:latest-pacific
+docker push --tls-verify=false localhost:5000/ceph/daemon:latest-pacific
 
 
 cd "$CEPH_ANSIBLE_SCENARIO_PATH"
