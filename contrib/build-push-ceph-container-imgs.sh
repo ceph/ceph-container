@@ -41,7 +41,7 @@ CONTAINER_REPO_ORGANIZATION=${CONTAINER_REPO_ORGANIZATION:-$REGISTRY/$REGISTRY_O
 CONTAINER_REPO_USERNAME=${CONTAINER_REPO_USERNAME:-$REGISTRY_USERNAME}
 CONTAINER_REPO_PASSWORD=${CONTAINER_REPO_PASSWORD:-$REGISTRY_PASSWORD}
 
-# GIT_BRANCH is typically 'origin/master', we strip the variable to only get 'master'
+# GIT_BRANCH is typically 'origin/main', we strip the variable to only get 'main'
 CONTAINER_BRANCH="${GIT_BRANCH#*/}"
 CONTAINER_SHA=$(git rev-parse --short HEAD)
 TAGGED_HEAD=false # does HEAD is on a tag ?
@@ -50,8 +50,8 @@ DEVEL=${DEVEL:=false}
 OSD_FLAVOR=${OSD_FLAVOR:=default}
 
 if [ -z "$CEPH_RELEASES" ]; then
-  # NEVER change 'master' position in the array, this will break the 'latest' tag
-  CEPH_RELEASES=(master octopus pacific quincy)
+  # NEVER change 'main' position in the array, this will break the 'latest' tag
+  CEPH_RELEASES=(main octopus pacific quincy)
 fi
 
 HOST_ARCH=$(uname -m)

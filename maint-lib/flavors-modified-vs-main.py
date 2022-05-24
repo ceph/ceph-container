@@ -35,8 +35,8 @@ def _filediff_intersects_sources(filediff, sources):
     return False
 
 
-# By default, compare to origin/master, but allow VS_BRANCH env var to be set to change this
-VS_BRANCH = 'origin/master'
+# By default, compare to origin/main, but allow VS_BRANCH env var to be set to change this
+VS_BRANCH = 'origin/main'
 if 'VS_BRANCH' in os.environ and not os.environ['VS_BRANCH'] == '':
     VS_BRANCH = os.environ['VS_BRANCH']
 VS_BRANCH_SPLIT = VS_BRANCH.split('/')

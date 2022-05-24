@@ -6,7 +6,7 @@ set -e
 # VARIABLES #
 #############
 
-STAGING_DIR=staging/master-ubi8-latest-x86_64/
+STAGING_DIR=staging/main-ubi8-latest-x86_64/
 DAEMON_BASE_DIR=$STAGING_DIR/daemon-base/
 DOCKERFILE_DAEMON_BASE=$DAEMON_BASE_DIR/Dockerfile
 COMPOSED_DIR=$STAGING_DIR/composed
@@ -48,7 +48,7 @@ clean_staging() {
 }
 
 make_staging() {
-  make BASEOS_REGISTRY=registry.redhat.io BASEOS_REPO=ubi8/ubi FLAVORS=master,ubi8,latest IMAGES_TO_BUILD=daemon-base || fatal "Cannot build rhel8"
+  make BASEOS_REGISTRY=registry.redhat.io BASEOS_REPO=ubi8/ubi FLAVORS=main,ubi8,latest IMAGES_TO_BUILD=daemon-base || fatal "Cannot build rhel8"
 }
 
 success() {

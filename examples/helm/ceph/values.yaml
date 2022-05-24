@@ -6,7 +6,7 @@ images:
 image_policy:
   pull: Always
 
-# As per: https://github.com/ceph/ceph-container/blob/master/src/daemon/debug.sh
+# As per: https://github.com/ceph/ceph-container/blob/main/src/daemon/debug.sh
 # Available options are: verbose,fstree and stayalive.
 # They can be used altogether like this: DEBUG=verbose,fstree=http://myfstree,stayalive
 debug_level: verbose
