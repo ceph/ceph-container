@@ -37,7 +37,7 @@ echo "Going to create new helm package version: 0.${PatchV}.${hfV}"
 echo "pack&deploy hfV=$hfV" 
 helm package --version 0.${PatchV}.${hfV} ceph
 helm repo update
-helm install --namespace ceph marina/ceph --version 0.${PatchV}.${hfV} --set network.cluster='10.244.0.0/16',network.public='10.244.0.0/16',images.daemon=docker.io/ceph/daemon:build-master-mimic-centos-7
+helm install --namespace ceph marina/ceph --version 0.${PatchV}.${hfV} --set network.cluster='10.244.0.0/16',network.public='10.244.0.0/16',images.daemon=docker.io/ceph/daemon:build-main-mimic-centos-7
 set +e
 ```
 Note: when flanned is used, the network should be set to: '10.244.0.0/16'. If it's calico or something else, put values accordingly.

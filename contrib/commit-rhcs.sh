@@ -39,7 +39,7 @@ trap cleanup EXIT QUIT INT TERM
 step "Updating local repository"
 git fetch || fatal 'Cannot fetch the remote repository'
 git reset --hard "origin/$CURRENT_GIT_BRANCH" || fatal "Cannot reset the local directory !"
-UPSTREAM_BRANCH_VERSION="master"
+UPSTREAM_BRANCH_VERSION="main"
 
 step "Cloning ceph-container ${UPSTREAM_BRANCH_VERSION}"
 git clone https://github.com/ceph/ceph-container.git -b "${UPSTREAM_BRANCH_VERSION}" "$CEPH_CONTAINER_DIR"
@@ -49,7 +49,7 @@ pushd "$CEPH_CONTAINER_DIR"
   contrib/compose-rhcs.sh
 popd > /dev/null
 
-COMPOSED_DIR=$CEPH_CONTAINER_DIR/staging/master-ubi8-latest-x86_64/composed
+COMPOSED_DIR=$CEPH_CONTAINER_DIR/staging/main-ubi8-latest-x86_64/composed
 
 if [ ! -d "$COMPOSED_DIR" ]; then
   fatal "There is no composed directory. Looks like the build failed !"

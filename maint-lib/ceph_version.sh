@@ -52,7 +52,7 @@ function get_ceph_version {
       echo quincy
       ;;
     *)
-      echo master
+      echo main
       ;;
   esac
 }
