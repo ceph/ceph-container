@@ -78,10 +78,10 @@ ceph/daemon:tag-stable-3.0-luminous-centos-7
 
 Development images
 ------------------
-It is possible to build a container running the latest development release (master). It also includes the latest development packages from the nfs-ganesha project.
+It is possible to build a container running the latest development release (main). It also includes the latest development packages from the nfs-ganesha project.
 
 This is only available on CentOS with the following command :
-`make FLAVORS="master,centos,7" build`
+`make FLAVORS="main,centos,7" build`
 
 Alternatively, you can build a container image based on `wip-*` branch:
 
@@ -90,7 +90,7 @@ Alternatively, you can build a container image based on `wip-*` branch:
 To build your branch on Centos 7 on the `wip-nautilus-superb` branch. But please make sure the
 branch name contains the release name from which the branch is created.
 
-It's also possible to use the Ceph development builds instead of the stable one (except for master).
+It's also possible to use the Ceph development builds instead of the stable one (except for main).
 The ceph packages will be pulled from shaman/chacra repositories.
 The Ceph development images are using the `latest-<release>-devel` tag where release is the ceph
 release name (ie: luminous, mimic, nautilus)
