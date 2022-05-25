@@ -50,7 +50,7 @@ fi
 
 cd "$WORKSPACE"
 # we test the latest stable release of Ceph in priority
-FLAVOR="master,centos,8"
+FLAVOR="main,centos,8"
 
 # build everything that was touched to make sure build succeeds
 mapfile -t FLAVOR_ARRAY < <(make flavors.modified)
@@ -79,11 +79,11 @@ make FLAVORS="$FLAVOR" BASEOS_TAG="stream8" BASEOS_REGISTRY="${REGISTRY}/centos"
 # start a local docker registry
 docker run -d -p 5000:5000 --restart=always --name registry registry:2
 # add the image we just built to the registry
-docker tag "${daemon_image}" localhost:5000/ceph/daemon:latest-master
+docker tag "${daemon_image}" localhost:5000/ceph/daemon:latest-main
 # this avoids a race condition between the tagging and the push
 # which causes this to sometimes fail when run by jenkins
 sleep 5
-docker push --tls-verify=false localhost:5000/ceph/daemon:latest-master
+docker push --tls-verify=false localhost:5000/ceph/daemon:latest-main
 
 cd "$CEPH_ANSIBLE_SCENARIO_PATH"
 bash "$TOXINIDIR"/ceph-ansible/tests/scripts/vagrant_up.sh --no-provision --provider="$VAGRANT_PROVIDER"
@@ -99,7 +99,7 @@ if [[ $CEPH_ANSIBLE_SCENARIO_PATH =~ "all_daemons" ]]; then
 fi
 ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/tests/functional/lvm_setup.yml "${ANSIBLE_PLAYBOOK_ARGS[@]}"
 ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/tests/functional/setup.yml
-ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/site-container.yml.sample --extra-vars="ceph_docker_image_tag=latest-master ceph_docker_registry=$REGISTRY_ADDRESS ceph_docker_image=ceph/daemon"
+ansible-playbook -vv -i "$CEPH_ANSIBLE_SCENARIO_PATH"/hosts "$TOXINIDIR"/ceph-ansible/site-container.yml.sample --extra-vars="ceph_docker_image_tag=latest-main ceph_docker_registry=$REGISTRY_ADDRESS ceph_docker_image=ceph/daemon"
 
 py.test --reruns 20 --reruns-delay 3 -n 8 --sudo -v --connection=ansible --ansible-inventory="$CEPH_ANSIBLE_SCENARIO_PATH"/hosts --ssh-config="$CEPH_ANSIBLE_SCENARIO_PATH"/vagrant_ssh_config "$TOXINIDIR"/ceph-ansible/tests/functional/tests
 
