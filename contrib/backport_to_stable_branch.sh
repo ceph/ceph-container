@@ -51,6 +51,7 @@ cherry_pick () {
   done
   # Trim the first white space and use an array
   # Reference: https://github.com/koalaman/shellcheck/wiki/SC2086#exceptions
+  # shellcheck disable=SC2206
   x=(${x##*( )})
   git cherry-pick -x -s "${x[@]}"
 }
