@@ -15,6 +15,7 @@
         nvme-cli \
         libstoragemgmt \
         systemd-udev \
+        sg3_utils \
         procps-ng \
         hostname \
         __RADOSGW_PACKAGES__ \
