@@ -6,7 +6,8 @@ set -e
 # VARIABLES #
 #############
 
-STAGING_DIR=staging/pacific-ubi8-latest-x86_64/
+RHEL_VER=${1:-8}
+STAGING_DIR=staging/pacific-ubi${RHEL_VER}-latest-x86_64/
 DAEMON_DIR=$STAGING_DIR/daemon
 DAEMON_BASE_DIR=${DAEMON_DIR}-base/
 DOCKERFILE_DAEMON=$DAEMON_DIR/Dockerfile
@@ -57,7 +58,7 @@ clean_staging() {
 }
 
 make_staging() {
-  make BASEOS_REGISTRY=registry.redhat.io BASEOS_REPO=ubi8/ubi FLAVORS=pacific,ubi8,latest || fatal "Cannot build rhel8"
+  make BASEOS_REGISTRY=registry.redhat.io BASEOS_REPO=ubi${RHEL_VER}/ubi-minimal FLAVORS=pacific,ubi${RHEL_VER},latest || fatal "Cannot build rhel${RHEL_VER}"
 }
 
 success() {
