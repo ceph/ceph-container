@@ -51,7 +51,7 @@ fi
 
 cd "$WORKSPACE"
 # we test the latest stable release of Ceph in priority
-FLAVOR="main,centos,8"
+FLAVOR="main,centos,9"
 
 # build everything that was touched to make sure build succeeds
 mapfile -t FLAVOR_ARRAY < <(make flavors.modified)
@@ -71,11 +71,11 @@ if [[ "$NIGHTLY" != 'TRUE' ]]; then
 fi
 
 echo "Building flavor $FLAVOR"
-make_output=$(make FLAVORS="$FLAVOR" BASEOS_TAG="stream8" BASEOS_REGISTRY="${REGISTRY}/centos" BASEOS_REPO="centos" stage) # Run staging to get DAEMON_IMAGE name
+make_output=$(make FLAVORS="$FLAVOR" BASEOS_TAG="stream9" BASEOS_REGISTRY="${REGISTRY}/centos" BASEOS_REPO="centos" stage) # Run staging to get DAEMON_IMAGE name
 daemon_image=$(echo "${make_output}" | grep " DAEMON_IMAGE ") # Find DAEMON_IMAGE line
 daemon_image="${daemon_image#*DAEMON_IMAGE*: }" # Remove DAEMON_IMAGE from beginning
 daemon_image="$(echo "${daemon_image}" | tr -s ' ')" # Remove whitespace
-make FLAVORS="$FLAVOR" BASEOS_TAG="stream8" BASEOS_REGISTRY="${REGISTRY}/centos" BASEOS_REPO="centos" build.parallel
+make FLAVORS="$FLAVOR" BASEOS_TAG="stream9" BASEOS_REGISTRY="${REGISTRY}/centos" BASEOS_REPO="centos" build.parallel
 
 # start a local docker registry
 docker run -d -p 5000:5000 --restart=always --name registry registry:2
