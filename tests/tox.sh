@@ -31,7 +31,7 @@ else
 fi
 
 if [ -n "${REGISTRY_USERNAME}" ] && [ -n "${REGISTRY_PASSWORD}" ]; then
-  docker login -u "${REGISTRY_USERNAME}" -p "${REGISTRY_PASSWORD}" "${REGISTRY}"
+  sudo docker login -u "${REGISTRY_USERNAME}" -p "${REGISTRY_PASSWORD}" "${REGISTRY}"
 fi
 
 rm -rf "$WORKSPACE"/ceph-ansible || true
@@ -42,10 +42,10 @@ pip install -r "$TOXINIDIR"/ceph-ansible/tests/requirements.txt
 bash "$WORKSPACE"/travis-builds/purge_cluster.sh
 # XXX purge_cluster only stops containers, it doesn't really remove them so try to
 # remove them for real
-containers_to_remove=$(docker ps -a -q)
+containers_to_remove=$(sudo docker ps -a -q)
 
 if [ "${containers_to_remove}" ]; then
-  docker rm -f "$@" "${containers_to_remove}" || echo failed to remove containers
+  sudo docker rm -f "$@" "${containers_to_remove}" || echo failed to remove containers
 fi
 
 cd "$WORKSPACE"
@@ -53,14 +53,14 @@ cd "$WORKSPACE"
 FLAVOR="main,centos,8"
 
 # build everything that was touched to make sure build succeeds
-mapfile -t FLAVOR_ARRAY < <(make flavors.modified)
+mapfile -t FLAVOR_ARRAY < <(sudo make flavors.modified)
 
 if [[ "$NIGHTLY" != 'TRUE' ]]; then
   if [[ "${#FLAVOR_ARRAY[@]}" -eq "0" ]]; then
     echo "The ceph-container code has not changed."
     echo "Nothing to test here."
     echo "SUCCESS"
-    make clean.all
+    sudo make clean.all
     exit 0
   fi
 
@@ -70,20 +70,20 @@ if [[ "$NIGHTLY" != 'TRUE' ]]; then
 fi
 
 echo "Building flavor $FLAVOR"
-make_output=$(make FLAVORS="$FLAVOR" BASEOS_TAG="stream8" BASEOS_REGISTRY="${REGISTRY}/centos" BASEOS_REPO="centos" stage) # Run staging to get DAEMON_IMAGE name
+make_output=$(sudo make FLAVORS="$FLAVOR" BASEOS_TAG="stream8" BASEOS_REGISTRY="${REGISTRY}/centos" BASEOS_REPO="centos" stage) # Run staging to get DAEMON_IMAGE name
 daemon_image=$(echo "${make_output}" | grep " DAEMON_IMAGE ") # Find DAEMON_IMAGE line
 daemon_image="${daemon_image#*DAEMON_IMAGE*: }" # Remove DAEMON_IMAGE from beginning
 daemon_image="$(echo "${daemon_image}" | tr -s ' ')" # Remove whitespace
-make FLAVORS="$FLAVOR" BASEOS_TAG="stream8" BASEOS_REGISTRY="${REGISTRY}/centos" BASEOS_REPO="centos" build.parallel
+sudo make FLAVORS="$FLAVOR" BASEOS_TAG="stream8" BASEOS_REGISTRY="${REGISTRY}/centos" BASEOS_REPO="centos" build.parallel
 
 # start a local docker registry
-docker run -d -p 5000:5000 --restart=always --name registry registry:2
+sudo docker run -d -p 5000:5000 --restart=always --name registry registry:2
 # add the image we just built to the registry
-docker tag "${daemon_image}" localhost:5000/ceph/daemon:latest-main
+sudo docker tag "${daemon_image}" localhost:5000/ceph/daemon:latest-main
 # this avoids a race condition between the tagging and the push
 # which causes this to sometimes fail when run by jenkins
 sleep 5
-docker push --tls-verify=false localhost:5000/ceph/daemon:latest-main
+sudo docker push --tls-verify=false localhost:5000/ceph/daemon:latest-main
 
 cd "$CEPH_ANSIBLE_SCENARIO_PATH"
 bash "$TOXINIDIR"/ceph-ansible/tests/scripts/vagrant_up.sh --no-provision --provider="$VAGRANT_PROVIDER"
@@ -106,5 +106,5 @@ py.test --reruns 20 --reruns-delay 3 -n 8 --sudo -v --connection=ansible --ansib
 # teardown
 #################################################################################
 cd "$WORKSPACE"
-make clean.all
+sudo make clean.all
 bash "$TOXINIDIR"/tests/teardown.sh
