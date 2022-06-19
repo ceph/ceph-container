@@ -39,16 +39,16 @@ create_compose_directory() {
   if [ -d "$COMPOSED_DIR" ]; then
     rm -rf "${COMPOSED_DIR:?}"
   fi
-  mkdir -p $COMPOSED_DIR
+  mkdir -p "$COMPOSED_DIR"
 }
 
 import_content() {
-  rsync -a --exclude "__*__" --exclude "*.bak" --exclude "*.md" "$1"/* $COMPOSED_DIR/ || fatal "Cannot rsync"
+  rsync -a --exclude "__*__" --exclude "*.bak" --exclude "*.md" "$1"/* "$COMPOSED_DIR"/ || fatal "Cannot rsync"
 }
 
 # Select the end of the daemon Dockerfile to complete the daemon-base's one
 merge_content() {
-  grep -B1 -A1000 "# Add ceph-container files" $DOCKERFILE_DAEMON >> $COMPOSED_DIR/Dockerfile || fatal "Cannot find starting point in $DOCKERFILE_DAEMON"
+  grep -B1 -A1000 "# Add ceph-container files" "$DOCKERFILE_DAEMON" >> "$COMPOSED_DIR"/Dockerfile || fatal "Cannot find starting point in $DOCKERFILE_DAEMON"
 }
 
 clean_staging() {
@@ -58,7 +58,7 @@ clean_staging() {
 }
 
 make_staging() {
-  make BASEOS_REGISTRY=registry.redhat.io BASEOS_REPO=ubi${RHEL_VER}/ubi-minimal FLAVORS=pacific,ubi${RHEL_VER},latest || fatal "Cannot build rhel${RHEL_VER}"
+  make BASEOS_REGISTRY=registry.redhat.io BASEOS_REPO=ubi"${RHEL_VER}"/ubi-minimal FLAVORS=pacific,ubi"${RHEL_VER}",latest || fatal "Cannot build rhel${RHEL_VER}"
 }
 
 success() {
@@ -76,7 +76,7 @@ clean_staging
 make_staging
 check_staging_exist
 create_compose_directory
-import_content $DAEMON_DIR
-import_content $DAEMON_BASE_DIR
+import_content "$DAEMON_DIR"
+import_content "$DAEMON_BASE_DIR"
 merge_content
 success
