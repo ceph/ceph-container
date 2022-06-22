@@ -38,6 +38,7 @@ rm -rf "$WORKSPACE"/ceph-ansible || true
 git clone -b "$CEPH_ANSIBLE_BRANCH" --single-branch https://github.com/ceph/ceph-ansible.git ceph-ansible
 
 pip install -r "$TOXINIDIR"/ceph-ansible/tests/requirements.txt
+ansible-galaxy install -r "${TOXINIDIR}"/ceph-ansible/requirements.yml -v
 
 bash "$WORKSPACE"/travis-builds/purge_cluster.sh
 # XXX purge_cluster only stops containers, it doesn't really remove them so try to
