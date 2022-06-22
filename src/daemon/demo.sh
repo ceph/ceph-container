@@ -282,6 +282,7 @@ RGW {
 ENDHERE
 
   # start ganesha
+  mkdir -p /var/run/ganesha
   ganesha.nfsd "${GANESHA_OPTIONS[@]}" -L STDOUT "${GANESHA_EPOCH}"
 }
 

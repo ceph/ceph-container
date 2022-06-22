@@ -31,7 +31,7 @@ function start_nfs {
   fi
 
   # create ganesha log directory since the package does not create it
-  mkdir -p /var/log/ganesha/
+  mkdir -p /var/log/ganesha/ /var/run/ganesha
 
   log "SUCCESS"
   # start ganesha, logging both to STDOUT and to the configured location
