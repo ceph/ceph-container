@@ -86,6 +86,17 @@ docker tag "${daemon_image}" localhost:5000/ceph/daemon:latest-main
 sleep 5
 docker push --tls-verify=false localhost:5000/ceph/daemon:latest-main
 
+# allow vagrant VMs to reach this registry
+if sudo firewall-cmd --state; then
+  if ! sudo firewall-cmd --list-all-zones | grep -q "cephciregistry (active)"; then
+    echo "Creating firewalld zone to allow vagrant VMs access to localhost:5000 registry"
+    sudo firewall-cmd --new-zone=cephciregistry --permanent
+    sudo firewall-cmd --zone=cephciregistry --add-port=5000/tcp --permanent
+    sudo firewall-cmd --zone=cephciregistry --add-source=192.168.121.0/24 --permanent
+    sudo firewall-cmd --reload
+  fi
+fi
+
 cd "$CEPH_ANSIBLE_SCENARIO_PATH"
 bash "$TOXINIDIR"/ceph-ansible/tests/scripts/vagrant_up.sh --no-provision --provider="$VAGRANT_PROVIDER"
 
