@@ -9,14 +9,14 @@
 # information on maintaining this file.
 ---
 x86_64:
-  - rhel-8-for-x86_64-baseos-rpms
-  - rhel-8-for-x86_64-appstream-rpms
-  - rhceph-6-tools-for-rhel-8-x86_64-rpms
+  - rhel-9-for-x86_64-baseos-rpms
+  - rhel-9-for-x86_64-appstream-rpms
+  - rhceph-6-tools-for-rhel-9-x86_64-rpms
 ppc64le:
-  - rhel-8-for-ppc64le-baseos-rpms
-  - rhel-8-for-ppc64le-appstream-rpms
-  - rhceph-6-tools-for-rhel-8-ppc64le-rpms
+  - rhel-9-for-ppc64le-baseos-rpms
+  - rhel-9-for-ppc64le-appstream-rpms
+  - rhceph-6-tools-for-rhel-9-ppc64le-rpms
 s390x:
-  - rhel-8-for-s390x-baseos-rpms
-  - rhel-8-for-s390x-appstream-rpms
-  - rhceph-6-tools-for-rhel-8-s390x-rpms
+  - rhel-9-for-s390x-baseos-rpms
+  - rhel-9-for-s390x-appstream-rpms
+  - rhceph-6-tools-for-rhel-9-s390x-rpms
