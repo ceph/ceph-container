@@ -9,7 +9,7 @@ set -e
 STAGING_DIR=staging/main-ubi9-latest-x86_64/
 DAEMON_BASE_DIR=$STAGING_DIR/daemon-base/
 DOCKERFILE_DAEMON_BASE=$DAEMON_BASE_DIR/Dockerfile
-COMPOSED_DIR=$STAGING_DIR/composed
+COMPOSED_DIR="${STAGING_DIR}"composed
 
 
 #############
