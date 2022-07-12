@@ -22,6 +22,8 @@ export WORKSPACE=$WORKSPACE
 export CEPH_ANSIBLE_SCENARIO_PATH=$CEPH_ANSIBLE_SCENARIO_PATH
 EOF
 
+sudo -s bash -c 'find /tmp -name pause.pid -uid $SUDO_UID -delete'
+
 # Check distro and install deps
 if command -v apt-get &>/dev/null; then
   sudo apt-get install -y --force-yes docker.io xfsprogs python3.6
