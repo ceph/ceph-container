@@ -18,6 +18,7 @@
 
 # When updating these defaults, be sure to check that ALL_BUILDABLE_FLAVORS is updated
 FLAVORS ?= \
+	pacific,centos,9-stream \
 	pacific,centos,8 \
 	quincy,centos,8 \
 	reef,centos,8 \
@@ -49,6 +50,7 @@ include maint-lib/makelib.mk
 
 # All flavor options that can be passed to FLAVORS
 ALL_BUILDABLE_FLAVORS := \
+	pacific,centos,9-stream \
 	pacific,centos,8 \
 	quincy,centos,8 \
 	reef,centos,8 \

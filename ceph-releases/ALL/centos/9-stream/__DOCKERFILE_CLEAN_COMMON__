@@ -1,0 +1,20 @@
+rm -rf \
+        /etc/{selinux,systemd,udev} \
+        /lib/{lsb,udev} \
+        /tmp/* \
+        /usr/lib{,64}/{locale,udev,dracut} \
+        /usr/share/{doc,info,locale,man} \
+        /usr/share/{bash-completion,pkgconfig/bash-completion.pc} \
+        /var/log/* \
+        /var/tmp/* && \
+    find  / -xdev -name "*.pyc" -o -name "*.pyo" -exec rm -f {} \; && \
+    # ceph-dencoder is only used for debugging, compressing it saves 10MB
+    # If needed it will be decompressed
+    # TODO: Is ceph-dencoder safe to remove as rook was trying to do?
+    # rm -f /usr/bin/ceph-dencoder && \
+    if [ -f /usr/bin/ceph-dencoder ]; then gzip -9 /usr/bin/ceph-dencoder; fi && \
+    # TODO: What other ceph stuff needs removed/stripped/zipped here?
+    # Photoshop files inside a container ?
+    rm -f /usr/lib/ceph/mgr/dashboard/static/AdminLTE-*/plugins/datatables/extensions/TableTools/images/psd/* && \
+    # Some logfiles are not empty, there is no need to keep them
+    find /var/log/ -type f -exec truncate -s 0 {} \;
