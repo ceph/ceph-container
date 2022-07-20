@@ -10,23 +10,19 @@ bash -c ' \
       echo "baseurl=https://buildlogs.centos.org/centos/\$releasever/storage/\$basearch/nfsganesha-4/" >> /etc/yum.repos.d/ganesha.repo ; \
       echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
       echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
-    elif  [[ "${CEPH_VERSION}" == pacific && "${releasever}" == 9 ]]; then \
+    elif  [[ "${CEPH_VERSION}" == pacific ]]; then \
       echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
       echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
       echo "baseurl=https://buildlogs.centos.org/centos/9-stream/storage/\$basearch/nfsganesha-3/" >> /etc/yum.repos.d/ganesha.repo ; \
       echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
       echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
-    elif [[ "${CEPH_VERSION}" == pacific && "${releasever}" != 9  ]]; then \
-      echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
-      echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V3.5-stable/$CEPH_VERSION/el\$releasever/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
-      echo "[ganesha-noarch]" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "name=ganesha-noarch" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V3.5-stable/$CEPH_VERSION/el\$releasever/noarch/" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
+
+      echo "[ceph-pacific]" > /etc/yum.repos.d/ceph-pacific.repo ; \
+      echo "name=ceph-pacific" >> /etc/yum.repos.d/ceph-pacific.repo ; \
+      echo "baseurl=https://buildlogs.centos.org/centos/9-stream/storage/\$basearch/ceph-pacific/" >> /etc/yum.repos.d/ceph-pacific.repo ; \
+      echo "gpgcheck=0" >> /etc/yum.repos.d/ceph-pacific.repo ; \
+      echo "enabled=1" >> /etc/yum.repos.d/ceph-pacific.repo  ; \
+
     elif [[ "${CEPH_VERSION}" == octopus ]]; then \
       echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
       echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
@@ -53,14 +49,24 @@ bash -c ' \
     fi ; \
   fi ; \
   if [ -n "__ISCSI_PACKAGES__" ]; then \
-    curl -s -L https://shaman.ceph.com/api/repos/tcmu-runner/main/latest/centos/__ENV_[DISTRO_VERSION]__/repo?arch=$(arch) -o /etc/yum.repos.d/tcmu-runner.repo ; \
-    if [[ "${CEPH_VERSION}" =~ master || "${CEPH_VERSION}" == main ]]; then \
-      curl -s -L https://shaman.ceph.com/api/repos/ceph-iscsi/main/latest/centos/__ENV_[DISTRO_VERSION]__/repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
-    elif [[ "${CEPH_VERSION}" =~ nautilus|octopus|pacific|quincy ]]; then \
-      curl -s -L https://download.ceph.com/ceph-iscsi/3/rpm/el__ENV_[DISTRO_VERSION]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
-    else \
-      curl -s -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[DISTRO_VERSION]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
-    fi ; \
+    DISTRO_VERSION=8 ;\
+    # curl -s -L https://shaman.ceph.com/api/repos/tcmu-runner/main/latest/centos/${DISTRO_VERSION}/repo?arch=$(arch) -o /etc/yum.repos.d/tcmu-runner.repo ; \
+
+    curl -s -L https://shaman.ceph.com/api/repos/tcmu-runner/main/latest/centos/8/repo?arch=$(arch) -o /etc/yum.repos.d/tcmu-runner.repo ; \
+    curl -s -L https://download.ceph.com/ceph-iscsi/3/rpm/el8/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
+
+    # if [[ "${CEPH_VERSION}" =~ master || "${CEPH_VERSION}" == main ]]; then \
+    #   curl -s -L https://shaman.ceph.com/api/repos/ceph-iscsi/main/latest/centos/__ENV_[DISTRO_VERSION]__/repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
+    # elif [[ "${CEPH_VERSION}" =~ nautilus|octopus|quincy ]]; then \
+    #   curl -s -L https://download.ceph.com/ceph-iscsi/3/rpm/el__ENV_[DISTRO_VERSION]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
+    # elif [[ "${CEPH_VERSION}" =~ pacific ]]; then \
+    #   if [[ "${DISTRO_VERSION}" == "9" ]]; then \
+    #     DISTRO_VERSION=8 ;\
+    #   fi ;\
+    #   curl -s -L https://download.ceph.com/ceph-iscsi/3/rpm/el${DISTRO_VERSION}/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
+    # else \
+    #   curl -s -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[DISTRO_VERSION]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
+    # fi ; \
   fi' && \
 yum update -y --setopt=install_weak_deps=False && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
@@ -85,13 +91,19 @@ bash -c ' \
      CRIMSON_PACKAGES="ceph-crimson-osd__ENV_[CEPH_POINT_RELEASE]__";\
     fi ;\
   else \
+    if [[ "${DISTRO_VERSION}" == "9" ]]; then \
+     DISTRO_VERSION=8 ;\
+    fi ;\
     RELEASE_VER=1 ;\
-    REPO_URL="http://download.ceph.com/rpm-${CEPH_VERSION}/el__ENV_[DISTRO_VERSION]__/"; \
+    DISTRO_VERSION=8 ;\
+    REPO_URL="http://download.ceph.com/rpm-${CEPH_VERSION}/el${DISTRO_VERSION}/"; \
   fi && \
-  rpm -Uvh "$REPO_URL/noarch/ceph-release-1-${RELEASE_VER}.el__ENV_[DISTRO_VERSION]__.noarch.rpm" && \
+  # rpm -Uvh "$REPO_URL/noarch/ceph-release-1-${RELEASE_VER}.el${DISTRO_VERSION}.noarch.rpm" && \
   if [[ __ENV_[DISTRO_VERSION]__ -eq 8 ]]; then \
     yum install -y dnf-plugins-core ; \
     yum copr enable -y tchaikov/python-scikit-learn ; \
     yum copr enable -y tchaikov/python3-asyncssh ; \
+  else \
+    yum install -y dnf-plugins-core ; \
   fi ' && \
 yum install -y --setopt=install_weak_deps=False __CEPH_BASE_PACKAGES__
