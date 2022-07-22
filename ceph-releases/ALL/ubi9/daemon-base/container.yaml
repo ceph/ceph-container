@@ -1,6 +1,9 @@
 # https://osbs.readthedocs.io/en/latest/users.html#compose
 ---
 
+platforms:
+  not: s390x
+
 compose:
   packages: []
   pulp_repos: true
