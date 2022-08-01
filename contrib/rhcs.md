@@ -34,7 +34,15 @@ We use [OSBS](https://osbs.readthedocs.io/en/osbs_ocp3/) to build the images for
 
 To test a local build outside OSBS, you must mimic what OSBS does and insert some Yum repo definitions.
 
-After the `RUN rm -f /etc/yum.repos.d/ubi.repo` step, add the following by-hand steps to your `staging/main-ubi9-latest-x86_64/composed/Dockerfile`:
+First, create an ODCS compose from the candidate tag:
+
+```
+odcs --redhat create-tag --sigkey none ceph-6.0-rhel-9-candidate
+```
+
+Save the resulting id and baseurl for the next step.
+
+Next, after the `RUN rm -f /etc/yum.repos.d/ubi.repo` step, add the following by-hand steps to your `staging/main-ubi9-latest-x86_64/composed/Dockerfile`:
 
 ```Dockerfile
 RUN printf '[rhel-9-baseos]\n\
@@ -51,12 +59,13 @@ enabled = 1\n\
 gpgcheck = 1\n\
 gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release' >> /etc/yum.repos.d/rhel-9.repo
 
-RUN printf '[rhceph-6-tools-for-rhel-9-rpms]\n\
-name = rhceph-6-tools-for-rhel-9-rpms\n\
-baseurl = http://rhsm-pulp.corp.redhat.com/content/dist/layered/rhel9/$basearch/rhceph-tools/6/os/\n\
+# Note: use your ODCS compose ID here (replacing "12345678"):
+
+RUN printf '[odcs]\n\
+name = odcs\n\
+baseurl = http://download.eng.bos.redhat.com/odcs/prod/odcs-12345678/compose/Temporary/x86_64/os/\n\
 enabled = 1\n\
-gpgcheck = 1\n\
-gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release\n\
+gpgcheck = 0\n\
 ' >> /etc/yum.repos.d/rhceph-6-rhel-9.repo
 ```
 
