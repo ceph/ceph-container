@@ -48,7 +48,6 @@ include maint-lib/makelib.mk
 
 # All flavor options that can be passed to FLAVORS
 ALL_BUILDABLE_FLAVORS := \
-	octopus,centos,7 \
 	octopus,centos,8 \
 	pacific,centos,8 \
 	quincy,centos,8 \
