@@ -24,4 +24,5 @@
         __CRIMSON_PACKAGES__ \
         __CEPH_IMMUTABLE_OBJECT_CACHE_PACKAGE__ \
         __SCIKIT_LEARN__ \
-        __CEPH_VOLUME_PACKAGE__
+        __CEPH_VOLUME_PACKAGE__ \
+        __CEPH_EXPORTER_PACKAGE__
