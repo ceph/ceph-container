@@ -3,7 +3,7 @@ yum install -y jq && \
 bash -c ' \
   if [ -n "__GANESHA_PACKAGES__" ]; then \
     if [[ "${CEPH_VERSION}" == master || "${CEPH_VERSION}" == main ]]; then \
-      curl -s -L "https://shaman.ceph.com/api/repos/nfs-ganesha/next/latest/centos/__ENV_[DISTRO_VERSION]__/flavors/ceph_main/repo" -o /etc/yum.repos.d/ganesha.repo ; \
+      curl -s -L "https://shaman.ceph.com/api/repos/nfs-ganesha/next/latest/centos/__ENV_[DISTRO_VERSION]__/flavors/ceph_main/repo?arch=$(arch)" -o /etc/yum.repos.d/ganesha.repo ; \
     elif  [[ "${CEPH_VERSION}" == quincy ]]; then \
       echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
       echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
