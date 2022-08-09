@@ -48,7 +48,17 @@ bash "$WORKSPACE"/travis-builds/purge_cluster.sh
 containers_to_remove=$(docker ps -a -q)
 
 if [ "${containers_to_remove}" ]; then
-  docker rm -f "$@" "${containers_to_remove}" || echo failed to remove containers
+  ATTEMPTS=0
+  NUM_CONTAINERS=$(docker ps -a -q | wc -l)
+  until [ "$ATTEMPTS" -eq 5 ] || [ "$NUM_CONTAINERS" -eq 0 ]; do
+    docker rm -f "$@" "${containers_to_remove}"
+    ((ATTEMPTS++))
+    NUM_CONTAINERS=$(docker ps -a -q | wc -l)
+  done
+  if [ "$ATTEMPTS" -eq 5 ]; then
+    echo "Removing containers failed"
+    exit 1
+  fi
 fi
 
 cd "$WORKSPACE"
