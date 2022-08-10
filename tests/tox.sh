@@ -52,7 +52,8 @@ if [ "${containers_to_remove}" ]; then
   NUM_CONTAINERS=$(docker ps -a -q | wc -l)
   until [ "$ATTEMPTS" -eq 5 ] || [ "$NUM_CONTAINERS" -eq 0 ]; do
     docker rm -f "$@" "${containers_to_remove}"
-    ((ATTEMPTS++))
+    # shellcheck disable=SC2219
+    let "ATTEMPTS=ATTEMPTS+1"
     NUM_CONTAINERS=$(docker ps -a -q | wc -l)
   done
   if [ "$ATTEMPTS" -eq 5 ]; then
