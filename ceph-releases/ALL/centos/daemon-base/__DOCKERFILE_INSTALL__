@@ -56,6 +56,8 @@ bash -c ' \
       curl -s -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[DISTRO_VERSION]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     fi ; \
   fi' && \
+echo "guits debug" && \
+cat /etc/yum.repos.d/tcmu-runner.repo && \
 yum update -y --setopt=install_weak_deps=False && \
 rpm --import 'https://download.ceph.com/keys/release.asc' && \
 if [[ "${CEPH_VERSION}" == nautilus ]]; then \
