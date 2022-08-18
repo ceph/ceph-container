@@ -37,7 +37,7 @@ bash -c ' \
     fi ; \
   fi ; \
   if [ -n "__ISCSI_PACKAGES__" ]; then \
-    curl -s -L https://shaman.ceph.com/api/repos/tcmu-runner/master/latest/centos/__ENV_[DISTRO_VERSION]__/repo?arch=$(arch) -o /etc/yum.repos.d/tcmu-runner.repo ; \
+    curl -s -L https://shaman.ceph.com/api/repos/tcmu-runner/main/latest/centos/__ENV_[DISTRO_VERSION]__/repo?arch=$(arch) -o /etc/yum.repos.d/tcmu-runner.repo ; \
     if [[ "${CEPH_VERSION}" =~ master ]]; then \
       curl -s -L https://shaman.ceph.com/api/repos/ceph-iscsi/master/latest/centos/__ENV_[DISTRO_VERSION]__/repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     elif [[ "${CEPH_VERSION}" =~ nautilus|octopus|pacific ]]; then \
