@@ -20,6 +20,8 @@ function wait_for_daemon () {
     sleep 1
     (( timeout=timeout-1 ))
   done
+  $DOCKER_COMMAND -s > /dev/stderr
+  $DOCKER_COMMAND health detail > /dev/stderr
   return 1
 }
 
