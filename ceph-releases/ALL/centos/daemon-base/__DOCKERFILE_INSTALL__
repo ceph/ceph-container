@@ -88,4 +88,5 @@ bash -c ' \
     yum copr enable -y tchaikov/python-scikit-learn ; \
     yum copr enable -y tchaikov/python3-asyncssh ; \
   fi ' && \
+yum check-update -y && \
 yum install -y --setopt=install_weak_deps=False __CEPH_BASE_PACKAGES__
