@@ -1,4 +1,5 @@
 yum install -y epel-release && \
+yum update -y && \
 yum install -y jq && \
 bash -c ' \
   if [ -n "__GANESHA_PACKAGES__" ]; then \
