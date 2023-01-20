@@ -28,7 +28,7 @@ VERSION=6 ./contrib/compose-rhcs.sh
 
 You will not see any Yum repositories in the resulting `Dockerfile` from `./contrib/compose-rhcs.sh`.
 
-We use [OSBS](https://osbs.readthedocs.io/en/osbs_ocp3/) to build the images for RH storage products. OSBS dynamically injects Yum repository definition steps into our `Dockerfile` during each build. This gives us far more flexibility (for hotfixes, etc) than storing all repo files in Git.
+We use [OSBS](https://osbs.readthedocs.io/en/latest/) to build the images for RH storage products. OSBS dynamically injects Yum repository definition steps into our `Dockerfile` during each build. This gives us far more flexibility (for hotfixes, etc) than storing all repo files in Git.
 
 To test a local build outside OSBS, you must mimic what OSBS does and insert some Yum repo definitions.
 
