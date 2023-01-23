@@ -7,7 +7,7 @@ set -e
 #############
 
 STAGING_DIR=staging/main-ubi9-latest-x86_64/
-DAEMON_BASE_DIR=$STAGING_DIR/daemon-base/
+DAEMON_BASE_DIR=$STAGING_DIR/base/
 DOCKERFILE_DAEMON_BASE=$DAEMON_BASE_DIR/Dockerfile
 COMPOSED_DIR="${STAGING_DIR}"composed
 
@@ -48,7 +48,7 @@ clean_staging() {
 }
 
 make_staging() {
-  make BASEOS_REGISTRY=registry.redhat.io BASEOS_REPO=ubi9/ubi-minimal FLAVORS=main,ubi9,latest IMAGES_TO_BUILD=daemon-base || fatal "Cannot build rhel9"
+  make BASEOS_REGISTRY=registry.redhat.io BASEOS_REPO=ubi9/ubi-minimal FLAVORS=main,ubi9,latest IMAGES_TO_BUILD=base || fatal "Cannot build rhel9"
 }
 
 success() {

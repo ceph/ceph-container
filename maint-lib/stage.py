@@ -89,7 +89,7 @@ def main(CORE_FILES_DIR, CEPH_RELEASES_DIR):
     logging.debug('Path search order: {}'.format(path_search_order))
 
     files_copied = OrderedDict()
-    # e.g., IMAGES_TO_BUILD = ['daemon-base', 'daemon']
+    # e.g., IMAGES_TO_BUILD = ['base']
     for image in IMAGES_TO_BUILD:
         logging.info('')
         logging.info('{}/'.format(image))

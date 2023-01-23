@@ -1,6 +1,6 @@
 # Container images built for each flavor
 # Can be overridden, but don't change the ordering, because the images are built atop each other
-IMAGES_TO_BUILD ?= daemon-base daemon
+IMAGES_TO_BUILD ?= base
 
 HOST_ARCH ?= $(shell uname -m)
 
@@ -39,14 +39,9 @@ $(shell bash -c 'set -eu ; \
 	set_var RELEASE            "$(RELEASE)" ; \
 	\
 	daemon_base_img="$$(val_or_default "$(DAEMON_BASE_TAG)" \
-		"daemon-base:$(RELEASE)-$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH")" ; \
+		"base:$(RELEASE)-$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH")" ; \
 	if [ -n "$(TAG_REGISTRY)" ]; then daemon_base_img="$(TAG_REGISTRY)/$$daemon_base_img" ; fi ; \
 	set_var DAEMON_BASE_IMAGE  "$$daemon_base_img" ; \
-	\
-	daemon_img="$$(val_or_default "$(DAEMON_TAG)" \
-		"daemon:$(RELEASE)-$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH")" ; \
-	if [ -n "$(TAG_REGISTRY)" ]; then daemon_img="$(TAG_REGISTRY)/$$daemon_img" ; fi ; \
-	set_var DAEMON_IMAGE       "$$daemon_img" ; \
 	'
 )
 endef

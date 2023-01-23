@@ -1,0 +1,2 @@
+ADD s3cfg /root/.s3cfg
+ADD demo.sh /opt/ceph-container/bin/demo

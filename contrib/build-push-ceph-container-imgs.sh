@@ -154,7 +154,7 @@ function compare_registry_and_github_tags {
   # build an array with the list of tag from the registry
   local page=1
   while response="$(curl --silent --fail --list-only --location \
-                      "https://${REGISTRY}/api/v1/repository/ceph/daemon/tag?limit=100&page=${page}")"; do
+                      "https://${REGISTRY}/api/v1/repository/ceph/base/tag?limit=100&page=${page}")"; do
     local tags_registry ; tags_registry+=$(echo "${response}" | jq -r .tags[].name)
     if [ "$(echo "${response}" | jq -r .has_additional)" == "false" ]; then
       break
@@ -257,7 +257,7 @@ function build_ceph_imgs {
          OSD_FLAVOR=${OSD_FLAVOR} \
          RELEASE="${RELEASE}" \
          TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" \
-         IMAGES_TO_BUILD=daemon-base \
+         IMAGES_TO_BUILD=base \
          build.parallel
   else
     make BASEOS_TAG=stream"${CENTOS_RELEASE}" CEPH_DEVEL=${DEVEL} RELEASE="${RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build.parallel
@@ -278,14 +278,14 @@ function build_and_push_latest_bis {
   for ceph_release in "${CEPH_RELEASES[@]}"; do
     CENTOS_RELEASE=$(_centos_release "${ceph_release}")
     tag_bis="latest-bis-${ceph_release}"
-    make BASEOS_TAG=stream8 DAEMON_BASE_TAG="daemon-base:${tag_bis}" DAEMON_TAG="daemon:${tag_bis}" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build
-    make BASEOS_TAG=stream8 DAEMON_BASE_TAG="daemon-base:${tag_bis}" DAEMON_TAG="daemon:${tag_bis}" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" push
+    make BASEOS_TAG=stream8 DAEMON_BASE_TAG="base:${tag_bis}" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build
+    make BASEOS_TAG=stream8 DAEMON_BASE_TAG="base:${tag_bis}" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" push
   done
 
   # Now let's build the latest
   CENTOS_RELEASE=$(_centos_release "${CEPH_RELEASES[-1]}")
-  make BASEOS_TAG=stream8 DAEMON_BASE_TAG="daemon-base:latest-bis" DAEMON_TAG="daemon:latest-bis" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build
-  make BASEOS_TAG=stream8 DAEMON_BASE_TAG="daemon-base:latest-bis" DAEMON_TAG="daemon:latest-bis" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" push
+  make BASEOS_TAG=stream8 DAEMON_BASE_TAG="base:latest-bis" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build
+  make BASEOS_TAG=stream8 DAEMON_BASE_TAG="base:latest-bis" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" push
 }
 
 declare -F push_ceph_imgs_latest ||
@@ -300,7 +300,7 @@ function push_ceph_imgs_latest {
       IFS="," read -r ceph_branch distro distro_release <<< "${CONTAINER_FLAVOR}"
     fi
     # local_tag should match with daemon_img defined in maint-lib/makelib.mk
-    local_tag=${CONTAINER_REPO_ORGANIZATION}/daemon-base:${RELEASE}-${CEPH_VERSION}-${distro}-stream${distro_release}-${HOST_ARCH}
+    local_tag=${CONTAINER_REPO_ORGANIZATION}/base:${RELEASE}-${CEPH_VERSION}-${distro}-stream${distro_release}-${HOST_ARCH}
     full_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${RELEASE}-${distro}-stream${distro_release}-${HOST_ARCH}-devel
     branch_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${BRANCH}
     sha1_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}
@@ -340,14 +340,12 @@ function push_ceph_imgs_latest {
     if ${DEVEL}; then
       latest_name="${latest_name}-devel"
     fi
-    for i in daemon-base daemon; do
-      tag=${CONTAINER_REPO_ORGANIZATION}/$i:${CONTAINER_BRANCH}-${CONTAINER_SHA}-$release-centos-stream$(_centos_release "${release}")-${HOST_ARCH}
-      # tag image
-      docker tag "$tag" "${CONTAINER_REPO_ORGANIZATION}"/$i:"$latest_name"
+    tag=${CONTAINER_REPO_ORGANIZATION}/base:${CONTAINER_BRANCH}-${CONTAINER_SHA}-$release-centos-stream$(_centos_release "${release}")-${HOST_ARCH}
+    # tag image
+    docker tag "$tag" "${CONTAINER_REPO_ORGANIZATION}"/base:"$latest_name"
 
-      # push image to the registry
-      docker push "${CONTAINER_REPO_ORGANIZATION}"/$i:"$latest_name"
-    done
+    # push image to the registry
+    docker push "${CONTAINER_REPO_ORGANIZATION}"/base:"$latest_name"
   done
 }
 
@@ -360,7 +358,7 @@ function wait_for_arm_images {
   echo "Waiting for ARM64 images to be ready"
   set -e
   CENTOS_RELEASE=$(_centos_release "${CEPH_RELEASES[-1]}")
-  until docker pull "${CONTAINER_REPO_ORGANIZATION}"/daemon:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-stream"${CENTOS_RELEASE}"-aarch64; do
+  until docker pull "${CONTAINER_REPO_ORGANIZATION}"/base:"$RELEASE"-"${CEPH_RELEASES[-1]}"-centos-stream"${CENTOS_RELEASE}"-aarch64; do
     echo -n .
     sleep 30
   done
@@ -373,23 +371,21 @@ function create_registry_manifest {
   # This should normally work, by the time we get here the arm64 image should have been built and pushed
   # IIRC docker manisfest will fail if the image does not exist
   rm -rvf ~/.docker/manifests
-  for image in daemon-base daemon; do
-    for ceph_release in "${CEPH_RELEASES[@]}"; do
-      TARGET_RELEASE="${CONTAINER_REPO_ORGANIZATION}/${image}:${RELEASE}-${ceph_release}-centos-stream$(_centos_release "${ceph_release}")"
-      DOCKER_IMAGES="$TARGET_RELEASE ${TARGET_RELEASE}-x86_64"
+  for ceph_release in "${CEPH_RELEASES[@]}"; do
+    TARGET_RELEASE="${CONTAINER_REPO_ORGANIZATION}/base:${RELEASE}-${ceph_release}-centos-stream$(_centos_release "${ceph_release}")"
+    DOCKER_IMAGES="$TARGET_RELEASE ${TARGET_RELEASE}-x86_64"
 
-      # Let's add ARM images if being built
-      if [ -n "$BUILD_ARM" ]; then
-        DOCKER_IMAGES="$DOCKER_IMAGES ${TARGET_RELEASE}-aarch64"
-      fi
+    # Let's add ARM images if being built
+    if [ -n "$BUILD_ARM" ]; then
+      DOCKER_IMAGES="$DOCKER_IMAGES ${TARGET_RELEASE}-aarch64"
+    fi
 
-      #shellcheck disable=SC2086
-      docker manifest create $DOCKER_IMAGES
-      if [ -n "$BUILD_ARM" ]; then
-        docker manifest annotate --variant v8 "${TARGET_RELEASE}" "${TARGET_RELEASE}-aarch64"
-      fi
-      docker manifest push "$TARGET_RELEASE"
-    done
+    #shellcheck disable=SC2086
+    docker manifest create $DOCKER_IMAGES
+    if [ -n "$BUILD_ARM" ]; then
+      docker manifest annotate --variant v8 "${TARGET_RELEASE}" "${TARGET_RELEASE}-aarch64"
+    fi
+    docker manifest push "$TARGET_RELEASE"
   done
 }
 

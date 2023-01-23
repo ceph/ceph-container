@@ -29,12 +29,12 @@ For docker hub registry
 $ curl -s https://registry.hub.docker.com/v2/repositories/ceph/ceph/tags/?page_size=100 | jq '."results"[] .name'
 ```
 
-All tags for ceph/{daemon-base,daemon} can be found on the quay.io registry.
-For the daemon-base tags [visit](https://quay.io/repository/ceph/daemon-base?tab=tags)
-For the daemon tags [visit](https://quay.io/repository/ceph/daemon?tab=tags)
+All tags for ceph/base can be found on the quay.io registry.
+For the base tags [visit](https://quay.io/repository/ceph/base?tab=tags)
+For the daemon tags [visit](https://quay.io/repository/ceph/daemon?tab=tags) (LEGACY!)
 As an alternative you can still use the docker hub registry but without the most recent images.
-For the daemon-base tags [visit](https://hub.docker.com/r/ceph/daemon-base/tags/).
-For the daemon tags [visit](https://hub.docker.com/r/ceph/daemon/tags/).
+For the base tags [visit](https://hub.docker.com/r/ceph/base/tags/).
+For the daemon tags [visit](https://hub.docker.com/r/ceph/daemon/tags/). (LEGACY!)
 
 Alternatively, you can run the following command (install jq first):
 
@@ -100,15 +100,13 @@ release name (ie: luminous, mimic, nautilus)
 This will generate the following container images:
 
 ```
-ceph/daemon:latest-nautilus-devel
-ceph/daemon-base:latest-nautilus-devel
+ceph/base:latest-nautilus-devel
 ```
 
-Core Components
+Core Component
 ---------------
 
-- [`ceph/daemon-base`](src/daemon-base/): Base container image containing Ceph core components.
-- [`ceph/daemon`](src/daemon/): All-in-one container containing all Ceph daemons.
+- [`ceph/base`](src/base/): Base container image containing Ceph core components.
 
 See README files in subdirectories for instructions on using containers.
 

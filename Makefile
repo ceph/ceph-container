@@ -29,7 +29,6 @@ TAG_REGISTRY ?= ceph
 RELEASE ?= $(shell git rev-parse --abbrev-ref HEAD)
 
 DAEMON_BASE_TAG ?= ""
-DAEMON_TAG ?= ""
 
 # These values are given sane defaults if they are unset. Otherwise, they get the value specified.
 BASEOS_REGISTRY ?= ""
@@ -58,7 +57,7 @@ ALL_BUILDABLE_FLAVORS := \
 stage.%:
 	@$(call set_env_vars,$*) sh -c maint-lib/stage.py
 
-# Make daemon-base.% and/or daemon.% target based on IMAGES_TO_BUILD setting
+# Make base.% target based on IMAGES_TO_BUILD setting
 #do.image.%: | stage.% $(foreach i, $(IMAGES_TO_BUILD), $(i).% ) ;
 do.image.%: stage.%
 	$(foreach i, $(IMAGES_TO_BUILD), \
@@ -185,10 +184,7 @@ ADVANCED OPTIONS:
                  If specified as empty string, no registry will be prepended to the tag.
                  e.g., TAG_REGISTRY="myreg" tags images "myreg/daemon{,-base}" & pushes to "myreg".
 
-  DAEMON_BASE_TAG - Override the tag name for the daemon-base image.
-  DAEMON_TAG      - Override the tag name for the daemon image.
-    For tags above, the final image tag will include the registry defined by "TAG_REGISTRY".
-    e.g., TAG_REGISTRY="myreg" DAEMON_TAG="mydaemontag" will tag daemon "myreg/mydaemontag"
+  DAEMON_BASE_TAG - Override the tag name for the base image.
 
   BASEOS_REGISTRY - Registry part of the build's base image.  Default: none (empty)
   BASEOS_REPO     - Repo part of the build's base image.  Default: value from DISTRO
@@ -196,10 +192,10 @@ ADVANCED OPTIONS:
     e.g., BASEOS_REPO=debian BASEOS_TAG=jessie will use "debian:jessie" as a base image
           BASEOS_REGISTRY with above will use "myreg/debian:jessie" as a base image
 
-  IMAGES_TO_BUILD - Change which images to build. Primarily useful for building daemon-base only,
+  IMAGES_TO_BUILD - Change which images to build. Primarily useful for building base only,
                     but could be used to rebuild the daemon for local dev when base hasn't changed.
-                    Default: "daemon-base daemon". Do NOT list specify images out of order!
-                    e.g., IMAGES_TO_BUILD=daemon-base or IMAGES_TO_BUILD=daemon
+                    Default: "base". Do NOT list specify images out of order!
+                    e.g., IMAGES_TO_BUILD=base
 
 endef
 export HELPTEXT

@@ -8,10 +8,10 @@ Contributing to ceph-container
 
 Project structure
 -----------------
-The primary deliverables of this project are two container images: `daemon-base`, and `daemon`. As
-such, the project structure is influenced by what files and configurations go into each image. The
+The primary deliverable of this project is one container image: `base`. As
+such, the project structure is influenced by what files and configurations go into this image. The
 main source base (including configuration files and build specifications) of the project is located
-in `src/` and is further specified in `src/daemon-base` and `src/daemon`.
+in `src/` and is further specified in `src/base`.
 
 Because this project supports several different Ceph versions and many OS distros, the structure
 also allows individual Ceph versions, individual distros, and combinations of
@@ -26,7 +26,7 @@ effectively work with this project structure, we introduce the concept of **stag
 Special tooling has been built to collect all source files with appropriate overrides into a unique
 staging directory for each flavor (each staging directory is also specified by a target
 architecture). From a staging directory, containers can be built directly from the
-`<staging>/daemon-base/` and `<staging>/daemon/` image directories. Additionally, developers can
+`<staging>/base/` image directory. Additionally, developers can
 inspect a staging directory's files to view exactly what will be (or has been) built into the
 container images. Additionally, in order to maintain a core source base that is as reusable as
 possible for all flavors, staging also supports a very basic form of templating. Some tooling has
@@ -39,19 +39,19 @@ that `FILE` may be a file or a directory containing further files.
 
 ```
 # Most specific
-ceph-releases/<ceph release>/<base os repository>/<base os release>/{daemon-base,daemon}/FILE
+ceph-releases/<ceph release>/<base os repository>/<base os release>/{base}/FILE
 ceph-releases/<ceph release>/<base os repository>/<base os release>/FILE
-ceph-releases/<ceph release>/<base os repository>/{daemon-base,daemon}/FILE
+ceph-releases/<ceph release>/<base os repository>/{base}/FILE
 ceph-releases/<ceph release>/<base os repository>/FILE
-ceph-releases/<ceph release>/{daemon-base,daemon}/FILE
+ceph-releases/<ceph release>/{base}/FILE
 ceph-releases/<ceph release>/FILE
-ceph-releases/ALL/<base os repository>/<base os release>/{daemon-base,daemon}/FILE
+ceph-releases/ALL/<base os repository>/<base os release>/{base}/FILE
 ceph-releases/ALL/<base os repository>/<base os release>/FILE
-ceph-releases/ALL/<base os repository>/{daemon-base,daemon}/FILE
+ceph-releases/ALL/<base os repository>/{base}/FILE
 ceph-releases/ALL/<base os repository>/FILE
-ceph-releases/ALL/{daemon-base,daemon}/FILE
+ceph-releases/ALL/{base}/FILE
 ceph-releases/ALL/FILE
-src/{daemon-base,daemon}/FILE
+src/{base}/FILE
 src/FILE
 # Least specific
 ```
@@ -97,11 +97,11 @@ To practically aid developers, helpful tools have been built for staging:
 #### Building images from staging
 It is possible (but not usually necessary) to build container images directly from staging in the
 event that `make build` is not appealing. Simply stage the flavor(s) to be built, and then execute
-the desired build command for `daemon-base` and `daemon`.
+the desired build command for `base` and `daemon`.
 ```
 # Example
 cd <staging>
-docker build -t <daemon base tag> daemon-base/
+docker build -t <daemon base tag> base/
 docker build -t <daemon tag> daemon/
 ```
 
@@ -199,9 +199,8 @@ In the worst case, trying to make as few modifications as possible:
 1. Add flavors for the new distro to the Makefile.
    - At minimum: `ALL_BUILDABLE_FLAVORS`.
 2. Add a `ceph-releases/ALL/<new distro>` directory for the new distro
-   - Make sure to install all the required packages for `daemon-base` (see
-     `src/daemon-base/__CEPH_BASE_PACKAGES__)` and for `daemon` (see
-     `src/daemon/__DAEMON_PACKAGES__`).
+   - Make sure to install all the required packages for `base` (see
+     `src/base/__CEPH_BASE_PACKAGES__)`.
    - Make sure to specify all `__VAR__` files without sane defaults for the container builds.
    - Make sure to override any `__VAR__` file sane defaults that do not apply to the new distro.
    - Refer to other distros for inspiration.

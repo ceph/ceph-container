@@ -1,8 +1,0 @@
-Ceph version: luminous
-Maintainer: centos Maintainer <centos@maintainer.com>
-Stuff: # Do daemon-base stuff
-          hi mom
-Empty: 
-Nums: haxor
-Nested env: luminous
-Nested file: haxor

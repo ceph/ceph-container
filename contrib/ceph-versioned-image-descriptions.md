@@ -40,7 +40,7 @@ architecture of the host system.
 
 #### Image source
 Images are built from the [ceph/ceph-container](https://github.com/ceph/ceph-container) project on
-GitHub. These images are specially-built `daemon-base` images built with a specific Ceph version
+GitHub. These images are specially-built `base` images built with a specific Ceph version
 instead of whatever version is latest.
 
 

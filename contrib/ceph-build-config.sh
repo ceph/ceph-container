@@ -24,8 +24,8 @@ AARCH64_FLAVORS_TO_BUILD="pacific,centos,8 quincy,centos,8"
 # Use the ceph library by default
 PUSH_LIBRARY="ceph"
 
-# Instead of 'daemon-base', call these images 'ceph' so users don't get these confused with the
-# daemon-base and daemon images. This is the registry where manifest images are pushed.
+# Instead of 'base', call these images 'ceph' so users don't get these confused with the
+# base and daemon images. This is the registry where manifest images are pushed.
 PUSH_REPOSITORY="ceph"
 
 # Manifest images point to the below arch-specific images
