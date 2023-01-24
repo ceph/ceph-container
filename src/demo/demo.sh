@@ -2,6 +2,19 @@
 set -e
 
 unset "DAEMON_OPTS[${#DAEMON_OPTS[@]}-1]" # remove the last element of the array
+: "${CLUSTER:=ceph}"
+: "${MON_NAME:=${HOSTNAME}}"
+: "${RGW_NAME:=${HOSTNAME}}"
+: "${RBD_MIRROR_NAME:=${HOSTNAME}}"
+: "${MGR_NAME:=${HOSTNAME}}"
+: "${MDS_NAME:=${HOSTNAME}}"
+: "${MON_DATA_DIR:=/var/lib/ceph/mon/${CLUSTER}-${MON_NAME}}"
+: "${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}"
+DAEMON_OPTS=(--cluster ${CLUSTER} --setuser ceph --setgroup ceph --default-log-to-stderr=true --err-to-stderr=true --default-log-to-file=false)
+ADMIN_KEYRING=/etc/ceph/${CLUSTER}.client.admin.keyring
+MON_KEYRING=/etc/ceph/${CLUSTER}.mon.keyring
+RGW_KEYRING=/var/lib/ceph/radosgw/${CLUSTER}-rgw.${RGW_NAME}/keyring
+MONMAP=/etc/ceph/monmap-${CLUSTER}
 # the following ceph version can start with a numerical value where the new ones need a proper name
 MDS_NAME=demo
 MDS_PATH="/var/lib/ceph/mds/${CLUSTER}-$MDS_NAME"
@@ -17,13 +30,146 @@ MGR_IP=$MON_IP
 : "${RGW_USAGE_LOG_FLUSH_THRESHOLD:=1}"
 : "${RGW_USAGE_LOG_TICK_INTERVAL:=1}"
 : "${EXPOSED_IP:=127.0.0.1}"
-: "${SREE_PORT:=5000}"
 
 # rgw options
 : "${RGW_FRONTEND_IP:=0.0.0.0}"
 : "${RGW_FRONTEND_PORT:=8080}"
 : "${RGW_FRONTEND_TYPE:="beast"}"
 
+
+function get_mon_config {
+  # IPv4 is the default unless we specify it
+  IP_LEVEL=${1:-4}
+
+  if [ ! -e /etc/ceph/"${CLUSTER}".conf ]; then
+    local fsid
+    fsid=$(uuidgen)
+    cat <<ENDHERE >/etc/ceph/"${CLUSTER}".conf
+[global]
+fsid = $fsid
+mon initial members = ${MON_NAME}
+mon host = v2:${MON_IP}:${MON_PORT}/0
+osd crush chooseleaf type = 0
+public network = ${CEPH_PUBLIC_NETWORK}
+cluster network = ${CEPH_PUBLIC_NETWORK}
+osd pool default size = 2
+auth_allow_insecure_global_id_reclaim = false
+ENDHERE
+
+  # For ext4
+  if [ "$(findmnt -n -o FSTYPE -T /var/lib/ceph)" = "ext4" -o "$OSD_FORCE_EXT4" == "yes" ]; then
+    cat <<ENDHERE >> /etc/ceph/"${CLUSTER}".conf
+osd max object name len = 256
+osd max object namespace len = 64
+ENDHERE
+  fi
+    if [ "$IP_LEVEL" -eq 6 ]; then
+      echo "ms bind ipv6 = true" >> /etc/ceph/"${CLUSTER}".conf
+    fi
+  else
+    # extract fsid from ceph.conf
+    fsid=$(grep "fsid" /etc/ceph/"${CLUSTER}".conf | awk '{print $NF}')
+  fi
+
+  if [ ! -e "$ADMIN_KEYRING" ]; then
+    if [ -z "$ADMIN_SECRET" ]; then
+      # Automatically generate administrator key
+      CLI+=(--gen-key)
+    else
+      # Generate custom provided administrator key
+      CLI+=("--add-key=$ADMIN_SECRET")
+    fi
+    ceph-authtool "$ADMIN_KEYRING" --create-keyring -n client.admin "${CLI[@]}" --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow *' --cap mgr 'allow *'
+  fi
+
+  if [ ! -e "$MON_KEYRING" ]; then
+    # Generate the mon. key
+    ceph-authtool "$MON_KEYRING" --create-keyring --gen-key -n mon. --cap mon 'allow *'
+  fi
+
+  # Apply proper permissions to the keys
+  chown "${CHOWN_OPT[@]}" ceph. "$MON_KEYRING" "$ADMIN_KEYRING"
+
+  if [ ! -e "$MONMAP" ]; then
+    if [ -e /etc/ceph/monmap ]; then
+      # Rename old monmap
+      mv /etc/ceph/monmap "$MONMAP"
+    else
+      # Generate initial monitor map
+      monmaptool --create --add "${MON_NAME}" "${MON_IP}:${MON_PORT}" --fsid "${fsid}" "$MONMAP"
+    fi
+    chown "${CHOWN_OPT[@]}" ceph. "$MONMAP"
+  fi
+}
+
+function start_mon {
+  if [[ -z "$CEPH_PUBLIC_NETWORK" ]]; then
+    log "ERROR- CEPH_PUBLIC_NETWORK must be defined as the name of the network for the OSDs"
+    exit 1
+  fi
+
+  if [[ -z "$MON_IP" ]]; then
+    log "ERROR- MON_IP must be defined as the IP address of the monitor"
+    exit 1
+  fi
+
+  # If we don't have a monitor keyring, this is a new monitor
+  if [ ! -e "$MON_DATA_DIR/keyring" ]; then
+    mkdir -p "$MON_DATA_DIR"
+    chown 167:167 "$MON_DATA_DIR"
+    get_mon_config $ip_version
+
+    if [ ! -e "$MON_KEYRING" ]; then
+      log "ERROR- $MON_KEYRING must exist.  You can extract it from your current monitor by running 'ceph auth get mon. -o $MON_KEYRING' or use a KV Store"
+      exit 1
+    fi
+
+    if [ ! -e "$MONMAP" ]; then
+      log "ERROR- $MONMAP must exist.  You can extract it from your current monitor by running 'ceph mon getmap -o $MONMAP' or use a KV Store"
+      exit 1
+    fi
+
+    # Testing if it's not the first monitor, if one key doesn't exist we assume none of them exist
+    for keyring in $OSD_BOOTSTRAP_KEYRING $MDS_BOOTSTRAP_KEYRING $RGW_BOOTSTRAP_KEYRING $RBD_MIRROR_BOOTSTRAP_KEYRING $ADMIN_KEYRING; do
+      if [ -f "$keyring" ]; then
+        ceph-authtool "$MON_KEYRING" --import-keyring "$keyring"
+      fi
+    done
+
+    # Prepare the monitor daemon's directory with the map and keyring
+    ceph-mon --setuser ceph --setgroup ceph --cluster "${CLUSTER}" --mkfs -i "${MON_NAME}" --inject-monmap "$MONMAP" --keyring "$MON_KEYRING" --mon-data "$MON_DATA_DIR"
+
+    # Never re-use that monmap again, otherwise we end up with partitioned Ceph monitor
+    # The initial mon **only** contains the current monitor, so this is useful for initial bootstrap
+    # Always rely on what has been populated after the other monitors joined the quorum
+    rm -f "$MONMAP"
+  else
+    log "Existing mon, trying to rejoin cluster..."
+    if [[ "$KV_TYPE" != "none" ]]; then
+      # This is needed for etcd or k8s deployments as new containers joining need to have a map of the cluster
+      # The list of monitors will not be provided by the ceph.conf since we don't have the overall knowledge of what's already deployed
+      # In this kind of environment, the monmap is the only source of truth for new monitor to attempt to join the existing quorum
+      if [[ ! -f "$MONMAP" ]]; then
+        get_mon_config $ip_version
+      fi
+      # Be sure that the mon name of the current monitor in the monmap is equal to ${MON_NAME}.
+      # Names can be different in case of full qualifed hostnames
+      MON_ID=$(monmaptool --print "${MONMAP}" | sed -n "s/^.*${MON_IP}:${MON_PORT}.*mon\\.//p")
+      if [[ -n "$MON_ID" && "$MON_ID" != "$MON_NAME" ]]; then
+        monmaptool --rm "$MON_ID" "$MONMAP" >/dev/null
+        monmaptool --add "$MON_NAME" "$MON_IP" "$MONMAP" >/dev/null
+      fi
+      ceph-mon --setuser ceph --setgroup ceph --cluster "${CLUSTER}" -i "${MON_NAME}" --inject-monmap "$MONMAP" --keyring "$MON_KEYRING" --mon-data "$MON_DATA_DIR"
+    fi
+  fi
+
+  # start MON
+    /usr/bin/ceph-mon "${DAEMON_OPTS[@]}" -i "${MON_NAME}" --mon-data "$MON_DATA_DIR" --public-addr "${MON_IP}"
+
+    if [ -n "$NEW_USER_KEYRING" ]; then
+      echo "$NEW_USER_KEYRING" | ceph "${CLI_OPTS[@]}" auth import -i -
+    fi
+}
 
 #######
 # MON #
@@ -32,7 +178,7 @@ function bootstrap_mon {
   # shellcheck disable=SC2034
   MON_PORT=3300
   # shellcheck disable=SC1091
-  source /opt/ceph-container/bin/start_mon.sh
+
   start_mon
 
   chown --verbose ceph. /etc/ceph/*
@@ -127,7 +273,6 @@ ENDHERE
   done
 }
 
-
 #######
 # MDS #
 #######
@@ -197,6 +342,7 @@ function bootstrap_demo_user {
     log "Demo user already exists with credentials:"
     cat "$CEPH_DEMO_USER"
   else
+    mkdir -p $(dirname $CEPH_DEMO_USER)
     log "Setting up a demo user..."
     if [ -n "$CEPH_DEMO_UID" ] && [ -n "$CEPH_DEMO_ACCESS_KEY" ] && [ -n "$CEPH_DEMO_SECRET_KEY" ]; then
       radosgw-admin "${CLI_OPTS[@]}" user create --uid="$CEPH_DEMO_UID" --display-name="Ceph demo user" --access-key="$CEPH_DEMO_ACCESS_KEY" --secret-key="$CEPH_DEMO_SECRET_KEY"
@@ -241,7 +387,6 @@ function import_in_s3 {
     log "$DATA_TO_SYNC is not a directory, nothing to do!"
   fi
 }
-
 
 #######
 # NFS #
@@ -405,7 +550,6 @@ function build_bootstrap {
       rgw)
         bootstrap_rgw
         bootstrap_demo_user
-        bootstrap_sree
         if [[ -n "$DATA_TO_SYNC" ]] && [[ -n "$DATA_TO_SYNC_BUCKET" ]]; then
           import_in_s3
         fi
@@ -429,6 +573,24 @@ function build_bootstrap {
         ;;
     esac
   done
+}
+
+# For a 'demo' container, we must ensure there is no Ceph files
+function detect_ceph_files {
+  if [ -f /etc/ceph/I_AM_A_DEMO ] || [ -f /var/lib/ceph/I_AM_A_DEMO ]; then
+    log "Found residual files of a demo container."
+    log "This looks like a restart, processing."
+    return 0
+  fi
+  if [ -d /var/lib/ceph ] || [ -d /etc/ceph ]; then
+    # For /etc/ceph, it always contains a 'rbdmap' file so we must check for length > 1
+    if [[ "$(find /var/lib/ceph/ -mindepth 3 -maxdepth 3 -type f | wc -l)" != 0 ]] || [[ "$(find /etc/ceph -mindepth 1 -type f| wc -l)" -gt "1" ]]; then
+      log "I can see existing Ceph files, please remove them!"
+      log "To run the demo container, remove the content of /var/lib/ceph/ and /etc/ceph/"
+      log "Before doing this, make sure you are removing any sensitive data."
+      exit 1
+    fi
+  fi
 }
 
 #########

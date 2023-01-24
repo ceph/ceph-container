@@ -8,10 +8,10 @@ Contributing to ceph-container
 
 Project structure
 -----------------
-The primary deliverables of this project are two container images: `daemon-base`, and `daemon`. As
+The primary deliverables of this project are two container images: `daemon-base`, and `demo`. As
 such, the project structure is influenced by what files and configurations go into each image. The
 main source base (including configuration files and build specifications) of the project is located
-in `src/` and is further specified in `src/daemon-base` and `src/daemon`.
+in `src/` and is further specified in `src/daemon-base` and `src/demo`.
 
 Because this project supports several different Ceph versions and many OS distros, the structure
 also allows individual Ceph versions, individual distros, and combinations of
@@ -26,7 +26,7 @@ effectively work with this project structure, we introduce the concept of **stag
 Special tooling has been built to collect all source files with appropriate overrides into a unique
 staging directory for each flavor (each staging directory is also specified by a target
 architecture). From a staging directory, containers can be built directly from the
-`<staging>/daemon-base/` and `<staging>/daemon/` image directories. Additionally, developers can
+`<staging>/daemon-base/` and `<staging>/demo/` image directories. Additionally, developers can
 inspect a staging directory's files to view exactly what will be (or has been) built into the
 container images. Additionally, in order to maintain a core source base that is as reusable as
 possible for all flavors, staging also supports a very basic form of templating. Some tooling has
@@ -39,19 +39,19 @@ that `FILE` may be a file or a directory containing further files.
 
 ```
 # Most specific
-ceph-releases/<ceph release>/<base os repository>/<base os release>/{daemon-base,daemon}/FILE
+ceph-releases/<ceph release>/<base os repository>/<base os release>/{daemon-base,demo}/FILE
 ceph-releases/<ceph release>/<base os repository>/<base os release>/FILE
-ceph-releases/<ceph release>/<base os repository>/{daemon-base,daemon}/FILE
+ceph-releases/<ceph release>/<base os repository>/{daemon-base,demo}/FILE
 ceph-releases/<ceph release>/<base os repository>/FILE
-ceph-releases/<ceph release>/{daemon-base,daemon}/FILE
+ceph-releases/<ceph release>/{daemon-base,demo}/FILE
 ceph-releases/<ceph release>/FILE
-ceph-releases/ALL/<base os repository>/<base os release>/{daemon-base,daemon}/FILE
+ceph-releases/ALL/<base os repository>/<base os release>/{daemon-base,demo}/FILE
 ceph-releases/ALL/<base os repository>/<base os release>/FILE
-ceph-releases/ALL/<base os repository>/{daemon-base,daemon}/FILE
+ceph-releases/ALL/<base os repository>/{daemon-base,demo}/FILE
 ceph-releases/ALL/<base os repository>/FILE
-ceph-releases/ALL/{daemon-base,daemon}/FILE
+ceph-releases/ALL/{daemon-base,demo}/FILE
 ceph-releases/ALL/FILE
-src/{daemon-base,daemon}/FILE
+src/{daemon-base,demo}/FILE
 src/FILE
 # Least specific
 ```
@@ -97,12 +97,12 @@ To practically aid developers, helpful tools have been built for staging:
 #### Building images from staging
 It is possible (but not usually necessary) to build container images directly from staging in the
 event that `make build` is not appealing. Simply stage the flavor(s) to be built, and then execute
-the desired build command for `daemon-base` and `daemon`.
+the desired build command for `daemon-base` and `demo`.
 ```
 # Example
 cd <staging>
 docker build -t <daemon base tag> daemon-base/
-docker build -t <daemon tag> daemon/
+docker build -t <daemon tag> demo/
 ```
 
 ### Where does (should) source code live?
@@ -118,7 +118,7 @@ ceph-container source code can use container environment variables to execute co
 conditionally, making an override of source files for specific Ceph versions unnecessary.
 
 Where possible `src/` provides a specification of a "sane default" that may need to be
-overridden for certain flavors. For example, the `src/daemon/__DAEMON_PACKAGES__` file defines the
+overridden for certain flavors. For example, the `src/demo/__DAEMON_PACKAGES__` file defines the
 daemon packages which should be installed in the base image. A distro is not required to install
 these packages via its package manager or to use this list (though it is recommended to gain as much
 reuse as possible), as each distro may have a different preferred method of installation. This list
@@ -200,8 +200,8 @@ In the worst case, trying to make as few modifications as possible:
    - At minimum: `ALL_BUILDABLE_FLAVORS`.
 2. Add a `ceph-releases/ALL/<new distro>` directory for the new distro
    - Make sure to install all the required packages for `daemon-base` (see
-     `src/daemon-base/__CEPH_BASE_PACKAGES__)` and for `daemon` (see
-     `src/daemon/__DAEMON_PACKAGES__`).
+     `src/daemon-base/__CEPH_BASE_PACKAGES__)` and for `demo` (see
+     `src/demo/__DAEMON_PACKAGES__`).
    - Make sure to specify all `__VAR__` files without sane defaults for the container builds.
    - Make sure to override any `__VAR__` file sane defaults that do not apply to the new distro.
    - Refer to other distros for inspiration.
@@ -225,7 +225,7 @@ Commit guidelines
   - **[dir]** ceph-releases: change flavor specification(s) in the `ceph-container` dir
   - **[dir]** mimic: change flavor spec for mimic
   - **[dir]** kubernetes: edit a Kubernetes example in `examples/kubernetes`
-  - **[file]** osd_disk_activate: edit the `src/daemon/osd_scenarios/osd_disk_activate.sh` file
+  - **[file]** osd_disk_activate: edit the `src/demo/osd_scenarios/osd_disk_activate.sh` file
   - **[logical group]** osd prep: change how OSDs are prepared, with changes in multiple files
   - **[combinations]** mimic osd prep: change how OSDs are prepared only in mimic
 

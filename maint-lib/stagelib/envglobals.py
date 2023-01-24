@@ -32,8 +32,9 @@ REQUIRED_ENV_VARS = OrderedDict([
     ('STAGING_DIR',        'Dir into which files will be staged' + ALIGNED_NEWLINE +  # noqa: E241
                            'This dir will be overwritten if it already exists'),  # noqa: E241
     ('RELEASE',            'Release string for the build'),  # noqa: E241
-    ('DAEMON_BASE_IMAGE',  'Tag given to the daemon-base image and used as base for the daemon image'),  # noqa: E241,E501
+    ('DAEMON_BASE_IMAGE',  'Tag given to the daemon-base image and used as base for any other images'),  # noqa: E241,E501
     ('DAEMON_IMAGE',       'Tag given to the daemon image'),  # noqa: E241
+    ('DEMO_IMAGE',         'Tag given to the demo image'),  # noqa: E241
 ])
 _REQUIRED_VAR_TEXT = """
 Required environment variables:

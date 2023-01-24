@@ -340,7 +340,7 @@ function push_ceph_imgs_latest {
     if ${DEVEL}; then
       latest_name="${latest_name}-devel"
     fi
-    for i in daemon-base daemon; do
+    for i in daemon-base daemon demo; do
       tag=${CONTAINER_REPO_ORGANIZATION}/$i:${CONTAINER_BRANCH}-${CONTAINER_SHA}-$release-centos-stream$(_centos_release "${release}")-${HOST_ARCH}
       # tag image
       docker tag "$tag" "${CONTAINER_REPO_ORGANIZATION}"/$i:"$latest_name"
@@ -373,7 +373,7 @@ function create_registry_manifest {
   # This should normally work, by the time we get here the arm64 image should have been built and pushed
   # IIRC docker manisfest will fail if the image does not exist
   rm -rvf ~/.docker/manifests
-  for image in daemon-base daemon; do
+  for image in daemon-base daemon demo; do
     for ceph_release in "${CEPH_RELEASES[@]}"; do
       TARGET_RELEASE="${CONTAINER_REPO_ORGANIZATION}/${image}:${RELEASE}-${ceph_release}-centos-stream$(_centos_release "${ceph_release}")"
       DOCKER_IMAGES="$TARGET_RELEASE ${TARGET_RELEASE}-x86_64"
