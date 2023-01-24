@@ -36,6 +36,16 @@ MGR_IP=$MON_IP
 : "${RGW_FRONTEND_PORT:=8080}"
 : "${RGW_FRONTEND_TYPE:="beast"}"
 
+function log {
+  if [ -z "$*" ]; then
+    return 1
+  fi
+
+  local timestamp
+  timestamp=$(date '+%F %T')
+  echo "$timestamp  $0: $*"
+  return 0
+}
 
 function get_mon_config {
   # IPv4 is the default unless we specify it
