@@ -38,10 +38,10 @@ $(shell bash -c 'set -eu ; \
 	set_var STAGING_DIR        "staging/$$CEPH_VERSION$$CEPH_POINT_RELEASE-$$DISTRO-$$DISTRO_VERSION-$$HOST_ARCH" ; \
 	set_var RELEASE            "$(RELEASE)" ; \
 	\
-	daemon_base_img="$$(val_or_default "$(DAEMON_BASE_TAG)" \
+	base_img="$$(val_or_default "$(DAEMON_BASE_TAG)" \
 		"base:$(RELEASE)-$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH")" ; \
-	if [ -n "$(TAG_REGISTRY)" ]; then daemon_base_img="$(TAG_REGISTRY)/$$daemon_base_img" ; fi ; \
-	set_var DAEMON_BASE_IMAGE  "$$daemon_base_img" ; \
+	if [ -n "$(TAG_REGISTRY)" ]; then base_img="$(TAG_REGISTRY)/$$base_img" ; fi ; \
+	set_var BASE_IMAGE  "$$base_img" ; \
 	'
 )
 endef

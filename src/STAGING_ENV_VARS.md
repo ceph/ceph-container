@@ -14,7 +14,7 @@ See `ceph-container/maint-lib/stagelib/envglobals.py` for most updated list and 
  - IMAGES_TO_BUILD
  - STAGING_DIR
  - RELEASE
- - DAEMON_BASE_IMAGE
+ - BASE_IMAGE
  - DAEMON_IMAGE
 
 ## Generated during staging

@@ -76,5 +76,5 @@ Hat's network to access these repositories.**
 
 ```
 cd staging/main-ubi9-latest-x86_64/composed
-make build DAEMON_BASE_IMAGE=test
+make build BASE_IMAGE=test
 ```

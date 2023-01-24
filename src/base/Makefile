@@ -14,17 +14,17 @@
 # limitations under the License.
 
 # Environment variables required to be set for this Makefile:
-#   DAEMON_BASE_IMAGE - the tag to be applied to the build of the base image
+#   BASE_IMAGE - the tag to be applied to the build of the base image
 #                       (e.g., ceph/base:testbuild1)
 #   BUILD_ARGS (optional) - additional arguments to the container build
 
 .PHONY: build push clean
 
 build:
-	@echo === docker build $(DAEMON_BASE_IMAGE)
-	@docker build --pull $(BUILD_ARGS) --tag $(DAEMON_BASE_IMAGE) .
+	@echo === docker build $(BASE_IMAGE)
+	@docker build --pull $(BUILD_ARGS) --tag $(BASE_IMAGE) .
 
-push: ; @docker push $(DAEMON_BASE_IMAGE)
+push: ; @docker push $(BASE_IMAGE)
 clean:
 # Don't fail if can't clean; user may have removed the image
-	@docker rmi $(DAEMON_BASE_IMAGE) || true
+	@docker rmi $(BASE_IMAGE) || true

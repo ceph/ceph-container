@@ -9,5 +9,5 @@ BASEOS_TAG: centos.tag
 IMAGES_TO_BUILD: base daemon
 STAGING_DIR: tests/stage-test/staging/luminous-12.2.1-0-centos.repo-centos.tag-x86_64
 RELEASE: test-release
-DAEMON_BASE_IMAGE: test-reg/base:test-release-1
+BASE_IMAGE: test-reg/base:test-release-1
 DAEMON_IMAGE: test-reg/daemon:test-release-1
