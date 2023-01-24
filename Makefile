@@ -30,6 +30,7 @@ RELEASE ?= $(shell git rev-parse --abbrev-ref HEAD)
 
 DAEMON_BASE_TAG ?= ""
 DAEMON_TAG ?= ""
+DEMO_TAG ?= ""
 
 # These values are given sane defaults if they are unset. Otherwise, they get the value specified.
 BASEOS_REGISTRY ?= ""
@@ -58,7 +59,7 @@ ALL_BUILDABLE_FLAVORS := \
 stage.%:
 	@$(call set_env_vars,$*) sh -c maint-lib/stage.py
 
-# Make daemon-base.% and/or daemon.% target based on IMAGES_TO_BUILD setting
+# Make daemon-base.% and/or demo.% target based on IMAGES_TO_BUILD setting
 #do.image.%: | stage.% $(foreach i, $(IMAGES_TO_BUILD), $(i).% ) ;
 do.image.%: stage.%
 	$(foreach i, $(IMAGES_TO_BUILD), \
@@ -187,8 +188,9 @@ ADVANCED OPTIONS:
 
   DAEMON_BASE_TAG - Override the tag name for the daemon-base image.
   DAEMON_TAG      - Override the tag name for the daemon image.
+  DEMO_TAG - Override the tag name for the demo image.
     For tags above, the final image tag will include the registry defined by "TAG_REGISTRY".
-    e.g., TAG_REGISTRY="myreg" DAEMON_TAG="mydaemontag" will tag daemon "myreg/mydaemontag"
+    e.g., TAG_REGISTRY="myreg" DAEMON_BASE_TAG="mydaemonbasetag" will tag daemon "myreg/mydaemonbasetag"
 
   BASEOS_REGISTRY - Registry part of the build's base image.  Default: none (empty)
   BASEOS_REPO     - Repo part of the build's base image.  Default: value from DISTRO
@@ -196,8 +198,8 @@ ADVANCED OPTIONS:
     e.g., BASEOS_REPO=debian BASEOS_TAG=jessie will use "debian:jessie" as a base image
           BASEOS_REGISTRY with above will use "myreg/debian:jessie" as a base image
 
-  IMAGES_TO_BUILD - Change which images to build. Primarily useful for building daemon-base only,
-                    but could be used to rebuild the daemon for local dev when base hasn't changed.
+  IMAGES_TO_BUILD - Change which images to build. Primarily useful for building base only,
+                    but could be used to rebuild the demo for local dev when base hasn't changed.
                     Default: "daemon-base daemon". Do NOT list specify images out of order!
                     e.g., IMAGES_TO_BUILD=daemon-base or IMAGES_TO_BUILD=daemon
 

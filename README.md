@@ -29,12 +29,10 @@ For docker hub registry
 $ curl -s https://registry.hub.docker.com/v2/repositories/ceph/ceph/tags/?page_size=100 | jq '."results"[] .name'
 ```
 
-All tags for ceph/{daemon-base,daemon} can be found on the quay.io registry.
-For the daemon-base tags [visit](https://quay.io/repository/ceph/daemon-base?tab=tags)
-For the daemon tags [visit](https://quay.io/repository/ceph/daemon?tab=tags)
-As an alternative you can still use the docker hub registry but without the most recent images.
-For the daemon-base tags [visit](https://hub.docker.com/r/ceph/daemon-base/tags/).
-For the daemon tags [visit](https://hub.docker.com/r/ceph/daemon/tags/).
+-All tags for ceph/{daemon-base,daemon,demo} can be found on the quay.io registry.
+-For the daemon-base tags [visit](https://quay.io/repository/ceph/daemon-base?tab=tags)
+-For the daemon tags [visit](https://quay.io/repository/ceph/daemon?tab=tags)
+-For the demo tags [visit](https://quay.io/repository/ceph/demo?tab=tags)
 
 Alternatively, you can run the following command (install jq first):
 
@@ -48,13 +46,13 @@ $ curl -s https://registry.hub.docker.com/v2/repositories/ceph/daemon/tags/?page
 ```
 
 
-Be careful, this will only show the latest 100 tags.  To improve your `curl` you can pass a page number: `https://registry.hub.docker.com/v2/repositories/ceph/daemon/tags/?page_size=100&page=2` or use the following bash script to search multiple pages:
+Be careful, this will only show the latest 100 tags.  To improve your `curl` you can pass a page number: `https://registry.hub.docker.com/v2/repositories/ceph/demo/tags/?page_size=100&page=2` or use the following bash script to search multiple pages:
 
 This will search for all tags with both **stable** and **nautlius** in the latest 2000
 
 ```bash
 for i in {1..20}; do \
-    curl -s https://registry.hub.docker.com/v2/repositories/ceph/daemon/tags/?page_size=100\&page=$i | jq '."results"[] .name'; \
+    curl -s https://registry.hub.docker.com/v2/repositories/ceph/demo/tags/?page_size=100\&page=$i | jq '."results"[] .name'; \
 done | awk '/stable/ && /nautilus/'
 ```
 
@@ -107,8 +105,9 @@ ceph/daemon-base:latest-nautilus-devel
 Core Components
 ---------------
 
-- [`ceph/daemon-base`](src/daemon-base/): Base container image containing Ceph core components.
+- [`ceph/demo-base`](src/daemon-base/): Base container image containing Ceph core components.
 - [`ceph/daemon`](src/daemon/): All-in-one container containing all Ceph daemons.
+- [`ceph/demo`](src/demo/): A demo image for Ceph containers.
 
 See README files in subdirectories for instructions on using containers.
 
