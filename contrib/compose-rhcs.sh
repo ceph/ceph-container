@@ -6,7 +6,31 @@ set -e
 # VARIABLES #
 #############
 
-STAGING_DIR=staging/main-ubi9-latest-x86_64/
+if [[ -z "${VERSION}" ]]; then
+  echo "ERROR: VERSION must be set (eg: VERSION=5)"
+  exit 1
+fi
+
+case "${VERSION}" in
+  *4*)
+    UBI_VERSION=8
+    CEPH_RELEASE=nautilus
+    ;;
+  *5*)
+    UBI_VERSION=8
+    CEPH_RELEASE=pacific
+    ;;
+  *6*)
+    UBI_VERSION=9
+    CEPH_RELEASE=quincy
+    ;;
+    *)
+    echo "ERROR: VERSION must be set to a valid version."
+    exit 1
+esac
+
+UBI=ubi"${UBI_VERSION}"
+STAGING_DIR=staging/"${CEPH_RELEASE}"-"${UBI}"-latest-x86_64/
 DAEMON_BASE_DIR=$STAGING_DIR/daemon-base/
 DOCKERFILE_DAEMON_BASE=$DAEMON_BASE_DIR/Dockerfile
 COMPOSED_DIR="${STAGING_DIR}"composed
@@ -48,7 +72,7 @@ clean_staging() {
 }
 
 make_staging() {
-  make BASEOS_REGISTRY=registry.redhat.io BASEOS_REPO=ubi9/ubi-minimal FLAVORS=main,ubi9,latest IMAGES_TO_BUILD=daemon-base || fatal "Cannot build rhel9"
+  make BASEOS_REGISTRY=registry.redhat.io BASEOS_REPO="${UBI}"/ubi-minimal FLAVORS="${CEPH_RELEASE}","${UBI}",latest IMAGES_TO_BUILD=daemon-base || fatal "Cannot build ${UBI}"
 }
 
 success() {

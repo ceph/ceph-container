@@ -7,5 +7,8 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
 
-      - name: compose the RHCS container image
-        run: ./contrib/compose-rhcs.sh
+      - name: compose the RHCS 5 container image
+        run: VERSION=5 CEPH_RELEASE=pacific ./contrib/compose-rhcs.sh
+
+      - name: compose the RHCS 6 container image
+        run: VERSION=6 CEPH_RELEASE=quincy ./contrib/compose-rhcs.sh

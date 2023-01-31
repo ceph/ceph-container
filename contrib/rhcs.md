@@ -16,14 +16,12 @@ to fetch the base image.
 
 ## Composing the Dockerfile
 
-> **_NOTE:_**  Please ensure you're working on the `stable-7.0` branch of the ceph-container project. That corresponds to the RH Ceph Storage 6 product. The `main` branch of ceph-container does not work with RH Ceph Storage 6 today.
-
 The `ceph-container` project uses a series of template files to create the
 final `Dockerfile` that developers can build or commit to dist-git. This
 command generates that downstream Red Hat UBI-based `Dockerfile`:
 
 ```
-./contrib/compose-rhcs.sh
+UBI_VERSION=9 ./contrib/compose-rhcs.sh
 ```
 
 ## Yum repositories
