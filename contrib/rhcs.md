@@ -21,7 +21,7 @@ final `Dockerfile` that developers can build or commit to dist-git. This
 command generates that downstream Red Hat UBI-based `Dockerfile`:
 
 ```
-UBI_VERSION=9 ./contrib/compose-rhcs.sh
+VERSION=6 ./contrib/compose-rhcs.sh
 ```
 
 ## Yum repositories
