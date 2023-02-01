@@ -31,7 +31,9 @@ esac
 
 UBI=ubi"${UBI_VERSION}"
 STAGING_DIR=staging/"${CEPH_RELEASE}"-"${UBI}"-latest-x86_64/
+DAEMON_DIR=$STAGING_DIR/daemon
 DAEMON_BASE_DIR=$STAGING_DIR/daemon-base/
+DOCKERFILE_DAEMON=$DAEMON_DIR/Dockerfile
 DOCKERFILE_DAEMON_BASE=$DAEMON_BASE_DIR/Dockerfile
 COMPOSED_DIR="${STAGING_DIR}"composed
 
@@ -65,6 +67,11 @@ import_content() {
   rsync -a --exclude "__*__" --exclude "*.bak" --exclude "*.md" "$1"/* $COMPOSED_DIR/ || fatal "Cannot rsync"
 }
 
+# Select the end of the daemon Dockerfile to complete the daemon-base's one
+merge_content() {
+  grep -B1 -A1000 "# Add ceph-container files" $DOCKERFILE_DAEMON >> $COMPOSED_DIR/Dockerfile || fatal "Cannot find starting point in $DOCKERFILE_DAEMON"
+}
+
 clean_staging() {
   if [ -d "$STAGING_DIR" ]; then
     rm -rf "${STAGING_DIR:?}"
@@ -72,7 +79,7 @@ clean_staging() {
 }
 
 make_staging() {
-  make BASEOS_REGISTRY=registry.redhat.io BASEOS_REPO="${UBI}"/ubi-minimal FLAVORS="${CEPH_RELEASE}","${UBI}",latest IMAGES_TO_BUILD=daemon-base || fatal "Cannot build ${UBI}"
+  make BASEOS_REGISTRY=registry.redhat.io BASEOS_REPO="${UBI}"/ubi-minimal FLAVORS="${CEPH_RELEASE}","${UBI}",latest || fatal "Cannot build ${UBI}"
 }
 
 success() {
@@ -90,5 +97,9 @@ clean_staging
 make_staging
 check_staging_exist
 create_compose_directory
+if [[ "${VERSION}" == "5" ]]; then
+  import_content $DAEMON_DIR
+fi
 import_content $DAEMON_BASE_DIR
+merge_content
 success
