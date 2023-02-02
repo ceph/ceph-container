@@ -1,0 +1,7 @@
+echo 'Install packages' && \
+      yum install -y --setopt=install_weak_deps=False wget unzip util-linux python3-setuptools udev device-mapper && \
+      yum install -y --setopt=install_weak_deps=False --enablerepo=powertools __DAEMON_PACKAGES__ && \
+    # Centos 8 doesn't have confd/etcdctl/kubectl packages, so install them from web
+    __WEB_INSTALL_CONFD__ && \
+    __WEB_INSTALL_ETCDCTL__ && \
+    __WEB_INSTALL_KUBECTL__

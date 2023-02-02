@@ -1,0 +1,7 @@
+# Let's remove easy stuff
+    rm -f /usr/bin/{etcd-tester,etcd-dump-logs} && \
+    # Remove etcd since all we need is etcdctl
+    rm -f /usr/bin/etcd && \
+    # Uncomment below line for more detailed debug info
+    # find / -xdev -type f -exec du -c {} \; |sort -n && \
+    echo "CLEAN DAEMON DONE!"

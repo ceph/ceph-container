@@ -1,0 +1,11 @@
+# ceph.defaults
+# for more config options see: https://github.com/ceph/ceph/blob/main/src/common/config_opts.h
+# the format is key_path value
+# the key path will be prefixed by /ceph-config/$CLUSTER
+
+#osd
+/osd/osd_journal_size 100
+
+# these 2 should be passed at runtime to the container.
+#/osd/cluster_network 198.100.128.0/19
+#/osd/public_network 198.100.128.0/19

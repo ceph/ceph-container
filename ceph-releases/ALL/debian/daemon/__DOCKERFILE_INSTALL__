@@ -1,0 +1,10 @@
+echo 'Install packages' && \
+      DEBIAN_FRONTEND=noninteractive apt-get update && \
+      DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        wget unzip uuid-runtime python-setuptools udev dmsetup && \
+      apt-get install -y  --no-install-recommends --force-yes __DAEMON_PACKAGES__ && \
+      apt-get clean && \
+    # debian does not have confd/kubectl/etcd packages, so install from web
+    __WEB_INSTALL_CONFD__ && \
+    __WEB_INSTALL_KUBECTL__ && \
+    __WEB_INSTALL_ETCDCTL__

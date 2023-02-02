@@ -1,0 +1,17 @@
+echo "purge unneeded packages" && \
+    DEBIAN_FRONTEND=noninteractive apt-get purge -y --auto-remove perl wget && \
+    # NOTE: apt will fail with "E: Unmet dependencies." if `dpkg --purge --force-all` commands
+    #       exist while it is trying to manage packages, so save aggressive removes for after.
+    # Removing agressively perl-base as nothing we use call perl yet.
+    # perl-base is required by adduser, init-system-helpers and debconf
+    # At this stage of the build process, it's okay to break those tools for saving storage space
+    echo "purge perl-base" && dpkg --purge --force-all perl-base libperl5.22 && \
+    # Timezone is not configured so let's remove the zoneinfo (8MB)
+    # BUG: dpkg --purge --force-all tzdata is returning an error. Disable for now.
+    #      subprocess installed post-removal script returned error exit status 127
+    # echo 'purge time zone info' && dpkg --purge --force-all tzdata && \
+    echo 'remove unneeded apt, deb, dpkg data' && \
+      rm -rf /var/lib/apt/lists/* \
+             /var/cache/debconf/* \
+             /var/log/apt/ \
+             /var/log/dpkg.log
