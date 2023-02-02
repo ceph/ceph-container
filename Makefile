@@ -184,9 +184,10 @@ ADVANCED OPTIONS:
 
   TAG_REGISTRY - Registry name to tag images with and to push images to.  Default: "ceph"
                  If specified as empty string, no registry will be prepended to the tag.
-                 e.g., TAG_REGISTRY="myreg" tags images "myreg/daemon-base" & pushes to "myreg".
+                 e.g., TAG_REGISTRY="myreg" tags images "myreg/daemon{,-base}" & pushes to "myreg".
 
   DAEMON_BASE_TAG - Override the tag name for the daemon-base image.
+  DAEMON_TAG      - Override the tag name for the daemon image.
   DEMO_TAG - Override the tag name for the demo image.
     For tags above, the final image tag will include the registry defined by "TAG_REGISTRY".
     e.g., TAG_REGISTRY="myreg" DAEMON_BASE_TAG="mydaemonbasetag" will tag daemon "myreg/mydaemonbasetag"
@@ -199,8 +200,8 @@ ADVANCED OPTIONS:
 
   IMAGES_TO_BUILD - Change which images to build. Primarily useful for building base only,
                     but could be used to rebuild the demo for local dev when base hasn't changed.
-                    Default: "daemon-base demo". Do NOT list specify images out of order!
-                    e.g., IMAGES_TO_BUILD=daemon-base or IMAGES_TO_BUILD=demo
+                    Default: "daemon-base daemon". Do NOT list specify images out of order!
+                    e.g., IMAGES_TO_BUILD=daemon-base or IMAGES_TO_BUILD=daemon
 
 endef
 export HELPTEXT
