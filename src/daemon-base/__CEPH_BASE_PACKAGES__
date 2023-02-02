@@ -16,8 +16,7 @@
         libstoragemgmt \
         systemd-udev \
         sg3_utils \
-        procps-ng \
-        hostname \
+        __UTIL_PACKAGES__ \
         __RADOSGW_PACKAGES__ \
         __GANESHA_PACKAGES__ \
         __ISCSI_PACKAGES__ \
