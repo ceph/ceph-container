@@ -1,0 +1,17 @@
+RUN rm -f /etc/yum.repos.d/ubi.repo
+
+# Editing /etc/redhat-storage-server release file
+RUN echo "Red Hat Ceph Storage Server 6 (Container)" > /etc/redhat-storage-release
+
+EXPOSE 6789 6800 6801 6802 6803 6804 6805 80 5000
+
+# Atomic specific labels
+LABEL version="6"
+
+# Build specific labels
+LABEL com.redhat.component="rhceph-container"
+LABEL name="rhceph"
+LABEL description="Red Hat Ceph Storage 6"
+LABEL summary="Provides the latest Red Hat Ceph Storage 6 on RHEL 9 in a fully featured and supported base image."
+LABEL io.k8s.display-name="Red Hat Ceph Storage 6 on RHEL 9"
+LABEL io.openshift.tags="rhceph ceph"

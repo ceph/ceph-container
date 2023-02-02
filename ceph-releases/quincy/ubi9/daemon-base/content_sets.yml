@@ -1,0 +1,22 @@
+# This file defines which Pulp content sets (yum repositories) OSBS needs in
+# order to build this image. This also helps determine which images are
+# vulnerable to specific CVEs. Generally you should only need to update this
+# file when:
+#    1. You start depending on a new product
+#    2. You are preparing new product release and your content sets will change
+#
+# See https://osbs.readthedocs.io/en/latest/users.html#content-sets for more
+# information on maintaining this file.
+---
+x86_64:
+  - rhel-9-for-x86_64-baseos-rpms
+  - rhel-9-for-x86_64-appstream-rpms
+  - rhceph-6-tools-for-rhel-9-x86_64-rpms
+ppc64le:
+  - rhel-9-for-ppc64le-baseos-rpms
+  - rhel-9-for-ppc64le-appstream-rpms
+  - rhceph-6-tools-for-rhel-9-ppc64le-rpms
+s390x:
+  - rhel-9-for-s390x-baseos-rpms
+  - rhel-9-for-s390x-appstream-rpms
+  - rhceph-6-tools-for-rhel-9-s390x-rpms

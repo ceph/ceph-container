@@ -1,0 +1,1 @@
+rpm -q __CEPH_BASE_PACKAGES__
