@@ -1,4 +1,5 @@
 # add the necessary repos
+    DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade && \
     echo "deb http://obs.linaro.org/ERP:/ceph-ansible:/${CEPH_VERSION}/Debian___ENV_[DISTRO_VERSION]__ ./" \
       >> /etc/apt/sources.list.d/erp.list && \
     echo "deb http://deb.debian.org/debian/ __OS_CODENAME__-backports main" \
