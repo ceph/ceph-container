@@ -1,0 +1,4 @@
+echo 'Postinstall cleanup' && \
+ ( microdnf clean all && \
+   rpm -q __CEPH_BASE_PACKAGES__ && \
+   rm -f /etc/profile.d/lang.sh )
