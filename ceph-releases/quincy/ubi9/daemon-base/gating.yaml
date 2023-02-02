@@ -1,0 +1,7 @@
+--- !Policy
+id: "cvp-external"
+product_versions:
+ - cvp
+decision_context: cvp_default
+rules:
+ - !PassingTestCaseRule {test_case_name: rhceph-cvp-test.default.external1}
