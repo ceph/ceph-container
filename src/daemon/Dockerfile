@@ -40,9 +40,6 @@ RUN \
 # Add ceph-container files
 #======================================================
 
-# Add s3cfg file
-ADD s3cfg /root/.s3cfg
-
 # Add templates for confd
 ADD ./confd/templates/* /etc/confd/templates/
 ADD ./confd/conf.d/* /etc/confd/conf.d/
@@ -51,10 +48,6 @@ ADD ./confd/conf.d/* /etc/confd/conf.d/
 ADD *.sh check_zombie_mons.py ./osd_scenarios/* entrypoint.sh.in disabled_scenario /opt/ceph-container/bin/
 ADD ceph.defaults /opt/ceph-container/etc/
 # ADD *.sh ceph.defaults check_zombie_mons.py ./osd_scenarios/* entrypoint.sh.in disabled_scenario /
-
-# Copye sree web interface for cn
-# We use COPY instead of ADD for tarball so that it does not get extracted automatically at build time
-COPY Sree-0.2.tar.gz /opt/ceph-container/tmp/sree.tar.gz
 
 # Modify the entrypoint
 RUN bash "/opt/ceph-container/bin/generate_entrypoint.sh" && \
