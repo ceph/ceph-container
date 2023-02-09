@@ -18,6 +18,12 @@ ENV OSD_FLAVOR __ENV_[OSD_FLAVOR]__
 
 __DOCKERFILE_PREINSTALL__
 
+__ETC_REDHAT_STORAGE_RELEASE__
+
+__EXPOSE_PORTS__
+
+__DOCKERFILE_LABELS__
+
 # Escape char after immediately after RUN allows comment in first line
 RUN \
     # Install all components for the image, whether from packages or web downloads.
@@ -33,6 +39,7 @@ RUN \
     __DOCKERFILE_POSTINSTALL_CLEANUP__ && \
     # Tweak some configuration files on the container system
     __DOCKERFILE_POSTINSTALL_TWEAKS__ && \
+    __DOCKERFILE_BRANDING__
     # Clean common files like /tmp, /var/lib, etc.
     __DOCKERFILE_CLEAN_COMMON__ && \
     #
