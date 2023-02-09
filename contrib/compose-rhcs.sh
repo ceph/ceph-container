@@ -11,6 +11,8 @@ if [[ -z "${VERSION}" ]]; then
   exit 1
 fi
 
+UBI_BRANDING=${BRANDING:-ibm}
+
 case "${VERSION}" in
   *4*)
     UBI_VERSION=8
@@ -29,7 +31,7 @@ case "${VERSION}" in
     exit 1
 esac
 
-UBI=ubi"${UBI_VERSION}"
+UBI=ubi"${UBI_VERSION}-${UBI_BRANDING}"
 STAGING_DIR=staging/"${CEPH_RELEASE}"-"${UBI}"-latest-x86_64/
 DAEMON_DIR=$STAGING_DIR/daemon
 DAEMON_BASE_DIR=$STAGING_DIR/daemon-base/
@@ -79,7 +81,7 @@ clean_staging() {
 }
 
 make_staging() {
-  make BASEOS_REGISTRY=registry.redhat.io BASEOS_REPO="${UBI}"/ubi-minimal FLAVORS="${CEPH_RELEASE}","${UBI}",latest || fatal "Cannot build ${UBI}"
+  make BASEOS_REGISTRY=registry.redhat.io BASEOS_REPO="ubi${UBI_VERSION}"/ubi-minimal FLAVORS="${CEPH_RELEASE}","${UBI}",latest || fatal "Cannot build ${UBI}"
 }
 
 success() {

@@ -1,0 +1,12 @@
+ln -s /usr/share/ceph/mgr/dashboard/frontend/dist-ibm /usr/share/ceph/mgr/dashboard/frontend/dist && \
+sed -i \
+  -e "s|registry.redhat.io/rhceph/rhceph-5-rhel8:latest|cp.icr.io/cp/ibm-ceph/ceph-5-rhel8:latest|" \
+  -e "s|registry.redhat.io/openshift4/ose-prometheus:v4.10|cp.icr.io/cp/ibm-ceph/prometheus:v4.10|" \
+  -e "s|registry.redhat.io/openshift4/ose-prometheus-node-exporter:v4.10|cp.icr.io/cp/ibm-ceph/prometheus-node-exporter:v4.10|" \
+  -e "s|registry.redhat.io/rhceph/rhceph-5-dashboard-rhel8:latest|cp.icr.io/cp/ibm-ceph/ceph-5-dashboard-rhel8:latest|" \
+  -e "s|registry.redhat.io/openshift4/ose-prometheus-alertmanager:v4.10|cp.icr.io/cp/ibm-ceph/prometheus-alertmanager:v4.10|" \
+  -e "s|registry.redhat.io/rhceph/rhceph-haproxy-rhel8:latest|cp.icr.io/cp/ibm-ceph/haproxy-rhel8:latest|" \
+  -e "s|registry.redhat.io/rhceph/keepalived-rhel8:latest|cp.icr.io/cp/ibm-ceph/keepalived-rhel8:latest|" \
+  -e "s|registry.redhat.io/rhceph/snmp-notifier-rhel8:latest|cp.icr.io/cp/ibm-ceph/snmp-notifier-rhel8:latest|" \
+  -e "s|default='registry.redhat.io'|default='cp.icr.io'|" \
+  /usr/share/ceph/mgr/cephadm/module.py && \

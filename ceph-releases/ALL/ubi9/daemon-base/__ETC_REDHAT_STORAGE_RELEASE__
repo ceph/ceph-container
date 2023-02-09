@@ -1,0 +1,2 @@
+# Editing /etc/redhat-storage-server release file
+RUN echo "Red Hat Ceph Storage Server 6 (Container)" > /etc/redhat-storage-release

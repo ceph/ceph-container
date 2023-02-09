@@ -1,0 +1,11 @@
+
+# Atomic specific labels
+LABEL version="4"
+
+# Build specific labels
+LABEL com.redhat.component="rhceph-container"
+LABEL name="rhceph"
+LABEL description="Red Hat Ceph Storage 4"
+LABEL summary="Provides the latest Red Hat Ceph Storage 4 on RHEL 8 in a fully featured and supported base image."
+LABEL io.k8s.display-name="Red Hat Ceph Storage 4 on RHEL 8"
+LABEL io.openshift.tags="rhceph ceph"
