@@ -39,4 +39,16 @@ jobs:
         run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
       - name: build the ceph container arm64 image
-        run: make BASEOS_REGISTRY=quay.io BASEOS_TAG=stream8 RELEASE="demo" BASEOS_REPO=centos/arm64v8 DAEMON_BASE_TAG="daemon-base:demo-centos-8-aarch64" DEMO_TAG="demo:demo-centos-stream8-aarch64" DAEMON_TAG="daemon:demo-centos-stream8-aarch64" FLAVORS="main,centos-arm64,8" build
+        run: make BASEOS_REGISTRY=quay.io/centos BASEOS_TAG=stream8 RELEASE="demo" BASEOS_REPO=centos DAEMON_BASE_TAG="daemon-base:demo-centos-8-aarch64" DEMO_TAG="demo:demo-centos-stream8-aarch64" DAEMON_TAG="daemon:demo-centos-stream8-aarch64" FLAVORS="main,centos-arm64,8" build
+
+  arm64-quincy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: setup qemu-static-user
+        run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+
+      - name: build the ceph container arm64 image
+        run: make BASEOS_REGISTRY=quay.io/centos BASEOS_TAG=stream8 RELEASE="demo" BASEOS_REPO=centos DAEMON_BASE_TAG="daemon-base:demo-centos-8-aarch64" IMAGES_TO_BUILD="daemon-base" FLAVORS="main,centos-arm64,8" build
