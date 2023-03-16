@@ -11,6 +11,7 @@ ENV CEPH_POINT_RELEASE "__ENV_[CEPH_POINT_RELEASE]__"
 ENV CEPH_DEVEL __ENV_[CEPH_DEVEL]__
 ENV CEPH_REF __ENV_[CEPH_REF]__
 ENV OSD_FLAVOR __ENV_[OSD_FLAVOR]__
+__IBM_ACCEPT_EULA__
 
 #======================================================
 # Install ceph and dependencies, and clean up
