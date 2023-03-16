@@ -39,16 +39,16 @@ $(shell bash -c 'set -eu ; \
 	set_var RELEASE            "$(RELEASE)" ; \
 	\
 	daemon_base_img="$$(val_or_default "$(DAEMON_BASE_TAG)" \
-		"daemon-base:$(RELEASE)-$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH")" ; \
+		"daemon-base:$(RELEASE)-$$CEPH_VERSION-$$DISTRO-$$BASEOS_TAG-$$HOST_ARCH")" ; \
 	if [ -n "$(TAG_REGISTRY)" ]; then daemon_base_img="$(TAG_REGISTRY)/$$daemon_base_img" ; fi ; \
 	set_var DAEMON_BASE_IMAGE  "$$daemon_base_img" ; \
 	\
 	daemon_img="$$(val_or_default "$(DAEMON_TAG)" \
-			"daemon:$(RELEASE)-$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH")" ; \
+			"daemon:$(RELEASE)-$$CEPH_VERSION-$$DISTRO-$$BASEOS_TAG-$$HOST_ARCH")" ; \
 	if [ -n "$(TAG_REGISTRY)" ]; then daemon_img="$(TAG_REGISTRY)/$$daemon_img" ; fi ; \
 	set_var DAEMON_IMAGE       "$$daemon_img" ; \
 	demo_img="$$(val_or_default "$(DEMO_TAG)" \
-			"demo:$(RELEASE)-$$CEPH_VERSION-$$BASEOS_REPO-$$BASEOS_TAG-$$HOST_ARCH")" ; \
+			"demo:$(RELEASE)-$$CEPH_VERSION-$$DISTRO-$$BASEOS_TAG-$$HOST_ARCH")" ; \
 	if [ -n "$(TAG_REGISTRY)" ]; then demo_img="$(TAG_REGISTRY)/$$demo_img" ; fi ; \
 	set_var DEMO_IMAGE       "$$demo_img" ; \
 	'
