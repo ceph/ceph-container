@@ -11,8 +11,8 @@ Password: **********
 Login Succeeded!
 ```
 
-You will then be able to run `podman pull registry.redhat.io/ubi9/ubi:latest`
-to fetch the base image.
+You will then be able to run `podman pull
+registry.redhat.io/ubi9/ubi-minimal:latest` to fetch the base image.
 
 ## Composing the Dockerfile
 
