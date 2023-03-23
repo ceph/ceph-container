@@ -61,7 +61,7 @@ gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release' >> /etc/yum.repos.d
 
 RUN printf '[odcs]\n\
 name = odcs\n\
-baseurl = http://download.eng.bos.redhat.com/odcs/prod/odcs-12345678/compose/Temporary/x86_64/os/\n\
+baseurl = http://download.eng.bos.redhat.com/odcs/prod/odcs-12345678/compose/Temporary/$basearch/os/\n\
 enabled = 1\n\
 gpgcheck = 0\n\
 ' >> /etc/yum.repos.d/rhceph-6-rhel-9.repo
