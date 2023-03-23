@@ -64,7 +64,7 @@ name = odcs\n\
 baseurl = http://download.eng.bos.redhat.com/odcs/prod/odcs-12345678/compose/Temporary/$basearch/os/\n\
 enabled = 1\n\
 gpgcheck = 0\n\
-' >> /etc/yum.repos.d/rhceph-6-rhel-9.repo
+' >> /etc/yum.repos.d/odcs.repo
 ```
 
 **Note: this uses an internal Pulp server, so your computer must be on Red
