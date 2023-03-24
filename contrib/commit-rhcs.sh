@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+source "$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )/common.sh"
+
 #############
 # VARIABLES #
 #############
@@ -49,7 +51,7 @@ pushd "$CEPH_CONTAINER_DIR"
   contrib/compose-rhcs.sh
 popd > /dev/null
 
-COMPOSED_DIR=$CEPH_CONTAINER_DIR/staging/main-ubi9-latest-x86_64/composed
+COMPOSED_DIR=$CEPH_CONTAINER_DIR/staging/"${CEPH_RELEASE}"-ubi9-"${UBI_BRANDING}"-latest-x86_64/composed
 
 if [ ! -d "$COMPOSED_DIR" ]; then
   fatal "There is no composed directory. Looks like the build failed !"

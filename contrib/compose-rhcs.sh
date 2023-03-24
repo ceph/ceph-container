@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+source "$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )/common.sh"
 
 #############
 # VARIABLES #
@@ -10,26 +11,6 @@ if [[ -z "${VERSION}" ]]; then
   echo "ERROR: VERSION must be set (eg: VERSION=5)"
   exit 1
 fi
-
-UBI_BRANDING=${BRANDING:-ibm}
-
-case "${VERSION}" in
-  *4*)
-    UBI_VERSION=8
-    CEPH_RELEASE=nautilus
-    ;;
-  *5*)
-    UBI_VERSION=8
-    CEPH_RELEASE=pacific
-    ;;
-  *6*)
-    UBI_VERSION=9
-    CEPH_RELEASE=quincy
-    ;;
-    *)
-    echo "ERROR: VERSION must be set to a valid version."
-    exit 1
-esac
 
 UBI=ubi"${UBI_VERSION}-${UBI_BRANDING}"
 STAGING_DIR=staging/"${CEPH_RELEASE}"-"${UBI}"-latest-x86_64/
@@ -62,16 +43,16 @@ create_compose_directory() {
   if [ -d "$COMPOSED_DIR" ]; then
     rm -rf "${COMPOSED_DIR:?}"
   fi
-  mkdir -p $COMPOSED_DIR
+  mkdir -p "$COMPOSED_DIR"
 }
 
 import_content() {
-  rsync -a --exclude "__*__" --exclude "*.bak" --exclude "*.md" "$1"/* $COMPOSED_DIR/ || fatal "Cannot rsync"
+  rsync -a --exclude "__*__" --exclude "*.bak" --exclude "*.md" "$1"/* "$COMPOSED_DIR"/ || fatal "Cannot rsync"
 }
 
 # Select the end of the daemon Dockerfile to complete the daemon-base's one
 merge_content() {
-  grep -B1 -A1000 "# Add ceph-container files" $DOCKERFILE_DAEMON >> $COMPOSED_DIR/Dockerfile || fatal "Cannot find starting point in $DOCKERFILE_DAEMON"
+  grep -B1 -A1000 "# Add ceph-container files" "$DOCKERFILE_DAEMON" >> "$COMPOSED_DIR"/Dockerfile || fatal "Cannot find starting point in $DOCKERFILE_DAEMON"
 }
 
 clean_staging() {
@@ -100,9 +81,9 @@ make_staging
 check_staging_exist
 create_compose_directory
 if [[ "${VERSION}" == "5" ]]; then
-  import_content $DAEMON_DIR
+  import_content "$DAEMON_DIR"
 fi
-import_content $DAEMON_BASE_DIR
+import_content "$DAEMON_BASE_DIR"
 if [[ "${VERSION}" == "5" ]]; then
   merge_content
 fi
