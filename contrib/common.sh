@@ -17,7 +17,7 @@ case "${VERSION}" in
     CEPH_RELEASE=quincy
     ;;
     *)
-    echo "ERROR: VERSION must be set to a valid version."
+    echo "ERROR: VERSION must be set to 4, 5, or 6."
     exit 1
 esac
 
