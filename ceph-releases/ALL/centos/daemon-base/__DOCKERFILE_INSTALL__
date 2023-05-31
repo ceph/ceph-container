@@ -1,54 +1,53 @@
 yum install -y epel-release && \
 yum install -y jq && \
-bash -c ' \
+bash -x -c ' \
   if [ -n "__GANESHA_PACKAGES__" ]; then \
-    if [[ "${CEPH_VERSION}" == master || "${CEPH_VERSION}" == main ]]; then \
-      curl -s -L "https://shaman.ceph.com/api/repos/nfs-ganesha/next/latest/centos/__ENV_[DISTRO_VERSION]__/flavors/ceph_main/repo?arch=$(arch)" -o /etc/yum.repos.d/ganesha.repo ; \
-    elif  [[ "${CEPH_VERSION}" == reef ]]; then \
-      echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
-      echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "baseurl=https://buildlogs.centos.org/centos/\$releasever-stream/storage/\$basearch/nfsganesha-5/" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
-    elif  [[ "${CEPH_VERSION}" == quincy ]]; then \
-      echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
-      echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "baseurl=https://buildlogs.centos.org/centos/\$releasever-stream/storage/\$basearch/nfsganesha-5/" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
-    elif [[ "${CEPH_VERSION}" == pacific ]]; then \
-      echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
-      echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V3.5-stable/$CEPH_VERSION/el\$releasever/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
+    arch_baseurl="" ; \
+    noarch_baseurl="" ; \
+    gpgcheck=1 ; \
+    case "${CEPH_VERSION}" in \
+      master | main ) \
+        ARCH=$(arch); \
+        if [[ "${ARCH}" == "aarch64" ]]; then \
+          ARCH="arm64"; \
+        fi ; \
+        base="$(curl -s -L "https://shaman.ceph.com/api/search/?project=nfs-ganesha&ref=next&sha1=latest&flavor=ceph_main&distros=centos/__ENV_[DISTRO_VERSION]__/${ARCH}" | jq -e -r ".[0].url")" ; \
+        arch_baseurl="$base/\$basearch/" ; \
+        noarch_baseurl="$base/noarch/" ; \
+        gpgcheck=0 ; \
+        ;; \
+      quincy | reef ) \
+        arch_baseurl="https://buildlogs.centos.org/centos/\$releasever-stream/storage/\$basearch/nfsganesha-5/" ; \
+        noarch_baseurl="" ; \
+        ;; \
+      pacific ) \
+        arch_baseurl="https://download.ceph.com/nfs-ganesha/rpm-V3.5-stable/$CEPH_VERSION/el\$releasever/\$basearch/" ; \
+        noarch_baseurl="https://download.ceph.com/nfs-ganesha/rpm-V3.5-stable/$CEPH_VERSION/el\$releasever/noarch/" ; \
+        ;; \
+      octopus ) \
+        arch_baseurl="https://download.ceph.com/nfs-ganesha/rpm-V3.3-stable/$CEPH_VERSION/el\$releasever/\$basearch/" ; \
+        noarch_baseurl="https://download.ceph.com/nfs-ganesha/rpm-V3.3-stable/$CEPH_VERSION/el\$releasever/noarch/" ; \
+        ;; \
+      nautilus ) \
+        arch_baseurl="https://download.ceph.com/nfs-ganesha/rpm-V2.8-stable/$CEPH_VERSION/el\$releasever/\$basearch/" ; \
+        noarch_baseurl="" ; \
+        ;; \
+      * ) \
+        arch_baseurl="https://download.ceph.com/nfs-ganesha/rpm-V2.7-stable/$CEPH_VERSION/el\$releasever/\$basearch/" ; \
+        noarch_baseurl="" ; \
+        ;; \
+    esac ; \
+    echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
+    echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
+    echo "baseurl=$arch_baseurl" >> /etc/yum.repos.d/ganesha.repo ; \
+    echo "gpgcheck=$gpgcheck" >> /etc/yum.repos.d/ganesha.repo ; \
+    echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
+    if [[ -n "$noarch_baseurl" ]]; then \
+      echo "" >> /etc/yum.repos.d/ganesha.repo ; \
       echo "[ganesha-noarch]" >> /etc/yum.repos.d/ganesha.repo ; \
       echo "name=ganesha-noarch" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V3.5-stable/$CEPH_VERSION/el\$releasever/noarch/" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
-    elif [[ "${CEPH_VERSION}" == octopus ]]; then \
-      echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
-      echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V3.3-stable/$CEPH_VERSION/el\$releasever/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
-      echo "[ganesha-noarch]" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "name=ganesha-noarch" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V3.3-stable/$CEPH_VERSION/el\$releasever/noarch/" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
-    elif [[ "${CEPH_VERSION}" == nautilus ]]; then \
-      echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
-      echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V2.8-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
-    else \
-      echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
-      echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V2.7-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
-      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "baseurl=$noarch_baseurl" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "gpgcheck=$gpgcheck" >> /etc/yum.repos.d/ganesha.repo ; \
       echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
     fi ; \
   fi ; \
