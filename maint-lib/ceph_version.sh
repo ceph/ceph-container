@@ -51,6 +51,9 @@ function get_ceph_version {
     *quincy*)
       echo quincy
       ;;
+    *reef*)
+      echo reef
+      ;;
     *)
       echo main
       ;;

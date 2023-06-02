@@ -4,6 +4,12 @@ bash -c ' \
   if [ -n "__GANESHA_PACKAGES__" ]; then \
     if [[ "${CEPH_VERSION}" == master || "${CEPH_VERSION}" == main ]]; then \
       curl -s -L "https://shaman.ceph.com/api/repos/nfs-ganesha/next/latest/centos/__ENV_[DISTRO_VERSION]__/flavors/ceph_main/repo?arch=$(arch)" -o /etc/yum.repos.d/ganesha.repo ; \
+    elif  [[ "${CEPH_VERSION}" == reef ]]; then \
+      echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
+      echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "baseurl=https://buildlogs.centos.org/centos/\$releasever-stream/storage/\$basearch/nfsganesha-5/" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
     elif  [[ "${CEPH_VERSION}" == quincy ]]; then \
       echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
       echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
@@ -50,7 +56,7 @@ bash -c ' \
     curl -s -L https://shaman.ceph.com/api/repos/tcmu-runner/main/latest/centos/__ENV_[DISTRO_VERSION]__/repo?arch=$(arch) -o /etc/yum.repos.d/tcmu-runner.repo ; \
     if [[ "${CEPH_VERSION}" =~ master || "${CEPH_VERSION}" == main ]]; then \
       curl -s -L https://shaman.ceph.com/api/repos/ceph-iscsi/main/latest/centos/__ENV_[DISTRO_VERSION]__/repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
-    elif [[ "${CEPH_VERSION}" =~ nautilus|octopus|pacific|quincy ]]; then \
+    elif [[ "${CEPH_VERSION}" =~ nautilus|octopus|pacific|quincy|reef ]]; then \
       curl -s -L https://download.ceph.com/ceph-iscsi/3/rpm/el__ENV_[DISTRO_VERSION]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
     else \
       curl -s -L https://download.ceph.com/ceph-iscsi/2/rpm/el__ENV_[DISTRO_VERSION]__/ceph-iscsi.repo -o /etc/yum.repos.d/ceph-iscsi.repo ; \
