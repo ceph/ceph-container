@@ -519,16 +519,28 @@ function ami_privileged {
 
 # Detect how much ram is available
 function get_available_ram {
-  limit_in_bytes="/sys/fs/cgroup/memory/memory.limit_in_bytes"
-  memory_limit=$(cat $limit_in_bytes)
+  memory_limit_in_bytes_file=""
+  memory_current_usage_in_bytes_file=""
+
+  if grep -q cgroup2 /proc/mounts; then
+    # cgroups v2
+    memory_limit_in_bytes_file="/sys/fs/cgroup/memory.max"
+    memory_current_usage_in_bytes_file="/sys/fs/cgroup/memory.current"
+  else
+    # cgroups V1
+    memory_limit_in_bytes_file="/sys/fs/cgroup/memory/memory.limit_in_bytes"
+    memory_current_usage_in_bytes_file="/sys/fs/cgroup/memory/memory.usage_in_bytes"
+  fi
+
+  memory_limit=$(cat $memory_limit_in_bytes_file)
   # 8 ExaBytes is the value of an unbounded device
-  if  [ "${memory_limit}" = "9223372036854771712" ]; then
+  if [ "${memory_limit}" = "9223372036854771712" ] || [ "${memory_limit}" = "max" ]; then
     # Looks like we are not in a container
     # Let's report the MemAvailable on this system
     echo $(( $(awk '/MemAvailable/{print $2}' /proc/meminfo) * 1024))
   else
-    current_usage=$(cat /sys/fs/cgroup/memory/memory.usage_in_bytes)
-    echo $(( memory_limit - current_usage ))
+    memory_current_usage=$(cat $memory_current_usage_in_bytes_file)
+    echo $(( memory_limit - memory_current_usage ))
   fi
 }
 
