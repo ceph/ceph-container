@@ -51,7 +51,7 @@ OSD_FLAVOR=${OSD_FLAVOR:=default}
 
 if [ -z "$CEPH_RELEASES" ]; then
   # NEVER change 'main' position in the array, this will break the 'latest' tag
-  CEPH_RELEASES=(main pacific quincy)
+  CEPH_RELEASES=(main pacific quincy reef)
 fi
 
 HOST_ARCH=$(uname -m)
@@ -224,6 +224,8 @@ function create_head_or_point_release {
       CEPH_RELEASES=(pacific)
     elif [ "${CONTAINER_BRANCH}" == "stable-7.0" ]; then
       CEPH_RELEASES=(quincy)
+    elif [ "${CONTAINER_BRANCH}" == "stable-8.0" ]; then
+      CEPH_RELEASES=(reef)
     fi
   else
     set -e
