@@ -10,7 +10,7 @@ unset "DAEMON_OPTS[${#DAEMON_OPTS[@]}-1]" # remove the last element of the array
 : "${MDS_NAME:=${HOSTNAME}}"
 : "${MON_DATA_DIR:=/var/lib/ceph/mon/${CLUSTER}-${MON_NAME}}"
 : "${CEPH_CLUSTER_NETWORK:=${CEPH_PUBLIC_NETWORK}}"
-DAEMON_OPTS=(--cluster ${CLUSTER} --setuser ceph --setgroup ceph --default-log-to-stderr=true --err-to-stderr=true --default-log-to-file=false)
+DAEMON_OPTS=(--cluster "${CLUSTER}" --setuser ceph --setgroup ceph --default-log-to-stderr=true --err-to-stderr=true --default-log-to-file=false)
 ADMIN_KEYRING=/etc/ceph/${CLUSTER}.client.admin.keyring
 MON_KEYRING=/etc/ceph/${CLUSTER}.mon.keyring
 RGW_KEYRING=/var/lib/ceph/radosgw/${CLUSTER}-rgw.${RGW_NAME}/keyring
@@ -67,7 +67,7 @@ auth_allow_insecure_global_id_reclaim = false
 ENDHERE
 
   # For ext4
-  if [ "$(findmnt -n -o FSTYPE -T /var/lib/ceph)" = "ext4" -o "$OSD_FORCE_EXT4" == "yes" ]; then
+  if [ "$(findmnt -n -o FSTYPE -T /var/lib/ceph)" = "ext4" ] || [ "$OSD_FORCE_EXT4" == "yes" ]; then
     cat <<ENDHERE >> /etc/ceph/"${CLUSTER}".conf
 osd max object name len = 256
 osd max object namespace len = 64
@@ -127,7 +127,7 @@ function start_mon {
   if [ ! -e "$MON_DATA_DIR/keyring" ]; then
     mkdir -p "$MON_DATA_DIR"
     chown 167:167 "$MON_DATA_DIR"
-    get_mon_config $ip_version
+    get_mon_config "$IP_VERSION"
 
     if [ ! -e "$MON_KEYRING" ]; then
       log "ERROR- $MON_KEYRING must exist.  You can extract it from your current monitor by running 'ceph auth get mon. -o $MON_KEYRING' or use a KV Store"
@@ -160,7 +160,7 @@ function start_mon {
       # The list of monitors will not be provided by the ceph.conf since we don't have the overall knowledge of what's already deployed
       # In this kind of environment, the monmap is the only source of truth for new monitor to attempt to join the existing quorum
       if [[ ! -f "$MONMAP" ]]; then
-        get_mon_config $ip_version
+        get_mon_config "$IP_VERSION"
       fi
       # Be sure that the mon name of the current monitor in the monmap is equal to ${MON_NAME}.
       # Names can be different in case of full qualifed hostnames
@@ -352,7 +352,7 @@ function bootstrap_demo_user {
     log "Demo user already exists with credentials:"
     cat "$CEPH_DEMO_USER"
   else
-    mkdir -p $(dirname $CEPH_DEMO_USER)
+    mkdir -p "$(dirname $CEPH_DEMO_USER)"
     log "Setting up a demo user..."
     if [ -n "$CEPH_DEMO_UID" ] && [ -n "$CEPH_DEMO_ACCESS_KEY" ] && [ -n "$CEPH_DEMO_SECRET_KEY" ]; then
       radosgw-admin "${CLI_OPTS[@]}" user create --uid="$CEPH_DEMO_UID" --display-name="Ceph demo user" --access-key="$CEPH_DEMO_ACCESS_KEY" --secret-key="$CEPH_DEMO_SECRET_KEY"
