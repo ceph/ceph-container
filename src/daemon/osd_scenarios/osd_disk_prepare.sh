@@ -43,15 +43,18 @@ function osd_disk_prepare {
     if [[ "${OSD_BLUESTORE_BLOCK_DB}" != "${OSD_DEVICE}" ]]; then
       CEPH_DISK_CLI_OPTS+=(--block.db "${OSD_BLUESTORE_BLOCK_DB}" --block.db-uuid "${OSD_BLUESTORE_BLOCK_DB_UUID}")
     fi
-    ceph-disk -v prepare "${CEPH_DISK_CLI_OPTS[@]}" \
-    --block-uuid "${OSD_BLUESTORE_BLOCK_UUID}" \
-    "${OSD_DEVICE}"
+    # ceph-disk -v prepare "${CEPH_DISK_CLI_OPTS[@]}" \
+    # --block-uuid "${OSD_BLUESTORE_BLOCK_UUID}" \
+    # "${OSD_DEVICE}"
+    ceph-volume lvm prepare "${CEPH_DISK_CLI_OPTS[@]}"
   elif [[ "${OSD_FILESTORE}" -eq 1 ]]; then
     CEPH_DISK_CLI_OPTS+=(--filestore)
     if [[ -n "${OSD_JOURNAL}" ]]; then
-      ceph-disk -v prepare "${CEPH_DISK_CLI_OPTS[@]}" --journal-uuid "${OSD_JOURNAL_UUID}" "${OSD_DEVICE}" "${OSD_JOURNAL}"
+      # ceph-disk -v prepare "${CEPH_DISK_CLI_OPTS[@]}" --journal-uuid "${OSD_JOURNAL_UUID}" "${OSD_DEVICE}" "${OSD_JOURNAL}"
+      ceph-volume lvm prepare "${CEPH_DISK_CLI_OPTS[@]}" --journal "${OSD_JOURNAL}"
     else
-      ceph-disk -v prepare "${CEPH_DISK_CLI_OPTS[@]}" --journal-uuid "${OSD_JOURNAL_UUID}" "${OSD_DEVICE}"
+      # ceph-disk -v prepare "${CEPH_DISK_CLI_OPTS[@]}" --journal-uuid "${OSD_JOURNAL_UUID}" "${OSD_DEVICE}"
+      log "ERROR: use FILESTORE you must provide OSD_JOURNAL"
     fi
   fi
 
