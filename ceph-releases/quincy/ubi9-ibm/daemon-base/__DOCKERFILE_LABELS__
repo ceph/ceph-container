@@ -1,0 +1,10 @@
+# Atomic specific labels
+LABEL version="6"
+
+# Build specific labels
+LABEL com.redhat.component="ibm-ceph-container"
+LABEL name="ibm-ceph"
+LABEL description="IBM Storage Ceph 6"
+LABEL summary="Provides the latest IBM Storage Ceph 6 in a fully featured and supported base image."
+LABEL io.k8s.display-name="IBM Storage Ceph 6"
+LABEL io.openshift.tags="ibm ceph"
