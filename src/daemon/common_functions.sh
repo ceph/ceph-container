@@ -121,7 +121,7 @@ function dev_part {
       if [[ $(readlink -f "$option") == "$desired_partition" ]]; then
         local optprefixlen
         optprefixlen=$(prefix_length "$option" "$osd_device")
-        if [[ $optprefixlen > $pfxlen ]]; then
+        if [[ $optprefixlen -gt $pfxlen ]]; then
           link=$option
           pfxlen=$optprefixlen
         fi
