@@ -32,14 +32,18 @@ def _get_file_text(file_path):
 # variable in the text with the contents of the file without trailing space
 def _replace_file_in_text(variable_file_path, text, file_path):
     variable = os.path.basename(variable_file_path)
-    with open(variable_file_path) as variable_file:
-        variable_text = variable_file.read().rstrip()
-        if "\n" in variable_text or len(variable_text) > 46:
-            # Output 'user-defined script' if string is multiline
-            logging.info(REPLACE_LOGTEXT.format(variable, '[user-defined script]', file_path))
-        else:
-            logging.info(REPLACE_LOGTEXT.format(variable, variable_text, file_path))
-        return text.replace(variable, variable_text)
+    try:
+        with open(variable_file_path) as variable_file:
+            variable_text = variable_file.read().rstrip()
+            if "\n" in variable_text or len(variable_text) > 46:
+                # Output 'user-defined script' if string is multiline
+                logging.info(REPLACE_LOGTEXT.format(variable, '[user-defined script]', file_path))
+            else:
+                logging.info(REPLACE_LOGTEXT.format(variable, variable_text, file_path))
+            return text.replace(variable, variable_text)
+    except FileNotFoundError:
+        print("File {} is missing.\n\n".format(variable_file_path))
+        sys.exit(1)
 
 
 # Move existing file to <file>.bak. Save text into file.
