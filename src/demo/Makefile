@@ -22,6 +22,11 @@
 
 build:
 	@echo === docker build $(DEMO_IMAGE)
+	@echo running cmd: sleep 30
+	@sleep 30
+	@echo running cmd: docker images
+	@docker images
+	@echo running cmd: docker build $(BUILD_ARGS) -t $(DEMO_IMAGE) .
 	@docker build $(BUILD_ARGS) -t $(DEMO_IMAGE) .
 
 push: ; @docker push $(DEMO_IMAGE)
