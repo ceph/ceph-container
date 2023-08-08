@@ -35,8 +35,11 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
 
+      - name: switch to podman
+        run: sudo apt-get remove moby-cli moby-engine moby-buildx moby-compose moby-runc moby-containerd && sudo apt-get install -y podman-docker
+
       - name: setup qemu-static-user
-        run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+        run: sudo docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
       - name: build the ceph container arm64 image
         run: make BASEOS_REGISTRY=quay.io BASEOS_TAG=stream8 RELEASE="demo" BASEOS_REPO=centos/arm64v8 DAEMON_BASE_TAG="daemon-base:demo-centos-8-aarch64" DEMO_TAG="demo:demo-centos-stream8-aarch64" DAEMON_TAG="daemon:demo-centos-stream8-aarch64" IMAGES_TO_BUILD="daemon-base demo" TAG_REGISTRY=quay.io FLAVORS="main,centos-arm64,8" build
@@ -44,6 +47,6 @@ jobs:
       - name: debug on failure
         if: ${{ failure() }}
         run: |
-          docker images
-          docker ps
-          docker ps -a
+          podman images
+          podman ps
+          podman ps -a
