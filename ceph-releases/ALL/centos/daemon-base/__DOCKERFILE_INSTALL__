@@ -2,7 +2,7 @@ yum install -y epel-release && \
 yum install -y jq && \
 bash -c ' \
   if [ -n "__GANESHA_PACKAGES__" ]; then \
-    __GANESHA_REPO__
+    ../../../"${CEPH_VERSION}"/centos/__GANESHA_REPO__
   fi ; \
   if [ -n "__ISCSI_PACKAGES__" ]; then \
     curl -s -L https://shaman.ceph.com/api/repos/tcmu-runner/main/latest/centos/__ENV_[DISTRO_VERSION]__/repo?arch=$(arch) -o /etc/yum.repos.d/tcmu-runner.repo ; \
