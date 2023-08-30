@@ -23,8 +23,7 @@ FLAVORS ?= \
 	reef,centos,8 \
 	main,centos,8
 
-TAG_REGISTRY ?= quay.io
-TAG_REPO ?= ceph
+TAG_REGISTRY ?= ceph
 
 # By default the RELEASE version is the git branch name
 # Could be overrided by user at build time
