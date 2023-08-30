@@ -300,7 +300,7 @@ function push_ceph_imgs_latest {
       IFS="," read -r ceph_branch distro distro_release <<< "${CONTAINER_FLAVOR}"
     fi
     # local_tag should match with daemon_img defined in maint-lib/makelib.mk
-    local_tag=${CONTAINER_REPO_ORGANIZATION}/ceph/daemon-base:${RELEASE}-${CEPH_VERSION}-${distro}-stream${distro_release}-${HOST_ARCH}
+    local_tag=${CONTAINER_REPO_ORGANIZATION}/daemon-base:${RELEASE}-${CEPH_VERSION}-${distro}-stream${distro_release}-${HOST_ARCH}
     full_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${RELEASE}-${distro}-stream${distro_release}-${HOST_ARCH}-devel
     branch_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${BRANCH}
     sha1_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}
