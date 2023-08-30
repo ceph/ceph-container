@@ -2,7 +2,55 @@ yum install -y epel-release && \
 yum install -y jq && \
 bash -c ' \
   if [ -n "__GANESHA_PACKAGES__" ]; then \
-    __GANESHA_REPO__
+    if [[ "${CEPH_VERSION}" == master || "${CEPH_VERSION}" == main ]]; then \
+      curl -s -L "https://shaman.ceph.com/api/repos/nfs-ganesha/V5.3.2/latest/centos/__ENV_[DISTRO_VERSION]__/flavors/ceph_main/repo?arch=$(arch)" -o /etc/yum.repos.d/ganesha.repo ; \
+    elif  [[ "${CEPH_VERSION}" == reef ]]; then \
+      echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
+      echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "baseurl=https://buildlogs.centos.org/centos/\$releasever-stream/storage/\$basearch/nfsganesha-5/" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
+    elif  [[ "${CEPH_VERSION}" == quincy ]]; then \
+      echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
+      echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "baseurl=https://buildlogs.centos.org/centos/\$releasever/storage/\$basearch/nfsganesha-4/" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
+    elif [[ "${CEPH_VERSION}" == pacific ]]; then \
+      echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
+      echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V3.5-stable/$CEPH_VERSION/el\$releasever/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
+      echo "[ganesha-noarch]" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "name=ganesha-noarch" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V3.5-stable/$CEPH_VERSION/el\$releasever/noarch/" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
+    elif [[ "${CEPH_VERSION}" == octopus ]]; then \
+      echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
+      echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V3.3-stable/$CEPH_VERSION/el\$releasever/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
+      echo "[ganesha-noarch]" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "name=ganesha-noarch" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V3.3-stable/$CEPH_VERSION/el\$releasever/noarch/" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
+    elif [[ "${CEPH_VERSION}" == nautilus ]]; then \
+      echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
+      echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V2.8-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
+    else \
+      echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
+      echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V2.7-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
+    fi ; \
   fi ; \
   if [ -n "__ISCSI_PACKAGES__" ]; then \
     curl -s -L https://shaman.ceph.com/api/repos/tcmu-runner/main/latest/centos/__ENV_[DISTRO_VERSION]__/repo?arch=$(arch) -o /etc/yum.repos.d/tcmu-runner.repo ; \
@@ -46,4 +94,4 @@ bash -c ' \
     yum copr enable -y tchaikov/python-scikit-learn ; \
     yum copr enable -y tchaikov/python3-asyncssh ; \
   fi ' && \
-yum install -y --setopt=install_weak_deps=False __ENABLE_REPOS__ __CEPH_BASE_PACKAGES__
+yum install -y --setopt=install_weak_deps=False --enablerepo=powertools __CEPH_BASE_PACKAGES__
