@@ -21,12 +21,12 @@ final `Dockerfile` that developers can build or commit to dist-git. This
 command generates that downstream Red Hat UBI-based `Dockerfile`:
 
 ```
-BRANDING=redhat VERSION=6 ./contrib/compose-rhcs.sh
+BRANDING=redhat VERSION=7 ./contrib/compose-rhcs.sh
 ```
 
 Or the IBM-branded `Dockerfile`:
 ```
-BRANDING=ibm VERSION=6 ./contrib/compose-rhcs.sh
+BRANDING=ibm VERSION=7 ./contrib/compose-rhcs.sh
 ```
 
 ## Yum repositories
@@ -40,7 +40,7 @@ To test a local build outside OSBS, you must mimic what OSBS does and insert som
 First, create an ODCS compose from the candidate tag:
 
 ```
-odcs --redhat create-tag --sigkey none ceph-6.0-rhel-9-candidate
+odcs --redhat create-tag --sigkey none ceph-7.0-rhel-9-candidate
 ```
 
 Save the resulting id and baseurl for the next step.
