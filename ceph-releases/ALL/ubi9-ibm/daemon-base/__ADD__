@@ -1,0 +1,1 @@
+ADD ceph_call_home /usr/share/ceph/mgr/call_home_agent/ceph_call_home
