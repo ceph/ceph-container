@@ -53,3 +53,4 @@ RUN \
     #
     # Verify that the packages installed haven't been accidentally cleaned
     __DOCKERFILE_VERIFY_PACKAGES__ && echo 'Packages verified successfully'
+__ADD__
