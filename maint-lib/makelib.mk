@@ -37,6 +37,9 @@ $(shell bash -c 'set -eu ; \
 	set_var IMAGES_TO_BUILD    "$(IMAGES_TO_BUILD)" ; \
 	set_var STAGING_DIR        "staging/$$CEPH_VERSION$$CEPH_POINT_RELEASE-$$DISTRO-$$DISTRO_VERSION-$$HOST_ARCH" ; \
 	set_var RELEASE            "$(RELEASE)" ; \
+	set_var PRERELEASE         "$(PRERELEASE)" ; \
+	set_var PRERELEASE_USERNAME "$(PRERELEASE_USERNAME)" ; \
+	set_var PRERELEASE_PASSWORD "$(PRERELEASE_PASSWORD)" ; \
 	\
 	daemon_base_img="$$(val_or_default "$(DAEMON_BASE_TAG)" \
 		"daemon-base:$(RELEASE)-$$CEPH_VERSION-$$DISTRO-$$BASEOS_TAG-$$HOST_ARCH")" ; \
