@@ -43,6 +43,11 @@ BASEOS_TAG ?= ""
 CEPH_DEVEL ?= false
 OSD_FLAVOR ?= "default"
 
+# Default to not doing prerelease (env var must have a value)
+PRERELEASE ?= false
+PRERELEASE_USERNAME ?= ""
+PRERELEASE_PASSWORD ?= ""
+
 
 # ==============================================================================
 # Internal definitions

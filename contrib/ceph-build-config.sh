@@ -13,8 +13,8 @@ trap 'exit $?' ERR
 # These build scripts don't need to have the aarch64 part of the distro specified
 # I.e., specifying 'luminous,centos-arm64,7' is not necessary for aarch64 builds; these scripts
 #       will do the right build. See configurable CENTOS_AARCH64_FLAVOR_DISTRO below
-X86_64_FLAVORS_TO_BUILD="pacific,centos,8 quincy,centos,8 reef,centos,8"
-AARCH64_FLAVORS_TO_BUILD="pacific,centos,8 quincy,centos,8 reef,centos,8"
+X86_64_FLAVORS_TO_BUILD="${X86_64_FLAVORS_TO_BUILD:-pacific,centos,8 quincy,centos,8 reef,centos,8}"
+AARCH64_FLAVORS_TO_BUILD="${AARCH64_FLAVORS_TO_BUILD:-pacific,centos,8 quincy,centos,8 reef,centos,8}"
 
 # Allow running this script with the env var ARCH='aarch64' to build arm images
 # ARCH='x86_64'
@@ -226,7 +226,11 @@ function get_ceph_download_url () {
     *)
       error "get_ceph_download_url - unknown distro '${distro}''"
   esac
-  echo "https://download.ceph.com/${flavor_path}/${arch}/"
+  if [ "$PRERELEASE" = true ] ; then
+    echo "https://$PRERELEASE_USERNAME:$PRERELEASE_PASSWORD@download.ceph.com/prerelease/${flavor_path}/${arch}/"
+  else
+    echo "https://download.ceph.com/${flavor_path}/${arch}/"
+  fi
 }
 
 # Return a list of the ceph version strings available on the server as:

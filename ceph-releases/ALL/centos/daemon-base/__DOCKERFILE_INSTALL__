@@ -93,9 +93,21 @@ bash -c ' \
     fi ;\
   else \
     RELEASE_VER=1 ;\
-    REPO_URL="http://download.ceph.com/rpm-${CEPH_VERSION}/el__ENV_[DISTRO_VERSION]__/"; \
+    if [[ __ENV_[PRERELEASE]__ = true ]] ; then \
+      REPO_URL="https://__ENV_[PRERELEASE_USERNAME]__:__ENV_[PRERELEASE_PASSWORD]__@download.ceph.com/prerelease/rpm-${CEPH_VERSION}/el__ENV_[DISTRO_VERSION]__/"; \
+    else \
+      REPO_URL="http://download.ceph.com/rpm-${CEPH_VERSION}/el__ENV_[DISTRO_VERSION]__/"; \
+    fi \
   fi && \
   rpm -Uvh "$REPO_URL/noarch/ceph-release-1-${RELEASE_VER}.el__ENV_[DISTRO_VERSION]__.noarch.rpm" && \
+  #
+  # We have to change this after installing because ceph-release is built long
+  # ago in the ceph build
+  #
+  if [[ __ENV_[PRERELEASE]__ = true ]] ; then \
+    sed -i "s;http://download.ceph.com/;https://__ENV_[PRERELEASE_USERNAME]__:__ENV_[PRERELEASE_PASSWORD]__@download.ceph.com/prerelease/;" /etc/yum.repos.d/ceph.repo ; \
+    dnf clean expire-cache ; \
+  fi && \
   if [[ __ENV_[DISTRO_VERSION]__ -eq 8 ]]; then \
     yum install -y dnf-plugins-core ; \
     yum copr enable -y tchaikov/python-scikit-learn ; \
