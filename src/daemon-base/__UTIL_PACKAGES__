@@ -1,2 +1,3 @@
 procps-ng \
-        hostname
+hostname \
+iproute
