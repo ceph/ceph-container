@@ -1,0 +1,5 @@
+echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
+echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
+echo "baseurl=http://mirror.centos.org/centos/8-stream/storage/\$basearch/nfsganesha-__GANESHA_VER__/" >> /etc/yum.repos.d/ganesha.repo ; \
+echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
+echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo ; \

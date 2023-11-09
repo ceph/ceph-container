@@ -1,0 +1,5 @@
+echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
+echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
+echo "baseurl=https://download.ceph.com/nfs-ganesha/rpm-V2.7-stable/$CEPH_VERSION/\$basearch/" >> /etc/yum.repos.d/ganesha.repo ; \
+echo "gpgcheck=1" >> /etc/yum.repos.d/ganesha.repo ; \
+echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
