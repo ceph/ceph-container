@@ -58,7 +58,8 @@ ALL_BUILDABLE_FLAVORS := \
 	quincy,centos,8 \
 	reef,centos,8 \
 	squid,centos,8 \
-	main,centos,8
+	main,centos,8 \
+	main,centos,9
 
 # ==============================================================================
 # Build targets
