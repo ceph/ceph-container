@@ -54,6 +54,9 @@ function get_ceph_version {
     *reef*)
       echo reef
       ;;
+    *squid*)
+      echo squid
+      ;;
     *)
       echo main
       ;;
