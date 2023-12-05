@@ -20,8 +20,12 @@ case "${VERSION}" in
     UBI_VERSION=9
     CEPH_RELEASE=reef
     ;;
+  *8*)
+    UBI_VERSION=9
+    CEPH_RELEASE=squid
+    ;;
     *)
-    echo "ERROR: VERSION must be set to 5, 6 or 7."
+    echo "ERROR: VERSION must be set to 6, 7 or 8."
     exit 1
 esac
 
