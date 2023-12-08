@@ -12,3 +12,9 @@ jobs:
 
       - name: compose the RHCS 6 container image
         run: VERSION=6 CEPH_RELEASE=quincy ./contrib/compose-rhcs.sh
+
+      - name: compose the RHCS 7 container image
+        run: VERSION=7 CEPH_RELEASE=reef ./contrib/compose-rhcs.sh
+
+      - name: compose the RHCS 8 container image
+        run: VERSION=8 CEPH_RELEASE=squid ./contrib/compose-rhcs.sh
