@@ -4,7 +4,11 @@ bash -c ' \
   if [ -n "__GANESHA_PACKAGES__" ]; then \
     if [[ "${CEPH_VERSION}" == master || "${CEPH_VERSION}" == main ]]; then \
       ARCH=$(arch); if [[ "${ARCH}" == "aarch64" ]]; then ARCH="arm64"; fi ; \
-      curl -s -L "https://shaman.ceph.com/api/repos/nfs-ganesha/V5.7/latest/centos/__ENV_[DISTRO_VERSION]__/flavors/ceph_main/repo?arch=${ARCH}" -o /etc/yum.repos.d/ganesha.repo ; \
+      echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
+      echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "baseurl=https://buildlogs.centos.org/centos/\$releasever-stream/storage/\$basearch/nfsganesha-5/" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "gpgcheck=0" >> /etc/yum.repos.d/ganesha.repo ; \
+      echo "enabled=1" >> /etc/yum.repos.d/ganesha.repo  ; \
     elif  [[ "${CEPH_VERSION}" == reef ]]; then \
       echo "[ganesha]" > /etc/yum.repos.d/ganesha.repo ; \
       echo "name=ganesha" >> /etc/yum.repos.d/ganesha.repo ; \
