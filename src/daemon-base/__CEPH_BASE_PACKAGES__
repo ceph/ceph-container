@@ -27,4 +27,5 @@
         __SCIKIT_LEARN__ \
         __CEPH_VOLUME_PACKAGE__ \
         __CEPH_EXPORTER_PACKAGE__ \
+        __CEPH_NODE_PROXY_PACKAGE__ \
         __CEPH_IBM_PACKAGES__
