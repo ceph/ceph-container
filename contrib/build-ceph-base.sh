@@ -6,6 +6,7 @@ set -Eeuo pipefail
 # script. Dry runs will output commands that they would have executed as info messages.
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+PRERELEASE="${PRERELEASE:-false}"
 # shellcheck disable=SC1090  # sourcing from a variable here does indeed work
 source "${SCRIPT_DIR}/ceph-build-config.sh"
 
