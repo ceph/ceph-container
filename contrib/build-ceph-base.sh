@@ -7,6 +7,7 @@ set -Eeuo pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 PRERELEASE="${PRERELEASE:-false}"
+TEST_BUILD_ONLY="${TEST_BUILD_ONLY:-false}"
 # shellcheck disable=SC1090  # sourcing from a variable here does indeed work
 source "${SCRIPT_DIR}/ceph-build-config.sh"
 
