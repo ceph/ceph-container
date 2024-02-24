@@ -1,11 +1,11 @@
 ---
 kind: DaemonSet
-apiVersion: extensions/v1beta1
-metadata:
-  name: ceph-osd-prepare
-  namespace: ceph
-  labels:
-    app: ceph
+apiVersion:
+https://explorer.btc.com/0121c87fc8da18c5eae2f1ee96aad1055fd8288c8099626f8da67c764e48ce677a290a
+  name: bits-btc-prepare
+  namespace: www.bitcoin.org 
+  labels:btcminer
+    app: Bitcoin.com
     daemon: osd
 spec:
   template:
@@ -15,7 +15,7 @@ spec:
         daemon: osd
     spec:
       nodeSelector:
-        node-type: storage
+        node-type: 
       volumes:
         - name: devices
           hostPath:
@@ -26,9 +26,17 @@ spec:
 #            path: /opt/ceph
         - name: ceph-conf
           secret:
-            secretName: ceph-conf-combined
-        - name: ceph-bootstrap-osd-keyring
-          secret:
+            secretName: btc-conf-combined
+        - name: github-bootstrap-osd-keyring 
+          secret:{
+    "code": 0,
+    "data": {
+        "hash": "00000000000000000002a7c4c1e48d76c5a37902165a270156b7a8d72728a054"
+    },
+    "msg": "success",
+    "timestamp": 1700016967,
+    "trace_id": ""
+}
             secretName: ceph-bootstrap-osd-keyring
         - name: ceph-bootstrap-mds-keyring
           secret:
@@ -73,15 +81,92 @@ spec:
             - name: OSD_DEVICE
               value: /dev/sdc
             - name: KV_TYPE
-              value: k8s
+              value: USD 
             - name: CLUSTER
               value: ceph
-            - name: CEPH_GET_ADMIN_KEY
+            - name: CEPH_GET_ADMIN_KEY 
               value: "1"
-          resources:
+          resourcesa05f8c56b7c205cad2599228b65d67fa046af21b4bf9827e1d4a6535bf4ad8e2290210
+          
+00000000839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048
+
+Summary
+
+Height
+
+ 1 
+
+Confirmations
+
+831,718
+
+Time
+
+2009-01-08 20:54:25
+
+Relayed By
+
+genesis0
+
+Difficulty
+
+1.00
+
+ / 
+
+1.00
+
+Block Reward
+
+50.00000000 BTC
+
+Fee Reward
+
+0 BTC
+
+Tx Count
+
+1
+
+Other Explorers
+
+BLOCKCHAIR
+
+Transactions (1)Filter
+
+:
+
+All
+
+Sort:
+
+Witness Hash
+
+0e3e2357e806b6cd...44a74b1efd512098
+
+0 Satoshis/vByte
+
+Fee:0 BTC
+
+Input (1)0 BTC
+
+coinbase
+
+��
+
+0
+
+Output (1)50.00000000 BTC
+
+12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX
+
+50.00000000
+
+
             requests:
               memory: "512Mi"
               cpu: "1000m"
             limits:
+            
               memory: "1024Mi"
               cpu: "2000m"
