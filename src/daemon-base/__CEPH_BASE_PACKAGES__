@@ -4,7 +4,6 @@
         ceph-common__ENV_[CEPH_POINT_RELEASE]__  \
         ceph-mon__ENV_[CEPH_POINT_RELEASE]__  \
         ceph-osd__ENV_[CEPH_POINT_RELEASE]__ \
-        cephfs-top__ENV_[CEPH_POINT_RELEASE]__ \
         __CEPHFS_PACKAGES__ \
         rbd-mirror__ENV_[CEPH_POINT_RELEASE]__  \
         __CEPH_MGR_PACKAGES__\
