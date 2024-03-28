@@ -31,8 +31,8 @@ RUN \
     # Typical workflow: add new repos; refresh repos; install packages; package-manager clean;
     #   download and install packages from web, cleaning any files as you go.
     # Installs should support install of ganesha for luminous
-    __QAT_ACCELERATION__
     __DOCKERFILE_INSTALL__ && \
+    __QAT_ACCELERATION__
     # Clean container, starting with record of current size (strip / from end)
     INITIAL_SIZE="$(bash -c 'sz="$(du -sm --exclude=/proc /)" ; echo "${sz%*/}"')" && \
     #
