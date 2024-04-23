@@ -304,6 +304,12 @@ function push_ceph_imgs_latest {
     full_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${RELEASE}-${distro}-stream${distro_release}-${HOST_ARCH}-devel
     branch_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${BRANCH}
     sha1_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}
+    # for centos9, while we're still building centos8, add -centos9 to branch and sha1 tags
+    # to avoid colliding with the existing distrover-less tags for the c8 containers
+    if [[ ${distro_release} == "9" ]] ; then
+      branch_repo_tag=${branch_repo_tag}-centos9
+      sha1_repo_tag=${sha1_repo_tag}-centos9
+    fi
     # add aarch64 suffix for short tags to allow coexisting arches
     if [[ ${HOST_ARCH} == "aarch64" ]] ; then
       branch_repo_tag=${branch_repo_tag}-aarch64
@@ -311,7 +317,7 @@ function push_ceph_imgs_latest {
     fi
     if [[ "${OSD_FLAVOR}" == "crimson" ]]; then
       if [[ "${HOST_ARCH}" == "x86_64" ]]; then
-        sha1_flavor_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}-${OSD_FLAVOR}
+        sha1_flavor_repo_tag=${sha1_repo_tag}-${OSD_FLAVOR}
         docker tag "$local_tag" "$sha1_flavor_repo_tag"
         docker push "$sha1_flavor_repo_tag"
       fi
