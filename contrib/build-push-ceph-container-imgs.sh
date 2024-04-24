@@ -103,19 +103,10 @@ function install_docker {
 function install_podman {
 
   if ${CI_CONTAINER}; then
-    # we may need to undo prior packaging hacks.  This code should only
-    # have any effect the first time it runs.
-    if dnf repolist | grep -q devel_kubic_libcontainers_stable 2>/dev/null
-    then
-
-      sudo dnf -y repository-packages devel_kubic_libcontainers_stable remove
-      sudo dnf config-manager --disable devel_kubic_libcontainers_stable
+    eval $(grep VERSION_ID= /etc/os-release)
+    if [[ "${VERSION_ID}" == "8" ]] ; then
+      sudo dnf module enable -y container-tools:rhel8
     fi
-    if dnf repolist | grep -q copr:copr.fedorainfracloud.org:rhcontainerbot:container-selinux 2>/dev/null; then
-      sudo dnf -y repository-packages copr:copr.fedorainfracloud.org:rhcontainerbot:container-selinux remove
-      sudo dnf config-manager --disable copr:copr.fedorainfracloud.org:rhcontainerbot:container-selinux
-    fi
-    sudo dnf module enable -y container-tools:rhel8
   fi
 
   # now install it
