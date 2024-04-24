@@ -112,8 +112,6 @@ bash -c ' \
     yum install -y dnf-plugins-core ; \
     yum copr enable -y tchaikov/python-scikit-learn ; \
     yum copr enable -y tchaikov/python3-asyncssh ; \
-    if [[ "${OSD_FLAVOR}" == "crimson" ]] ; then \
-      yum copr enable -y ceph/grpc ; \
-    fi ; \
+    yum copr enable -y ceph/grpc ; \
   fi ' && \
 yum install -y --setopt=install_weak_deps=False --enablerepo=powertools __CEPH_BASE_PACKAGES__
