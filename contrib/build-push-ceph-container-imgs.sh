@@ -64,7 +64,16 @@ BUILD_ARM= # Set this variable to anything if you want to build the ARM images t
 
 function _centos_release {
   local release=$1
+
+  # when building for CI, really we want to build on the same base
+  # that the build is using; that's the major version of the
+  # build host itself.  Grab it from /etc/os-release.
+  if ${CI_CONTAINER}; then
+    echo "${VERSION_ID}"
+    return
+  fi
   case  "${release}" in
+
     *luminous*)
       echo 7
       ;;
@@ -103,7 +112,6 @@ function install_docker {
 function install_podman {
 
   if ${CI_CONTAINER}; then
-    eval $(grep VERSION_ID= /etc/os-release)
     if [[ "${VERSION_ID}" == "8" ]] ; then
       sudo dnf module enable -y container-tools:rhel8
     fi
@@ -394,6 +402,9 @@ function create_registry_manifest {
 ########
 # MAIN #
 ########
+
+# set global for use in several functions above
+eval "$(grep VERSION_ID= /etc/os-release)"
 
 if [[ -x /usr/bin/dnf ]] ; then
   install_podman
