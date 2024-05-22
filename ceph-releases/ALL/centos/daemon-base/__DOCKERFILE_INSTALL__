@@ -94,7 +94,7 @@ bash -c ' \
   else \
     RELEASE_VER=1 ;\
     if [[ __ENV_[PRERELEASE]__ = true ]] ; then \
-      REPO_URL="https://__ENV_[PRERELEASE_USERNAME]__:__ENV_[PRERELEASE_PASSWORD]__@download.ceph.com/prerelease/rpm-${CEPH_VERSION}/el__ENV_[DISTRO_VERSION]__/"; \
+      REPO_URL="https://__ENV_[PRERELEASE_USERNAME]__:__ENV_[PRERELEASE_PASSWORD]__@download.ceph.com/prerelease/ceph/rpm-${CEPH_VERSION}/el__ENV_[DISTRO_VERSION]__/"; \
     else \
       REPO_URL="http://download.ceph.com/rpm-${CEPH_VERSION}/el__ENV_[DISTRO_VERSION]__/"; \
     fi \
@@ -105,7 +105,7 @@ bash -c ' \
   # ago in the ceph build
   #
   if [[ __ENV_[PRERELEASE]__ = true ]] ; then \
-    sed -i "s;http://download.ceph.com/;https://__ENV_[PRERELEASE_USERNAME]__:__ENV_[PRERELEASE_PASSWORD]__@download.ceph.com/prerelease/;" /etc/yum.repos.d/ceph.repo ; \
+    sed -i "s;http://download.ceph.com/;https://__ENV_[PRERELEASE_USERNAME]__:__ENV_[PRERELEASE_PASSWORD]__@download.ceph.com/prerelease/ceph/;" /etc/yum.repos.d/ceph.repo ; \
     dnf clean expire-cache ; \
   fi && \
   if [[ __ENV_[DISTRO_VERSION]__ -eq 8 ]]; then \
