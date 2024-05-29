@@ -2,16 +2,23 @@ name: container
 on: [pull_request]
 jobs:
   x86_64:
+    strategy:
+      matrix:
+        os: [9]
+        ceph_release: [quincy, reef, squid, main]
+        exclude:
+          - os: 9
+            ceph_release: squid
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v2
 
-      - name: build the ceph container image
-        run: make BASEOS_REGISTRY=quay.io/centos BASEOS_TAG=stream8 RELEASE="demo" FLAVORS="main,centos,8" IMAGES_TO_BUILD="daemon-base demo" build
+      - name: build the ceph container image (el${{ matrix.os }})
+        run: make BASEOS_REGISTRY=quay.io/centos BASEOS_TAG=stream${{ matrix.os }} RELEASE="demo" FLAVORS="${{ matrix.ceph_release }},centos,${{ matrix.os }}" IMAGES_TO_BUILD="daemon-base demo" build
 
       - name: run the ceph demo container
-        run: docker run -d --privileged --name ceph-demo -v /mnt/ceph:/var/lib/ceph -e RGW_FRONTEND_TYPE=beast -e DEBUG=verbose -e RGW_FRONTEND_PORT=8000 -e MON_IP=127.0.0.1 -e CEPH_PUBLIC_NETWORK=0.0.0.0/0 -e CLUSTER=ceph -e CEPH_DEMO_UID=demo -e CEPH_DEMO_ACCESS_KEY=G1EZ5R4K6IJ7XUQKMAED -e CEPH_DEMO_SECRET_KEY=cNmUrqpBKjCMzcfqG8fg4Qk07Xkoyau52OmvnSsz -e CEPH_DEMO_BUCKET=foobar -e SREE_PORT=5001 -e DATA_TO_SYNC=/etc/modprobe.d -e DATA_TO_SYNC_BUCKET=github -e OSD_COUNT=3 ceph/demo:demo-main-centos-stream8-x86_64
+        run: docker run -d --privileged --name ceph-demo -v /mnt/ceph:/var/lib/ceph -e RGW_FRONTEND_TYPE=beast -e DEBUG=verbose -e RGW_FRONTEND_PORT=8000 -e MON_IP=127.0.0.1 -e CEPH_PUBLIC_NETWORK=0.0.0.0/0 -e CLUSTER=ceph -e CEPH_DEMO_UID=demo -e CEPH_DEMO_ACCESS_KEY=G1EZ5R4K6IJ7XUQKMAED -e CEPH_DEMO_SECRET_KEY=cNmUrqpBKjCMzcfqG8fg4Qk07Xkoyau52OmvnSsz -e CEPH_DEMO_BUCKET=foobar -e SREE_PORT=5001 -e DATA_TO_SYNC=/etc/modprobe.d -e DATA_TO_SYNC_BUCKET=github -e OSD_COUNT=3 ceph/demo:demo-${{ matrix.ceph_release }}-centos-stream${{ matrix.os }}-x86_64
 
       - name: run the demo validation
         run: |
@@ -30,6 +37,13 @@ jobs:
           docker logs ceph-demo
           docker exec ceph-demo ceph --connect-timeout 3 --cluster ceph -s
   arm64:
+    strategy:
+      matrix:
+        os: [9]
+        ceph_release: [quincy, reef, squid, main]
+        exclude:
+          - os: 9
+            ceph_release: squid
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -41,8 +55,8 @@ jobs:
       - name: setup qemu-static-user
         run: sudo docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
-      - name: build the ceph container arm64 image
-        run: make BASEOS_REGISTRY=quay.io BASEOS_TAG=stream8 RELEASE="demo" BASEOS_REPO=centos/arm64v8 DAEMON_BASE_TAG="daemon-base:demo-centos-8-aarch64" DEMO_TAG="demo:demo-centos-stream8-aarch64" DAEMON_TAG="daemon:demo-centos-stream8-aarch64" IMAGES_TO_BUILD="daemon-base demo" TAG_REGISTRY=quay.io FLAVORS="main,centos-arm64,8" build
+      - name: build the ceph container arm64 image (el${{ matrix.os }})
+        run: make BASEOS_REGISTRY=quay.io BASEOS_TAG=stream${{ matrix.os }} RELEASE="demo" BASEOS_REPO=centos/arm64v8 DAEMON_BASE_TAG="daemon-base:demo-centos-${{ matrix.os }}-aarch64" DEMO_TAG="demo:demo-centos-stream${{ matrix.os }}-aarch64" DAEMON_TAG="daemon:demo-centos-stream${{ matrix.os }}-aarch64" IMAGES_TO_BUILD="daemon-base demo" TAG_REGISTRY=quay.io FLAVORS="${{ matrix.ceph_release }},centos-arm64,${{ matrix.os }}" build
 
       - name: debug on failure
         if: ${{ failure() }}
