@@ -303,11 +303,14 @@ function push_ceph_imgs_latest {
     full_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${RELEASE}-${distro}-stream${distro_release}-${HOST_ARCH}-devel
     branch_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${BRANCH}
     sha1_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}
-    # for centos9, while we're still building centos8, add -centos9 to branch and sha1 tags
-    # to avoid colliding with the existing distrover-less tags for the c8 containers
-    if [[ ${distro_release} == "9" ]] ; then
-      branch_repo_tag=${branch_repo_tag}-centos9
-      sha1_repo_tag=${sha1_repo_tag}-centos9
+    # Now that centos8 will be going EOL, we need to make centos9 default. While we're still building
+    # centos8, add -centos8 to branch and sha1 tags to avoid colliding with the distrover-less tags
+    # for the c9 containers.
+    # TODO: Once c8 builds start failing and/or we remove them, any references to c8 in this file
+    #       will likely become dead code which should be cleaned up.
+    if [[ ${distro_release} == "8" ]] ; then
+      branch_repo_tag=${branch_repo_tag}-centos8
+      sha1_repo_tag=${sha1_repo_tag}-centos8
     fi
     # add aarch64 suffix for short tags to allow coexisting arches
     if [[ ${HOST_ARCH} == "aarch64" ]] ; then
