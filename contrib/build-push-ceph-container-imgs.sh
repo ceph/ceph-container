@@ -270,23 +270,6 @@ function push_ceph_imgs {
   make BASEOS_TAG=stream8 RELEASE="$RELEASE" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" push.parallel
 }
 
-declare -F build_and_push_latest_bis ||
-function build_and_push_latest_bis {
-  # latest-bis-$ceph_release is needed by ceph-ansible so it can test the restart handlers on an image ID change
-  # rebuild latest again to get a different image ID
-  for ceph_release in "${CEPH_RELEASES[@]}"; do
-    CENTOS_RELEASE=$(_centos_release "${ceph_release}")
-    tag_bis="latest-bis-${ceph_release}"
-    make BASEOS_TAG=stream8 DAEMON_BASE_TAG="daemon-base:${tag_bis}" DAEMON_TAG="daemon:${tag_bis}" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build
-    make BASEOS_TAG=stream8 DAEMON_BASE_TAG="daemon-base:${tag_bis}" DAEMON_TAG="daemon:${tag_bis}" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${ceph_release}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" push
-  done
-
-  # Now let's build the latest
-  CENTOS_RELEASE=$(_centos_release "${CEPH_RELEASES[-1]}")
-  make BASEOS_TAG=stream8 DAEMON_BASE_TAG="daemon-base:latest-bis" DAEMON_TAG="daemon:latest-bis" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build
-  make BASEOS_TAG=stream8 DAEMON_BASE_TAG="daemon-base:latest-bis" DAEMON_TAG="daemon:latest-bis" RELEASE="$CONTAINER_BRANCH"-bis FLAVORS="${CEPH_RELEASES[-1]}",centos,"${CENTOS_RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" push
-}
-
 declare -F push_ceph_imgs_latest ||
 function push_ceph_imgs_latest {
   local latest_name
@@ -435,7 +418,3 @@ if $TAGGED_HEAD; then
   exit 0
 fi
 push_ceph_imgs_latest
-# We don't need latest bis tags with ceph devel
-if ! ( ${DEVEL} || ${CI_CONTAINER} ); then
-  build_and_push_latest_bis
-fi
