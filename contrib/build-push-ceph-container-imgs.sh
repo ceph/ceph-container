@@ -140,97 +140,6 @@ function enable_experimental_docker_cli {
   fi
 }
 
-function grep_sort_tags {
-  "$@" | grep -oE 'v[3-9].[0-9]*.[0-9]*|v[3-9].[0-9]*.[0-9](alpha|beta|rc)[0-9]{1,2}?' | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n
-}
-
-function compare_registry_and_github_tags {
-  # build an array with the list of tags from github
-  for tag_github in $(grep_sort_tags git ls-remote --tags --refs 2>/dev/null); do
-    tags_github_array+=("$tag_github")
-  done
-
-  # build an array with the list of tag from the registry
-  local page=1
-  while response="$(curl --silent --fail --list-only --location \
-                      "https://${REGISTRY}/api/v1/repository/ceph/daemon/tag?limit=100&page=${page}")"; do
-    local tags_registry ; tags_registry+=$(echo "${response}" | jq -r .tags[].name)
-    if [ "$(echo "${response}" | jq -r .has_additional)" == "false" ]; then
-      break
-    else
-      page=$((page + 1))
-    fi
-  done
-  tags_registry=$(grep_sort_tags echo "${tags_registry}" | uniq)
-  for tag_registry in $tags_registry; do
-    tags_registry_array+=("$tag_registry")
-  done
-
-  # we now look into each array and find a possible missing tag
-  # the idea is to find if a tag present on github is not present on the registry
-  for i in "${tags_github_array[@]}"; do
-    # the grep has a conditionnal on either the explicit match last character is the end of the line OR
-    # it has a space after it so we cover the case where the tag that matches is placed at the end
-    # of the line or the first one
-    echo "${tags_registry_array[@]}" | grep -qoE "${i}$|${i} " || tag_to_build+=("$i")
-  done
-
-  # if there is an entry we activate TAGGED_HEAD which tells the script to build a release image
-  # we must find a single tag only
-  if [[ ${#tag_to_build[@]} -eq "1" ]]; then
-    TAGGED_HEAD=true
-    echo "${tag_to_build[*]} not found! Building it."
-  fi
-
-  # if we find more than one release, we should fail and report the problem
-  if [[ ${#tag_to_build[@]} -gt "1" ]]; then
-    echo "ERROR: it looks like more than one tag are not built, see ${tag_to_build[*]}."
-  fi
-}
-
-function create_head_or_point_release {
-  # We test if there is a new tag available
-  # if so, we build images with this particular tag
-  # otherwise we just build using the branch name and the latest commit sha1
-  # We use the commit sha1 on the devel image so we can have multiple tags
-  # instead of overriding the previous one.
-
-  # call compare tags to determine if we need to build a release
-  compare_registry_and_github_tags
-
-  # shellcheck disable=SC2181
-  if $TAGGED_HEAD; then
-    # wait for the arm64 image for the manifest creation as we only have one image to build
-    BUILD_ARM=true
-    # checkout tag's code
-    # using [*] but [0] would work too, also the array's length should be 1 anyway
-    # this code is only activated if length is 1 so we are safe
-    git checkout refs/tags/"${tag_to_build[*]}"
-
-    # find branch associated to that tag
-    CONTAINER_BRANCH=$(git branch -r --contains tags/"${tag_to_build[*]}" | grep -Eo 'stable-[0-9].[0-9]')
-    echo "Building a release Ceph container image based on branch $CONTAINER_BRANCH and tag ${tag_to_build[*]}"
-    RELEASE="${tag_to_build[*]}-$CONTAINER_BRANCH"
-    # (todo): remove this when we have a better solution like running
-    # the build script directly from the right branch.
-    if [ "${CONTAINER_BRANCH}" == "stable-3.2" ]; then
-      CEPH_RELEASES=(luminous mimic)
-    elif [ "${CONTAINER_BRANCH}" == "stable-4.0" ]; then
-      CEPH_RELEASES=(nautilus)
-    elif [ "${CONTAINER_BRANCH}" == "stable-5.0" ]; then
-      CEPH_RELEASES=(octopus)
-    elif [ "${CONTAINER_BRANCH}" == "stable-6.0" ]; then
-      CEPH_RELEASES=(pacific)
-    elif [ "${CONTAINER_BRANCH}" == "stable-7.0" ]; then
-      CEPH_RELEASES=(quincy)
-    fi
-  else
-    set -e
-    echo "Building a devel Ceph container image based on branch $CONTAINER_BRANCH and commit $CONTAINER_SHA"
-    RELEASE="$CONTAINER_BRANCH-$CONTAINER_SHA"
-  fi
-}
-
 declare -F build_ceph_imgs  ||
 function build_ceph_imgs {
   echo "Build Ceph container image(s)"
@@ -274,72 +183,46 @@ declare -F push_ceph_imgs_latest ||
 function push_ceph_imgs_latest {
   local latest_name
 
-  if ${CI_CONTAINER} ; then
-    if [ -z "$CONTAINER_FLAVOR" ]; then
-      distro=centos
-      distro_release=$(_centos_release "${BRANCH}")
-    else
-      IFS="," read -r ceph_branch distro distro_release <<< "${CONTAINER_FLAVOR}"
-    fi
-    # local_tag should match with daemon_img defined in maint-lib/makelib.mk
-    local_tag=${CONTAINER_REPO_ORGANIZATION}/daemon-base:${RELEASE}-${CEPH_VERSION}-${distro}-stream${distro_release}-${HOST_ARCH}
-    full_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${RELEASE}-${distro}-stream${distro_release}-${HOST_ARCH}-devel
-    branch_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${BRANCH}
-    sha1_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}
-    # Now that centos8 will be going EOL, we need to make centos9 default. While we're still building
-    # centos8, add -centos8 to branch and sha1 tags to avoid colliding with the distrover-less tags
-    # for the c9 containers.
-    # TODO: Once c8 builds start failing and/or we remove them, any references to c8 in this file
-    #       will likely become dead code which should be cleaned up.
-    if [[ ${distro_release} == "8" ]] ; then
-      branch_repo_tag=${branch_repo_tag}-centos8
-      sha1_repo_tag=${sha1_repo_tag}-centos8
-    fi
-    # add aarch64 suffix for short tags to allow coexisting arches
-    if [[ ${HOST_ARCH} == "aarch64" ]] ; then
-      branch_repo_tag=${branch_repo_tag}-aarch64
-      sha1_repo_tag=${sha1_repo_tag}-aarch64
-    fi
-    if [[ "${OSD_FLAVOR}" == "crimson" ]]; then
-      if [[ "${HOST_ARCH}" == "x86_64" ]]; then
-        sha1_flavor_repo_tag=${sha1_repo_tag}-${OSD_FLAVOR}
-        docker tag "$local_tag" "$sha1_flavor_repo_tag"
-        docker push "$sha1_flavor_repo_tag"
-      fi
-    elif [[ "${distro_release}" == "7" ]]; then
-      docker tag "$local_tag" "$full_repo_tag"
-      docker push "$full_repo_tag"
-    else
-      docker tag "$local_tag" "$full_repo_tag"
-      docker push "$full_repo_tag"
-      docker tag "$local_tag" "$branch_repo_tag"
-      docker tag "$local_tag" "$sha1_repo_tag"
-      docker push "$branch_repo_tag"
-      docker push "$sha1_repo_tag"
-    fi
-    return
+  if [ -z "$CONTAINER_FLAVOR" ]; then
+    distro=centos
+    distro_release=$(_centos_release "${BRANCH}")
+  else
+    IFS="," read -r ceph_branch distro distro_release <<< "${CONTAINER_FLAVOR}"
   fi
-
-  for release in "${CEPH_RELEASES[@]}" latest; do
-    if [[ "$release" == "latest" ]]; then
-      latest_name="latest"
-      # Use the last item in the array which corresponds to the latest stable Ceph version
-      release=${CEPH_RELEASES[-1]}
-    else
-      latest_name="latest-$release"
+  # local_tag should match with daemon_img defined in maint-lib/makelib.mk
+  local_tag=${CONTAINER_REPO_ORGANIZATION}/daemon-base:${RELEASE}-${CEPH_VERSION}-${distro}-stream${distro_release}-${HOST_ARCH}
+  full_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${RELEASE}-${distro}-stream${distro_release}-${HOST_ARCH}-devel
+  branch_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${BRANCH}
+  sha1_repo_tag=${CONTAINER_REPO_HOSTNAME}/${CONTAINER_REPO_ORGANIZATION}/ceph:${SHA1}
+  # for centos9, while we're still building centos8, add -centos9 to branch and sha1 tags
+  # to avoid colliding with the existing distrover-less tags for the c8 containers
+  if [[ ${distro_release} == "9" ]] ; then
+    branch_repo_tag=${branch_repo_tag}-centos9
+    sha1_repo_tag=${sha1_repo_tag}-centos9
+  fi
+  # add aarch64 suffix for short tags to allow coexisting arches
+  if [[ ${HOST_ARCH} == "aarch64" ]] ; then
+    branch_repo_tag=${branch_repo_tag}-aarch64
+    sha1_repo_tag=${sha1_repo_tag}-aarch64
+  fi
+  if [[ "${OSD_FLAVOR}" == "crimson" ]]; then
+    if [[ "${HOST_ARCH}" == "x86_64" ]]; then
+      sha1_flavor_repo_tag=${sha1_repo_tag}-${OSD_FLAVOR}
+      docker tag "$local_tag" "$sha1_flavor_repo_tag"
+      docker push "$sha1_flavor_repo_tag"
     fi
-    if ${DEVEL}; then
-      latest_name="${latest_name}-devel"
-    fi
-    for i in daemon-base demo; do
-      tag=${CONTAINER_REPO_ORGANIZATION}/$i:${CONTAINER_BRANCH}-${CONTAINER_SHA}-$release-centos-stream$(_centos_release "${release}")-${HOST_ARCH}
-      # tag image
-      docker tag "$tag" "${CONTAINER_REPO_ORGANIZATION}"/$i:"$latest_name"
-
-      # push image to the registry
-      docker push "${CONTAINER_REPO_ORGANIZATION}"/$i:"$latest_name"
-    done
-  done
+  elif [[ "${distro_release}" == "7" ]]; then
+    docker tag "$local_tag" "$full_repo_tag"
+    docker push "$full_repo_tag"
+  else
+    docker tag "$local_tag" "$full_repo_tag"
+    docker push "$full_repo_tag"
+    docker tag "$local_tag" "$branch_repo_tag"
+    docker tag "$local_tag" "$sha1_repo_tag"
+    docker push "$branch_repo_tag"
+    docker push "$sha1_repo_tag"
+  fi
+  return
 }
 
 declare -F wait_for_arm_images ||
@@ -404,7 +287,8 @@ if ${CI_CONTAINER}; then
   top_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
   CEPH_VERSION=$(bash "${top_dir}"/maint-lib/ceph_version.sh "${CEPH_BRANCH}" CEPH_VERSION)
 else
-  create_head_or_point_release
+  echo "Building a devel Ceph container image based on branch $CONTAINER_BRANCH and commit $CONTAINER_SHA"
+  RELEASE="$CONTAINER_BRANCH-$CONTAINER_SHA"
 fi
 build_ceph_imgs
 # With devel builds we only push latest builds.
@@ -420,4 +304,7 @@ if $TAGGED_HEAD; then
   echo "Don't push latest as we run on a tagged head"
   exit 0
 fi
-push_ceph_imgs_latest
+
+if ${CI_CONTAINER} ; then
+  push_ceph_imgs_latest
+fi
