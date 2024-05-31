@@ -376,6 +376,7 @@ function get_latest_full_semver_tag () {
   # For searching full versions, always use 'v<major>.<minor>.<bug>-' including the dash so that a
   # search for 'v1.1.1' doesn't return 'v1.1.11' for example
   if [ -n "${TEST_RUN:-}" ]; then
+    # date %Y%m%d
     local build_num ; build_num="$(generate_new_build_number)"
     build_num=$((build_num - 1))
     if [[ $repository =~ .*amd64.* ]]; then
