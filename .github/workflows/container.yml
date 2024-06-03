@@ -48,6 +48,8 @@ jobs:
             ceph_release: squid
           - os: 9
             ceph_release: quincy
+          - os: 9
+            ceph_release: reef
     runs-on: ubuntu-latest
     steps:
       - name: checkout
