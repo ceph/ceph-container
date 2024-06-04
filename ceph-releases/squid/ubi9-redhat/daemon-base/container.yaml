@@ -1,6 +1,9 @@
 # https://osbs.readthedocs.io/en/latest/users.html#compose
 ---
 
+platforms:
+  not: ppc64le
+
 compose:
   packages: []
   pulp_repos: true
