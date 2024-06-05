@@ -50,14 +50,14 @@ Next, after the `RUN rm -f /etc/yum.repos.d/ubi.repo` step, add the following by
 ```Dockerfile
 RUN printf '[rhel-9-baseos]\n\
 name = Red Hat Enterprise Linux 9 BaseOS\n\
-baseurl = http://rhsm-pulp.corp.redhat.com/content/dist/rhel9/9/$basearch/baseos/os/\n\
+baseurl = https://rhsm-pulp.corp.redhat.com/content/dist/rhel9/9/$basearch/baseos/os/\n\
 enabled = 1\n\
 gpgcheck = 1\n\
 gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release\n\
 \n\
 [rhel-9-appstream]\n\
 name = Red Hat Enterprise Linux 9 AppStream\n\
-baseurl = http://rhsm-pulp.corp.redhat.com/content/dist/rhel9/9/$basearch/appstream/os/\n\
+baseurl = https://rhsm-pulp.corp.redhat.com/content/dist/rhel9/9/$basearch/appstream/os/\n\
 enabled = 1\n\
 gpgcheck = 1\n\
 gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release' >> /etc/yum.repos.d/rhel-9.repo
