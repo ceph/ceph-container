@@ -84,7 +84,7 @@ function _centos_release {
       echo 7
       ;;
     *)
-      echo 8
+      echo 9
       ;;
   esac
 }
