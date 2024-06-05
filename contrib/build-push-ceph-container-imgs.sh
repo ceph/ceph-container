@@ -259,7 +259,7 @@ function build_ceph_imgs {
          IMAGES_TO_BUILD=daemon-base \
          build.parallel
   else
-    make BASEOS_TAG=stream"${CENTOS_RELEASE}" CEPH_DEVEL="${DEVEL}" RELEASE="${RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" build.parallel
+    make BASEOS_TAG=stream"${CENTOS_RELEASE}" CEPH_DEVEL="${DEVEL}" RELEASE="${RELEASE}" BASEOS_REGISTRY="${CONTAINER_REPO_HOSTNAME}/centos" BASEOS_REPO=centos TAG_REGISTRY="${CONTAINER_REPO_ORGANIZATION}" IMAGES_TO_BUILD="daemon-base demo" build.parallel
   fi
   docker images
 }
