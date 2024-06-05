@@ -60,6 +60,13 @@ name = Red Hat Enterprise Linux 9 AppStream\n\
 baseurl = https://rhsm-pulp.corp.redhat.com/content/dist/rhel9/9/$basearch/appstream/os/\n\
 enabled = 1\n\
 gpgcheck = 1\n\
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release\n\
+\n\
+[rhel-9-codeready-builder]\n\
+name = Red Hat Enterprise Linux 9 CRB\n\
+baseurl = https://rhsm-pulp.corp.redhat.com/content/dist/rhel9/9/$basearch/codeready-builder/os/\n\
+enabled = 1\n\
+gpgcheck = 1\n\
 gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release' >> /etc/yum.repos.d/rhel-9.repo
 
 # Note: use your ODCS compose ID here (replacing "12345678"):
