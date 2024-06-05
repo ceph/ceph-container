@@ -51,7 +51,7 @@ OSD_FLAVOR=${OSD_FLAVOR:=default}
 
 if [ -z "$CEPH_RELEASES" ]; then
   # NEVER change 'main' position in the array, this will break the 'latest' tag
-  CEPH_RELEASES=(main pacific quincy reef)
+  CEPH_RELEASES=(main quincy reef)
 fi
 
 HOST_ARCH=$(uname -m)
