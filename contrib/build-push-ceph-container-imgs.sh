@@ -331,7 +331,7 @@ function push_ceph_imgs_latest {
     if ${DEVEL}; then
       latest_name="${latest_name}-devel"
     fi
-    for i in daemon-base daemon demo; do
+    for i in daemon-base demo; do
       tag=${CONTAINER_REPO_ORGANIZATION}/$i:${CONTAINER_BRANCH}-${CONTAINER_SHA}-$release-centos-stream$(_centos_release "${release}")-${HOST_ARCH}
       # tag image
       docker tag "$tag" "${CONTAINER_REPO_ORGANIZATION}"/$i:"$latest_name"
