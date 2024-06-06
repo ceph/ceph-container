@@ -364,7 +364,7 @@ function create_registry_manifest {
   # This should normally work, by the time we get here the arm64 image should have been built and pushed
   # IIRC docker manisfest will fail if the image does not exist
   rm -rvf ~/.docker/manifests
-  for image in daemon-base daemon demo; do
+  for image in daemon-base demo; do
     for ceph_release in "${CEPH_RELEASES[@]}"; do
       TARGET_RELEASE="${CONTAINER_REPO_ORGANIZATION}/${image}:${RELEASE}-${ceph_release}-centos-stream$(_centos_release "${ceph_release}")"
       DOCKER_IMAGES="$TARGET_RELEASE ${TARGET_RELEASE}-x86_64"
