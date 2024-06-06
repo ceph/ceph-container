@@ -18,6 +18,7 @@
 
 # When updating these defaults, be sure to check that ALL_BUILDABLE_FLAVORS is updated
 FLAVORS ?= \
+	quincy,centos,9 \
 	reef,centos,9 \
 	main,centos,9
 
