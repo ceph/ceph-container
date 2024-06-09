@@ -1,13 +1,10 @@
-# add the necessary repos
+# add the necessary repo using extrepo authenticated method
     DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade && \
-    echo "deb http://obs.linaro.org/ERP:/ceph-ansible:/${CEPH_VERSION}/Debian___ENV_[DISTRO_VERSION]__ ./" \
-      >> /etc/apt/sources.list.d/erp.list && \
-    echo "deb http://deb.debian.org/debian/ __OS_CODENAME__-backports main" \
-      >> /etc/apt/sources.list.d/erp.list && \
-    echo "deb http://download.ceph.com/debian-${CEPH_VERSION} __OS_CODENAME__ main" \
-      >> /etc/apt/sources.list.d/ceph.list && \
-    curl http://obs.linaro.org/ERP:/ceph-ansible:/${CEPH_VERSION}/Debian___ENV_[DISTRO_VERSION]__/Release.key | apt-key add - && \
-    curl https://download.ceph.com/keys/release.asc | apt-key add - && \
+    apt-get install extrepo && \
+    extrepo enable ceph_${CEPH_VERSION} && \
+    echo "Package: *" >/etc/apt/preferences.d/99-prio-from-osbpo && \
+    echo "Pin: release o=osbpo" >>/etc/apt/preferences.d/99-prio-from-osbpo && \
+    echo "Pin-Priority: 900" >>/etc/apt/preferences.d/99-prio-from-osbpo && \
     DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -yy --force-yes --no-install-recommends \
        __CEPH_BASE_PACKAGES__
