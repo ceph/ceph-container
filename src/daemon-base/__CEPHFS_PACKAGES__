@@ -1,3 +1,4 @@
 ceph-mds__ENV_[CEPH_POINT_RELEASE]__ \
 cephfs-mirror__ENV_[CEPH_POINT_RELEASE]__ \
-cephfs-top__ENV_[CEPH_POINT_RELEASE]__
+cephfs-top__ENV_[CEPH_POINT_RELEASE]__ \
+cephfs-shell__ENV_[CEPH_POINT_RELEASE]__
