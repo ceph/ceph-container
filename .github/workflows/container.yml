@@ -8,8 +8,6 @@ jobs:
         ceph_release: [quincy, reef, squid, main]
         exclude:
           - os: 9
-            ceph_release: squid
-          - os: 9
             ceph_release: quincy
     runs-on: ubuntu-latest
     steps:

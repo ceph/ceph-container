@@ -20,6 +20,7 @@
 FLAVORS ?= \
 	quincy,centos,9 \
 	reef,centos,9 \
+	squid,centos,9 \
 	main,centos,9
 
 TAG_REGISTRY ?= ceph
