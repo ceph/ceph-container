@@ -343,7 +343,7 @@ function get_tags_matching () {
   while response="$(curl --silent --fail --list-only --location \
                       "${tag_list_url}&page=${page}")"; do
     local matching_tags ; matching_tags="$(echo "${response}" | \
-              jq -r ".tags[] | select(.name | match(\"${version_tag}\")) | .name")"
+              jq -r ".tags[] | select(.end_ts == null) | select(.name | match(\"${version_tag}\")) | .name")"
     # jq: From the results of the curl, select all images with a name matching the matcher, and then
     # output the name. Exits success w/ empty string if no matches found.
     if [ -n "${matching_tags}" ]; then
