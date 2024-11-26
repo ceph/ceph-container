@@ -1,6 +1,9 @@
 # https://osbs.readthedocs.io/en/latest/users.html#compose
 ---
 
+platforms:
+  not: aarch64
+
 compose:
   packages: []
   pulp_repos: true
