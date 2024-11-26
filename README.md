@@ -29,10 +29,10 @@ For docker hub registry
 $ curl -s https://registry.hub.docker.com/v2/repositories/ceph/ceph/tags/?page_size=100 | jq '."results"[] .name'
 ```
 
--All tags for ceph/{daemon-base,daemon,demo} can be found on the quay.io registry.
--For the daemon-base tags [visit](https://quay.io/repository/ceph/daemon-base?tab=tags)
--For the daemon tags [visit](https://quay.io/repository/ceph/daemon?tab=tags)
--For the demo tags [visit](https://quay.io/repository/ceph/demo?tab=tags)
+- All tags for ceph/{daemon-base,daemon,demo} can be found on the quay.io registry.
+- For the daemon-base tags [visit](https://quay.io/repository/ceph/daemon-base?tab=tags)
+- For the daemon tags [visit](https://quay.io/repository/ceph/daemon?tab=tags)
+- For the demo tags [visit](https://quay.io/repository/ceph/demo?tab=tags)
 
 Alternatively, you can run the following command (install jq first):
 
