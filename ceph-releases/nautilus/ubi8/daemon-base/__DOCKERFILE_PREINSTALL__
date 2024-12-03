@@ -1,3 +1,0 @@
-RUN sed -i 's/enabled=.*/enabled=0/g' /etc/yum/pluginconf.d/subscription-manager.conf
-
-RUN rm -f /etc/yum.repos.d/ubi.repo

@@ -1,1 +1,0 @@
-ln -s /usr/share/ceph/mgr/dashboard/frontend/dist-redhat /usr/share/ceph/mgr/dashboard/frontend/dist && \

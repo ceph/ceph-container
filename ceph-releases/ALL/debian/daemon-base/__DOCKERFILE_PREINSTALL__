@@ -1,4 +1,0 @@
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
-DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade && \
-DEBIAN_FRONTEND=noninteractive apt-get install -yy --force-yes --no-install-recommends \
-gnupg curl apt-transport-https ca-certificates

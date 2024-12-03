@@ -1,1 +1,0 @@
-nfs-ganesha-5.5-1.el__ENV_[DISTRO_VERSION]__s nfs-ganesha-ceph-5.5-1.el__ENV_[DISTRO_VERSION]__s nfs-ganesha-rgw-5.5-1.el__ENV_[DISTRO_VERSION]__s nfs-ganesha-rados-grace-5.5-1.el__ENV_[DISTRO_VERSION]__s nfs-ganesha-rados-urls-5.5-1.el__ENV_[DISTRO_VERSION]__s sssd-client dbus-daemon rpcbind

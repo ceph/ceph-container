@@ -1,2 +1,0 @@
-# Sane default: do not do postinstall cleanup. It's recommended that each distro implement this.
-    /bin/true

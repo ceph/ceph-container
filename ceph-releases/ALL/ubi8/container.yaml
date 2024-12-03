@@ -1,6 +1,0 @@
-# https://osbs.readthedocs.io/en/latest/users.html#compose
----
-
-compose:
-  packages: []
-  pulp_repos: true
