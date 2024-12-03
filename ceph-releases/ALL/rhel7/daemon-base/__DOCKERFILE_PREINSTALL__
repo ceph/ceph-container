@@ -1,1 +1,0 @@
-RUN sed -i 's/enabled=.*/enabled=0/g' /etc/yum/pluginconf.d/subscription-manager.conf

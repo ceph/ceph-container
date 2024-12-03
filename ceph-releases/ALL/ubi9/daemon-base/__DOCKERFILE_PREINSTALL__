@@ -1,1 +1,0 @@
-RUN rm -f /etc/yum.repos.d/ubi.repo

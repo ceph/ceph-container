@@ -1,2 +1,0 @@
-# We don't clean RHEL
-find /var/log/ -type f -exec truncate -s 0 {} \;
