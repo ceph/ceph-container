@@ -1,1 +1,0 @@
-dnf install -y --setopt=install_weak_deps=False __CEPH_BASE_PACKAGES__

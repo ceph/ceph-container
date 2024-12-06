@@ -1,2 +1,0 @@
-KERNEL=="rbd[0-9]*", ENV{DEVTYPE}=="disk", PROGRAM="/opt/bin/ceph-rbdnamer %k", SYMLINK+="rbd/%c{1}/%c{2}"
-KERNEL=="rbd[0-9]*", ENV{DEVTYPE}=="partition", PROGRAM="/opt/bin/ceph-rbdnamer %k", SYMLINK+="rbd/%c{1}/%c{2}-part%n"

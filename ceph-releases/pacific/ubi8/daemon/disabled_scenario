@@ -1,4 +1,0 @@
-# You can find the complete list of scenario by looking at the 'case' statement
-# in the entrypoint.sh.in file.
-
-EXCLUDED_TAGS="populate_kvstore kv_type_etcd kv_type_k8s restapi rgw_user osd_directory_single osd_directory osd_ceph_activate_journal mon_health"

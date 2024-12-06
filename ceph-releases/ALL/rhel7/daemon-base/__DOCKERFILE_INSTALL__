@@ -1,3 +1,0 @@
-yum update -y && \
-yum install -y wget unzip util-linux python-setuptools udev device-mapper && \
-yum install -y __CEPH_BASE_PACKAGES__

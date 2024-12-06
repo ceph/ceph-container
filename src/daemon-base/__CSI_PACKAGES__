@@ -1,3 +1,0 @@
-attr \
-ceph-fuse__ENV_[CEPH_POINT_RELEASE]__ \
-rbd-nbd__ENV_[CEPH_POINT_RELEASE]__

@@ -1,7 +1,0 @@
-Ceph version: __ENV_[CEPH_VERSION]__
-Maintainer: __MAINTAINER__
-Stuff: __DO_STUFF__
-Empty: __EMPTY__
-Nums: __H4X0R__
-Nested env: __ENV_[NESTED_ENV]__
-Nested file: __ENV_[NESTED_FILE]__

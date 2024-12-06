@@ -1,5 +1,0 @@
-ceph-mgr__ENV_[CEPH_POINT_RELEASE]__ \
-ceph-mgr-dashboard__ENV_[CEPH_POINT_RELEASE]__ \
-ceph-mgr-diskprediction-local__ENV_[CEPH_POINT_RELEASE]__ \
-${CEPH_MGR_K8SEVENTS} \
-ceph-mgr-rook__ENV_[CEPH_POINT_RELEASE]__

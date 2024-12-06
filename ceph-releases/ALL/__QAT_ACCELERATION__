@@ -1,2 +1,0 @@
-echo '@ceph - memlock 204800' >> /etc/security/limits.conf && \
-    echo '@root - memlock 204800' >> /etc/security/limits.conf && \
